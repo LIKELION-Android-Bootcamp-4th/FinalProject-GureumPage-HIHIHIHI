@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,11 +17,16 @@ import com.hihihihi.gureumpage.ui.search.SearchScreen
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
 
+
 @Composable
-fun GureumNavGraph(navController: NavHostController) {
+fun GureumNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
-        startDestination = NavigationRoute.Home.route
+        startDestination = NavigationRoute.Home.route,
+        modifier = modifier
     ){
         composable(NavigationRoute.Home.route) { HomeScreen() }
         composable(NavigationRoute.Login.route) { LoginScreen() }

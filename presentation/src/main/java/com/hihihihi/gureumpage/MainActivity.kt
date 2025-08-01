@@ -14,10 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.hihihihi.data.ForTest
 import com.hihihihi.domain.Book
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
+import com.hihihihi.gureumpage.navigation.GureumNavGraph
 
 class MainActivity : ComponentActivity() {
     val book = Book("test")
@@ -28,32 +31,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GureumPageTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                GureumPageScreen()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Row(modifier = Modifier.fillMaxSize()) {
-        Icon(painter = painterResource(id = R.drawable.ic_tooltip), contentDescription = null)
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-        style = GureumTypography.displayLarge
-    )
-}}
+fun GureumPageScreen() {
+    val navController = rememberNavController()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GureumPageTheme {
-        Greeting("Android")
+    Scaffold(
+        bottomBar = {
+            GureumBottomNavBar(navController = navController)
+        }
+    ) { innerPadding ->
+        GureumNavGraph(
+            navController = navController,
+            modifier = Modifier.padding(innerPadding)
+        )
     }
 }
