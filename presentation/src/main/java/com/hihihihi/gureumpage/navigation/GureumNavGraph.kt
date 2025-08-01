@@ -3,8 +3,10 @@ package com.hihihihi.gureumpage.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
@@ -25,12 +27,12 @@ fun GureumNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavigationRoute.Home.route,
+        startDestination = NavigationRoute.Login.route,
         modifier = modifier
     ){
-        composable(NavigationRoute.Home.route) { HomeScreen() }
-        composable(NavigationRoute.Login.route) { LoginScreen() }
-        composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen() }
+        composable(NavigationRoute.Home.route) { HomeScreen(navController) }
+        composable(NavigationRoute.Login.route) { LoginScreen(navController) }
+        composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(NavigationRoute.MindMap.route) { MindMapScreen() }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
         composable(NavigationRoute.Library.route) { LibraryScreen() }
@@ -38,6 +40,14 @@ fun GureumNavGraph(
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(NavigationRoute.Timer.route) { TimerScreen() }
         composable(NavigationRoute.MyPage.route) { MyPageScreen() }
-        composable(NavigationRoute.BookDetail.route) { BookDetailScreen() }
+        composable(
+            route = NavigationRoute.BookDetail.route,
+            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId")
+            bookId?.let {
+                BookDetailScreen(bookId = it, navController)
+            }
+        }
     }
 }
