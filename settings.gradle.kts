@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "GureumPage"
 include(":app")
+include(":domain")
