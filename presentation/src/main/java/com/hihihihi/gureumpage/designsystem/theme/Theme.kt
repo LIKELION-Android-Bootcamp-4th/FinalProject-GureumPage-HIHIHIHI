@@ -1,64 +1,61 @@
 package com.hihihihi.gureumpage.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GureumColor.LightPrimary,
-    onPrimary = GureumColor.Gray100,
-    primaryContainer = GureumColor.LightPrimaryDeep,
+    primary = GureumColor.DarkPrimary,
+    onPrimary = GureumColor.DarkGray100,
+    primaryContainer = GureumColor.DarkPrimaryDeep,
     onPrimaryContainer = GureumColor.White,
-    inversePrimary = GureumColor.LightPrimaryShallow,
+    inversePrimary = GureumColor.DarkPrimaryShallow,
 
-    secondary = GureumColor.Gray600,
-    onSecondary = GureumColor.Gray900,
-    secondaryContainer = GureumColor.LightDividerShallow,
-    onSecondaryContainer = GureumColor.Gray100,
+    secondary = GureumColor.DarkGray200,
+    onSecondary = GureumColor.DarkGray0,
 
     tertiary = GureumColor.LightPrimary50,
-    onTertiary = GureumColor.Gray300,
-    tertiaryContainer = GureumColor.LightPrimary10,
-    onTertiaryContainer = GureumColor.Gray300,
+    onTertiary = GureumColor.DarkGray500,
 
     error = GureumColor.SystemRed,
     onError = GureumColor.White,
     errorContainer = GureumColor.SystemRed,
     onErrorContainer = GureumColor.White,
 
-    surface = GureumColor.LightCard,
-    onSurface = GureumColor.Gray100,
-    surfaceContainerLowest = GureumColor.Gray800,
-    surfaceContainerLow = GureumColor.Gray500,
-    surfaceContainer = GureumColor.Gray400,
-    surfaceContainerHigh = GureumColor.Gray200,
-    surfaceContainerHighest = GureumColor.Gray150,
+    surface = GureumColor.DarkCard,
+    onSurface = GureumColor.DarkGray100,
+    surfaceContainerLowest = GureumColor.DarkGray100,
+    surfaceContainerLow = GureumColor.DarkGray300,
+    surfaceContainer = GureumColor.DarkCard,
+    surfaceContainerHigh = GureumColor.DarkGray600,
+    surfaceContainerHighest = GureumColor.DarkGray700,
 
-    background = GureumColor.LightBackground,
-    onBackground = GureumColor.Gray0,
+    background = GureumColor.DarkBackground,
+    onBackground = GureumColor.DarkGray0,
 
-    outline = GureumColor.Gray600,
+    outline = GureumColor.DarkGray200,
     outlineVariant = GureumColor.LightBackground50,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = GureumColor.LightPrimary,
-    onPrimary = GureumColor.Gray800,
+    onPrimary = GureumColor.LightGray100,
     primaryContainer = GureumColor.LightPrimaryDeep,
     onPrimaryContainer = GureumColor.White,
     inversePrimary = GureumColor.LightPrimaryShallow,
 
-    secondary = GureumColor.Gray200,
-    onSecondary = GureumColor.Gray0,
+    secondary = GureumColor.LightGray600,
+    onSecondary = GureumColor.LightGray900,
     secondaryContainer = GureumColor.LightDividerShallow,
-    onSecondaryContainer = GureumColor.Gray800,
+    onSecondaryContainer = GureumColor.LightGray100,
 
-    tertiary = GureumColor.LightPrimary50,
-    onTertiary = GureumColor.Gray500,
-    tertiaryContainer = GureumColor.LightPrimary10,
-    onTertiaryContainer = GureumColor.Gray500,
+    tertiary = GureumColor.DarkPrimary50,
+    onTertiary = GureumColor.LightGray300,
+    tertiaryContainer = GureumColor.DarkPrimary10,
+    onTertiaryContainer = GureumColor.LightGray300,
 
     error = GureumColor.SystemRed,
     onError = GureumColor.White,
@@ -66,18 +63,18 @@ private val LightColorScheme = lightColorScheme(
     onErrorContainer = GureumColor.White,
 
     surface = GureumColor.LightCard,
-    onSurface = GureumColor.Gray800,
-    surfaceContainerLowest = GureumColor.Gray100,
-    surfaceContainerLow = GureumColor.Gray300,
-    surfaceContainer = GureumColor.Gray400,
-    surfaceContainerHigh = GureumColor.Gray600,
-    surfaceContainerHighest = GureumColor.Gray700,
+    onSurface = GureumColor.LightGray100,
+    surfaceContainerLowest = GureumColor.LightGray800,
+    surfaceContainerLow = GureumColor.LightGray500,
+    surfaceContainer = GureumColor.LightCard,
+    surfaceContainerHigh = GureumColor.LightGray200,
+    surfaceContainerHighest = GureumColor.LightGray150,
 
     background = GureumColor.LightBackground,
-    onBackground = GureumColor.Gray900,
+    onBackground = GureumColor.LightGray800,
 
-    outline = GureumColor.Gray200,
-    outlineVariant = GureumColor.LightBackground50,
+    outline = GureumColor.LightGray600,
+    outlineVariant = GureumColor.DarkBackground50,
 )
 
 @Composable
