@@ -1,4 +1,4 @@
-package com.hihihihi.gureumpage.ui.theme
+package com.hihihihi.gureumpage.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

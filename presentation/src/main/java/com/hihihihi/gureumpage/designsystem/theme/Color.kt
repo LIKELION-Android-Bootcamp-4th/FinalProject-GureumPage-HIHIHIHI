@@ -1,4 +1,4 @@
-package com.hihihihi.gureumpage.ui.theme
+package com.hihihihi.gureumpage.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

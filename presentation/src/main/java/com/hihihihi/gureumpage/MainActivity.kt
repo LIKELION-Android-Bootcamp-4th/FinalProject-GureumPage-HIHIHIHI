@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.hihihihi.data.ForTest
 import com.hihihihi.domain.Book
-import com.hihihihi.gureumpage.ui.theme.GureumPageTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 
 class MainActivity : ComponentActivity() {
     val book = Book("test")
