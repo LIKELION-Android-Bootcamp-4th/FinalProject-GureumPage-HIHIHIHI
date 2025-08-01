@@ -52,7 +52,7 @@ fun GureumPageTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = GureumTypography,
         content = content
     )
 }
