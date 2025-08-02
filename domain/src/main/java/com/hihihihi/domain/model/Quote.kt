@@ -7,7 +7,7 @@ data class Quote(
     val userId: String,
     val userBookId: String,
     val content: String,
-    val pageNumber: Int,
+    val pageNumber: Int?,
     val isLiked: Boolean,
     val createdAt: LocalDateTime?
 )

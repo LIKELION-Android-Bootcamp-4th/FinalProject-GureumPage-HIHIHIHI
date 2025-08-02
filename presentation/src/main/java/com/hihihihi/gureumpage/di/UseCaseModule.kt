@@ -1,6 +1,8 @@
 package com.hihihihi.gureumpage.di
 
+import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,5 +20,13 @@ object UseCaseModule {
         repository: UserBookRepository
     ): GetUserBooksUseCase {
         return GetUserBooksUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAddQuotesUseCase(
+        repository: QuoteRepository
+    ): AddQuoteUseCase {
+        return AddQuoteUseCase(repository)
     }
 }

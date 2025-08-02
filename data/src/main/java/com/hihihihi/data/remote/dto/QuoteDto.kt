@@ -21,23 +21,11 @@ data class QuoteDto(
     var content: String = "",
 
     @get:PropertyName("page_number") @set:PropertyName("page_number")
-    var pageNumber: Int = 0,
+    var pageNumber: Int? = null,
 
     @get:PropertyName("is_liked") @set:PropertyName("is_liked")
     var isLiked: Boolean = false,
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
     var createdAt: Timestamp? = null
-) {
-    fun toDomain(): Quote {
-        return Quote(
-            id = quoteId,
-            userId = userId,
-            userBookId = userBookId,
-            content = content,
-            pageNumber = pageNumber,
-            isLiked = isLiked,
-            createdAt = createdAt?.toLocalDateTime()
-        )
-    }
-}
+)

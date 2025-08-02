@@ -54,7 +54,7 @@ fun HomeScreen(
 
         Button(
             onClick = {
-                navController.navigate(NavigationRoute.BookDetail.createRoute("123"))  // TODO 123은 임시 고정 ID 입니다. 추후 실제 ID 값 넘기기
+                navController.navigate(NavigationRoute.BookDetail.createRoute("JfHQlFQZ7hceYq5kxB4b"))  // TODO 임시 고정 ID 입니다. 추후 실제 ID 값 넘기기
             }
         ) {
             Text("책 상세로 이동")

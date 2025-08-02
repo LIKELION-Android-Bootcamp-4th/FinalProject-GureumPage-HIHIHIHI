@@ -1,7 +1,9 @@
 package com.hihihihi.data.di
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.UserBookRemoteDataSourceImpl
 import dagger.Module
 import dagger.Provides
@@ -20,5 +22,15 @@ object DataSourceModule {
     ): UserBookRemoteDataSource {
         return UserBookRemoteDataSourceImpl(firestore)
     }
+
+    @Provides
+    @Singleton
+    fun provideQuoteRemoteDataSource(
+        firestore: FirebaseFirestore
+    ): QuoteRemoteDataSource {
+        return QuoteRemoteDataSourceImpl(firestore)
+    }
+
+
 
 }

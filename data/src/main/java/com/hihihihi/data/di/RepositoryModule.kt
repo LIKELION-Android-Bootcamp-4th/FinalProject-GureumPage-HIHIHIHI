@@ -1,7 +1,10 @@
 package com.hihihihi.data.di
 
+import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
+import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import dagger.Module
 import dagger.Provides
@@ -18,5 +21,13 @@ object RepositoryModule {
         remoteDataSource: UserBookRemoteDataSource
     ): UserBookRepository {
         return UserBookRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuoteRepository(
+        remoteDataSource: QuoteRemoteDataSource
+    ): QuoteRepository {
+        return QuoteRepositoryImpl(remoteDataSource)
     }
 }
