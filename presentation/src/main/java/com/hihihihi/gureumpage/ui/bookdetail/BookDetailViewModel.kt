@@ -37,17 +37,16 @@ class BookDetailViewModel @Inject constructor(
             )
             val result = addQuoteUseCase(newQuote)
 
-            _uiState.update {
-                when{
-                    result.isSuccess -> {
-                        it.copy(addQuoteState = AddQuoteState(isSuccess = true))
-                        delay(2000)
-                        it.copy(addQuoteState = AddQuoteState())
-                    }
-                    result.isFailure -> it.copy(addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"))
-                    else -> it.copy(addQuoteState = AddQuoteState())
-                }
+            if (result.isSuccess) {
+                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isSuccess = true))
+                delay(2000)
+                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
+            } else if (result.isFailure) {
+                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"))
+            } else {
+                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
             }
+
         }
     }
 

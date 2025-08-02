@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import com.hihihihi.gureumpage.navigation.NavigationRoute
 fun BookDetailScreen(
     bookId: String,
     navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
     viewModel: BookDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -41,66 +43,78 @@ fun BookDetailScreen(
     var content by remember { mutableStateOf("") }
     var pageNumber by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState.addQuoteState.isSuccess) {
-        if (uiState.addQuoteState.isSuccess) {
-            content = ""
-            pageNumber = ""
+    LaunchedEffect(uiState.addQuoteState) {
+        val state = uiState.addQuoteState
+        when {
+            state.isSuccess -> {
+                content = ""
+                pageNumber = ""
+                Log.e("TAG", "BookDetailScreen: 성공!")
+                snackbarHostState.showSnackbar("필사 추가 성공!")
+                viewModel.resetAddQuoteState()
+            }
+
+            state.error != null -> {
+                Log.e("TAG", "BookDetailScreen: 에러=${state.error}")
+                snackbarHostState.showSnackbar("에러: ${state.error}")
+                viewModel.resetAddQuoteState()
+            }
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("BookDetail Screen")
+        Button(
+            onClick = {
+                navController.navigate(NavigationRoute.Timer.route)
+            }
         ) {
-            Text("BookDetail Screen")
-            Button(
-                onClick = {
-                    navController.navigate(NavigationRoute.Timer.route)
-                }
-            ) {
-                Text("타이머로 이동")
-            }
-            Button(
-                onClick = {
-                    navController.navigate(NavigationRoute.MindMap.route)
-                }
-            ) {
-                Text("마인드맵 이동")
-            }
-
-            OutlinedTextField(
-                value = content,
-                onValueChange = { content = it },
-                label = { Text("내용") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = pageNumber,
-                onValueChange = { pageNumber = it.filter { ch -> ch.isDigit() } },
-                label = { Text("페이지 번호") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = {
-                    viewModel.addQuote(bookId, content, pageNumber.toIntOrNull())
-                },
-                enabled = !uiState.addQuoteState.isLoading && content.isNotBlank()
-            ) {
-                if (uiState.addQuoteState.isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White
-                    )
-                } else Text("필사 추가")
-            }
-
-
+            Text("타이머로 이동")
         }
+        Button(
+            onClick = {
+                navController.navigate(NavigationRoute.MindMap.route)
+            }
+        ) {
+            Text("마인드맵 이동")
+        }
+
+        OutlinedTextField(
+            value = content,
+            onValueChange = { content = it },
+            label = { Text("내용") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = pageNumber,
+            onValueChange = { pageNumber = it.filter { ch -> ch.isDigit() } },
+            label = { Text("페이지 번호") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Button(
+            onClick = {
+                viewModel.addQuote(bookId, content, pageNumber.toIntOrNull())
+            },
+            enabled = !uiState.addQuoteState.isLoading && content.isNotBlank()
+        ) {
+            if (uiState.addQuoteState.isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White
+                )
+            } else Text("필사 추가")
+        }
+
+
     }
+
 }

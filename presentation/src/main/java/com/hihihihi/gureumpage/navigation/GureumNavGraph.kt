@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.navigation
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -23,7 +24,9 @@ import com.hihihihi.gureumpage.ui.timer.TimerScreen
 @Composable
 fun GureumNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String = NavigationRoute.Login.route,
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
@@ -46,7 +49,7 @@ fun GureumNavGraph(
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
             bookId?.let {
-                BookDetailScreen(bookId = it, navController)
+                BookDetailScreen(bookId = it, navController = navController, snackbarHostState = snackbarHostState)
             }
         }
     }
