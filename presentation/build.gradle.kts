@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -62,5 +64,30 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
+    // Retrofit + Gson
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // Coil (이미지 로딩)
+    implementation(libs.coil.compose)
+
+    // Coroutines + Flow
+    implementation(libs.jetbrains.kotlinx.coroutines.core)
+    implementation(libs.jetbrains.kotlinx.coroutines.android)
+
+    // Hilt (의존성 주입)
+    implementation(libs.hilt.android.v2562)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // MPAndroidChart (차트)
+    implementation(libs.mpandroidchart)
+
+
+    // Jetpack DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Calendar 라이브러리 (kizitonwose)
+    implementation(libs.view)
 
 }
