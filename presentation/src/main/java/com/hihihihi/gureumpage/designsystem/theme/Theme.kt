@@ -82,53 +82,46 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = DarkGureum.background50,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = GureumColor.LightPrimary,
-    onPrimary = GureumColor.LightGray100,
-    primaryContainer = GureumColor.LightPrimaryDeep,
-    onPrimaryContainer = GureumColor.White,
-    inversePrimary = GureumColor.LightPrimaryShallow,
-
-    secondary = GureumColor.LightGray600,
-    onSecondary = GureumColor.LightGray900,
-    secondaryContainer = GureumColor.LightDividerShallow,
-    onSecondaryContainer = GureumColor.LightGray100,
-
-    tertiary = GureumColor.DarkPrimary50,
-    onTertiary = GureumColor.LightGray300,
-    tertiaryContainer = GureumColor.DarkPrimary10,
-    onTertiaryContainer = GureumColor.LightGray300,
-
-    error = GureumColor.SystemRed,
-    onError = GureumColor.White,
-    errorContainer = GureumColor.SystemRed,
-    onErrorContainer = GureumColor.White,
-
-    surface = GureumColor.LightCard,
-    onSurface = GureumColor.LightGray100,
-    surfaceContainerLowest = GureumColor.LightGray800,
-    surfaceContainerLow = GureumColor.LightGray500,
-    surfaceContainer = GureumColor.LightCard,
-    surfaceContainerHigh = GureumColor.LightGray200,
-    surfaceContainerHighest = GureumColor.LightGray150,
-
-    background = GureumColor.LightBackground,
-    onBackground = GureumColor.LightGray800,
-
-    outline = GureumColor.LightGray600,
-    outlineVariant = GureumColor.DarkBackground50,
-)
+private val LocalDarkTheme = compositionLocalOf { true }
+private val LocalColors = compositionLocalOf<GureumColors> {
+    error("색상이 제공되지 않습니다. GureumTheme Provider 래핑을 확인해주세요")
+}
 
 @Composable
 fun GureumPageTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    colors: GureumColors = if (darkTheme) GureumColors.defaultDarkColors() else GureumColors.defaultLightColors(),
+    background: GureumBackground = GureumBackground.defaultBackground(darkTheme),
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = GureumTypography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalDarkTheme provides darkTheme,
+        LocalColors provides colors,
+        LocalBackgroundTheme provides background,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = GureumTypography,
+            content = content
+        )
+    }
+}
+
+object GureumTheme {
+    val currentTheme: Boolean
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalDarkTheme.current
+
+    val colors: GureumColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalColors.current
+
+    val background: GureumBackground
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalBackgroundTheme.current
 }
