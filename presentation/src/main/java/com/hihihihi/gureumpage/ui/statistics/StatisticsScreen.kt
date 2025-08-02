@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.statistics
 
 import android.content.res.Configuration
 import android.graphics.Color
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,13 +16,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.hihihihi.gureumpage.designsystem.components.TitleText
@@ -39,6 +47,8 @@ fun StatisticsScreen() {
         state = scrollState,
     ) {
         item {
+            val labelColor = if (GureumTheme.isDarkTheme) Color.LTGRAY else Color.DKGRAY
+
             TitleText("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -47,7 +57,6 @@ fun StatisticsScreen() {
                     .fillMaxWidth(1f)
                     .height(210.dp)
             ) {
-                val labelColor = if (GureumTheme.isDarkTheme) Color.LTGRAY else Color.DKGRAY
                 AndroidView(
                     modifier = Modifier
                         .fillMaxSize()
@@ -63,7 +72,7 @@ fun StatisticsScreen() {
                             val dataSet = PieDataSet(entries, "").apply {
                                 colors = ColorTemplate.LIBERTY_COLORS.toList() // 보이는 컬러 목록
                                 sliceSpace = 0f // 조각 간 간격
-                                setExtraOffsets(0f,4f,0f,8f)
+                                setExtraOffsets(0f, 4f, 0f, 8f)
 
                                 valueTextSize = 12f // 숫자 크기
                                 valueTextColor = labelColor // 숫자 컬러
@@ -95,41 +104,119 @@ fun StatisticsScreen() {
                                 form = Legend.LegendForm.CIRCLE // 범례 컬러 모양
                                 textColor = labelColor // 텍스트 컬러
                             }
-//                            animateY(1200, Easing.EaseInOutQuad)
+                            animateY(1200, Easing.EaseInOutQuad)
+                        }
+                    },
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TitleText("독서 시간 분포")
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .height(210.dp)
+            ) {
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                    factory = { context ->
+                        HorizontalBarChart(context).apply {
+                            val entries = mutableListOf<BarEntry>()
+
+                            for (mock in mockReading) {
+                                entries.add(BarEntry(mock.x, mock.y))
+                            }
+
+                            val dataSet = BarDataSet(entries, "독서 시간 분포").apply {
+                                val total = entries.sumOf { it.y.toDouble() }.toFloat()
+
+                                colors = ColorTemplate.LIBERTY_COLORS.toList()
+
+                                setDrawValues(true) // 숫자 퍼센트 표시
+                                valueTextColor = labelColor // 숫자 컬러
+                                valueTextSize = 12f // 숫자 사이즈
+                                valueFormatter = PercentFormatter(total) // 숫자 포맷
+
+                                isHighlightEnabled = false // 터치 강조
+                            }
+                            setExtraOffsets(0f, 0f, 80f, 0f)
+                            setDrawValueAboveBar(true) // 바 바깥에 숫자 표시
+
+                            data = BarData(dataSet).apply {
+                                barWidth = 0.6f // 바 두께
+                            }
+
+                            description.isEnabled = false // 설명 표시 여부
+                            legend.isEnabled = false // 범례 표시 여부
+                            setTouchEnabled(false) // 전체 영역 터치
+                            setDrawGridBackground(false) // 백그라운드 컬러
+
+                            animateY(800, Easing.EaseInOutQuad)
+
+                            val labels = listOf("새벽", "아침", "점심", "저녁", "밤")
+                            xAxis.apply {
+                                position = XAxis.XAxisPosition.BOTTOM // 라벨 좌측 정렬
+                                granularity = 1f // 라벨 거리 단위
+                                setDrawGridLines(false) // 가로 줄 끄기
+                                setDrawAxisLine(false) // 우측 끝 세로 줄 끄기
+                                valueFormatter = IndexAxisValueFormatter(labels) // 라벨 매핑
+                                textSize = 10f
+                                textColor = labelColor
+                            }
+
+                            axisLeft.apply {
+                                isEnabled = false
+                                axisMinimum = 0f // 최소치
+                                setDrawGridLines(false) // 그리드 표시 여부
+                                granularity = 10f
+                                textColor = labelColor
+                            }
+
+                            axisRight.isEnabled = false // 하단 눈금 제거
+
                         }
                     },
                 )
             }
 
-            TitleText("독서 시간 분포")
-
-            AndroidView(
-                modifier = Modifier,
-                factory = { context ->
-                    HorizontalBarChart(context).apply {
-                    }
-                },
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
             TitleText("주간 독서 페이지")
+            Spacer(modifier = Modifier.height(12.dp))
 
-            AndroidView(
-                modifier = Modifier,
-                factory = { context ->
-                    LineChart(context).apply {
-                    }
-                },
-            )
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .height(210.dp)
+            ) {
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp, vertical = 18.dp),
+                    factory = { context ->
+                        LineChart(context).apply {
+                        }
+                    },
+                )
+            }
         }
     }
 }
 
-class PercentFormatter : ValueFormatter() {
+class PercentFormatter(private val total: Float = 0f) : ValueFormatter() {
     private val percentFormatter = NumberFormat.getPercentInstance().apply {
         minimumFractionDigits = 0
     }
 
     override fun getFormattedValue(value: Float): String? = percentFormatter.format(value / 100)
+    override fun getBarLabel(barEntry: BarEntry): String {
+        val percent = if (total == 0f) 0f else barEntry.y / total
+        return percentFormatter.format(percent)
+    }
 }
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
