@@ -1,7 +1,10 @@
 package com.hihihihi.gureumpage.ui.statistics
 
+import android.R.attr.textColor
+import android.R.attr.textSize
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -26,6 +30,10 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.BaseEntry
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -33,6 +41,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import java.text.NumberFormat
@@ -193,12 +202,53 @@ fun StatisticsScreen() {
                     .fillMaxWidth(1f)
                     .height(210.dp)
             ) {
+//                val lineFillColor = if (GureumTheme.isDarkTheme) GureumColors.defaultDarkColors().primary.toArgb()
+//                else GureumColors.defaultLightColors().primary.toArgb()
+
+                val lineFillColor = GureumTheme.colors.primary50.toArgb()
                 AndroidView(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 8.dp, vertical = 18.dp),
                     factory = { context ->
                         LineChart(context).apply {
+                            val entries = mutableListOf<Entry>()
+
+                            mockPages.forEach { entries.add(Entry(it.x, it.y)) }
+
+                            val dataSet = LineDataSet(entries, "주간 독서 페이지").apply {
+                                color = labelColor
+                                lineWidth = 1.5f // 선 두께
+                                mode = LineDataSet.Mode.CUBIC_BEZIER // 선 모양
+
+                                setDrawCircles(false) // 점 삭제
+                                valueTextSize = 10f
+                                valueTextColor = labelColor
+//                                valueFormatter = PercentFormatter()
+
+                                setDrawFilled(true) // 나쁘지 않음
+                                fillAlpha = 30
+                                fillDrawable = GradientDrawable(
+                                    GradientDrawable.Orientation.TOP_BOTTOM,
+                                    intArrayOf(lineFillColor, Color.TRANSPARENT)
+                                )
+                            }
+
+                            data = LineData(dataSet)
+                            description.isEnabled = false
+                            setTouchEnabled(false)
+
+                            val week = listOf("일", "월", "화", "수", "목", "금", "토")
+                            xAxis.apply {
+                                position = XAxis.XAxisPosition.BOTTOM
+                                textSize = 12f
+                                textColor = labelColor
+                                valueFormatter = IndexAxisValueFormatter(week)
+                            }
+
+                            axisLeft.isEnabled = false
+                            axisRight.isEnabled = false
+                            legend.isEnabled = false
                         }
                     },
                 )
@@ -217,6 +267,7 @@ class PercentFormatter(private val total: Float = 0f) : ValueFormatter() {
         val percent = if (total == 0f) 0f else barEntry.y / total
         return percentFormatter.format(percent)
     }
+
 }
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
