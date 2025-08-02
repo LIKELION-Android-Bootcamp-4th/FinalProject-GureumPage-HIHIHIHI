@@ -58,3 +58,12 @@ fun GureumBottomNavBar(navController: NavHostController) {
         }
     }
 }
+
+@Preview
+@Composable
+private fun GureumBottomNavPreview() {
+    val navController = rememberNavController()
+    GureumPageTheme {
+        GureumBottomNavBar(navController)
+    }
+}
