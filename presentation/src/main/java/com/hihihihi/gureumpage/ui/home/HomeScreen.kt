@@ -7,19 +7,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
+    val uiState = viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserBooks(userId = "iK4v1WW1ZX4gID2HueBi")
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text("Home Screen")
+
+        when{
+            uiState.value.isLoading -> {
+                Text("로딩중...")
+            }
+            uiState.value.errorMessage != null -> {
+                Text("에러 발생: ${uiState.value.errorMessage}")
+            }
+            uiState.value.isEmpty -> {
+                Text("등록된 책이 없습니다.")
+            }
+            else -> {
+                Column {
+                    uiState.value.books.forEach { book ->
+                        Text(text = book.title)
+                    }
+                }
+            }
+        }
 
         Button(
             onClick = {

@@ -30,7 +30,7 @@ fun GureumNavGraph(
         startDestination = NavigationRoute.Login.route,
         modifier = modifier
     ){
-        composable(NavigationRoute.Home.route) { HomeScreen(navController) }
+        composable(NavigationRoute.Home.route) { HomeScreen(navController = navController) }
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(NavigationRoute.MindMap.route) { MindMapScreen() }

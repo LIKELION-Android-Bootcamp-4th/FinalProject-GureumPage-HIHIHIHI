@@ -24,7 +24,9 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val book = Book("test")
     val test = ForTest()
