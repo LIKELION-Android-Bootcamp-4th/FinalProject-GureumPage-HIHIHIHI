@@ -20,7 +20,9 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
                     return@addSnapshotListener
                 }
                 val userBooks = snapshot?.documents?.mapNotNull { document ->
-                    document.toObject(UserBookDto::class.java)
+                    document.toObject(UserBookDto::class.java)?.apply {
+                        userBookId = document.id  // 문서 ID를 가져와 userBookId 필드에 넣기
+                    }
                 } ?: emptyList()
                 trySend(userBooks)
             }

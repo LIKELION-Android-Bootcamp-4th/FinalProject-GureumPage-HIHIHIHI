@@ -2,7 +2,7 @@ package com.hihihihi.gureumpage.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hihihihi.domain.model.DomainUserBook
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +20,8 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
 
-    private val _userBooks = MutableStateFlow<List<DomainUserBook>>(emptyList())
-    val userBooks: StateFlow<List<DomainUserBook>> = _userBooks
+    private val _userBooks = MutableStateFlow<List<UserBook>>(emptyList())
+    val userBooks: StateFlow<List<UserBook>> = _userBooks
 
     fun loadUserBooks(userId: String) {
         viewModelScope.launch {

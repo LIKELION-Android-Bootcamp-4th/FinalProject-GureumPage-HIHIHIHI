@@ -2,8 +2,8 @@ package com.hihihihi.domain.model
 
 import java.time.LocalDateTime
 
-data class DomainUserBook (
-    val id: String,
+data class UserBook (
+    val userBookId: String,
     val userId: String,
     val bookId: String,
     val title: String,

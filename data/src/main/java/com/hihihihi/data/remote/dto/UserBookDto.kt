@@ -4,8 +4,8 @@ import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.data.common.util.toReadingStatus
-import com.hihihihi.domain.model.DomainUserBook
+import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.UserBook
 
 @Keep
 data class UserBookDto(
@@ -52,9 +52,9 @@ data class UserBookDto(
     @get:PropertyName("created_at") @set:PropertyName("created_at")
     var createdAt: Timestamp? = null
 ) {
-    fun toDomainUserBook(): DomainUserBook {
-        return DomainUserBook(
-            id = userBookId,
+    fun toDomainUserBook(): UserBook {
+        return UserBook(
+            userBookId = userBookId,
             userId = userId,
             bookId = bookId,
             title = title,
@@ -64,7 +64,7 @@ data class UserBookDto(
             startDate = startDate?.toLocalDateTime(),
             endDate = endDate?.toLocalDateTime(),
             totalReadTime = totalReadTime?:0,
-            status = status.toReadingStatus(),
+            status = ReadingStatus.valueOf(status.uppercase()),
             review = review,
             rating = rating,
             createdAt = createdAt?.toLocalDateTime()
