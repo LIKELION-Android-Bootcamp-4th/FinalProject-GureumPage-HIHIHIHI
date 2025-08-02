@@ -68,26 +68,21 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    // Coil (이미지 로딩)
-    implementation(libs.coil.compose)
-
     // Coroutines + Flow
     implementation(libs.jetbrains.kotlinx.coroutines.core)
     implementation(libs.jetbrains.kotlinx.coroutines.android)
 
     // Hilt (의존성 주입)
     implementation(libs.hilt.android.v2562)
-    ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
-
-    // MPAndroidChart (차트)
-    implementation(libs.mpandroidchart)
+    ksp(libs.hilt.android.compiler)
 
 
-    // Jetpack DataStore
-    implementation(libs.androidx.datastore.preferences)
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.kizitonwose.calendar:compose:2.8.0")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
 
-    // Calendar 라이브러리 (kizitonwose)
-    implementation(libs.view)
+
 
 }
