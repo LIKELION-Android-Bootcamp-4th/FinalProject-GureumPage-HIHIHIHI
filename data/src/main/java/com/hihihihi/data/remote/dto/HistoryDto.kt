@@ -29,6 +29,9 @@ data class HistoryDto(
     @get:PropertyName("read_time") @set:PropertyName("read_time")
     var readTime: Int = 0,
 
+    @get:PropertyName("read_page_count") @set:PropertyName("read_page_count")
+    var readPageCount: Int = 0,
+
     @get:PropertyName("record_type") @set:PropertyName("record_type")
     var recordType: String = "timer" // "timer", "manual"
 ) {
@@ -41,6 +44,7 @@ data class HistoryDto(
             startTime = startTime?.toLocalDateTime(),
             endTime = endTime?.toLocalDateTime(),
             readTime = readTime,
+            readPageCount = readPageCount,
             recordType = recordType
         )
     }
