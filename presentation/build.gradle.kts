@@ -2,8 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -63,26 +61,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.navigation.compose)
-
-    // Retrofit + Gson
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-
-    // Coroutines + Flow
-    implementation(libs.jetbrains.kotlinx.coroutines.core)
-    implementation(libs.jetbrains.kotlinx.coroutines.android)
-
-    // Hilt (의존성 주입)
-    implementation(libs.hilt.android.v2562)
-    ksp(libs.hilt.android.compiler)
-
-
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation("com.kizitonwose.calendar:compose:2.8.0")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-
-
-
 }
