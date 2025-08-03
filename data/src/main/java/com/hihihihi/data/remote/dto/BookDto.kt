@@ -6,6 +6,8 @@ import com.hihihihi.domain.model.Book
 
 @Keep
 data class BookDto(
+    var bookId: String = "",
+
     @get:PropertyName("title") @set:PropertyName("title")
     var title: String = "",
 

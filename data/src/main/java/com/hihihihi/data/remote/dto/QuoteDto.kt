@@ -8,7 +8,6 @@ import com.hihihihi.domain.model.Quote
 
 @Keep
 data class QuoteDto(
-    @get:PropertyName("quote_id") @set:PropertyName("quote_id")
     var quoteId: String = "",
 
     @get:PropertyName("user_id") @set:PropertyName("user_id")

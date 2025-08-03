@@ -6,6 +6,8 @@ import com.hihihihi.domain.model.Review
 
 @Keep
 data class ReviewDto(
+    var reviewId: String = "",
+
     @get:PropertyName("book_id") @set:PropertyName("book_id")
     var bookId: String = "",
 

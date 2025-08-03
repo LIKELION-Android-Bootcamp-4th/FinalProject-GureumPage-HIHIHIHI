@@ -8,6 +8,8 @@ import com.hihihihi.domain.model.MindmapNodeType
 
 @Keep
 data class MindmapNodeDto(
+    var mindmapNodeId: String = "",
+
     @get:PropertyName("mindmap_id") @set:PropertyName("mindmap_id")
     var mindmapId: String = "",
 

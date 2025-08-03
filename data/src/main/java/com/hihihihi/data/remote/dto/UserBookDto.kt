@@ -7,12 +7,11 @@ import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 
-@Keep
+@Keep  // Proguard 등 난독화 도구에서 제거되지 않도록 유지
 data class UserBookDto(
+    var userBookId: String = "", // Firestore 문서 ID를 저장하는 필드
 
-    @get:PropertyName("user_book_id") @set:PropertyName("user_book_id")
-    var userBookId: String = "",
-
+    // Firestore 필드명과 Kotlin 프로퍼티명을 매핑
     @get:PropertyName("user_id") @set:PropertyName("user_id")
     var userId: String = "",
 

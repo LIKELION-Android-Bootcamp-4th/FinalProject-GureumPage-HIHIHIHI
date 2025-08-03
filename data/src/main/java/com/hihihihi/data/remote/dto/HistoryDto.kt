@@ -8,7 +8,6 @@ import com.hihihihi.domain.model.History
 
 @Keep
 data class HistoryDto(
-    @get:PropertyName("history_id") @set:PropertyName("history_id")
     var historyId: String = "",
 
     @get:PropertyName("user_id") @set:PropertyName("user_id")
