@@ -183,7 +183,7 @@ fun QuotesScreen() {
                                             text = selectedQuote!!.date,
                                             maxLines = 1,
                                             style = GureumTypography.bodySmall,
-                                            color = GureumColors.defaultLightColors().gray400,
+                                            color = GureumTheme.colors.gray400,
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         //페이지
@@ -192,7 +192,7 @@ fun QuotesScreen() {
                                             text = selectedQuote!!.page.toString() + 'p',
                                             maxLines = 1,
                                             style = GureumTypography.bodySmall,
-                                            color = GureumColors.defaultLightColors().gray400,
+                                            color = GureumTheme.colors.gray400,
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     }
@@ -221,7 +221,7 @@ fun QuotesScreen() {
                     Text(
                         text = selectedQuote!!.content,
                         style = GureumTypography.bodySmall,
-                        color = GureumColors.defaultLightColors().gray800,
+                        color = GureumTheme.colors.gray800,
                     )
                 }
             }
