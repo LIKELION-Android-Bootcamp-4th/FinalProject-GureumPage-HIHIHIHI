@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -108,9 +108,10 @@ fun QuotesScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(GureumColors.defaultLightColors().background10)
         ) {
             CenterAlignedTopAppBar(
+                modifier = Modifier.height(56.dp),
                 title = {
                     Text(
                         text = "필사 목록",
@@ -121,6 +122,7 @@ fun QuotesScreen() {
 
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(quotesList) { item ->
