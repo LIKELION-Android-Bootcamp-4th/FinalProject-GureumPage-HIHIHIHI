@@ -25,13 +25,4 @@ data class MindmapNodeDto(
 
     @get:PropertyName("type") @set:PropertyName("type")
     var type: String = ""
-) {
-    fun toDomain() = MindmapNode(
-        mindmapId = mindmapId,
-        nodeId = nodeId,
-        nodeTitle = nodeTitle,
-        nodeEx = nodeEx,
-        nodeParent = nodeParent,
-        type = MindmapNodeType.valueOf(type.uppercase())
-    )
-}
+)

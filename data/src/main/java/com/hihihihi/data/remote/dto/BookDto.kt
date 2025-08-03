@@ -32,16 +32,4 @@ data class BookDto(
 
     @get:PropertyName("total_page") @set:PropertyName("total_page")
     var totalPage: Int = 0
-) {
-    fun toDomain() = Book(
-        title = title,
-        author = author,
-        publisher = publisher,
-        isbn10 = isbn10,
-        isbn13 = isbn13,
-        description = description,
-        genreIds = genreIds,
-        imageUrl = imageUrl,
-        totalPage = totalPage
-    )
-}
+)

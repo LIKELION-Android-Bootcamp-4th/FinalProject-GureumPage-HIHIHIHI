@@ -34,18 +34,4 @@ data class HistoryDto(
 
     @get:PropertyName("record_type") @set:PropertyName("record_type")
     var recordType: String = "timer" // "timer", "manual"
-) {
-    fun toDomain(): History {
-        return History(
-            id = historyId,
-            userId = userId,
-            userBookId = userBookId,
-            date = date?.toLocalDateTime(),
-            startTime = startTime?.toLocalDateTime(),
-            endTime = endTime?.toLocalDateTime(),
-            readTime = readTime,
-            readPageCount = readPageCount,
-            recordType = recordType
-        )
-    }
-}
+)

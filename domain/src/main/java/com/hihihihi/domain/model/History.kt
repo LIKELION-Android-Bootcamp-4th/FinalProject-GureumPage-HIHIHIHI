@@ -11,5 +11,5 @@ data class History(
     val endTime: LocalDateTime?,
     val readTime: Int,
     val readPageCount: Int,
-    val recordType: String
+    val recordType: RecordType
 )

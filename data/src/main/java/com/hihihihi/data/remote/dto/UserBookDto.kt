@@ -51,23 +51,4 @@ data class UserBookDto(
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
     var createdAt: Timestamp? = null
-) {
-    fun toDomainUserBook(): UserBook {
-        return UserBook(
-            userBookId = userBookId,
-            userId = userId,
-            bookId = bookId,
-            title = title,
-            author = author,
-            imageUrl = imageUrl,
-            currentPage = currentPage?:0,
-            startDate = startDate?.toLocalDateTime(),
-            endDate = endDate?.toLocalDateTime(),
-            totalReadTime = totalReadTime?:0,
-            status = ReadingStatus.valueOf(status.uppercase()),
-            review = review,
-            rating = rating,
-            createdAt = createdAt?.toLocalDateTime()
-        )
-    }
-}
+)

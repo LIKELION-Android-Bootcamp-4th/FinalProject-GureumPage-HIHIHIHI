@@ -23,13 +23,4 @@ data class ReviewDto(
 
     @get:PropertyName("user_id") @set:PropertyName("user_id")
     var userId: String = ""
-) {
-    fun toDomain() = Review(
-        bookId = bookId,
-        content = content,
-        createdAt = createdAt,
-        isPublic = isPublic,
-        rating = rating,
-        userId = userId
-    )
-}
+)

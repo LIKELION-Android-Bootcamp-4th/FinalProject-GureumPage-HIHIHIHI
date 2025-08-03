@@ -11,6 +11,4 @@ data class GenreDto(
 
     @get:PropertyName("genre_name") @set:PropertyName("genre_name")
     var genreName: String = ""
-) {
-    fun toDomain() = Genre(genreId = genreId,genreName = genreName)
-}
+)

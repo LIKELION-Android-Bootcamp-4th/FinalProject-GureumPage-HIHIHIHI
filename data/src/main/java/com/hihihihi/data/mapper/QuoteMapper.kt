@@ -1,9 +1,9 @@
 package com.hihihihi.data.mapper
 
+import com.google.firebase.firestore.FieldValue
 import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.data.remote.dto.QuoteDto
 import com.hihihihi.domain.model.Quote
-import java.time.LocalDateTime
 
 fun Quote.toDto(): QuoteDto = QuoteDto(
     quoteId = id,
@@ -12,7 +12,7 @@ fun Quote.toDto(): QuoteDto = QuoteDto(
     content = content,
     pageNumber = pageNumber,
     isLiked = isLiked,
-    createdAt = null //TODO FireStore 에서 규칙 변경해서 자동으로 서버 시간 채워지도록 테스트 해봐야 함
+    createdAt = null
 )
 
 fun QuoteDto.toDomain(): Quote = Quote(
@@ -24,3 +24,15 @@ fun QuoteDto.toDomain(): Quote = Quote(
     isLiked = isLiked,
     createdAt = createdAt?.toLocalDateTime()
 )
+
+fun QuoteDto.toMap(): Map<String, Any?> {
+    return mapOf(
+        "quote_id" to quoteId,
+        "user_id" to userId,
+        "userbook_id" to userBookId,
+        "content" to content,
+        "page_number" to pageNumber,
+        "is_liked" to isLiked,
+        "created_at" to FieldValue.serverTimestamp()
+    )
+}
