@@ -13,14 +13,15 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(SingletonComponent::class)  // 앱 전체 라이프사이클 동안 싱글톤으로 제공
 object RepositoryModule {
+    // UserBookRepository 의존성 주입 제공
     @Provides
     @Singleton
     fun provideUserBookRepository(
-        remoteDataSource: UserBookRemoteDataSource
+        remoteDataSource: UserBookRemoteDataSource // 원격 데이터 소스 주입
     ): UserBookRepository {
-        return UserBookRepositoryImpl(remoteDataSource)
+        return UserBookRepositoryImpl(remoteDataSource) // 구현체 반환
     }
 
     @Provides

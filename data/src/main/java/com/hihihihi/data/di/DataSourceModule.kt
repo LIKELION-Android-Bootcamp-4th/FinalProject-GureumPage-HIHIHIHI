@@ -14,13 +14,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataSourceModule {
-
+    // UserBookRemoteDataSource 의존성 주입 제공
     @Provides
     @Singleton
     fun provideUserBookRemoteDataSource(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore // Firestore 인스턴스 주입
     ): UserBookRemoteDataSource {
-        return UserBookRemoteDataSourceImpl(firestore)
+        return UserBookRemoteDataSourceImpl(firestore) // 구현체 반환
     }
 
     @Provides

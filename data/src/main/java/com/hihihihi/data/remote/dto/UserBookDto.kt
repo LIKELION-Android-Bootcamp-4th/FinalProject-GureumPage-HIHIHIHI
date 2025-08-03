@@ -9,6 +9,8 @@ import com.hihihihi.domain.model.UserBook
 
 @Keep  // Proguard 등 난독화 도구에서 제거되지 않도록 유지
 data class UserBookDto(
+    // Firestore 문서 ID는 여기엔 기본 포함되지 않으므로
+    // 나중에 수동으로 넣어줘야 해서@PropertyName 필요 없음
     var userBookId: String = "", // Firestore 문서 ID를 저장하는 필드
 
     // Firestore 필드명과 Kotlin 프로퍼티명을 매핑
