@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import com.hihihihi.gureumpage.R
 
 // 폰트 패밀리 정의 (res/font에 넣은 파일명에 맞게 수정)
-val pretendardFamily = FontFamily(
+private val pretendardFamily = FontFamily(
     Font(R.font.pretendard_medium, FontWeight.Medium),
     Font(R.font.pretendard_semibold, FontWeight.SemiBold),
     Font(R.font.pretendard_bold, FontWeight.Bold)
