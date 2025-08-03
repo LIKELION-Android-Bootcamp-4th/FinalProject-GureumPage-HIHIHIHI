@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -20,6 +22,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 @Composable
 fun TitleText(
     text: String,
+    style: TextStyle = MaterialTheme.typography.titleLarge,
     maxLine: Int = Int.MAX_VALUE,
     isUnderline: Boolean = false,
 ) {
@@ -38,17 +41,17 @@ fun TitleText(
     }
 
     Text(
-        text,
-        style = MaterialTheme.typography.titleLarge,
+        text = text,
+        style = style,
         maxLines = maxLine,
-        modifier = underlineModifier
+        modifier = underlineModifier,
     )
 }
 
 @Preview(name = "DarkMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-private fun TextPreview() {
+private fun GureumTextPreview() {
     GureumPageTheme {
         Column {
             TitleText("필사한 문장", isUnderline = true)
