@@ -76,7 +76,7 @@ dependencies {
     implementation(libs.hilt.android.v2562)
     ksp(libs.hilt.android.compiler)
 
-
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
