@@ -37,10 +37,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -61,46 +64,71 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.home.components.EmptyView
+import com.hihihihi.gureumpage.ui.home.components.ErrorView
+import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+fun HomeScreen(
+    // Hilt로 ViewModel을 주입받음. DI를 통해 뷰모델의 생명주기를 컴포즈에 맞게 관리
+    navController: NavHostController,
+    viewModel: HomeViewModel = hiltViewModel(),
+
     ) {
+    // viewModel에서 선언한 uiState Flow를 Compose에서 관찰 (State로 변환).
+    // 상태가 변경되면 recomposition 발생
+    val uiState = viewModel.uiState.collectAsState()
 
-        val scrollState = rememberLazyListState()
+    val scrollState = rememberLazyListState()
 
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = scrollState,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                SearchBarWithBackground()
-
-            }
-    
-            item {
-                Text("Home Screen")
-
-            }
-            item {
-                Button(
-                    onClick = {
-                        navController.navigate(NavigationRoute.BookDetail.createRoute("123"))  // TODO 123은 임시 고정 ID 입니다. 추후 실제 ID 값 넘기기
-                    }
-                ) {
-                    Text("책 상세로 이동")
-                }
-            }
-
+    // ui
+    when {
+        uiState.value.isLoading -> {
+            LoadingView() // 데이터 로딩 중일 때 표시될 뷰. 분리된 Composable 사용
         }
 
+        uiState.value.errorMessage != null -> {
+            ErrorView(message = uiState.value.errorMessage!!) // 에러 발생 시 표시될 뷰
+        }
+
+        uiState.value.books.isEmpty() -> {
+            EmptyView() // 데이터는 정상 응답됐지만 책 목록이 비어있을 때 표시
+        }
+
+        else -> {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = scrollState,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
+                    SearchBarWithBackground()
+
+                }
+
+                item {
+                    Text("Home Screen")
+
+                }
+                item {
+                    Button(
+                        onClick = {
+                            navController.navigate(NavigationRoute.BookDetail.createRoute("123"))  // TODO 123은 임시 고정 ID 입니다. 추후 실제 ID 값 넘기기
+                        }
+                    ) {
+                        Text("책 상세로 이동")
+                    }
+                }
+                item {
+                    uiState.value.books.forEach { book ->
+                        Text(text = book.title)// 간단하게 책 제목만 출력. 추후 BookCard 형태로 개선
+                    }
+                }
+
+            }
+        }
     }
 }
 
