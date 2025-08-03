@@ -18,8 +18,8 @@ fun ToggleTab(
     isBeforeReading: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    val selectedColor = Color(0xFFFFD460)
-    val unselectedColor = Color(0xFF3A3A3C)
+    val selectedColor = GureumTheme.colors.primary
+    val unselectedColor = GureumTheme.colors.gray400
     val textColor = GureumTheme.colors.gray800
 
     Row(
