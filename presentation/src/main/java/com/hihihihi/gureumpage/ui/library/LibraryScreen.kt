@@ -44,7 +44,10 @@ fun LibraryScreen(
         viewModel.loadUserBooks(userId)
     }
     //현재 책 상태에 맞게 필터링
-    val filteredBooks = books.filter { it.isRead != isBeforeReading }
+    val filteredBooks = books.filter {
+        if (isBeforeReading) it.status != ReadingStatus.FINISHED
+        else it.status == ReadingStatus.FINISHED
+    }
 
     Column(
         modifier = Modifier
