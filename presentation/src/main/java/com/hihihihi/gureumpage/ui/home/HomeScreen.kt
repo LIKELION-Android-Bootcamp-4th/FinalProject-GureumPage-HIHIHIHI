@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
@@ -27,6 +28,7 @@ import com.hihihihi.gureumpage.ui.home.components.EmptyView
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
+import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
 
 @Composable
 fun HomeScreen(
@@ -56,7 +58,9 @@ fun HomeScreen(
         }
 
         else -> {
-            HomeScreenContent(onBookClick = {
+            HomeScreenContent(
+                books = uiState.value.books,
+                onBookClick = {
                 navController.navigate(NavigationRoute.BookDetail.createRoute(it))
             })
         }
@@ -65,6 +69,7 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
+    books: List<UserBook>,
     onBookClick: (String) -> Unit
 ) {
     val scrollState = rememberLazyListState()
@@ -91,7 +96,10 @@ fun HomeScreenContent(
             }
 
             item {
-                CurrentReadingBookSection(onBookClick = { onBookClick(it) })
+                CurrentReadingBookSection(
+                    books = books,
+                    onBookClick = { onBookClick(it) }
+                )
             }
 
             item {
@@ -122,7 +130,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(onBookClick = {})
+        HomeScreenContent(mockUserBooks, onBookClick = {})
     }
 }
 
