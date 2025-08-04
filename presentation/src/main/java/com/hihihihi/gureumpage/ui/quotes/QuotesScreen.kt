@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -146,23 +147,14 @@ fun QuotesScreen() {
                                     )
                                     Row {
                                         //날짜
-                                        Text(
-                                            text = selectedQuote!!.date,
-                                            maxLines = 1,
-                                            style = GureumTypography.bodySmall,
-                                            color = GureumTheme.colors.gray400,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        BodySubText(selectedQuote!!.date)
                                         //페이지
-                                        Text(
-                                            modifier = Modifier.padding(start = 10.dp),
-                                            text = selectedQuote!!.page.toString() + 'p',
-                                            maxLines = 1,
-                                            style = GureumTypography.bodySmall,
-                                            color = GureumTheme.colors.gray400,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        BodySubText(selectedQuote!!.page.toString() + 'p')
                                     }
+                                    //저자
+                                    BodySubText(selectedQuote!!.author)
+                                    //출판사
+                                    BodySubText(selectedQuote!!.publisher)
                                 }
 
                                 //닫기 버튼

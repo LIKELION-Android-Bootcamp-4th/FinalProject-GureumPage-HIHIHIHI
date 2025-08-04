@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -81,6 +81,24 @@ fun BodyText(
         style = style,
         maxLines = maxLine,
         modifier = modifier,
+    )
+}
+
+@Composable
+fun BodySubText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray400,
+    style: TextStyle = GureumTypography.bodySmall,
+    maxLine: Int = 1
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        overflow = TextOverflow.Ellipsis
     )
 }
 
@@ -151,9 +169,9 @@ private fun GureumTextPreview() {
     GureumPageTheme {
         Column {
             BodyText("네가 4시에 온다면 난 3시부터 행복할거야")
+            BodySubText("네가 4시에 온다면 난 3시부터 행복할거야")
             Spacer(modifier = Modifier.height(10.dp))
             ExpandableText("네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야")
-
         }
     }
 }
