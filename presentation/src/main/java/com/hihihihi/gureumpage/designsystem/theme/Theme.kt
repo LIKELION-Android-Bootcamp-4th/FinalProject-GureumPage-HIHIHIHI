@@ -76,7 +76,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHighest = DarkGureum.card,
 
     background = DarkGureum.background,
-    onBackground = DarkGureum.gray0,
+    onBackground = DarkGureum.gray800,
 
     outline = DarkGureum.gray200,
     outlineVariant = DarkGureum.background50,
@@ -110,7 +110,7 @@ fun GureumPageTheme(
 }
 
 object GureumTheme {
-    val currentTheme: Boolean
+    val isDarkTheme: Boolean
         @Composable
         @ReadOnlyComposable
         get() = LocalDarkTheme.current

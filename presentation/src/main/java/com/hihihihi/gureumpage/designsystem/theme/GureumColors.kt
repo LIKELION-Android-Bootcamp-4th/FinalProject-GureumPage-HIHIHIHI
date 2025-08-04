@@ -1,11 +1,12 @@
 package com.hihihihi.gureumpage.designsystem.theme
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
 @Immutable
 data class GureumColors(
-    val white: Color,
+    @Stable val white: Color,
     val systemRed: Color,
     val systemGreen: Color,
     val point: Color,
