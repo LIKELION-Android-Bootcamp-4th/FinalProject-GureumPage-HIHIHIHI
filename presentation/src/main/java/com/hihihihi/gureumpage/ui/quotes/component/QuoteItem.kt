@@ -25,20 +25,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.quotes.Quote
 
 @Composable
 fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
-    Card(
+    GureumCard (
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = { onItemClick(item) })
             .background(GureumTheme.colors.background),
-        elevation = CardDefaults.cardElevation(4.dp)
-
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             AsyncImage(
