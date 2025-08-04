@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components.tabs
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +30,6 @@ fun QuotesTab(/*아무튼 필사 목록*/) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Top
     ) {
         // TODO 아무튼 필사 리스트 반복문
 
