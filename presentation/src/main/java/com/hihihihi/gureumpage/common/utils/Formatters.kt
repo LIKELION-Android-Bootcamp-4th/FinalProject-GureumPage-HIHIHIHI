@@ -1,5 +1,8 @@
 package com.hihihihi.gureumpage.common.utils
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.NumberFormat
@@ -69,4 +72,13 @@ fun formatSecondsToReadableTime(seconds: Int): String {
         if (minutes > 0) append("${minutes}분 ")
         if (secs > 0 || (hours == 0 && minutes == 0)) append("${secs}초")
     }.trim()
+}
+
+/**
+ * px 을 Dp 로 변환
+ */
+@Composable
+fun pxToDp(px: Int): Dp {
+    val density = LocalDensity.current
+    return with(density) { px.toDp() }
 }
