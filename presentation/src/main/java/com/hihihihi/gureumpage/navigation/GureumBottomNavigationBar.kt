@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.navigation
 
+import android.content.res.Configuration
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -78,7 +79,8 @@ fun GureumBottomNavBar(navController: NavHostController) {
     }
 }
 
-@Preview
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GureumBottomNavPreview() {
     val navController = rememberNavController()
