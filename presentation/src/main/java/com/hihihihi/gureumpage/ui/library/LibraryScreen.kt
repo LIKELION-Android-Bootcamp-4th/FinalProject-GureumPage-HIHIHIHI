@@ -29,7 +29,11 @@ import com.hihihihi.gureumpage.ui.library.model.Book
 
 
 @Composable
-fun LibraryScreen(books: List<Book>) {
+fun LibraryScreen(
+    userId: String = "iK4v1WW1ZX4gID2HueBi", // 테스트용 기본 유저 ID
+    viewModel: LibraryViewModel = hiltViewModel() // Hilt -> viewModel
+) {
+    //현재 탭 상태 true면 읽기 전, false 면 읽은 책
     var isBeforeReading by remember { mutableStateOf(true) }
     //현재 책 상태에 맞게 필터링
     val filteredBooks = books.filter { it.isRead != isBeforeReading }
