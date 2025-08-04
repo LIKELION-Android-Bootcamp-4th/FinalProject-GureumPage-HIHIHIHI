@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.quotes.component.QuoteItem
+import com.hihihihi.gureumpage.ui.quotes.model.Quote
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,61 +50,27 @@ import kotlinx.coroutines.launch
 fun QuotesScreen() {
     val quotesList = listOf<Quote>(
         Quote(
-            "title1",
+            "책 제목 1",
             "2025.08.04",
             "https://image.yes24.com/goods/141792177/XL",
-            "content2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            1
+            "필사 내용입니다.\n필사 내용입니다.\n필사 내용입니다.\n필사 내용입니다.\n필사 내용입니다.\n필사 내용입니다.",
+            1,
+            "저자1",
+            "출판사1"
         ),
         Quote(
-            "title2",
+            "책 제목 2",
             "2025.08.05",
             "https://image.yes24.com/goods/141792177/XL",
-            "content2 a",
-            12
+            "필사 내용입니다.",
+            2,
+            "저자2",
+            "출판사3"
         ),
-        Quote(
-            "title3",
-            "2025.08.06",
-            "https://image.yes24.com/goods/141792177/XL",
-            "content3 b",
-            123
-        ),
-        Quote(
-            "title4",
-            "2025.08.07",
-            "https://image.yes24.com/goods/141792177/XL",
-            "content4 c",
-            2
-        ),
-        Quote(
-            "title1",
-            "2025.08.08",
-            "https://image.yes24.com/goods/141792177/XL",
-            "content1 ddddddddddd",
-            22
-        ),
-        Quote(
-            "title5",
-            "2025.08.09",
-            "https://image.yes24.com/goods/141792177/XL",
-            "content5 ee",
-            222
-        ),
-        Quote(
-            "title6",
-            "2025.08.10",
-            "https://image.yes24.com/goods/141792177/XL",
-            "content6 ffffff",
-            33333333
-        ),
-
-        )
+    )
     var sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var selectedQuote by remember { mutableStateOf<Quote?>(null) }
-
-
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -111,8 +79,7 @@ fun QuotesScreen() {
                 .background(GureumColors.defaultLightColors().background10)
         ) {
             CenterAlignedTopAppBar(
-                modifier = Modifier.height(56.dp),
-                title = {
+                modifier = Modifier.height(56.dp), title = {
                     Text(
                         text = "필사 목록",
                         style = MaterialTheme.typography.titleLarge,
@@ -122,7 +89,7 @@ fun QuotesScreen() {
 
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp),
+                contentPadding = PaddingValues(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(quotesList) { item ->
@@ -205,8 +172,7 @@ fun QuotesScreen() {
                                             sheetState.hide()
                                             selectedQuote = null
                                         }
-                                    }
-                                ) {
+                                    }) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_close),
                                         contentDescription = "닫기",
@@ -218,17 +184,21 @@ fun QuotesScreen() {
                     }
                     Spacer(modifier = Modifier.padding(16.dp))
                     //필사 내용
-                    Text(
-                        text = selectedQuote!!.content,
-                        style = GureumTypography.bodySmall,
-                        color = GureumTheme.colors.gray800,
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(GureumColors.defaultLightColors().bookBackground)
+                    ) {
+                        Text(
+                            text = selectedQuote!!.content,
+                            style = GureumTypography.bodySmall,
+                            color = GureumTheme.colors.gray800,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
-
-data class Quote(
-    val title: String, val date: String, val image: String, val content: String, val page: Int
-)

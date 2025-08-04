@@ -28,7 +28,7 @@ import coil.compose.AsyncImagePainter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.quotes.Quote
+import com.hihihihi.gureumpage.ui.quotes.model.Quote
 
 @Composable
 fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
