@@ -1,4 +1,4 @@
-package com.hihihihi.gureumpage.ui.bookdetail.components
+package com.hihihihi.gureumpage.ui.bookdetail.components.tabs
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
