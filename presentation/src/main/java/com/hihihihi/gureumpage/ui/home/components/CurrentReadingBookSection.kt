@@ -1,12 +1,14 @@
 package com.hihihihi.gureumpage.ui.home.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -22,7 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +35,7 @@ import androidx.compose.ui.util.lerp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
@@ -40,16 +45,16 @@ import com.hihihihi.gureumpage.designsystem.components.GureumProgressBar
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
 import kotlin.math.absoluteValue
 
 @SuppressLint("RestrictedApi")
 @Composable
 fun CurrentReadingBookSection(
+    books: List<UserBook>,
     onBookClick: (String) -> Unit
 ) {
     val pagerState = rememberPagerState(
-        pageCount = { mockUserBooks.size }
+        pageCount = { books.size }
     )
     val contentPadding = 30.dp
     val pageSpacing = 16.dp
@@ -75,11 +80,11 @@ fun CurrentReadingBookSection(
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 state = pagerState,
-                key = { mockUserBooks[it].userBookId },
+                key = { books[it].userBookId },
                 contentPadding = PaddingValues(horizontal = contentPadding),
                 pageSpacing = pageSpacing,
             ) { page ->
-                val book = mockUserBooks[page]
+                val book = books[page]
                 BoxWithConstraints {
                     GureumCard(
                         Modifier
@@ -107,60 +112,74 @@ fun CurrentReadingBookSection(
                         }
                     ) {
                         Column(Modifier.padding(16.dp)) {
-                            Row {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
                                         .data(book.imageUrl)
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = "책 표지",
-                                    modifier = Modifier.size(width = 60.dp, height = 80.dp),
-                                    placeholder = painterResource(R.drawable.bg_home_dark),
+                                    modifier = Modifier
+                                        .height(80.dp)
+                                        .aspectRatio(0.75f)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    placeholder = painterResource(R.drawable.ic_cloud_reading),
+                                    error = painterResource(R.drawable.ic_cloud_reading),
+                                    contentScale = ContentScale.Crop
+                                )
 
-
-                                    )
                                 Spacer(Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        book.title,
-                                        style = GureumTypography.titleLarge.copy(
-                                            color = GureumTheme.colors.primary,
-                                        ),
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        book.author,
-                                        style = GureumTypography.bodySmall.copy(
-                                            color = GureumTheme.colors.gray500,
-                                        ),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        "누적 독서 시간: ${formatSecondsToReadableTime(book.totalReadTime)}",
-                                        style = GureumTypography.bodySmall.copy(
-                                            color = GureumTheme.colors.gray500,
-                                        )
-                                    )
 
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(84.dp), // 이미지 높이와 맞추기
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(
+                                            book.title,
+                                            style = GureumTypography.titleLarge.copy(
+                                                color = GureumTheme.colors.primary,
+                                            ),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            book.author,
+                                            style = GureumTypography.bodySmall.copy(
+                                                color = GureumTheme.colors.gray500,
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            "누적 독서 시간: ${formatSecondsToReadableTime(book.totalReadTime)}",
+                                            style = GureumTypography.bodySmall.copy(
+                                                color = GureumTheme.colors.gray500,
+                                            )
+                                        )
+                                    }
+
+                                    Text(
+                                        "${formatDateToSimpleString(book.startDate!!)} ~",
+                                        style = GureumTypography.bodySmall.copy(
+                                            color = GureumTheme.colors.gray500,
+                                        ),
+                                        modifier = Modifier.align(Alignment.End)
+                                    )
                                 }
                             }
-                            Spacer(Modifier.height(8.dp))
 
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.End
                             ) {
-                                Text(
-                                    "${formatDateToSimpleString(book.startDate!!)} ~",
-                                    style = GureumTypography.bodySmall.copy(
-                                        color = GureumTheme.colors.gray500,
-                                    )
-                                )
-                                Spacer(Modifier.height(8.dp))
+                                Spacer(Modifier.height(4.dp))
                                 GureumProgressBar(
                                     progress = book.currentPage.toFloat()/book.totalPage,
                                     height = 6
@@ -174,7 +193,7 @@ fun CurrentReadingBookSection(
                         }
                     }
                     val cardWidth = pxToDp(constraints.maxWidth) // box 사이즈 가져옴
-                    val bookmarkOffsetX = cardWidth * 0.88f // 카드 너비의 88% 지점에 위치
+                    val bookmarkOffsetX = cardWidth * 0.88f // box 너비의 88% 지점에 위치
 
                     Icon(
                         painter = painterResource(R.drawable.ic_bookmark),
