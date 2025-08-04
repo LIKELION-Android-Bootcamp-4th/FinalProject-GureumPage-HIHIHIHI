@@ -1,7 +1,10 @@
 package com.hihihihi.gureumpage.ui.home.components
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,34 +23,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.designsystem.component.Floating
+import com.hihihihi.gureumpage.designsystem.components.Floating
+import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.ui.home.HomeScreenContent
 import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun SearchBarWithBackground() {
-    Box(
+    BoxWithConstraints (
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp)
-            .paint(
-                // TODO 테마에 따라 배경도 바꿔줘야 함 아직 right 배경 안나옴
-                painterResource(id = R.drawable.bg_home_dark),
-                contentScale = ContentScale.Crop
-            )
+            .height(220.dp)
+
     ) {
+        val maxWidth: Dp = maxWidth
+        val maxHeight: Dp = maxHeight
 
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp, vertical = 20.dp)
         ) {
+            //TODO 현재는 진짜 TextField 인데 누르면 Search Screen으로 가도록 해야함
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
@@ -120,8 +126,8 @@ fun SearchBarWithBackground() {
 
         Floating(
             modifier = Modifier
-                .align(Alignment.BottomEnd) // 박스 기준 오른쪽 위
-                .offset(x = (-16).dp, y = (-35).dp) // 오른쪽으로 좀 당기고 아래로 살짝 내림
+                .offset(x = maxWidth * 0.6f, // 오른쪽 비율 위치
+                    y = maxHeight * 0.38f)  // 아래쪽에서 살짝 위로) // 오른쪽으로 좀 당기고 아래로 살짝 내림
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_cloud_reading),
@@ -130,5 +136,17 @@ fun SearchBarWithBackground() {
             )
         }
 
+    }
+}
+
+
+@Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun HomePreview() {
+    val fakeNavController = rememberNavController()
+
+    GureumPageTheme {
+        SearchBarWithBackground()
     }
 }
