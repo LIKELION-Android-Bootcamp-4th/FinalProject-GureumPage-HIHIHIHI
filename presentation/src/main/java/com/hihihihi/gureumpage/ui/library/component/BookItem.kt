@@ -26,14 +26,16 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.library.model.Book
 
-
+fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
 //한 권의 책정보
 @Composable
-fun BookItem(book: Book, modifier: Modifier = Modifier) {
+fun BookItem(book: UserBook, modifier: Modifier = Modifier) {
     Log.d("BookItem", "BookItem 실행됨: ${book.title}")
     val context = LocalContext.current
     val imageRequest = ImageRequest.Builder(context)
@@ -104,7 +106,7 @@ fun BookItem(book: Book, modifier: Modifier = Modifier) {
         }
 
         //다 읽은 책 아이콘
-        if (book.isRead) {
+        if (book.isRead()) {
             Image(
                 painter = painterResource(id = R.drawable.ic_bookmark),
                 contentDescription = null,
