@@ -29,11 +29,8 @@ import com.hihihihi.gureumpage.ui.library.model.Book
 
 
 @Composable
-fun LibraryScreen(
-    books: List<Book>,
-    isBeforeReading: Boolean,
-    onToggle: (Boolean) -> Unit
-) {
+fun LibraryScreen(books: List<Book>) {
+    var isBeforeReading by remember { mutableStateOf(true) }
     //현재 책 상태에 맞게 필터링
     val filteredBooks = books.filter { it.isRead != isBeforeReading }
 
@@ -58,18 +55,17 @@ fun LibraryScreen(
         }
 
 
-
         //상단 탭
         ToggleTab(
             isBeforeReading = isBeforeReading,
-            onToggle = onToggle
+            onToggle = { isBeforeReading = it}
         )
-        //그리드로 책 목록 출력
+        //그리드로 책 목록 출력(3열)
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredBooks) { book ->
                 BookItem(
@@ -81,27 +77,6 @@ fun LibraryScreen(
     }
 }
 
-//상태 저장 및 더미 데이터 테스트
-@Composable
-fun LibraryScreenRoute() {
-    var isBeforeReading by remember { mutableStateOf(true) }
-
-    val dummyBooks = remember {
-        listOf(
-            Book("1", "책1", "작가1", "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791187192596.jpg", true),
-            Book("2", "책2", "작가2", "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791187192596.jpg", true),
-            Book("3", "책3", "작가3", "https://image.yes24.com/momo/TopCate02/MidCate08/172832.jpg", true),
-            Book("4", "책4", "작가4", "https://image.yes24.com/momo/TopCate02/MidCate08/172832.jpg", false)
-        )
-    }
-
-    LibraryScreen(
-        books = dummyBooks,
-        isBeforeReading = isBeforeReading,
-        onToggle = {isBeforeReading = it}
-    )
-}
-
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -109,6 +84,6 @@ fun LibraryScreenRoute() {
 @Composable
 fun PreviewLibraryScreen() {
     GureumPageTheme {
-        LibraryScreenRoute()
+        LibraryScreen(books = dummyBooks)
     }
 }
