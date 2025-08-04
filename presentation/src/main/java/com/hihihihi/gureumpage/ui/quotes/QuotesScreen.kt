@@ -174,7 +174,7 @@ fun QuotesScreen() {
                                     Text(
                                         text = selectedQuote!!.title,
                                         maxLines = 1,
-                                        style = GureumTypography.bodyMedium,
+                                        style = GureumTypography.bodyLarge,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Row {
