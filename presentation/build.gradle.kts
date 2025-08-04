@@ -86,12 +86,8 @@ dependencies {
     implementation("com.kizitonwose.calendar:compose:2.8.0")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
 
-<<<<<<< HEAD
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")
 
 }
-=======
-}
->>>>>>> feature/Fix_libraryUI
