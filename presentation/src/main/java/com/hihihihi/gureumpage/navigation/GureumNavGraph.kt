@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
+import com.hihihihi.gureumpage.ui.library.LibraryScreenRoute
 import com.hihihihi.gureumpage.ui.login.LoginScreen
 import com.hihihihi.gureumpage.ui.mindmap.MindMapScreen
 import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
@@ -38,7 +39,7 @@ fun GureumNavGraph(
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(NavigationRoute.MindMap.route) { MindMapScreen() }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
-        composable(NavigationRoute.Library.route) { LibraryScreen() }
+        composable(NavigationRoute.Library.route) { LibraryScreenRoute() }
         composable(NavigationRoute.Search.route) { SearchScreen() }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(NavigationRoute.Timer.route) { TimerScreen() }
