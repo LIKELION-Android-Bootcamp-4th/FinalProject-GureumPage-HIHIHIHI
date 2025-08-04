@@ -148,6 +148,7 @@ fun QuotesScreen() {
                                     Row {
                                         //날짜
                                         BodySubText(selectedQuote!!.date)
+                                        Spacer(modifier = Modifier.padding(start = 10.dp))
                                         //페이지
                                         BodySubText(selectedQuote!!.page.toString() + 'p')
                                     }
