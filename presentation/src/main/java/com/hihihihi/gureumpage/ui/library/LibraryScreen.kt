@@ -35,6 +35,14 @@ fun LibraryScreen(
 ) {
     //현재 탭 상태 true면 읽기 전, false 면 읽은 책
     var isBeforeReading by remember { mutableStateOf(true) }
+
+    //viewModel 에서 책 리시트 가져옴
+    val books by viewModel.userBooks.collectAsState()
+
+    //진입시 유저의 책 데이터 로드
+    LaunchedEffect(userId) {
+        viewModel.loadUserBooks(userId)
+    }
     //현재 책 상태에 맞게 필터링
     val filteredBooks = books.filter { it.isRead != isBeforeReading }
 
