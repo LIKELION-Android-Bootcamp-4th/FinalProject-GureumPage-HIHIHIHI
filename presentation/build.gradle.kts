@@ -80,6 +80,7 @@ dependencies {
 
 
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.kizitonwose.calendar:compose:2.8.0")
