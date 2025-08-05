@@ -3,6 +3,7 @@ package com.hihihihi.gureumpage.di
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.Module
 import dagger.Provides
@@ -21,6 +22,14 @@ object UseCaseModule {
     ): GetUserBooksUseCase {
         return GetUserBooksUseCase(repository) // UseCase 생성 후 반환
     }
+
+    @Provides
+    fun provideGetUserBooksByStatusUseCase(
+        repository: UserBookRepository // Repository가 자동 주입됨
+    ): GetUserBooksByStatusUseCase {
+        return GetUserBooksByStatusUseCase(repository) // UseCase 생성 후 반환
+    }
+
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
     @Provides
