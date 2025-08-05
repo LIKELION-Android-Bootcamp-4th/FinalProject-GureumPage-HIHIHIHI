@@ -1,12 +1,16 @@
 package com.hihihihi.gureumpage.ui.home
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,10 +28,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -42,6 +51,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieAnimatable
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
@@ -56,6 +71,14 @@ import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.text.style.TextOverflow
+
 
 @Composable
 fun HomeScreen(
@@ -127,9 +150,9 @@ fun HomeScreenContent(
                     onBookClick = { onBookClick(it) }
                 )
             }
-//            item {
-//                RandomQuoteSection()
-//            }
+            item {
+                RandomQuoteSection()
+            }
 
             item {
                 Text("Home Screen")
@@ -143,30 +166,9 @@ fun HomeScreenContent(
                     Text("책 상세로 이동")
                 }
             }
-//        item {
-//            uiState.value.books.forEach { book ->
-//                Text(text = book.title)// 간단하게 책 제목만 출력. 추후 BookCard 형태로 개선
-//            }
-//        }
         }
     }
 }
-
-//@Composable
-//fun RandomQuoteSection() {
-//    Column(modifier = Modifier.padding(16.dp)) {
-//        TitleText("필사한 문장", isUnderline = true)
-//        Spacer(Modifier.height(8.dp))
-//
-//        SpeechBubbleCard(
-//            quote = "“네가 4시에 온다면 난 3시부터 행복할거야”",
-//            title = "어린왕자",
-//            date = "2025.07.29"
-//        )
-//
-//
-//    }
-//}
 
 
 
@@ -179,13 +181,3 @@ private fun HomePreview() {
     }
 }
 
-
-//@Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-//@Composable
-//private fun SpeechBubbleCardPreview() {
-//    GureumPageTheme {
-//        RandomQuoteSection()
-//
-//    }
-//}
