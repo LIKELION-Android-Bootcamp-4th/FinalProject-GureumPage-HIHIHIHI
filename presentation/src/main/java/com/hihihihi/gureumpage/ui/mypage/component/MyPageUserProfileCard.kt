@@ -1,0 +1,128 @@
+package com.hihihihi.gureumpage.ui.mypage.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+
+@Composable
+fun MyPageUserProfileCard(
+    //ui 확인용 더미 데이터
+    title: String = "안녕하세요!",
+    badge: String = "새벽 독서가", // 칭호
+    nickname: String = "히히히히님", // 유저 닉네임
+    totalPages: String = "1892쪽",
+    totalBooks: String = "16권",
+    totalTime: String = "3,744시간"
+) {
+    val colors = GureumTheme.colors
+    val typography = GureumTypography
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(colors.card, shape = RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                //인사
+                Text(
+                    text = title,
+                    style = typography.titleLarge,
+                    color = colors.gray800
+                )
+
+                //칭호 + 닉네임
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    //칭호
+                    Text(
+                        text = badge,
+                        style = typography.titleMedium,
+                        color = colors.point,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    //닉네임
+                    Text(
+                        text = nickname,
+                        style = typography.titleMedium,
+                        color = colors.gray800,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp) //터치 영역
+                    .clickable {  },
+                contentAlignment = Alignment.Center
+            ) {
+                //연필 아이콘
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_pen_outline),
+                    contentDescription = "프로필 수정",
+                    tint = colors.gray400,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        //구분선
+        Spacer(modifier = Modifier.height(12.dp))
+        Divider(color = colors.dividerDeep, thickness = 1.dp)
+
+        //독서 통계
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            StatColumn("총 페이지", totalPages)
+            StatColumn("총 권수", totalBooks)
+            StatColumn("총 독서 시간", totalTime)
+        }
+    }
+}
+
+@Composable
+private fun StatColumn(label: String, value: String) {
+    val colors = GureumTheme.colors
+    val typography = GureumTypography
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, style = typography.bodySmall, color = colors.gray500)
+        Text(text = value, style = typography.bodyMedium, color = colors.gray800)
+    }
+}
