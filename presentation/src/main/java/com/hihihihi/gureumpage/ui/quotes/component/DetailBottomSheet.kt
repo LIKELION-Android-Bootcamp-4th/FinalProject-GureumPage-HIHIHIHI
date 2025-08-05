@@ -53,7 +53,8 @@ fun DetailBottomSheet(
                 // 책 표지
                 AsyncImage(
                     modifier = Modifier
-                        .size(width = 60.dp, height = 80.dp),
+                        .size(width = 60.dp, height = 80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop,
                     model = quote.imageUrl,
                     contentDescription = "책 표지",

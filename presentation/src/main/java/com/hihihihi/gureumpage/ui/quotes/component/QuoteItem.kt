@@ -28,17 +28,15 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 @Composable
 fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
     GureumCard(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = { onItemClick(item) })
-            .background(GureumTheme.colors.background),
+        corner = 16.dp,
+        onClick = { onItemClick(item) }
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             //책 이미지
             AsyncImage(
                 modifier = Modifier
-                    .size(width = 60.dp, height = 80.dp),
+                    .size(width = 60.dp, height = 80.dp)
+                    .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
                 model = item.imageUrl,
                 contentDescription = "책",
