@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -57,7 +58,7 @@ fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
                 Spacer(modifier = Modifier.height(2.dp))
                 //날짜
                 Text(
-                    text = item.createdAt.toString().split("T")[0],
+                    text = formatDateToSimpleString(item.createdAt),
                     style = GureumTypography.bodyMedium,
                     color = GureumTheme.colors.gray300,
                     maxLines = 1,

@@ -39,7 +39,7 @@ fun QuoteContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GureumColors.defaultLightColors().background10)
+                .background(GureumColors.defaultLightColors().background)
         ) {
             //임시 앱바
             CenterAlignedTopAppBar(
