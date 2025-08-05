@@ -27,5 +27,13 @@ fun OnBoardingScreen(navController: NavHostController) {
         ) {
             Text("홈으로 이동")
         }
+
+        Button(
+            onClick = {
+                navController.navigate(NavigationRoute.Search.route)
+            }
+        ) {
+            Text("검색으로 이동")
+        }
     }
 }
