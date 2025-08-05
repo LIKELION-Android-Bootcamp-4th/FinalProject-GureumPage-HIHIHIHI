@@ -1,5 +1,6 @@
 package com.hihihihi.domain.repository
 
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import kotlinx.coroutines.flow.Flow
 
@@ -7,4 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface UserBookRepository {
     // 특정 사용자(userId)의 책 목록을 Flow 형태로 반환
     fun getUserBooks(userId: String): Flow<List<UserBook>>
+
+     fun getUserBooksByStatus(userId: String, status: ReadingStatus): Flow<List<UserBook>>
 }

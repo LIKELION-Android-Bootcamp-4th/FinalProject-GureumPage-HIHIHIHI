@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 import com.hihihihi.data.common.util.toLocalDateTime
+import com.hihihihi.domain.model.Book
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 
@@ -26,11 +27,14 @@ data class UserBookDto(
     @get:PropertyName("author") @set:PropertyName("author")
     var author: String = "",
 
+    @get:PropertyName("is_liked") @set:PropertyName("is_liked")
+    var isLiked: Boolean = false,
+
     @get:PropertyName("image_url") @set:PropertyName("image_url")
     var imageUrl: String = "",
 
     @get:PropertyName("total_page") @set:PropertyName("total_page")
-    var totalPage: Int,
+    var totalPage: Int = 0,
 
     @get:PropertyName("current_page") @set:PropertyName("current_page")
     var currentPage: Int? = 0,
