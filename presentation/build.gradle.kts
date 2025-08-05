@@ -42,6 +42,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        viewBinding = true
         compose = true
     }
 }
@@ -83,8 +84,9 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     // MindMap
-    implementation(libs.androidx.dynamicanimation)
     implementation(libs.gyso.treeview)
+    implementation(libs.androidx.dynamicanimation)
+    implementation(libs.androidx.ui.viewbinding)
 
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
