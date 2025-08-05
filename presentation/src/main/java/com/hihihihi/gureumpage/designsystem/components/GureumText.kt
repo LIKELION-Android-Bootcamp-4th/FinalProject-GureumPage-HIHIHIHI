@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,6 +84,24 @@ fun BodyText(
         maxLines = maxLine,
         modifier = modifier,
         textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun BodySubText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray400,
+    style: TextStyle = GureumTypography.bodySmall,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        overflow = TextOverflow.Ellipsis
     )
 }
 
