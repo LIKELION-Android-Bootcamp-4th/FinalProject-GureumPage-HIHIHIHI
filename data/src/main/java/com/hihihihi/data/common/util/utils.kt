@@ -4,8 +4,10 @@ import com.google.firebase.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+private val KST = ZoneId.of("Asia/Seoul")
+
 fun Timestamp.toLocalDateTime(): LocalDateTime =
-    this.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    this.toDate().toInstant().atZone(KST).toLocalDateTime()
 
 fun LocalDateTime.toTimestamp(): Timestamp =
-    Timestamp(this.atZone(ZoneId.systemDefault()).toInstant())
+    Timestamp(this.atZone(KST).toInstant())

@@ -29,6 +29,9 @@ data class UserBookDto(
     @get:PropertyName("image_url") @set:PropertyName("image_url")
     var imageUrl: String = "",
 
+    @get:PropertyName("total_page") @set:PropertyName("total_page")
+    var totalPage: Int,
+
     @get:PropertyName("current_page") @set:PropertyName("current_page")
     var currentPage: Int? = 0,
 
