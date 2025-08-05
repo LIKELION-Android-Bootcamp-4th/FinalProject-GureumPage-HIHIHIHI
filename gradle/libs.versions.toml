@@ -1,7 +1,9 @@
 [versions]
 agp = "8.9.0"
 converterGson = "3.0.0"
+dynamicanimation = "1.1.0"
 gson = "2.13.1"
+gysoTreeview = "1.0.1"
 hiltAndroidVersion = "2.56.2"
 hiltCompiler = "2.56.2"
 kotlin = "2.2.0"
@@ -24,9 +26,11 @@ googleGmsGoogleServices = "4.4.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-dynamicanimation = { module = "androidx.dynamicanimation:dynamicanimation", version.ref = "dynamicanimation" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+gyso-treeview = { module = "io.github.guaishoun:gyso-treeview", version.ref = "gysoTreeview" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidVersion" }
 hilt-android-v2562 = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
 jetbrains-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
