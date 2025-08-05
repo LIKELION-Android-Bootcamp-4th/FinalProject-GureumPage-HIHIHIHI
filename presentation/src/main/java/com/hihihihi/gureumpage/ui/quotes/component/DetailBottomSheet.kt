@@ -92,7 +92,7 @@ fun DetailBottomSheet(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_close),
                                 contentDescription = "닫기",
-                                tint = GureumColors.defaultLightColors().gray500
+                                tint = GureumTheme.colors.gray500
                             )
                         }
                     }
@@ -104,7 +104,7 @@ fun DetailBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GureumColors.defaultLightColors().card)
+                    .background(GureumTheme.colors.card)
             ) {
                 Text(
                     text = quote.content,
