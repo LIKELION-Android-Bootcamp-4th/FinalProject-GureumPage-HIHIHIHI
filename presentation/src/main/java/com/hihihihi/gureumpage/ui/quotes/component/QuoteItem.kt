@@ -20,10 +20,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.quotes.model.Quote
 
 @Composable
 fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
@@ -35,12 +35,12 @@ fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
             .background(GureumTheme.colors.background),
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
+            //책 이미지
             AsyncImage(
                 modifier = Modifier
-                    .size(width = 60.dp, height = 80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .size(width = 60.dp, height = 80.dp),
                 contentScale = ContentScale.Crop,
-                model = item.image,
+                model = item.imageUrl,
                 contentDescription = "책",
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -59,7 +59,7 @@ fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
                 Spacer(modifier = Modifier.height(2.dp))
                 //날짜
                 Text(
-                    text = item.date,
+                    text = item.createdAt.toString().split("T")[0],
                     style = GureumTypography.bodyMedium,
                     color = GureumTheme.colors.gray300,
                     maxLines = 1,

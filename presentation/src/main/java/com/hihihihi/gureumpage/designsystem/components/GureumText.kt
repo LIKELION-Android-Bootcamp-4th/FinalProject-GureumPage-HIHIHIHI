@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -88,7 +89,7 @@ fun BodyText(
 @Composable
 fun BodySubText(
     text: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.padding(top = 2.dp),
     color: Color = GureumTheme.colors.gray400,
     style: TextStyle = GureumTypography.bodySmall,
     maxLine: Int = 4,
