@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -45,11 +46,21 @@ fun SearchBarWithBackground() {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
+            .height(220.dp),
+
 
     ) {
         val maxWidth: Dp = maxWidth
         val maxHeight: Dp = maxHeight
+        Image(
+            //TODO 이미지 테마에 맞춰 변경되어야 함 현재는 Light BG가 없음
+            painter = painterResource(id = R.drawable.bg_home_dark),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp), // 배경이 겹쳐질 만큼만 높이
+            contentScale = ContentScale.Crop
+        )
 
         Column(
             Modifier
