@@ -3,13 +3,13 @@ package com.hihihihi.gureumpage.di
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module // Hilt 모듈 선언
 @InstallIn(SingletonComponent::class) // 앱 전체 생명주기 동안 싱글톤으로 유지되는 컴포넌트에 설치
@@ -37,5 +37,12 @@ object UseCaseModule {
         repository: QuoteRepository
     ): AddQuoteUseCase {
         return AddQuoteUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetQuotesUseCase(
+        repository: QuoteRepository
+    ): GetQuoteUseCase {
+        return GetQuoteUseCase(repository)
     }
 }

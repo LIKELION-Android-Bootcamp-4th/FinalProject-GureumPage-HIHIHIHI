@@ -12,7 +12,11 @@ fun Quote.toDto(): QuoteDto = QuoteDto(
     content = content,
     pageNumber = pageNumber,
     isLiked = isLiked,
-    createdAt = null
+    createdAt = null,
+    title = title,
+    author = author,
+    publisher = publisher,
+    imageUrl = imageUrl
 )
 
 fun QuoteDto.toDomain(): Quote = Quote(
@@ -22,7 +26,11 @@ fun QuoteDto.toDomain(): Quote = Quote(
     content = content,
     pageNumber = pageNumber,
     isLiked = isLiked,
-    createdAt = createdAt?.toLocalDateTime()
+    createdAt = createdAt?.toLocalDateTime(),
+    title = title,
+    author = author,
+    publisher = publisher,
+    imageUrl = imageUrl
 )
 
 fun QuoteDto.toMap(): Map<String, Any?> {
@@ -33,6 +41,10 @@ fun QuoteDto.toMap(): Map<String, Any?> {
         "content" to content,
         "page_number" to pageNumber,
         "is_liked" to isLiked,
-        "created_at" to FieldValue.serverTimestamp()
+        "created_at" to FieldValue.serverTimestamp(),
+        "title" to title,
+        "author" to author,
+        "publisher" to publisher,
+        "image_url" to imageUrl
     )
 }

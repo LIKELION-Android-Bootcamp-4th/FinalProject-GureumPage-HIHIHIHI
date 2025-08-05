@@ -1,10 +1,12 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.mapper.toMap
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.dto.QuoteDto
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -26,5 +28,24 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
     } catch (e: Exception) {
         // 에러 발생 시 실패 결과 반환
         Result.failure(e)
+    }
+
+    override fun getQuotes(userId: String): Flow<List<QuoteDto>> = callbackFlow {
+        val quotesCollection = firestore.collection("quotes")
+            .whereEqualTo("user_id", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val quotes = snapshot?.documents?.mapNotNull { document ->
+                    document.toObject(QuoteDto::class.java)?.apply {
+                        quoteId = document.id
+                    }
+                } ?: emptyList()
+                trySend(quotes)
+            }
+        awaitClose { quotesCollection.remove() }
     }
 }

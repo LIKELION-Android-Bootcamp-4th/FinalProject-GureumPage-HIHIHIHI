@@ -3,12 +3,22 @@ package com.hihihihi.data.remote.dto
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.domain.model.Quote
 
 @Keep
 data class QuoteDto(
     var quoteId: String = "",
+
+    @get:PropertyName("title") @set:PropertyName("title")
+    var title: String = "",
+
+    @get:PropertyName("author") @set:PropertyName("author")
+    var author: String = "",
+
+    @get:PropertyName("publisher") @set:PropertyName("publisher")
+    var publisher: String = "",
+
+    @get:PropertyName("image_url") @set:PropertyName("image_url")
+    var imageUrl: String = "",
 
     @get:PropertyName("user_id") @set:PropertyName("user_id")
     var userId: String = "",
