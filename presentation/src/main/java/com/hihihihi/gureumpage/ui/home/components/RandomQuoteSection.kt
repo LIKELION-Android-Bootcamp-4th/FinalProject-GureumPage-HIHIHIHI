@@ -39,18 +39,44 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.hihihihi.domain.model.Quote
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
+import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
+import java.time.LocalDateTime
 
 
 @Composable
-fun RandomQuoteSection() {
-    Column(modifier = Modifier.background(GureumTheme.colors.background).padding(16.dp)) {
+fun RandomQuoteSection(
+    quotes: List<Quote>,
+) {
+    var currentIndex by remember { mutableStateOf(0) }
+
+    Column(modifier = Modifier
+        .background(GureumTheme.colors.background)
+        .padding(16.dp)) {
         TitleText("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
-        QuoteCard(
-            quote = "“네가 4시에 온다면 난 3시부터 행복할거”",
-            title = "어린왕자",
-            date = "2025.07.29",
-        )
+        if (quotes.isNotEmpty()) {
+            val quote = quotes[currentIndex % quotes.size]
+            QuoteCard(
+                quote = quote.content,
+                title = quote.title,
+                date = formatDateToSimpleString(quote.createdAt),
+                onClick = {
+                    currentIndex = (quotes.indices - currentIndex).random()
+                }
+            )
+        }else{
+            QuoteCard(
+                quote = "구름한장",
+                title = """아직 등록된 필사가 없네요! 필사를 등록하고 절 누르면 랜덤으로 작성한 필사를 보여드릴게요!""",
+                date = formatDateToSimpleString(LocalDateTime.now()),
+                onClick = {
+                }
+            )
+        }
     }
 }
 
@@ -60,17 +86,21 @@ fun QuoteCard(
     quote: String,
     title: String,
     date: String,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .wrapContentHeight()
             .padding(bottom = 66.dp) // 구름 하단 여유 공간 확보
+            .clickable(onClick = onClick)
     ) {
         // 말풍선 본체
-        GureumCard(modifier = Modifier.heightIn(min=100.dp)) {
+        GureumCard(modifier = Modifier.heightIn(min = 100.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -99,7 +129,7 @@ fun QuoteCard(
                 .align(Alignment.BottomEnd)
                 .offset(x = 16.dp, y = 60.dp)
         ) {
-            GuruemBulbLottie()
+            GuruemBulbLottie(onClick)
         }
     }
 }
@@ -107,6 +137,7 @@ fun QuoteCard(
 
 @Composable
 fun GuruemBulbLottie(
+    onClick: () -> Unit
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("cloud_bulb.json"))
     val scope = rememberCoroutineScope()
@@ -115,10 +146,11 @@ fun GuruemBulbLottie(
 
     Box(
         modifier = Modifier
-            .clickable (
+            .clickable(
                 interactionSource = interactionSource,
                 indication = null
-            ){
+            ) {
+                onClick()
                 scope.launch {
                     if (composition == null) return@launch
 
@@ -152,7 +184,6 @@ fun GuruemBulbLottie(
 @Composable
 private fun SpeechBubbleCardPreview() {
     GureumPageTheme {
-        RandomQuoteSection()
-
+        RandomQuoteSection(dummyQuotes)
     }
 }

@@ -78,7 +78,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.style.TextOverflow
+import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
+import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 
 
 @Composable
@@ -110,6 +112,7 @@ fun HomeScreen(
         else -> {
             HomeScreenContent(
                 books = uiState.value.books,
+                quotes = uiState.value.quotes,
                 onBookClick = {
                     navController.navigate(NavigationRoute.BookDetail.createRoute(it))
                 })
@@ -120,6 +123,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     books: List<UserBook>,
+    quotes: List<Quote>,
     onBookClick: (String) -> Unit
 ) {
     val scrollState = rememberLazyListState()
@@ -143,7 +147,9 @@ fun HomeScreenContent(
             )
         }
         item {
-            RandomQuoteSection()
+            RandomQuoteSection(
+                quotes = quotes
+            )
         }
 
         item {
@@ -167,7 +173,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUserBooks, onBookClick = {})
+        HomeScreenContent(mockUserBooks, dummyQuotes,onBookClick = {})
     }
 }
 
