@@ -44,7 +44,11 @@ class BookDetailViewModel @Inject constructor(
                 content = content,
                 pageNumber = pageNumber,
                 isLiked = false,
-                createdAt = null
+                createdAt = null,
+                title = "",
+                author = "",
+                publisher = "",
+                imageUrl = ""
             )
             // 명언 추가 UseCase 실행
             val result = addQuoteUseCase(newQuote)
