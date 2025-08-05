@@ -3,7 +3,9 @@
     <color name="card">#FFF9F8F5</color>
     <color name="gray600">#FF4F4F41</color>
     <color name="gray200">#FFBABBB1</color>
+    <color name="gray0">#FFFFFFFF</color>
     <color name="background">#FFFCFBF6</color>
+    <color name="divider_shallow">#FFF1F2E6</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="primary">#FF96A46B</color>
 </resources>
