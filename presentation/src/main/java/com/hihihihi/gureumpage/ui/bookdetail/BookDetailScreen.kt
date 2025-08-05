@@ -1,20 +1,14 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
+import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,11 +18,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.hihihihi.gureumpage.navigation.NavigationRoute
+import androidx.navigation.compose.rememberNavController
+import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
+import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 
 @Composable
 fun BookDetailScreen(
@@ -74,70 +74,53 @@ fun BookDetailScreen(
         }
     }
 
+    val scrollState: LazyListState = rememberLazyListState()
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Text("BookDetail Screen")
-
-        // 타이머 화면으로 이동하는 버튼
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.Timer.route)
-            }
-        ) {
-            Text("타이머로 이동")
-        }
-
-        // 마인드맵 화면으로 이동하는 버튼
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.MindMap.route)
-            }
-        ) {
-            Text("마인드맵 이동")
-        }
-
-        // 필사 내용 입력 필드
-        OutlinedTextField(
-            value = content,
-            onValueChange = { content = it },
-            label = { Text("내용") },
-            modifier = Modifier.fillMaxWidth()
+        BookDetailFab(
+            modifier = Modifier
+                .align(alignment = Alignment.BottomEnd)
+                .padding(bottom = 32.dp, end = 22.dp),
+            onActionClick = {  }
         )
 
-        // 페이지 번호 입력 필드 (숫자만 입력 가능)
-        OutlinedTextField(
-            value = pageNumber,
-            onValueChange = { pageNumber = it.filter { ch -> ch.isDigit() } }, // 숫자 필터링
-            label = { Text("페이지 번호") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        // 필사 추가 버튼
-        Button(
-            onClick = {
-                // ViewModel의 명언 추가 함수 호출
-                viewModel.addQuote(bookId, content, pageNumber.toIntOrNull())
-            },
-            // 로딩 중이 아니고, 내용이 비어있지 않을 때만 활성화
-            enabled = !uiState.addQuoteState.isLoading && content.isNotBlank()
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = scrollState,
         ) {
-            if (uiState.addQuoteState.isLoading) {
-                // 로딩 중엔 원형 프로그레스 표시
-                CircularProgressIndicator(
-                    color = Color.White
-                )
-                // 평상시 버튼 텍스트
-            } else Text("필사 추가")
+            item { BookSimpleInfoSection() }
+            item { ReadingProgressSection() }
+            item { BookStatisticsCard() }
+            item { BookDetailTabs() }
         }
-
-
     }
+}
 
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun BookDetailPreview() {
+    GureumPageTheme {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            BookDetailFab(
+                modifier = Modifier
+                    .align(alignment = Alignment.BottomEnd)
+                    .padding(bottom = 32.dp, end = 22.dp),
+                onActionClick = {  }
+            )
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                item { BookSimpleInfoSection() }
+                item { ReadingProgressSection() }
+                item { BookStatisticsCard() }
+                item { BookDetailTabs() }
+            }
+        }
+    }
 }

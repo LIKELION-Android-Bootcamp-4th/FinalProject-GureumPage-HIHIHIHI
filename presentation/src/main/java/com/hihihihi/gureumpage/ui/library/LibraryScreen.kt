@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,14 +37,10 @@ fun LibraryScreen(
     var isBeforeReading by remember { mutableStateOf(true) }
 
     //viewModel 에서 책 리시트 가져옴
-    val books by viewModel.userBooks.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    //진입시 유저의 책 데이터 로드
-    LaunchedEffect(userId) {
-        viewModel.loadUserBooks(userId)
-    }
     //현재 책 상태에 맞게 필터링
-    val filteredBooks = books.filter {
+    val filteredBooks = uiState.books.filter {
         if (isBeforeReading) it.status != ReadingStatus.FINISHED
         else it.status == ReadingStatus.FINISHED
     }
@@ -54,7 +50,6 @@ fun LibraryScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-
         //앱 바 ui 확인용
         Box(
             modifier = Modifier
@@ -75,18 +70,42 @@ fun LibraryScreen(
             isBeforeReading = isBeforeReading,
             onToggle = { isBeforeReading = it}
         )
-        //그리드로 책 목록 출력(3열)
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(filteredBooks) { book ->
-                BookItem(
-                    book = book,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+        //ui 상태 분기
+        when {
+            //로딩 중
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = GureumTheme.colors.primary)
+                }
+            }
+            //에러 발생
+            uiState.errorMessage != null -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "에러 발생", color = GureumTheme.colors.systemRed)
+                }
+            }
+            //필터링된 책이 없을 경우
+            filteredBooks.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "표시할 책이 없습니다.", style = GureumTypography.bodyMedium)
+                }
+            }
+            //정상적으로 작동될 떄
+            else -> {
+                //그리드로 책 목록 출력(3열)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredBooks) { book ->
+                        BookItem(
+                            book = book,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
             }
         }
     }
