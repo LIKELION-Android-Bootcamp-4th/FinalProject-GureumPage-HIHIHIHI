@@ -39,6 +39,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.hihihihi.domain.model.Quote
@@ -51,6 +52,7 @@ import java.time.LocalDateTime
 fun RandomQuoteSection(
     quotes: List<Quote>,
 ) {
+    // 현재 인덱스 저장해서 다음 랜덤때 제외하도록
     var currentIndex by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier
@@ -59,19 +61,23 @@ fun RandomQuoteSection(
         TitleText("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
         if (quotes.isNotEmpty()) {
+            // 나중에 수정이나 삭제했을때 사이즈보다 커지거나 하면 문제가 생길 수도 있어 나머지 로직 넣었습니다
             val quote = quotes[currentIndex % quotes.size]
             QuoteCard(
                 quote = quote.content,
                 title = quote.title,
                 date = formatDateToSimpleString(quote.createdAt),
                 onClick = {
-                    currentIndex = (quotes.indices - currentIndex).random()
+                    if (quotes.size > 1) {  // 1일때는 안바뀌도록
+                        currentIndex = (quotes.indices - currentIndex).random()
+                    }
                 }
             )
         }else{
+            // 필사 목록 비어있을 때 처리
             QuoteCard(
-                quote = "구름한장",
-                title = """아직 등록된 필사가 없네요! 필사를 등록하고 절 누르면 랜덤으로 작성한 필사를 보여드릴게요!""",
+                quote = "아직 등록된 필사가 없네요! 필사를 등록하고 저(구름이)를 누르면 랜덤으로 작성한 필사를 보여드릴게요!",
+                title = "구름한장",
                 date = formatDateToSimpleString(LocalDateTime.now()),
                 onClick = {
                 }
@@ -92,6 +98,7 @@ fun QuoteCard(
         modifier = Modifier
             .wrapContentHeight()
             .padding(bottom = 66.dp) // 구름 하단 여유 공간 확보
+        //TODO 더 나은 방식이 있지 않을까
     ) {
         // 말풍선 본체
         GureumCard(modifier = Modifier.heightIn(min = 100.dp)) {
@@ -100,20 +107,27 @@ fun QuoteCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // 책 제목
                     Text(
                         text = title,
-                        style = GureumTypography.titleLarge.copy(color = GureumTheme.colors.gray900)
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = GureumTypography.titleLarge.copy(color = GureumTheme.colors.gray900),
+                        modifier = Modifier.weight(1f) // 날짜 공간 보장용
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    // 날짜
                     Text(
                         text = date,
                         style = GureumTypography.bodySmall.copy(color = GureumTheme.colors.gray500),
                     )
                 }
-
+                // 필사
                 Text(
-                    text = quote,
+                    text = "\"${quote}\"",
                     style = GureumTypography.bodyMedium.copy(color = GureumTheme.colors.gray700),
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis
@@ -121,7 +135,7 @@ fun QuoteCard(
             }
         }
 
-        // 구름 캐릭터 - 말풍선 오른쪽 아래에 겹치도록 배치
+        // 구름 캐릭터
         Box(
             modifier = Modifier
                 .size(100.dp)
@@ -154,6 +168,7 @@ fun GuruemBulbLottie(
                     if (composition == null) return@launch
 
                     animatable.snapTo(progress = 0f) // 항상 처음부터 시작
+                    // 재생
                     animatable.animate(
                         composition = composition,
                         clipSpec = LottieClipSpec.Progress(0f, 0.9f),
@@ -170,6 +185,7 @@ fun GuruemBulbLottie(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
+            // TODO 로티가 로딩이 좀 느려서 자리가 비어있다가 생기길래 일단 인디케이터를 넣어놨는데 어떻게 하면 좋을지🥲
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
