@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.home.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +43,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 
 @Composable
 fun RandomQuoteSection() {
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.background(GureumTheme.colors.background).padding(16.dp)) {
         TitleText("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
         QuoteCard(

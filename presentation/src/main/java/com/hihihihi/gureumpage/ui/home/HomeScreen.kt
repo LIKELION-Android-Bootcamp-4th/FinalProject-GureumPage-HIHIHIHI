@@ -78,6 +78,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.style.TextOverflow
+import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
 
 
 @Composable
@@ -123,53 +124,42 @@ fun HomeScreenContent(
 ) {
     val scrollState = rememberLazyListState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 배경 (겹쳐지는 것까지 포함)
-        Image(
-            //TODO 이미지 테마에 맞춰 변경되어야 함 현재는 Light BG가 없음
-            painter = painterResource(id = R.drawable.bg_home_dark),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp), // 배경이 겹쳐질 만큼만 높이
-            contentScale = ContentScale.Crop
-        )
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            // 원래 이 바깥에 이미지를 뒀더니 길어짐에 따라 뒷배경 이미지가 이상하게 작동돼서.. 일단 잔디색 고정값
+            .background(color = Color(0xFF276040)),
+        state = scrollState,
+    ) {
+        item {
+            SearchBarWithBackground()
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = scrollState,
-        ) {
-            item {
-                SearchBarWithBackground()
+        }
 
-            }
+        item {
+            CurrentReadingBookSection(
+                books = books,
+                onBookClick = { onBookClick(it) }
+            )
+        }
+        item {
+            RandomQuoteSection()
+        }
 
-            item {
-                CurrentReadingBookSection(
-                    books = books,
-                    onBookClick = { onBookClick(it) }
-                )
-            }
-            item {
-                RandomQuoteSection()
-            }
+        item {
+            Text("Home Screen")
 
-            item {
-                Text("Home Screen")
-
-            }
-            item {
-                Button(
-                    onClick = {
-                    }
-                ) {
-                    Text("책 상세로 이동")
+        }
+        item {
+            Button(
+                onClick = {
                 }
+            ) {
+                Text("책 상세로 이동")
             }
         }
     }
 }
-
 
 
 @Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
