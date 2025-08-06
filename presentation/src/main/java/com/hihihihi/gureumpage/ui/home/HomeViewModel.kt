@@ -49,7 +49,7 @@ class HomeViewModel @Inject constructor(
                     _uiState.update { it.copy(errorMessage = e.message) }
                 }
                 .collect { quotes ->
-                    _uiState.update { it.copy(quotes = emptyList()) }
+                    _uiState.update { it.copy(quotes = quotes) }
                 }
         }
     }

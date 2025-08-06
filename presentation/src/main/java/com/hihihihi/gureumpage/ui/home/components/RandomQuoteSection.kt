@@ -76,7 +76,7 @@ fun RandomQuoteSection(
         }else{
             // 필사 목록 비어있을 때 처리
             QuoteCard(
-                quote = "아직 등록된 필사가 없네요! 필사를 등록하고 저(구름이)를 누르면 랜덤으로 작성한 필사를 보여드릴게요!",
+                quote = "아직 필사가 등록되지 않았어요. 필사를 하나 추가하고 구름이를 눌러보세요! 작성한 필사 중 하나를 랜덤으로 소개해드릴게요.",
                 title = "구름한장",
                 date = formatDateToSimpleString(LocalDateTime.now()),
                 onClick = {
