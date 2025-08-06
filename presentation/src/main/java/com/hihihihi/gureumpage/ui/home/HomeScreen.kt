@@ -53,10 +53,6 @@ fun HomeScreen(
             ErrorView(message = uiState.value.errorMessage!!) // 에러 발생 시 표시될 뷰
         }
 
-        uiState.value.books.isEmpty() -> {
-            EmptyView() // 데이터는 정상 응답됐지만 책 목록이 비어있을 때 표시
-        }
-
         else -> {
             HomeScreenContent(
                 books = uiState.value.books,
