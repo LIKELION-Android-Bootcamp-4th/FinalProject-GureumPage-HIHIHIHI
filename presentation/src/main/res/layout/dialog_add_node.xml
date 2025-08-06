@@ -57,6 +57,7 @@
     </HorizontalScrollView>
 
     <HorizontalScrollView
+        android:layout_marginTop="16.dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

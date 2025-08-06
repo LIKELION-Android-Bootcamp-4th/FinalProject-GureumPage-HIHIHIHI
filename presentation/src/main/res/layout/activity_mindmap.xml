@@ -20,7 +20,7 @@
         android:text="편집 모드"
         android:textColor="@color/gray600"
         app:thumbTint="@color/gray0"
-        app:trackTint="@color/divider_shallow" />
+        app:trackTint="@color/dividerShallow" />
 
     <ImageButton
         android:id="@+id/btn_center"
@@ -40,7 +40,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="16dp"
-        android:background="@color/transparent"
         android:orientation="horizontal">
 
         <ImageButton
