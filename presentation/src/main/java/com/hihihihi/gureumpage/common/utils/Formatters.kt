@@ -54,9 +54,9 @@ class PageFormatter : ValueFormatter() {
 /**
  * LocalDateTime -> "yyyy.MM.dd" 포맷
  */
-fun formatDateToSimpleString(dateTime: LocalDateTime): String {
+fun formatDateToSimpleString(dateTime: LocalDateTime?): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
-    return dateTime.format(formatter)
+    return dateTime?.format(formatter) ?: ""
 }
 
 /**
