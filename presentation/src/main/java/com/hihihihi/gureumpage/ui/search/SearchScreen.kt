@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -29,7 +30,8 @@ import com.hihihihi.gureumpage.ui.search.component.SearchTopAppBar
 
 @Composable
 fun SearchScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
     //검색어 입력을 위한 상태
     var searchQuery by remember { mutableStateOf("") }
@@ -37,6 +39,8 @@ fun SearchScreen(
     //포커스와 키보드 제어
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    //검색이 한번이라도 실행되었는지 여부
+    var hasSearched by remember { mutableStateOf(false) }
     //화면 진입 시 검색 자동 포커스
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -51,7 +55,16 @@ fun SearchScreen(
                 focusManager.clearFocus()
                 keyboardController?.hide()
             },
-            focusRequester = focusRequester
+            focusRequester = focusRequester,
+            onSearch = { currentQuery ->
+                //검색 버튼이 눌렸을 때
+                //키보드 내리고 포커스 해제
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                //검색 로직
+                viewModel.search(currentQuery)
+                hasSearched = true
+            }
         )
     }) { paddingValues ->
         Box(
@@ -59,7 +72,7 @@ fun SearchScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
         ) {
-            if (searchQuery.isEmpty()) {
+            if (!hasSearched) {
                 Text(
                     text = "책 제목, 작가, 출판사 등\n무엇으로든 검색해 보세요",
                     color = GureumTheme.colors.gray400,
