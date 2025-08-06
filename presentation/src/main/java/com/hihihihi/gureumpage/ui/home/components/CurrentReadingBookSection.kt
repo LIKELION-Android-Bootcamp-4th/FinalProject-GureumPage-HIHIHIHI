@@ -41,7 +41,7 @@ import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.pxToDp
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
-import com.hihihihi.gureumpage.designsystem.components.GureumProgressBar
+import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -180,7 +180,7 @@ fun CurrentReadingBookSection(
                                 horizontalAlignment = Alignment.End
                             ) {
                                 Spacer(Modifier.height(4.dp))
-                                GureumProgressBar(
+                                GureumLinearProgressBar(
                                     progress = book.currentPage.toFloat()/book.totalPage,
                                     height = 6
                                 )
