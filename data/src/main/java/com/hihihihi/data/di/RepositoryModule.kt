@@ -1,9 +1,12 @@
 package com.hihihihi.data.di
 
+import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.repotisoryimpl.AuthRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
+import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import dagger.Module
@@ -30,5 +33,13 @@ object RepositoryModule {
         remoteDataSource: QuoteRemoteDataSource
     ): QuoteRepository {
         return QuoteRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        authDataSource: AuthDataSource
+    ): AuthRepository {
+       return AuthRepositoryImpl(authDataSource)
     }
 }

@@ -1,7 +1,9 @@
 package com.hihihihi.gureumpage.di
 
+import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -44,5 +46,12 @@ object UseCaseModule {
         repository: QuoteRepository
     ): GetQuoteUseCase {
         return GetQuoteUseCase(repository)
+    }
+
+    @Provides
+    fun provideSignInWithGoogleUseCase(
+        repository: AuthRepository
+    ): SignInWithGoogleUseCase {
+        return SignInWithGoogleUseCase(repository)
     }
 }
