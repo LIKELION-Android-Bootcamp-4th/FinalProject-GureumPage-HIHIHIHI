@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,7 +45,11 @@ class BookDetailViewModel @Inject constructor(
                 content = content,
                 pageNumber = pageNumber,
                 isLiked = false,
-                createdAt = null
+                createdAt = LocalDateTime.now(),
+                title = "",
+                author = "",
+                publisher = "",
+                imageUrl = ""
             )
             // 명언 추가 UseCase 실행
             val result = addQuoteUseCase(newQuote)
