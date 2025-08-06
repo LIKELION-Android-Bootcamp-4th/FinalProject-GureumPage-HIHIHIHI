@@ -17,8 +17,6 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
     override suspend fun addQuote(quoteDto: QuoteDto): Result<Unit> = try {
         // quotes 컬렉션에 새 문서 생성 (자동 ID 생성)
         val documentReference = firestore.collection("quotes").document()
-        // 자동 생성된 문서 ID를 DTO에 할당
-        quoteDto.quoteId = documentReference.id
 
         // DTO를 Map 형태로 변환 후 Firestore에 저장, await()로 완료 대기
         documentReference.set(quoteDto.toMap()).await()

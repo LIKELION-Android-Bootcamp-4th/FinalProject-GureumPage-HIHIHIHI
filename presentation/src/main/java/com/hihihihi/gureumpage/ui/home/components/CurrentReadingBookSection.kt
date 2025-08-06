@@ -204,6 +204,9 @@ fun CurrentReadingBookSection(
                     )
                 }
             }
+
+            // 아래 그림자 끊기는 것 같아 추가
+            Spacer(Modifier.height(10.dp))
         }
     }
 }
