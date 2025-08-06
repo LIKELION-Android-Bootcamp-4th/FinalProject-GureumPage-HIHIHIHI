@@ -3,6 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="18dp"
+    android:layout_marginRight="18dp"
     android:background="@drawable/dialog_background_shape"
     android:orientation="vertical"
     android:paddingTop="24dp">
@@ -11,7 +13,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:paddingBottom="24dp">
 
         <TextView
@@ -29,7 +32,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_alignParentEnd="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_close"
             android:tint="@color/gray400" />
     </RelativeLayout>
@@ -40,24 +43,17 @@
         android:layout_height="2dp"
         android:background="@color/gray150" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/pretendard_semibold"
-        android:gravity="center"
-        android:textColor="@color/gray800"
-        android:text="아이콘\t\t\t\t\t\t\t\t색상"
-        android:textSize="12sp" />
-
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/icon_container"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp" />
     </HorizontalScrollView>
 
     <HorizontalScrollView
@@ -65,26 +61,30 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/color_container"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp" />
     </HorizontalScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp">
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"        android:textColor="@color/gray800"
-
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/pretendard_semibold"
             android:paddingBottom="4dp"
             android:text="제목"
+            android:textColor="@color/gray800"
             android:textSize="12sp" />
 
         <EditText
@@ -104,9 +104,9 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/pretendard_semibold"
             android:paddingTop="22dp"
-            android:paddingBottom="4dp"        android:textColor="@color/gray800"
-
+            android:paddingBottom="4dp"
             android:text="내용"
+            android:textColor="@color/gray800"
             android:textSize="12sp" />
 
         <EditText
@@ -115,11 +115,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/node_background_shape"
             android:fontFamily="@font/pretendard_medium"
+            android:gravity="top"
             android:hint="책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요."
             android:inputType="textMultiLine"
+            android:lines="4"
             android:padding="16dp"
-            android:textColorHint="@color/gray400"
             android:textColor="@color/gray600"
+            android:textColorHint="@color/gray400"
             android:textSize="14sp" />
 
         <TextView
@@ -129,8 +131,8 @@
             android:fontFamily="@font/pretendard_medium"
             android:gravity="right"
             android:paddingTop="6dp"
-            android:textColor="@color/gray400"
             android:text="최대 250자"
+            android:textColor="@color/gray400"
             android:textSize="10sp" />
 
         <Button
@@ -139,9 +141,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="32dp"
-            android:textColor="@color/gray400"
             android:background="@drawable/button_background_shape"
-            android:text="저장하기" />
+            android:fontFamily="@font/pretendard_medium"
+            android:text="저장하기"
+            android:textColor="@color/gray400"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>
