@@ -19,10 +19,14 @@ class MindMapAdapter(
 ) : TreeViewAdapter<MindMapNodeData>() {
     private lateinit var editor: TreeViewEditor // 마인드 맵 편집 객체
     private var selected: TreeNode? = null      // 현재 선택된 노드
+    private var editMode: Boolean = false       // 편집 모드
+
+    private val undoStack = ArrayDeque<Command>()
+    private val redoStack = ArrayDeque<Command>()
 
     fun setEditor(treeViewEditor: TreeViewEditor) {
         editor = treeViewEditor
-        editor.requestMoveNodeByDragging(false) // 화면 드래그 활성화
+        editor.requestMoveNodeByDragging(true) // 화면 드래그 활성화
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, node: TreeNode) =
@@ -30,31 +34,80 @@ class MindMapAdapter(
             LayoutInflater.from(parent.context).inflate(R.layout.item_mindmap_node, parent, false), node
         )
 
+    // TODO: 노드 커스터마이즈
     override fun onBindViewHolder(holder: TreeViewHolder<MindMapNodeData>) {
-        holder.view.findViewById<TextView>(R.id.node_text).text = holder.node.value.content
+        holder.view.findViewById<TextView>(R.id.node_title).text = holder.node.value.content
+
         holder.view.setOnClickListener {
             selected = holder.node
-            onNodeClick(holder.node) // 이벤트 처리할 노드 전달
+
+            if (editMode) {
+                // 편집 모드일 때: 노드 추가 다이얼로그
+
+            } else {
+                // 편집 모드 아닐 때: 상세 내용 보기 다이어로그
+
+            }
+            onNodeClick(holder.node)
+
+        }
+
+        // 편집 모드 일 때만 동작
+        holder.view.setOnLongClickListener {
+            if (editMode) {
+                // 수정, 삭제 팝업 메뉴
+                // 수정 누를 시 작성되어 있던 내용 다이얼로그
+                // 삭제 누를 시 (타이틀 이름) 삭제하시겠습니까 다이얼로그
+
+            }
+            true
         }
     }
 
-    // TODO: 추후 간선 스타일 지정할 때 사용
     override fun onDrawLine(drawInfo: DrawInfo?): BaseLine? = null
 
     fun addChildToSelected() {
-        selected?.let {
-            editor.addChildNodes(
-                it,
-                TreeNode(MindMapNodeData(UUID.randomUUID().toString(), "새 노드"))
-            )
+        selected?.let { parent ->
+            val child = TreeNode(MindMapNodeData(UUID.randomUUID().toString(), ""))
+            perform(AddNodeCommand(editor, parent, child))
         }
     }
 
     fun removeSelected() {
-        selected?.let { editor.removeNode(it) }
+        selected?.let { node ->
+            val parent = node.parentNode ?: return
+            perform(RemoveNodeCommand(editor, node, parent))
+        }
     }
 
     fun focusCenter() {
         editor.focusMidLocation()
+    }
+
+    fun perform(command: Command) {
+        command.redo()
+        undoStack.addLast(command)
+        redoStack.clear()
+    }
+
+    fun undo() {
+        if (undoStack.isNotEmpty()) {
+            val command = undoStack.removeLast()
+            command.undo()
+            redoStack.addLast(command)
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            val command = redoStack.removeLast()
+            command.redo()
+            undoStack.addLast(command)
+        }
+    }
+
+    fun changeEditMode(state: Boolean) {
+        editMode = state
+        editor.requestMoveNodeByDragging(state)
     }
 }
