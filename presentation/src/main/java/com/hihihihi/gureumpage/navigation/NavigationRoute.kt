@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.navigation
 
 sealed class NavigationRoute (val route: String) {
+    object Splash: NavigationRoute("splash")
     object Home: NavigationRoute("home")
     object Login: NavigationRoute("login")
     object OnBoarding: NavigationRoute("onboarding")
