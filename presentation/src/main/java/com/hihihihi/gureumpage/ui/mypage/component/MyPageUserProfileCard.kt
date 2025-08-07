@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -39,79 +40,86 @@ fun MyPageUserProfileCard(
     val colors = GureumTheme.colors
     val typography = GureumTypography
 
-    Column(
+    GureumCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .background(colors.card, shape = RoundedCornerShape(12.dp))
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
+        corner = 12.dp
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                //인사
-                Text(
-                    text = title,
-                    style = typography.titleLarge,
-                    color = colors.gray800
-                )
-
-                //칭호 + 닉네임
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    //칭호
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(Modifier.weight(1f)) {
+                    //인사
                     Text(
-                        text = badge,
-                        style = typography.titleMedium,
-                        color = colors.point,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = title,
+                        style = typography.titleLarge,
+                        color = colors.gray800
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    //닉네임
-                    Text(
-                        text = nickname,
-                        style = typography.titleMedium,
-                        color = colors.gray800,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    Spacer(Modifier.height(2.dp))
+
+                    //칭호 + 닉네임
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        //칭호
+                        Text(
+                            text = badge,
+                            style = typography.titleLarge,
+                            color = colors.point,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        //닉네임
+                        Text(
+                            text = nickname,
+                            style = typography.titleLarge,
+                            color = colors.gray800,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(0.2f)
+                        .clickable { }
+                        .padding(start = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    //연필 아이콘
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_pen_outline),
+                        contentDescription = "프로필 수정",
+                        tint = colors.gray400,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .size(48.dp) //터치 영역
-                    .clickable {  },
-                contentAlignment = Alignment.Center
+            //구분선
+            Spacer(modifier = Modifier.height(12.dp))
+            Divider(color = colors.dividerDeep, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //독서 통계
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                //연필 아이콘
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_pen_outline),
-                    contentDescription = "프로필 수정",
-                    tint = colors.gray400,
-                    modifier = Modifier.size(24.dp)
-                )
+                StatColumn("총 페이지", totalPages)
+                StatColumn("총 권수", totalBooks)
+                StatColumn("총 독서 시간", totalTime)
             }
-        }
-
-        //구분선
-        Spacer(modifier = Modifier.height(12.dp))
-        Divider(color = colors.dividerDeep, thickness = 1.dp)
-
-        //독서 통계
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            StatColumn("총 페이지", totalPages)
-            StatColumn("총 권수", totalBooks)
-            StatColumn("총 독서 시간", totalTime)
         }
     }
 }
@@ -123,6 +131,7 @@ private fun StatColumn(label: String, value: String) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, style = typography.bodySmall, color = colors.gray500)
+        Spacer(modifier = Modifier.height(8.dp))
         Text(text = value, style = typography.bodyMedium, color = colors.gray800)
     }
 }
