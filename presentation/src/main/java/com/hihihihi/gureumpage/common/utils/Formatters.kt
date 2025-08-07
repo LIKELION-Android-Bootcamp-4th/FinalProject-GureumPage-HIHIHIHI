@@ -54,14 +54,14 @@ class PageFormatter : ValueFormatter() {
 /**
  * LocalDateTime -> "yyyy.MM.dd" 포맷
  */
-fun formatDateToSimpleString(dateTime: LocalDateTime): String {
+fun formatDateToSimpleString(dateTime: LocalDateTime?): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
-    return dateTime.format(formatter)
+    return dateTime?.format(formatter) ?: ""
 }
 
 /**
- * 초(int)로 받은거 -> "n시간 n분 n초" 포맷
- */
+* 초(int)로 받은거 -> "n시간 n분 n초" 포맷
+*/
 fun formatSecondsToReadableTime(seconds: Int): String {
     val hours = seconds / 3600
     val minutes = (seconds % 3600) / 60
@@ -73,6 +73,21 @@ fun formatSecondsToReadableTime(seconds: Int): String {
         if (secs > 0 || (hours == 0 && minutes == 0)) append("${secs}초")
     }.trim()
 }
+
+/**
+ * 초(int)로 받은 거 -> "n시간 n분" 포맷 (초는 제외)
+ */
+fun formatSecondsToReadableTimeWithoutSecond(seconds: Int): String {
+    val hours = seconds / 3600
+    val minutes = (seconds % 3600) / 60
+
+    return buildString {
+        if (hours > 0) append("${hours}시간 ")
+        if (minutes > 0) append("${minutes}분")
+        if (hours == 0 && minutes == 0) append("0분")
+    }.trim()
+}
+
 
 /**
  * px 을 Dp 로 변환

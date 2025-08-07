@@ -1,9 +1,12 @@
 package com.hihihihi.data.repotisoryimpl
 
+import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.mapper.toDto
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.repository.QuoteRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 // QuoteRepository 인터페이스 구현체
@@ -18,4 +21,8 @@ class QuoteRepositoryImpl @Inject constructor(
         return quoteRemoteDataSource.addQuote(quoteDto)
     }
 
+    override fun getQuotes(userId: String): Flow<List<Quote>> {
+        return quoteRemoteDataSource.getQuotes(userId)
+            .map { dtoList -> dtoList.map { it.toDomain() } }
+    }
 }

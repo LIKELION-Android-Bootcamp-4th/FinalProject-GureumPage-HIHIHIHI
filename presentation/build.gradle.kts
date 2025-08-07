@@ -40,6 +40,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        viewBinding = true
         compose = true
     }
 }
@@ -80,14 +81,19 @@ dependencies {
     implementation(libs.hilt.android.v2562)
     ksp(libs.hilt.android.compiler)
 
+    // MindMap
+    implementation(libs.gyso.treeview)
+    implementation(libs.androidx.dynamicanimation)
+    implementation(libs.androidx.ui.viewbinding)
 
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
     implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.kizitonwose.calendar:compose:2.8.0")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("com.airbnb.android:lottie-compose:5.2.0")
 
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-firestore")
