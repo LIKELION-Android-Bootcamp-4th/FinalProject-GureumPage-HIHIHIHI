@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="18dp"
+    android:layout_marginRight="18dp"
+    android:background="@drawable/dialog_background_shape"
+    android:orientation="vertical"
+    android:paddingTop="24dp">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/pretendard_semibold"
+            android:maxLines="2"
+            android:text="노드 제목"
+            android:textColor="@color/gray900"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            android:tint="@color/gray400" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/dividerDeep" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView3"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="20dp"-->
+<!--            android:fontFamily="@font/pretendard_semibold"-->
+<!--            android:paddingBottom="4dp"-->
+<!--            android:text="제목"-->
+<!--            android:textColor="@color/gray800"-->
+<!--            android:textSize="12sp" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/node_title"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/node_background_shape"-->
+<!--            android:fontFamily="@font/pretendard_medium"-->
+<!--            android:padding="16dp"-->
+<!--            android:textColor="@color/gray600"-->
+<!--            android:textSize="14sp" />-->
+
+<!--        android:id="@+id/textView4"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fontFamily="@font/pretendard_semibold"-->
+<!--        android:paddingTop="22dp"-->
+<!--        android:paddingBottom="4dp"-->
+<!--        android:text="내용"-->
+<!--        android:textColor="@color/gray800"-->
+<!--        android:textSize="12sp" />-->
+<!--        <TextView-->
+
+        <TextView
+            android:id="@+id/node_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/node_background_shape"
+            android:fontFamily="@font/pretendard_medium"
+            android:gravity="top"
+            android:lines="4"
+            android:padding="16dp"
+            android:layout_marginTop="26dp"
+            android:textColor="@color/gray600"
+            android:textColorHint="@color/gray400"
+            android:textSize="14sp" />
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btn_save"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="20dp"-->
+        <!--            android:layout_marginBottom="32dp"-->
+        <!--            android:background="@drawable/button_active_bacground_shape"-->
+        <!--            android:fontFamily="@font/pretendard_medium"-->
+        <!--            android:text="닫기"-->
+        <!--            android:textColor="@color/white"-->
+        <!--            android:textSize="14sp" />-->
+    </LinearLayout>
+
+</LinearLayout>

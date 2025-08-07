@@ -41,7 +41,8 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/gray150" />
+        android:background="@color/dividerDeep"
+        android:layout_marginBottom="20dp"/>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
