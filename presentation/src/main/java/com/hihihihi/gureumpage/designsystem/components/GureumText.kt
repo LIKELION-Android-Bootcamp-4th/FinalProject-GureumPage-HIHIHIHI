@@ -71,6 +71,24 @@ fun TitleText(
 }
 
 @Composable
+fun TitleSubText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.titleMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
 fun BodyText(
     text: String,
     modifier: Modifier = Modifier,
@@ -88,6 +106,23 @@ fun BodyText(
     )
 }
 
+@Composable
+fun BodyMediumText(
+    text: String,
+    modifier: Modifier = Modifier.padding(),
+    color: Color = GureumTheme.colors.gray500,
+    style: TextStyle = GureumTypography.bodyMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        overflow = TextOverflow.Ellipsis
+    )
+}
 @Composable
 fun BodySubText(
     text: String,
