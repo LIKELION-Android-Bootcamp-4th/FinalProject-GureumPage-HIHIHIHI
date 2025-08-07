@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.login
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -15,12 +16,22 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
+import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.common.model.ClientError
+import com.kakao.sdk.common.model.ClientErrorCause
+import com.kakao.sdk.user.UserApiClient
 
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val signInWithGoogleUseCase: SignInWithGoogleUseCase
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
+    private val signInWithKakaoUseCase: SignInWithKakaoUseCase,
+    private val signInWithNaverUseCase: SignInWithNaverUseCase,
 ) : ViewModel() {
+    private val TAG = "AuthViewModel"
+
 
     fun googleLogin(
         context: Context,
@@ -42,12 +53,45 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 signInWithGoogleUseCase(data)
-                Log.d("AuthViewModel", "구글 로그인 성공")
+                Log.d(TAG, "구글 로그인 성공")
                 navController.navigate(NavigationRoute.OnBoarding.route) {
                     popUpTo(NavigationRoute.Login.route) { inclusive = true }
                 }
             } catch (e: Exception) {
-                Log.e("AuthViewModel", "구글 로그인 실패", e)
+                Log.e(TAG, "구글 로그인 실패", e)
+            }
+        }
+    }
+
+
+    fun kakaoLogin(
+        navController: NavHostController
+    ) {
+        viewModelScope.launch {
+            try {
+                signInWithKakaoUseCase()
+                Log.d(TAG, "카카오 로그인 성공")
+                navController.navigate(NavigationRoute.OnBoarding.route) {
+                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "카카오 로그인 성공")
+            }
+        }
+
+    }
+
+
+    fun naverLogin(activity: Activity, navController: NavHostController) {
+        viewModelScope.launch {
+            try {
+                signInWithNaverUseCase(activity)
+                Log.d(TAG, "네이버 로그인 성공")
+                navController.navigate(NavigationRoute.OnBoarding.route) {
+                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "네이버 로그인 실패", e)
             }
         }
     }
