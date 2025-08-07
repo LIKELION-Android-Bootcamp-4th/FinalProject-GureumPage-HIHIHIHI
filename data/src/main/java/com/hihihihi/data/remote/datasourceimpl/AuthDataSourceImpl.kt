@@ -28,4 +28,12 @@ class AuthDataSourceImpl @Inject constructor(
             .getHttpsCallable(functionName)
             .call(mapOf("accessToken" to accessToken))
     }
+
+    override fun kakaoLogin(accessToken: String): Task<HttpsCallableResult> {
+        return functions.getHttpsCallable("kakaoCustomAuth").call(mapOf("accessToken" to accessToken))
+    }
+
+    override fun naverLogin(accessToken: String): Task<HttpsCallableResult> {
+        return functions.getHttpsCallable("naverCustomAuth").call(mapOf("accessToken" to accessToken))
+    }
 }

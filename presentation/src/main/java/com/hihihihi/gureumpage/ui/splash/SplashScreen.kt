@@ -19,12 +19,16 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.kakao.sdk.common.util.Utility
 
 @Composable
 fun SplashView(navController: NavHostController) {
     LaunchedEffect(Unit) {
+        FirebaseAuth.getInstance().signOut()
+
         val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
         Log.e("TAG", "SplashView: 여기 진입 $isLoggedIn", )
+        //Log.e("TAG", "SplashView: ${FirebaseAuth.getInstance().currentUser!!.uid}", )
 
         navController.navigate(
             if (isLoggedIn) {

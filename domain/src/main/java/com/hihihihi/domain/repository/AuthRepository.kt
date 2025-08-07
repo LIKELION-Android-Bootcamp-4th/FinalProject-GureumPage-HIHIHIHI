@@ -7,4 +7,6 @@ interface AuthRepository {
 
     suspend fun signInWithCustomToken(functionName: String, accessToken: String)
 
+    suspend fun kakaoLogin(accessToken: String)
+    suspend fun naverLogin(accessToken: String)
 }

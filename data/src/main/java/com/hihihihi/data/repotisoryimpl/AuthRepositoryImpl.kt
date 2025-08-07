@@ -25,5 +25,17 @@ class AuthRepositoryImpl @Inject constructor(
         authDataSource.signInWithCustomToken(customToken).await()
     }
 
+    override suspend fun kakaoLogin(accessToken: String) {
+        val result = authDataSource.kakaoLogin(accessToken).await()
+        val customToken = (result.data as Map<*, *>)["token"] as String
+        authDataSource.signInWithCustomToken(customToken).await()
+    }
+
+    override suspend fun naverLogin(accessToken: String) {
+        val result = authDataSource.naverLogin(accessToken).await()
+        val customToken = (result.data as Map<*, *>)["token"] as String
+        authDataSource.signInWithCustomToken(customToken).await()
+    }
+
 
 }
