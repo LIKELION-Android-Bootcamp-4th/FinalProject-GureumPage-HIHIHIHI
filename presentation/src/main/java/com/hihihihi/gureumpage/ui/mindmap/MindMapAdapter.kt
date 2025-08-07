@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.mindmap
 
+import android.R.attr.text
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
@@ -24,6 +25,7 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.DialogAddNodeBinding
 import java.util.UUID
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.util.TypedValueCompat.dpToPx
 import com.gyso.treeview.model.TreeModel
 
 typealias TreeNode = NodeModel<MindMapNodeData>
@@ -53,13 +55,32 @@ class MindMapAdapter(
         )
 
     override fun onBindViewHolder(holder: TreeViewHolder<MindMapNodeData>) {
-        holder.view.findViewById<TextView>(R.id.node_title).text = holder.node.value.title
+        val node = holder.node.value
+        val titleView = holder.view.findViewById<TextView>(R.id.node_title)
+        val iconView = holder.view.findViewById<TextView>(R.id.node_icon)
+        val colorView = holder.view.findViewById<View>(R.id.node_color)
+
+        titleView.text = node.title
+
+        node.color?.toInt()?.let { colorInt ->
+            val bg = colorView.background.mutate() as GradientDrawable// 뷰의 shape drawable을 mutate() 후 tint
+            bg.setColor(colorInt)
+            colorView.background = bg
+            colorView.visibility = View.VISIBLE
+        }
+
+        if (!node.icon.isNullOrEmpty()) {
+            iconView.visibility = View.VISIBLE
+            iconView.text = node.icon
+        } else {
+            iconView.visibility = View.GONE
+        }
 
         // 노드 클릭 시 이벤트
         holder.view.setOnClickListener {
             selected = holder.node
             if (editMode) { // 편집 모드면 노드 추가 다이얼로그
-                showAddNodeDialog(holder.view.context, holder.node) { newNode ->
+                showAddNodeDialog(holder.view.context, null) { newNode ->
                     val child = NodeModel(newNode)
                     performAdd(holder.node, child)
                 }
@@ -166,8 +187,9 @@ class MindMapAdapter(
         for (i in 0 until container.childCount) {
             val child = container.getChildAt(i)
             val bg = child.background as GradientDrawable
+
             if (child == selectedView) {
-                bg.setStroke(container.context.dpToPx(2), ContextCompat.getColor(context, R.color.primary))
+                bg.setStroke(container.context.dpToPx(3), ContextCompat.getColor(context, R.color.primary))
             } else {
                 bg.setStroke(0, ContextCompat.getColor(context, R.color.background10))
             }
@@ -206,17 +228,36 @@ class MindMapAdapter(
             .create()
         dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 
-        var selectedIconRes: Int = -1
-        var selectedColor: Int = Color.TRANSPARENT
+        var selectedIcon: String? = existingNode?.value?.icon
+        var selectedColor: Long? = existingNode?.value?.color
+
+        if (existingNode != null) {
+            binding.editTitle.setText(existingNode.value.title)
+            binding.editContent.setText(existingNode.value.content ?: "")
+
+            if (selectedIcon != null) {
+                val imageView = binding.iconContainer.findViewWithTag<ImageView>(selectedIcon)
+                updateIconSelection(binding.iconContainer, imageView)
+            }
+
+            if (selectedColor != null) {
+                val colorView = binding.colorContainer.findViewWithTag<View>(selectedColor)
+                updateColorSelection(binding.colorContainer, colorView)
+            }
+        }
 
         fun updateSaveEnabled() {
             val saveBtn = binding.btnSave
             saveBtn.isEnabled =
-                binding.editTitle.text!!.isNotBlank() &&
-                        binding.editContent.text!!.isNotBlank()
+                binding.editTitle.text!!.isNotBlank()
             if (saveBtn.isEnabled) {
                 saveBtn.setTextColor(ContextCompat.getColor(context, R.color.white))
-                saveBtn.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.button_active_bacground_shape))
+                saveBtn.setBackgroundDrawable(
+                    ContextCompat.getDrawable(
+                        context,
+                        R.drawable.button_active_bacground_shape
+                    )
+                )
             } else {
                 saveBtn.setTextColor(ContextCompat.getColor(context, R.color.gray400))
                 saveBtn.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.button_background_shape))
@@ -224,27 +265,61 @@ class MindMapAdapter(
         }
 
         // 아이콘 리스트
-        val icons = listOf(R.drawable.ic_close, R.drawable.ic_close)
-        icons.forEach { resId ->
-            val iv = ImageView(context).apply {
-                setImageResource(resId)
+        val icons = listOf(
+            "❤\uFE0F",
+            "\uD83C\uDFE0",
+            "⏰",
+            "\uD83D\uDCDD",
+            "\uD83D\uDCA1",
+            "✨",
+            "\uD83D\uDCCC",
+            "\uD83D\uDCC6",
+            "\uD83D\uDE21",
+            "☺\uFE0F",
+            "\uD83D\uDE2D",
+            "\uD83D\uDE35",
+            "\uD83E\uDD14",
+            "\uD83D\uDC75\uD83C\uDFFB",
+            "\uD83E\uDDD3\uD83C\uDFFB",
+            "\uD83D\uDC69\uD83C\uDFFB",
+            "\uD83E\uDDD1\uD83C\uDFFB",
+            "\uD83D\uDC76\uD83C\uDFFB",
+            "\uD83E\uDDD2\uD83C\uDFFB",
+            "\uD83D\uDC67\uD83C\uDFFB",
+            "☠\uFE0F"
+        )
+        icons.forEach { icon ->
+            val textIcon = TextView(context).apply {
+                text = icon
                 val size = context.dpToPx(32)
                 layoutParams = LinearLayout.LayoutParams(size, size).apply {
                     marginEnd = context.dpToPx(8)
+                    textSize = 24f
                 }
                 setOnClickListener {
-                    selectedIconRes = resId
+                    selectedIcon = icon
                     updateIconSelection(binding.iconContainer, this)
                     updateSaveEnabled()
                 }
             }
-            binding.iconContainer.addView(iv)
+            binding.iconContainer.addView(textIcon)
         }
 
         // 색상 리스트
-        val colors = listOf(0xFFE57373, 0xFF81C784)
+        val colors = listOf(
+            0xFFFF6363,
+            0xFFFFA663,
+            0xFFFFD051,
+            0xFFA1D36E,
+            0xFF86B9DB,
+            0xFF415D9D,
+            0xFFAB8AD1,
+            0xFFFFB8C9,
+            0xFF504F59,
+            0xFFFFFFFF
+        )
         colors.forEach { colorInt ->
-            val v = View(context).apply {
+            val view = View(context).apply {
                 setBackgroundResource(R.drawable.bg_button_rounded)
                 (background as GradientDrawable).setColor(colorInt.toInt())
                 val size = context.dpToPx(32)
@@ -252,12 +327,12 @@ class MindMapAdapter(
                     marginEnd = context.dpToPx(8)
                 }
                 setOnClickListener {
-                    selectedColor = colorInt.toInt()
+                    selectedColor = colorInt
                     updateColorSelection(binding.colorContainer, this)
                     updateSaveEnabled()
                 }
             }
-            binding.colorContainer.addView(v)
+            binding.colorContainer.addView(view)
         }
 
         binding.editTitle.addTextChangedListener { updateSaveEnabled() }
@@ -270,7 +345,9 @@ class MindMapAdapter(
                 id = existingNode?.value?.id ?: UUID.randomUUID().toString(),
                 title = binding.editTitle.text.toString(),
                 content = binding.editContent.text.toString(),
-                bookImage = selectedIconRes.toString()
+                bookImage = selectedIcon.toString(),
+                icon = selectedIcon,
+                color = selectedColor
             )
             onSave(node)
             dialog.dismiss()
