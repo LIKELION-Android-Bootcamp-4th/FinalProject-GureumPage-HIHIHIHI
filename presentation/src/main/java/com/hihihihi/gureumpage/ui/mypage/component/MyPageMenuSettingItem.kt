@@ -25,9 +25,11 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 @Composable
 fun MyPageMenuSettingItem(
     title: String,
-    showSwitch: Boolean = false,
+    showSwitch: Boolean = false, // 스위치 노출 여부
+    switchChecked: Boolean = false, // 스위치 on/off 상태
+    onSwitchToggle: (Boolean) -> Unit = {}, //스위치 변경 시 콜백
     textColor: Color = GureumTheme.colors.gray700,
-    onClick: () -> Unit
+    onClick: () -> Unit //항목 클릭 시 액션
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
@@ -36,19 +38,25 @@ fun MyPageMenuSettingItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .clickable { onClick() }, // TODO: 기능 구현 (화면이동,다크모드)
+            .clickable { onClick() }, // TODO: 기능 구현 (화면이동)
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = title, style = typography.titleMedium, color = textColor)
         if(showSwitch) {
+            //다크모드 토글 스위치
             Switch(
-                checked = false,
-                onCheckedChange = {}, // TODO: 다크모드 상태
-                colors = SwitchDefaults.colors(checkedThumbColor = colors.primary)
+                checked = switchChecked,
+                onCheckedChange = onSwitchToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = colors.primary,
+                    checkedTrackColor = colors.primary50,
+                    uncheckedTrackColor = colors.gray300,
+                    uncheckedThumbColor = colors.gray150
+                )
             )
         } else {
-            //화살표 아이콘 (오른쪽 화살표가 없어서 추후 생기면 변경)
+            // 스위치가 아닌 경우 아이콘
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow_right),
                 contentDescription = null,
