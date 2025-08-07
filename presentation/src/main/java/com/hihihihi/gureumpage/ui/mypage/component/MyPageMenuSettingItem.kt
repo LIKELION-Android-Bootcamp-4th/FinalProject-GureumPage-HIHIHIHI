@@ -15,7 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -23,6 +26,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun MyPageMenuSettingItem(
     title: String,
     showSwitch: Boolean = false,
+    textColor: Color = GureumTheme.colors.gray700,
     onClick: () -> Unit
 ) {
     val colors = GureumTheme.colors
@@ -36,7 +40,7 @@ fun MyPageMenuSettingItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = title, style = typography.titleMedium, color = colors.gray700)
+        Text(text = title, style = typography.titleMedium, color = textColor)
         if(showSwitch) {
             Switch(
                 checked = false,
@@ -46,7 +50,7 @@ fun MyPageMenuSettingItem(
         } else {
             //화살표 아이콘 (오른쪽 화살표가 없어서 추후 생기면 변경)
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                painter = painterResource(id = R.drawable.ic_arrow_right),
                 contentDescription = null,
                 tint = colors.gray300
             )
