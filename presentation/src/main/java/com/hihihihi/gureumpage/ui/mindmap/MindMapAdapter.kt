@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.mindmap
 
-import android.R.attr.text
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
@@ -13,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.gyso.treeview.TreeViewEditor
@@ -25,8 +25,8 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.DialogAddNodeBinding
 import java.util.UUID
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.util.TypedValueCompat.dpToPx
 import com.gyso.treeview.model.TreeModel
+import com.hihihihi.gureumpage.databinding.DialogNodeDetailBinding
 
 typealias TreeNode = NodeModel<MindMapNodeData>
 
@@ -85,7 +85,7 @@ class MindMapAdapter(
                     performAdd(holder.node, child)
                 }
             } else { // 편집 모드 아니면 상세 내용 보기 다이얼로그(or 바텀 시트)
-//                onNodeClick(holder.node)
+                showDetailDialog(holder.view.context, holder.node)
             }
         }
 
@@ -352,6 +352,34 @@ class MindMapAdapter(
             onSave(node)
             dialog.dismiss()
         }
+        dialog.show()
+    }
+
+    fun showDetailDialog(context: Context, currentNode: TreeNode) {
+        val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
+        val binding = DialogNodeDetailBinding.inflate(themedInflater)
+        val dialog = AlertDialog.Builder(context)
+            .setView(binding.root)
+            .create()
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+
+        binding.dialogTitle.text = currentNode.value.title
+        binding.nodeContent.text = currentNode.value.content
+
+        currentNode.value.color?.toInt()?.let { colorInt ->
+            val bg = binding.nodeColor.background.mutate() as GradientDrawable
+            bg.setColor(colorInt)
+            binding.nodeColor.background = bg
+            binding.nodeIconContainer.visibility = View.VISIBLE
+        }
+        
+        currentNode.value.icon?.let { emoji ->
+            binding.nodeIcon.text = emoji
+            binding.nodeIconContainer.visibility = View.VISIBLE
+        }
+
+        binding.btnClose.setOnClickListener { dialog.dismiss() }
+
         dialog.show()
     }
 }
