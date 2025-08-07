@@ -5,8 +5,10 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -16,9 +18,9 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GureumAppBar(
-    navController: NavHostController,
+    navController: NavHostController? = null,
     title: String = "",
-    showUpButton: Boolean = true,
+    showUpButton: Boolean = false,
     actions: @Composable () -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
@@ -27,7 +29,7 @@ fun GureumAppBar(
             if (showUpButton) {
                 IconButton(
                     onClick = {
-                        navController.popBackStack()
+                        navController?.popBackStack()
                     }
                 ) {
                     Icon(
@@ -40,5 +42,8 @@ fun GureumAppBar(
             }
         },
         actions = { actions },
+        modifier = Modifier.shadow(
+            elevation = 6.dp
+        )
     )
 }
