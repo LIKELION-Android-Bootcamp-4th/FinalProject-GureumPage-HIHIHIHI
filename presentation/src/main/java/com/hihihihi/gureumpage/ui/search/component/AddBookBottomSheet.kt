@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +56,12 @@ fun AddBookBottomSheet(
     book: SearchBook,
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onConfirm: (category: String, page: Int) -> Unit
+    onConfirm: (category: String, page: Int) -> Unit,
+    onGetBookPageCount: (isbn: String, onResult: (Int?) -> Unit) -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf("읽을 책") }
     var pageInput by remember { mutableStateOf("") }
+    var bookPageCount by remember { mutableStateOf<Int?>(null) }
     val focusManager = LocalFocusManager.current
     // "읽은 책" 상태 변수
     var startDate by remember { mutableStateOf("") }
@@ -66,6 +69,15 @@ fun AddBookBottomSheet(
     var showDatePicker by remember { mutableStateOf(false) }
     var dateFieldToUpdate by remember { mutableStateOf<((String) -> Unit)?>(null) }
     val datePickerState = rememberDatePickerState()
+
+    // 화면진입 시 페이지 수를 가져오는 로직
+    LaunchedEffect(book.isbn) {
+        if (book.isbn.isNotBlank()) {
+            onGetBookPageCount(book.isbn) { pageCount ->
+                bookPageCount = pageCount
+            }
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -125,7 +137,9 @@ fun AddBookBottomSheet(
                     //카테고리
                     BodyMediumText(book.categoryName.split(">")[1])
                     //페이지
-                    //BodyMediumText()
+                    bookPageCount?.let { pageCount ->
+                        BodyMediumText("${pageCount}페이지")
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))

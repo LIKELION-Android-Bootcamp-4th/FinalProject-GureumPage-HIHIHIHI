@@ -139,17 +139,25 @@ fun SearchScreen(
     }
     //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
     if (bookToAdd != null) {
-        AddBookBottomSheet(book = bookToAdd!!, sheetState = sheetState, onDismiss = {
-            scope.launch {
-                sheetState.hide()
-                bookToAdd = null
+        AddBookBottomSheet(
+            book = bookToAdd!!, 
+            sheetState = sheetState, 
+            onDismiss = {
+                scope.launch {
+                    sheetState.hide()
+                    bookToAdd = null
+                }
+            }, 
+            onConfirm = { category, page ->
+                scope.launch {
+                    sheetState.hide()
+                    bookToAdd = null
+                }
+            },
+            onGetBookPageCount = { isbn, onResult ->
+                viewModel.getBookPageCount(isbn, onResult)
             }
-        }, onConfirm = { category, page ->
-            scope.launch {
-                sheetState.hide()
-                bookToAdd = null
-            }
-        })
+        )
     }
 }
 
