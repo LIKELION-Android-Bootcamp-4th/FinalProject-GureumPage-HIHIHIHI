@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.designsystem.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -31,8 +32,15 @@ fun GureumTextField(
 ) {
     val colors = GureumTheme.colors
     OutlinedTextField(
-        modifier = modifier,
-        placeholder = { Text(text = hint, style = GureumTypography.bodySmall) },
+        modifier = modifier.fillMaxWidth(),
+        placeholder = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = hint,
+                style = GureumTypography.bodySmall,
+                textAlign = textAlign,
+            )
+        },
         value = value,
         onValueChange = onValueChange,
         colors = OutlinedTextFieldDefaults.colors(
