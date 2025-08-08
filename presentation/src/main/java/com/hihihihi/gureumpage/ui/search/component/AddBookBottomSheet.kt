@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyMediumText
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
@@ -40,12 +41,11 @@ import com.hihihihi.gureumpage.designsystem.components.TitleSubText
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.search.Search
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBookBottomSheet(
-    book: Search,
+    book: SearchBook,
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onConfirm: (category: String, page: Int) -> Unit
@@ -96,7 +96,7 @@ fun AddBookBottomSheet(
                         .size(width = 80.dp, height = 112.dp)
                         .clip(RoundedCornerShape(4.dp)),
                     contentScale = ContentScale.Crop,
-                    model = book.imgUrl,
+                    model = book.coverImageUrl,
                     contentDescription = "책 표지",
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -110,8 +110,8 @@ fun AddBookBottomSheet(
                     //출판사명
                     BodyMediumText(book.publisher)
                     Spacer(modifier = Modifier.weight(1f))
-                    //페이지 수
-                    BodyMediumText("${book.page}페이지")
+                    //카테고리
+                    BodyMediumText(book.categoryName.split(">")[1])
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))

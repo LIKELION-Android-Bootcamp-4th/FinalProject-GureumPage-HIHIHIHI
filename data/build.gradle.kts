@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -7,15 +10,23 @@ plugins {
     kotlin("plugin.parcelize")
 }
 
+//local.properties API KEY 사용하기 위함
+var properties = Properties()
+properties.load(FileInputStream("local.properties"))
 android {
     namespace = "com.hihihihi.data"
     compileSdk = 35
 
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        //local.properties API KEY 사용하기 위함
+        buildConfigField("String", "ALADIN_API_KEY", properties.getProperty("ALADIN_API_KEY"))
+    }
+    //local.properties API KEY 사용하기 위함
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
