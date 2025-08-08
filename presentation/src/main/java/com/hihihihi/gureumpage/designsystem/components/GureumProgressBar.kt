@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.designsystem.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,12 +17,13 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 fun GureumLinearProgressBar(
     height: Int,
     progress: Float,
+    modifier: Modifier = Modifier,
 ) {
     LinearProgressIndicator(
         progress = {
             progress
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(height.dp), // 필요에 따라 높이 조절
         color = GureumTheme.colors.primary, // 진행된 부분 색상
