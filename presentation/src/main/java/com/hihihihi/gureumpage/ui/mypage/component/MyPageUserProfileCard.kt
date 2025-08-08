@@ -35,7 +35,8 @@ fun MyPageUserProfileCard(
     nickname: String = "히히히히님", // 유저 닉네임
     totalPages: String = "1892쪽",
     totalBooks: String = "16권",
-    totalTime: String = "3,744시간"
+    totalTime: String = "3,744시간",
+    onEditNicknameClick: () -> Unit = {} // 연필 아이콘 클릭 시 콜백
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
@@ -91,9 +92,8 @@ fun MyPageUserProfileCard(
 
                 Box(
                     modifier = Modifier
-                        .weight(0.2f)
-                        .clickable { }
-                        .padding(start = 12.dp),
+                        .size(36.dp)
+                        .clickable { onEditNicknameClick() }, // 다이얼로그 열기
                     contentAlignment = Alignment.Center
                 ) {
                     //연필 아이콘
