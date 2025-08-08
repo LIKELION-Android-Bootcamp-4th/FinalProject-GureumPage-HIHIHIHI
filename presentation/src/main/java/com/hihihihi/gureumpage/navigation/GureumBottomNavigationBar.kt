@@ -45,36 +45,36 @@ fun GureumBottomNavBar(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar {
-            BottomNavItem.items.forEach { item ->
-                val isSelected = currentRoute == item.route
-                val iconId = if (isSelected) item.onSelectedIconResId else item.unSelectedIconResId
+        BottomNavItem.items.forEach { item ->
+            val isSelected = currentRoute == item.route
+            val iconId = if (isSelected) item.onSelectedIconResId else item.unSelectedIconResId
 
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = iconId),
-                            contentDescription = item.label,
-                        )
-                    },
-                    selected = isSelected,
-                    label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
-                    onClick = {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = iconId),
+                        contentDescription = item.label,
+                    )
+                },
+                selected = isSelected,
+                label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
                         }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = Color.Transparent,
-                        selectedIconColor = GureumTheme.colors.primary,
-                        unselectedIconColor = GureumTheme.colors.gray300,
-                        selectedTextColor = GureumTheme.colors.primary,
-                        unselectedTextColor = GureumTheme.colors.gray300,
-                    ),
-                )
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = GureumTheme.colors.primary,
+                    unselectedIconColor = GureumTheme.colors.gray300,
+                    selectedTextColor = GureumTheme.colors.primary,
+                    unselectedTextColor = GureumTheme.colors.gray300,
+                ),
+            )
         }
     }
 }
