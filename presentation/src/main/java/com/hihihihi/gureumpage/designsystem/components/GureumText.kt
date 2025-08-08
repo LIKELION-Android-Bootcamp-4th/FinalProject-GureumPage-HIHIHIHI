@@ -39,7 +39,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
  * 스크린 목차 타이틀, 책 상세 책 제목, 마이페이지 버튼 리스트 등
  */
 @Composable
-fun TitleText(
+fun Semi16Text(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = GureumTheme.colors.gray900,
@@ -71,11 +71,209 @@ fun TitleText(
 }
 
 @Composable
-fun TitleSubText(
+fun Semi40Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.displayLarge,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Medi32Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.displayMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Bold20Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.displaySmall,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Semi24Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.headlineLarge,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Semi20Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.headlineMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Semi18Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray800,
+    style: TextStyle = GureumTypography.headlineSmall,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Semi14Text(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = GureumTheme.colors.gray700,
     style: TextStyle = GureumTypography.titleMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Semi12Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.titleSmall,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Medi16Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.bodyLarge,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Medi14Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.bodyMedium,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Medi12Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.bodySmall,
+    maxLine: Int = 4,
+) {
+    Text(
+        text = text,
+        color = color,
+        style = style,
+        maxLines = maxLine,
+        modifier = modifier,
+        textAlign = TextAlign.Justify
+    )
+}
+
+@Composable
+fun Medi10Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = GureumTheme.colors.gray700,
+    style: TextStyle = GureumTypography.labelSmall,
     maxLine: Int = 4,
 ) {
     Text(
@@ -195,8 +393,8 @@ fun ExpandableText(
 private fun GureumTitleTextPreview() {
     GureumPageTheme {
         Column {
-            TitleText("필사한 문장", isUnderline = true)
-            TitleText("필사한 문장")
+            Semi16Text("필사한 문장", isUnderline = true)
+            Semi16Text("필사한 문장")
         }
     }
 }
