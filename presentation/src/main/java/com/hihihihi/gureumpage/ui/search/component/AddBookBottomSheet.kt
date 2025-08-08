@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +21,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +45,9 @@ import com.hihihihi.gureumpage.designsystem.components.TitleSubText
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +60,12 @@ fun AddBookBottomSheet(
     var selectedCategory by remember { mutableStateOf("읽을 책") }
     var pageInput by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    // "읽은 책" 상태 변수
+    var startDate by remember { mutableStateOf("") }
+    var endDate by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var dateFieldToUpdate by remember { mutableStateOf<((String) -> Unit)?>(null) }
+    val datePickerState = rememberDatePickerState()
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -109,9 +122,10 @@ fun AddBookBottomSheet(
                     BodyMediumText(book.author)
                     //출판사명
                     BodyMediumText(book.publisher)
-                    Spacer(modifier = Modifier.weight(1f))
                     //카테고리
                     BodyMediumText(book.categoryName.split(">")[1])
+                    //페이지
+                    //BodyMediumText()
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -140,39 +154,106 @@ fun AddBookBottomSheet(
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-            TitleText(
-                "현재 페이지 (선택사항)", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-            //사용자 페이지 입력 필드
-            OutlinedTextField(
-                shape = RoundedCornerShape(12.dp),
-                value = pageInput,
-                //숫자만 입력 되도록 함
-                onValueChange = {
-                    pageInput = it.filter { char -> char.isDigit() }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp),
-                placeholder = {
-                    Text(
-                        text = "예 : 157",
-                        style = GureumTypography.bodyMedium,
-                        color = GureumTheme.colors.gray500
+            //토글 여부에 따라 달라지는 하단 뷰
+            when (selectedCategory) {
+                "읽는 중" -> {
+                    TitleText(
+                        "현재 페이지 (선택사항)", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                     )
-                },
-                trailingIcon = {
-                    //이미지 부재 대체
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_book_outline),
-                        contentDescription = "페이지"
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    //사용자 페이지 입력 필드
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(12.dp),
+                        value = pageInput,
+                        //숫자만 입력 되도록 함
+                        onValueChange = {
+                            pageInput = it.filter { char -> char.isDigit() }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp),
+                        placeholder = {
+                            Text(
+                                text = "예 : 157",
+                                style = GureumTypography.bodyMedium,
+                                color = GureumTheme.colors.gray500
+                            )
+                        },
+                        trailingIcon = {
+                            //이미지 부재 대체
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_book_outline),
+                                contentDescription = "페이지"
+                            )
+                        })
+                    BodySubText(
+                        "시작할 페이지를 입력하세요 (기본값: 1페이지)",
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)
                     )
-                })
-            BodySubText(
-                "시작할 페이지를 입력하세요 (기본값: 1페이지)",
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)
-            )
+                }
+
+                "읽은 책" -> {
+                    TitleText(
+                        "독서 기간", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // 시작일 입력 필드
+                        DatePickTextField(
+                            value = startDate,
+                            placeholder = "시작한 날",
+                            onClick = {
+                                dateFieldToUpdate = { newDate -> startDate = newDate }
+                                showDatePicker = true
+                            }
+                        )
+                        // 종료일 입력 필드
+                        DatePickTextField(
+                            value = endDate,
+                            placeholder = "다 읽은 날",
+                            onClick = {
+                                dateFieldToUpdate = { newDate -> endDate = newDate }
+                                showDatePicker = true
+                            }
+                        )
+                    }
+                    if (showDatePicker) {
+                        DatePickerDialog(
+                            onDismissRequest = { showDatePicker = false },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showDatePicker = false
+                                        // 선택된 날짜를 Long(밀리초) 타입으로 가져옴
+                                        datePickerState.selectedDateMillis?.let { millis ->
+                                            // "yyyy.MM.dd" 형식의 문자열로 변환
+                                            val formattedDate = SimpleDateFormat(
+                                                "yyyy.MM.dd",
+                                                Locale.getDefault()
+                                            ).format(Date(millis))
+                                            // 어떤 필드를 업데이트할지 결정하고 상태 업데이트
+                                            dateFieldToUpdate?.invoke(formattedDate)
+                                        }
+                                    }
+                                ) { Text("확인") }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDatePicker = false }) { Text("취소") }
+                            }
+                        ) {
+                            DatePicker(state = datePickerState)
+                        }
+                    }
+                }
+
+                else -> {}
+            }
+
+
             Spacer(modifier = Modifier.height(24.dp))
             GureumButton(
                 "서재에 추가", modifier = Modifier.padding(start = 20.dp, end = 20.dp), onClick = {
