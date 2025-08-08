@@ -1,8 +1,10 @@
 package com.hihihihi.data.di
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.UserBookRemoteDataSourceImpl
 import dagger.Module
@@ -32,5 +34,11 @@ object DataSourceModule {
     }
 
 
-
+    @Provides
+    @Singleton
+    fun provideHistoryRemotedDataSource(
+        firestore: FirebaseFirestore
+    ): HistoryRemoteDataSource {
+        return HistoryRemoteDataSourceImpl(firestore)
+    }
 }
