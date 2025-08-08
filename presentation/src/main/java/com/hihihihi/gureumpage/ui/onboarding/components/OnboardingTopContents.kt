@@ -16,7 +16,10 @@ import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
 @Composable
-fun OnboardingTopContents(navController: NavHostController) {
+fun OnboardingTopContents(
+    navController: NavHostController,
+    progress: Float,
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         IconButton(
             onClick = { navController.popBackStack() },
@@ -32,7 +35,7 @@ fun OnboardingTopContents(navController: NavHostController) {
 
         GureumLinearProgressBar(
             height = 6,
-            progress = 0.1f,
+            progress = progress,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
     }
