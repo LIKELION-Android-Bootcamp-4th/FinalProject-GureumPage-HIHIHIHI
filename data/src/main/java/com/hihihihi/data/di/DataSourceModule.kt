@@ -1,14 +1,10 @@
 package com.hihihihi.data.di
 
-import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
-import com.hihihihi.data.remote.datasource.AuthDataSource
-import com.hihihihi.data.remote.datasource.KakaoDataSource
-import com.hihihihi.data.remote.datasource.NaverDataSource
+import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
@@ -65,4 +61,11 @@ object DataSourceModule {
         return KakaoDataSourceImpl(context)
     }
 
+    @Provides
+    @Singleton
+    fun provideHistoryRemotedDataSource(
+        firestore: FirebaseFirestore
+    ): HistoryRemoteDataSource {
+        return HistoryRemoteDataSourceImpl(firestore)
+    }
 }
