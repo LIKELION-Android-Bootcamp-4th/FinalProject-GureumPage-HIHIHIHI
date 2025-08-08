@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
@@ -52,7 +52,7 @@ fun BookSimpleInfoSection() {
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            TitleText("멘탈의 연금술")
+            Semi16Text("멘탈의 연금술")
             Spacer(modifier = Modifier.height(8.dp))
             BodyText("보도 섀퍼", color = GureumTheme.colors.gray500)
             Spacer(modifier = Modifier.weight(1f))

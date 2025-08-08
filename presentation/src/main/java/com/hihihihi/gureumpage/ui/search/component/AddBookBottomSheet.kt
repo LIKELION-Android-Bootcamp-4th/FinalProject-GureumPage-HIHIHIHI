@@ -36,8 +36,8 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyMediumText
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
-import com.hihihihi.gureumpage.designsystem.components.TitleSubText
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi14Text
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.search.Search
@@ -103,7 +103,7 @@ fun AddBookBottomSheet(
                 //책 설명
                 Column(modifier = Modifier.height(112.dp)) {
                     //책 이름
-                    TitleSubText(book.title)
+                    Semi14Text(book.title)
                     Spacer(modifier = Modifier.height(4.dp))
                     //저자명
                     BodyMediumText(book.author)
@@ -116,7 +116,7 @@ fun AddBookBottomSheet(
             }
             Spacer(modifier = Modifier.height(24.dp))
             //카테고리 (읽을 책, 읽는 중, 읽은 책)
-            TitleText(
+            Semi16Text(
                 "카테고리 선택", modifier = Modifier.padding(start = 20.dp, 20.dp)
             )
             Spacer(modifier = Modifier.height(14.dp))
@@ -140,7 +140,7 @@ fun AddBookBottomSheet(
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-            TitleText(
+            Semi16Text(
                 "현재 페이지 (선택사항)", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
             )
             Spacer(modifier = Modifier.height(14.dp))

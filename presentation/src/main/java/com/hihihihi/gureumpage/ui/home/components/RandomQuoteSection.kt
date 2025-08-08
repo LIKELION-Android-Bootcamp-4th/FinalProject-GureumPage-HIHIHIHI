@@ -33,7 +33,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -58,7 +58,7 @@ fun RandomQuoteSection(
     Column(modifier = Modifier
         .background(GureumTheme.colors.background)
         .padding(16.dp)) {
-        TitleText("필사한 문장", isUnderline = true)
+        Semi16Text("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
         if (quotes.isNotEmpty()) {
             // 나중에 수정이나 삭제했을때 사이즈보다 커지거나 하면 문제가 생길 수도 있어 나머지 로직 넣었습니다

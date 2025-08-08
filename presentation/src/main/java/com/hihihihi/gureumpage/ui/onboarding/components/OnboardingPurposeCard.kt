@@ -44,6 +44,7 @@ fun OnboardingPurposeCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .height(72.dp)
             .clickable(enabled = checked) { checked = !checked }
             .border(
                 width = 1.dp,
@@ -73,7 +74,9 @@ fun OnboardingPurposeCard(
                 ),
                 contentDescription = "",
                 tint = Color.Unspecified,
-                modifier = Modifier.padding(end = 16.dp).size(26.dp)
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .size(26.dp)
             )
         }
     }

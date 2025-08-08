@@ -23,6 +23,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun OnBoardingMainContents(
     titleText: String,
     subTitleText: String,
+    showGureum: Boolean = true,
     gureumRes: Int = R.drawable.ic_cloud_reading,
     content: @Composable () -> Unit
 ) {
@@ -31,12 +32,14 @@ fun OnBoardingMainContents(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(gureumRes),
-            contentDescription = "OnboardingGureumImage",
-            modifier = Modifier.size(120.dp)
-        )
-        Spacer(Modifier.height(14.dp))
+        if (showGureum) {
+            Image(
+                painter = painterResource(gureumRes),
+                contentDescription = "OnboardingGureumImage",
+                modifier = Modifier.size(120.dp)
+            )
+            Spacer(Modifier.height(14.dp))
+        }
         Text(
             text = titleText,
             style = GureumTypography.displaySmall,

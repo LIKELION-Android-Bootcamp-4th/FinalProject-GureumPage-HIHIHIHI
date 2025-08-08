@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -46,7 +46,7 @@ fun ReadingRecordTab() {
                     style = GureumTypography.bodySmall
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                TitleText(
+                Semi16Text(
                     text = "19분",
                     isUnderline = true
                 )
@@ -92,7 +92,7 @@ private fun RecordCard(
                 color = GureumTheme.colors.gray600
             )
             Spacer(modifier = Modifier.weight(1f))
-            TitleText("9분 30초", color = GureumTheme.colors.gray800)
+            Semi16Text("9분 30초", color = GureumTheme.colors.gray800)
         }
     }
 }
