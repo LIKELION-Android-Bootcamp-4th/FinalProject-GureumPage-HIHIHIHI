@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="systemRed">#FFFF402F</color>
+    <color name="systemGreen">#FF47A94B</color>
+    <color name="point">#FFFFCB5B</color>
+    <color name="gray0">#FF181B1F</color>
+    <color name="gray100">#FF202327</color>
+    <color name="gray150">#FF2E333A</color>
+    <color name="gray200">#FF41454F</color>
+    <color name="gray300">#FF606672</color>
+    <color name="gray400">#FF7C8694</color>
+    <color name="gray500">#FF909BAD</color>
+    <color name="gray600">#FF9DA8BA</color>
+    <color name="gray700">#FFD1DBE7</color>
+    <color name="gray800">#FFF4F6FC</color>
+    <color name="gray900">#FFFFFFFF</color>
+    <color name="card">#FF2E333A</color>
+    <color name="background">#FF212327</color>
+    <color name="background50">#803A3F47</color>
+    <color name="background10">#1A828B99</color>
+    <color name="textFieldOutline">#FF41454F</color>
+    <color name="primary">#FFFFCB5B</color>
+    <color name="primaryDeep">#FFF8C153</color>
+    <color name="primaryShallow">#FFFFDE87</color>
+    <color name="primary50">#80FFCB5B</color>
+    <color name="primary30">#4DFFCB5B</color>
+    <color name="primary10">#1AFFCB5B</color>
+    <color name="searchTextField">#802E333A</color>
+    <color name="bookBackground">#1A828B99</color>
+    <color name="dividerDeep">#FF41454F</color>
+    <color name="dividerShallow">#FF2E333A</color>
+</resources>

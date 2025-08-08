@@ -97,7 +97,7 @@ fun QuoteCard(
     Box(
         modifier = Modifier
             .wrapContentHeight()
-            .padding(bottom = 66.dp) // 구름 하단 여유 공간 확보
+            .padding(bottom = 30.dp) // 구름 하단 여유 공간 확보
         //TODO 더 나은 방식이 있지 않을까
     ) {
         // 말풍선 본체

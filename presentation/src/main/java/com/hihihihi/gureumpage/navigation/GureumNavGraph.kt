@@ -42,7 +42,7 @@ fun GureumNavGraph(
         composable(NavigationRoute.MindMap.route) { MindMapScreen() }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
         composable(NavigationRoute.Library.route) { LibraryScreen() }
-        composable(NavigationRoute.Search.route) { SearchScreen() }
+        composable(NavigationRoute.Search.route) { SearchScreen(navController) }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(NavigationRoute.Timer.route) { TimerScreen() }
         composable(NavigationRoute.MyPage.route) { MyPageScreen() }
