@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -75,7 +76,7 @@ fun DetailBottomSheet(
                             )
                             Row {
                                 // 날짜
-                                BodySubText(quote.createdAt.toString().split("T")[0])
+                                BodySubText(formatDateToSimpleString(quote.createdAt))
                                 Spacer(modifier = Modifier.padding(start = 10.dp))
                                 // 페이지
                                 BodySubText(quote.pageNumber.toString() + 'p')
@@ -91,7 +92,7 @@ fun DetailBottomSheet(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_close),
                                 contentDescription = "닫기",
-                                tint = GureumColors.defaultLightColors().gray500
+                                tint = GureumTheme.colors.gray500
                             )
                         }
                     }
@@ -103,7 +104,7 @@ fun DetailBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GureumColors.defaultLightColors().bookBackground)
+                    .background(GureumTheme.colors.card)
             ) {
                 Text(
                     text = quote.content,

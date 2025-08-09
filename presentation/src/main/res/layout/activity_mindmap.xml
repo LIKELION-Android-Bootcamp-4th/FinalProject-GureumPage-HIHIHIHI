@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.gyso.treeview.GysoTreeView
+        android:id="@+id/base_tree_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background" />
+
+    <Switch
+        android:id="@+id/switch_edit_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:text="편집 모드"
+        android:textColor="@color/gray600"
+        app:thumbTint="@color/gray0"
+        app:trackTint="@color/dividerShallow" />
+
+    <ImageButton
+        android:id="@+id/btn_center"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_button_rounded"
+        android:backgroundTint="@color/card"
+        android:contentDescription="cd_center"
+        android:padding="8dp"
+        android:src="@drawable/ic_arrow_expand"
+        android:tint="@color/primary" />
+
+    <LinearLayout
+        android:id="@+id/layout_undo_redo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_undo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_button_rounded"
+            android:backgroundTint="@color/card"
+            android:contentDescription="cd_undo"
+            android:padding="8dp"
+            android:src="@drawable/ic_undo"
+            android:tint="@color/primary"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btn_redo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_button_rounded"
+            android:backgroundTint="@color/card"
+            android:contentDescription="cd_redo"
+            android:padding="8dp"
+            android:src="@drawable/ic_redo"
+            android:tint="@color/primary"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

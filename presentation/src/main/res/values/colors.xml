@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="systemRed">#FFFF402F</color>
+    <color name="systemGreen">#FF47A94B</color>
+    <color name="point">#FFFFCB5B</color>
+    <color name="gray0">#FFFFFFFF</color>
+    <color name="gray100">#FFFCFCF4</color>
+    <color name="gray150">#FFE3E4DB</color>
+    <color name="gray200">#FFBABBB1</color>
+    <color name="gray300">#FFA8A79A</color>
+    <color name="gray400">#FF97978C</color>
+    <color name="gray500">#FF7F7C72</color>
+    <color name="gray600">#FF4F4F41</color>
+    <color name="gray700">#FF3A392E</color>
+    <color name="gray800">#FF272420</color>
+    <color name="gray900">#FF1F1E18</color>
+    <color name="card">#FFF9F8F5</color>
+    <color name="background">#FFFCFBF6</color>
+    <color name="background50">#807D965C</color>
+    <color name="background10">#0F7D965C</color>
+    <color name="textFieldOutline">#FFEDEAEA</color>
+    <color name="primary">#FF96A46B</color>
+    <color name="primaryDeep">#FF79884A</color>
+    <color name="primaryShallow">#FF7D965C</color>
+    <color name="primary50">#807D965C</color>
+    <color name="primary30">#4D7D965C</color>
+    <color name="primary10">#1A7D965C</color>
+    <color name="searchTextField">#80FFFFFF</color>
+    <color name="bookBackground">#4DE3DECF</color>
+    <color name="dividerDeep">#FFDADBCD</color>
+    <color name="dividerShallow">#FFF1F2E6</color>
 </resources>

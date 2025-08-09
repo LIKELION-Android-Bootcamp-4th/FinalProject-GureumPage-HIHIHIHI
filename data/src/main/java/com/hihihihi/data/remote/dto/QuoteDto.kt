@@ -2,10 +2,12 @@ package com.hihihihi.data.remote.dto
 
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 
 @Keep
 data class QuoteDto(
+    @get:Exclude @set:Exclude
     var quoteId: String = "",
 
     @get:PropertyName("title") @set:PropertyName("title")
@@ -36,5 +38,5 @@ data class QuoteDto(
     var isLiked: Boolean = false,
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
-    var createdAt: Timestamp? = null
+    var createdAt: Timestamp =  Timestamp.now()
 )

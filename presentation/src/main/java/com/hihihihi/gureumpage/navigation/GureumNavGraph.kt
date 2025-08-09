@@ -18,6 +18,7 @@ import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingScreen
 import com.hihihihi.gureumpage.ui.quotes.QuotesScreen
 import com.hihihihi.gureumpage.ui.search.SearchScreen
+import com.hihihihi.gureumpage.ui.splash.SplashView
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
 
@@ -26,14 +27,15 @@ import com.hihihihi.gureumpage.ui.timer.TimerScreen
 fun GureumNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = NavigationRoute.Login.route,
+    startDestination: String = NavigationRoute.Splash.route,
     snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavigationRoute.Login.route,
+        startDestination = startDestination,
         modifier = modifier
-    ){
+    ) {
+        composable(NavigationRoute.Splash.route) { SplashView(navController) }
         composable(NavigationRoute.Home.route) { HomeScreen(navController = navController) }
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
@@ -50,7 +52,11 @@ fun GureumNavGraph(
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
             bookId?.let {
-                BookDetailScreen(bookId = it, navController = navController, snackbarHostState = snackbarHostState)
+                BookDetailScreen(
+                    bookId = it,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState
+                )
             }
         }
     }

@@ -2,6 +2,7 @@ package com.hihihihi.data.mapper
 
 import com.google.firebase.firestore.FieldValue
 import com.hihihihi.data.common.util.toLocalDateTime
+import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.data.remote.dto.QuoteDto
 import com.hihihihi.domain.model.Quote
 
@@ -12,7 +13,7 @@ fun Quote.toDto(): QuoteDto = QuoteDto(
     content = content,
     pageNumber = pageNumber,
     isLiked = isLiked,
-    createdAt = null,
+    createdAt = createdAt.toTimestamp(),
     title = title,
     author = author,
     publisher = publisher,
@@ -26,7 +27,7 @@ fun QuoteDto.toDomain(): Quote = Quote(
     content = content,
     pageNumber = pageNumber,
     isLiked = isLiked,
-    createdAt = createdAt?.toLocalDateTime(),
+    createdAt = createdAt.toLocalDateTime(),
     title = title,
     author = author,
     publisher = publisher,
@@ -35,7 +36,6 @@ fun QuoteDto.toDomain(): Quote = Quote(
 
 fun QuoteDto.toMap(): Map<String, Any?> {
     return mapOf(
-        "quote_id" to quoteId,
         "user_id" to userId,
         "userbook_id" to userBookId,
         "content" to content,

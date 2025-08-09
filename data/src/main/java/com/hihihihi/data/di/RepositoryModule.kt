@@ -1,11 +1,20 @@
 package com.hihihihi.data.di
 
+import com.hihihihi.data.remote.datasource.AuthDataSource
+import com.hihihihi.data.remote.datasource.KakaoDataSource
+import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
+import com.hihihihi.data.repotisoryimpl.AuthRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.KakaoAuthRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.NaverAuthRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
+import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -33,6 +42,31 @@ object RepositoryModule {
         remoteDataSource: QuoteRemoteDataSource
     ): QuoteRepository {
         return QuoteRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        authDataSource: AuthDataSource
+    ): AuthRepository {
+       return AuthRepositoryImpl(authDataSource)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideNaverAuthRepository(
+        naverDataSource: NaverDataSource
+    ): NaverAuthRepository {
+        return NaverAuthRepositoryImpl(naverDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideKakaoAuthRepository(
+        kakaoDataSource: KakaoDataSource
+    ): KakaoAuthRepository {
+        return KakaoAuthRepositoryImpl(kakaoDataSource)
     }
 
     @Provides
