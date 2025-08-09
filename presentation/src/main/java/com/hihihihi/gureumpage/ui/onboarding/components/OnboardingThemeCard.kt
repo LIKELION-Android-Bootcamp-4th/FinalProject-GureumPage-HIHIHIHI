@@ -1,21 +1,18 @@
 package com.hihihihi.gureumpage.ui.onboarding.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
@@ -29,24 +26,28 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 @Composable
 fun OnboardingThemeCard(
     modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    isDarkTheme: Boolean,
+    selected: Boolean,
+    onSelected: () -> Unit,
+    isDarkTheme: Boolean,   // 카드 컬러를 무슨 테마로 보일지
 ) {
-    var checked by remember { mutableStateOf(selected) }
     val colors = GureumTheme.colors
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .clickable(enabled = checked) { checked = !checked }
+            .selectable(
+                selected = selected,
+                onClick = onSelected,
+                role = Role.RadioButton
+            )
             .border(
                 width = 1.dp,
-                color = if (checked) colors.primary else colors.gray200,
+                color = if (selected) colors.primary else colors.gray200,
                 shape = CardDefaults.shape
             ),
         colors = CardDefaults.cardColors(
-            containerColor = colors.background10,
+            containerColor = if (selected) colors.primary10 else colors.background10,
         ),
     ) {
         Column(

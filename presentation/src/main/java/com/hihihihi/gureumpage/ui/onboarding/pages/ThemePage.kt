@@ -17,10 +17,11 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingThemeCard
+import com.hihihihi.gureumpage.ui.onboarding.model.ThemeType
 
 @Composable
 fun ThemePage(viewModel: OnBoardingViewModel) {
-    val selected by remember { mutableStateOf(false) }
+    val selectedTheme = viewModel.selectedTheme
     OnBoardingMainContents(
         titleText = "선호하는 테마를 선택해주세요",
         subTitleText = "언제든 설정에서 변경할 수 있어요",
@@ -33,9 +34,16 @@ fun ThemePage(viewModel: OnBoardingViewModel) {
             color = GureumTheme.colors.gray400
         )
         Spacer(Modifier.height(24.dp))
-        OnboardingThemeCard(isDarkTheme = true, selected = !selected)
+        OnboardingThemeCard(
+            isDarkTheme = true,
+            selected = selectedTheme == ThemeType.DARK,
+            onSelected = { viewModel.selectTheme(ThemeType.DARK) })
         Spacer(Modifier.height(24.dp))
-        OnboardingThemeCard(isDarkTheme = false, selected = selected)
+        OnboardingThemeCard(
+            isDarkTheme = false,
+            selected = selectedTheme == ThemeType.LIGHT,
+            onSelected = { viewModel.selectTheme(ThemeType.LIGHT) }
+        )
     }
 }
 
