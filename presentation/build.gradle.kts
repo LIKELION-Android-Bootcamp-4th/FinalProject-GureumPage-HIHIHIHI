@@ -136,4 +136,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.calendar.compose)
 }
