@@ -17,8 +17,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
-import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
-import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
