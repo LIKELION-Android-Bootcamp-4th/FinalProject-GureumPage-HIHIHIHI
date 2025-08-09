@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    alias(libs.plugins.google.gms.google.services)
     kotlin("plugin.parcelize")
 }
 
