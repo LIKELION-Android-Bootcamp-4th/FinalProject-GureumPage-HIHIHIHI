@@ -9,50 +9,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
-import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingBottom
 import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingPurposeCard
-import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingScaffold
-import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingTopContents
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingPurposeContents
 
 @Composable
-fun PurposePage(navController: NavHostController) {
-    OnboardingScaffold(
-        topContent = {
-            OnboardingTopContents(
-                navController = navController,
-                progress = 0.4f
-            )
-        },
-        mainContent = {
-            OnBoardingMainContents(
-                titleText = "구름한장을 사용하는\n목적을 알려주세요",
-                subTitleText = "한가지 이상 선택해주세요",
-                showGureum = false
-            ) {
-                Spacer(Modifier.height(20.dp))
+fun PurposePage(viewModel: OnBoardingViewModel) {
+    OnBoardingMainContents(
+        titleText = "구름한장을 사용하는\n목적을 알려주세요",
+        subTitleText = "한가지 이상 선택해주세요",
+        showGureum = false
+    ) {
+        Spacer(Modifier.height(20.dp))
 
-                Column(
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                ) {
-                    Column {
-                        purposeContents.forEach { content ->
-                            OnboardingPurposeCard(cardItem = content)
-                            Spacer(Modifier.height(10.dp))
-                        }
-                    }
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp)
+        ) {
+            Column {
+                purposeContents.forEach { content ->
+                    OnboardingPurposeCard(cardItem = content)
+                    Spacer(Modifier.height(10.dp))
                 }
             }
-        },
-        bottomContent = {
-            OnboardingBottom("다음 단계")
         }
-    )
+    }
 }
 
 // TODO: 이미지 변경하기
@@ -69,6 +52,6 @@ private val purposeContents = listOf(
 @Composable
 private fun PurposePagePreview() {
     GureumPageTheme {
-        PurposePage(rememberNavController())
+//        PurposePage()
     }
 }
