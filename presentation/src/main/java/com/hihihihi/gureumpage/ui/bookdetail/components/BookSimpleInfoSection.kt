@@ -26,15 +26,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 
 @Composable
-fun BookSimpleInfoSection() {
+fun BookSimpleInfoSection(
+    userBook: UserBook
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,7 +48,7 @@ fun BookSimpleInfoSection() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = "https://images-ext-1.discordapp.net/external/Dj-FzWSUevc1s_rJdjgHKEDl8VOS4AU-u3-B94EWA9A/https/contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791158511982.jpg?format=webp&width=916&height=1372",
+            model = userBook.imageUrl,
             contentDescription = "",
             modifier = Modifier
                 .size(100.dp, 140.dp)
@@ -53,9 +57,9 @@ fun BookSimpleInfoSection() {
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            TitleText("멘탈의 연금술", maxLine = 2)
+            TitleText(userBook.title, maxLine = 2)
             Spacer(modifier = Modifier.height(8.dp))
-            BodyText("보도 섀퍼", color = GureumTheme.colors.gray500)
+            BodyText(userBook.author, color = GureumTheme.colors.gray500)
             Spacer(modifier = Modifier.weight(1f))
 
             Row(
@@ -90,6 +94,6 @@ fun BookSimpleInfoSection() {
 @Composable
 private fun BookSimpleInfoSectionPreview() {
     GureumPageTheme {
-        BookSimpleInfoSection()
+        BookSimpleInfoSection(dummyUserBook)
     }
 }

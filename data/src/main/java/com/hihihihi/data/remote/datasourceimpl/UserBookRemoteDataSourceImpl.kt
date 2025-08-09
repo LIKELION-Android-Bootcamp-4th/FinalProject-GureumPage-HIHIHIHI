@@ -53,4 +53,27 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         // Flow가 종료될 때 리스너 해제
         awaitClose { listenerRegistration.remove() }
     }
+
+    override fun getUserBook(userBookId: String): Flow<UserBookDto> = callbackFlow {
+        val docRef = firestore.collection("user_books").document(userBookId)
+
+        val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            val userBookDto = snapshot?.toObject(UserBookDto::class.java)?.copy(userBookId = snapshot.id)
+
+
+            if (userBookDto != null) {
+                trySend(userBookDto).isSuccess
+            } else {
+                close(Exception("UserBookDto 변환 실패"))
+            }
+        }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
 }

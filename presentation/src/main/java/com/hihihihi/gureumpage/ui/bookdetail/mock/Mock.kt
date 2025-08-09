@@ -2,7 +2,9 @@ package com.hihihihi.gureumpage.ui.bookdetail.mock
 
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.model.UserBook
 import java.time.LocalDateTime
 
 val now = LocalDateTime.now()
@@ -69,4 +71,25 @@ val dummyQuotes = listOf(
         publisher = "출판사A",
         imageUrl = ""
     )
+)
+
+val dummyUserBook = UserBook(
+    userBookId = "dummyId123",
+    userId = "userId456",
+    isbn10 = "1234567890",
+    isbn13 = "9781234567897",
+    title = "더미 책 제목",
+    author = "더미 작가",
+    imageUrl = "https://dummyimage.com/200x300/cccccc/000000&text=Book+Cover",
+    isLiked = true,
+    totalPage = 350,
+    currentPage = 120,
+    startDate = LocalDateTime.of(2023, 1, 10, 0, 0),
+    endDate = null,
+    totalReadTime = 3600, // 초 단위
+    status = ReadingStatus.READING,
+    review = "아직 읽는 중이지만 흥미로워요.",
+    rating = 4.5,
+    category = "소설",
+    createdAt = LocalDateTime.now()
 )

@@ -23,4 +23,10 @@ class UserBookRepositoryImpl @Inject constructor(
         return userBookRemoteDataSource.getUserBooksByStatus(userId, status)
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
+
+    override fun getUserBook(userBookId: String): Flow<UserBook> {
+        return userBookRemoteDataSource.getUserBook(userBookId).map { it.toDomain() }
+    }
+
+
 }
