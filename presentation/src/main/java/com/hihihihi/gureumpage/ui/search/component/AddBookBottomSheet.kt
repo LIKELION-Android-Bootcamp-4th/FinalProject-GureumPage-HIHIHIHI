@@ -171,7 +171,7 @@ fun AddBookBottomSheet(
             //토글 여부에 따라 달라지는 하단 뷰
             when (selectedCategory) {
                 "읽는 중" -> {
-                    TitleText(
+                    Semi16Text(
                         "현재 페이지 (선택사항)", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                     )
                     Spacer(modifier = Modifier.height(14.dp))
@@ -208,7 +208,7 @@ fun AddBookBottomSheet(
                 }
 
                 "읽은 책" -> {
-                    TitleText(
+                    Semi16Text(
                         "독서 기간", modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                     )
                     Spacer(modifier = Modifier.height(14.dp))
