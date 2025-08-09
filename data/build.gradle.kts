@@ -11,8 +11,13 @@ plugins {
 }
 
 //local.properties API KEY 사용하기 위함
-var properties = Properties()
-properties.load(FileInputStream("local.properties"))
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        load(localFile.inputStream())
+    }
+}
+
 android {
     namespace = "com.hihihihi.data"
     compileSdk = 35
@@ -22,7 +27,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         //local.properties API KEY 사용하기 위함
-        buildConfigField("String", "ALADIN_API_KEY", properties.getProperty("ALADIN_API_KEY"))
+        buildConfigField ("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
+
     }
     //local.properties API KEY 사용하기 위함
     buildFeatures {
