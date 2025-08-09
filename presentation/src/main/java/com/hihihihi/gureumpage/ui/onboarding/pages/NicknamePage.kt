@@ -7,10 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,8 +22,6 @@ import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 
 @Composable
 fun NicknamePage(viewModel: OnBoardingViewModel) {
-    var nickname by remember { mutableStateOf("") }
-
     OnBoardingMainContents(
         titleText = "어떻게 불러드릴까요?",
         subTitleText = "앱에서 사용할 닉네임을 설정해주세요"
@@ -45,8 +39,10 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
             horizontalAlignment = Alignment.End
         ) {
             GureumTextField(
-                value = nickname,
-                onValueChange = { nickname = it },
+                value = viewModel.nickname,
+                onValueChange = {
+                    viewModel.updateNickname(it)
+                },
                 hint = "닉네임을 입력해주세요",
                 textAlign = TextAlign.Center,
             )
@@ -57,7 +53,7 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                         GureumTypography.titleSmall.toSpanStyle()
                             .copy(GureumTheme.colors.gray400)
                     )
-                    append(nickname.length.toString())
+                    append(viewModel.nickname.length.toString())
                     append("/8")
                 },
                 modifier = Modifier.padding(end = 6.dp),
