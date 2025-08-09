@@ -17,12 +17,12 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
 @Composable
 fun OnboardingTopContents(
-    navController: NavHostController,
     progress: Float,
+    onBack: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         IconButton(
-            onClick = { navController.popBackStack() },
+            onClick = { onBack() },
             modifier = Modifier.padding(start = 6.dp, top = 6.dp, bottom = 6.dp)
         ) {
             Icon(
