@@ -8,12 +8,15 @@ import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.KakaoDataSource
 import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
+import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.SearchRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.UserBookRemoteDataSourceImpl
+import com.hihihihi.data.remote.service.SearchApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,4 +68,12 @@ object DataSourceModule {
         return KakaoDataSourceImpl(context)
     }
 
+    @Provides
+    @Singleton
+    fun provideSearchRemoteDataSource(
+        searchApiService: SearchApiService,
+        apiKey: String
+    ): SearchRemoteDataSource {
+        return SearchRemoteDataSourceImpl(searchApiService, apiKey)
+    }
 }

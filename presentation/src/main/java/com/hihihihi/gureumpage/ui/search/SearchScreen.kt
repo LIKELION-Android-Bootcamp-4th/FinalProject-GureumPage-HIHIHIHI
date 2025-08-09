@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -54,7 +55,7 @@ fun SearchScreen(
     var hasSearched by remember { mutableStateOf(false) }
     //검색 결과 상태
     val searchResults by viewModel.searchResults.collectAsState()
-    var bookToAdd by remember { mutableStateOf<Search?>(null) }
+    var bookToAdd by remember { mutableStateOf<SearchBook?>(null) }
 
     //모달시트 상태관리
     val sheetState = rememberModalBottomSheetState(
@@ -138,17 +139,25 @@ fun SearchScreen(
     }
     //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
     if (bookToAdd != null) {
-        AddBookBottomSheet(book = bookToAdd!!, sheetState = sheetState, onDismiss = {
-            scope.launch {
-                sheetState.hide()
-                bookToAdd = null
+        AddBookBottomSheet(
+            book = bookToAdd!!, 
+            sheetState = sheetState, 
+            onDismiss = {
+                scope.launch {
+                    sheetState.hide()
+                    bookToAdd = null
+                }
+            }, 
+            onConfirm = { category, page ->
+                scope.launch {
+                    sheetState.hide()
+                    bookToAdd = null
+                }
+            },
+            onGetBookPageCount = { isbn, onResult ->
+                viewModel.getBookPageCount(isbn, onResult)
             }
-        }, onConfirm = { category, page ->
-            scope.launch {
-                sheetState.hide()
-                bookToAdd = null
-            }
-        })
+        )
     }
 }
 
