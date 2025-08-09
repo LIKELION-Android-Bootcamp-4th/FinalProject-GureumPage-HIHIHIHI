@@ -5,16 +5,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
 
 @Composable
 fun OnboardingScaffold(
-    topContent: @Composable () -> Unit,
-    mainContent: @Composable () -> Unit,
-    bottomContent: @Composable () -> Unit,
+    pagerState: PagerState,
+    topContent: @Composable (page: Int, step: OnboardingStep) -> Unit,
+    mainContent: @Composable (page: Int, step: OnboardingStep) -> Unit,
+    bottomContent: @Composable (page: Int, step: OnboardingStep) -> Unit,
+    steps: List<OnboardingStep>,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -24,19 +29,31 @@ fun OnboardingScaffold(
                 .fillMaxWidth()
                 .height(68.dp),
             contentAlignment = Alignment.TopCenter
-        ) { topContent() }
+        ) {
+            val page = pagerState.currentPage
+            topContent(page, steps[page])
+        }
 
         Box(
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
-        ) { mainContent() }
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                mainContent(page, steps[page])
+            }
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp),
             contentAlignment = Alignment.BottomCenter
-        ) { bottomContent() }
+        ) {
+            val page = pagerState.currentPage
+            bottomContent(page, steps[page])
+        }
     }
 }
