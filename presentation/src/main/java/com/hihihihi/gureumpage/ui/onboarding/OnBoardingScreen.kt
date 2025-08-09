@@ -34,7 +34,7 @@ fun OnBoardingScreen(
             steps = steps,
             viewModel = viewModel,
             onFinish = {
-                navController.navigate(NavigationRoute.Home)
+                navController.navigate(NavigationRoute.Home.route)
             },
         )
     }
@@ -72,7 +72,7 @@ private fun OnboardingContents(
                 OnboardingStep.Purpose -> PurposePage(viewModel = viewModel)
                 OnboardingStep.Feature -> FeaturePage()
                 OnboardingStep.Theme -> ThemePage(viewModel = viewModel)
-                OnboardingStep.Finish -> FinishPage()
+                OnboardingStep.Finish -> FinishPage(viewModel = viewModel)
             }
         },
         bottomContent = { page, step ->

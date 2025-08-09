@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
+import com.hihihihi.gureumpage.ui.onboarding.model.ThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +38,6 @@ class OnBoardingViewModel @Inject constructor(
         this.nickname = nickname
     }
 
-
     val selectedPurposes = mutableStateListOf<String>()
     fun togglePurpose(purpose: String) {
         if (selectedPurposes.contains(purpose)) selectedPurposes.remove(purpose)
@@ -48,7 +48,24 @@ class OnBoardingViewModel @Inject constructor(
         return when (step) {
             OnboardingStep.Nickname -> nickname.length in 2..8
             OnboardingStep.Purpose -> selectedPurposes.isNotEmpty()
+            OnboardingStep.Theme -> selectedTheme != null
             else -> true
         }
     }
+
+    var selectedTheme by mutableStateOf<ThemeType?>(null)
+        private set
+
+    fun selectTheme(theme: ThemeType) {
+        selectedTheme = theme
+    }
+
+    // TODO 데이터 스토어에 테마 저장
+//    fun saveTheme() {
+//        selectedTheme?.let { theme ->
+//            viewModelScope.launch {
+//                dataStoreManager.saveTheme(theme)
+//            }
+//        }
+//    }
 }
