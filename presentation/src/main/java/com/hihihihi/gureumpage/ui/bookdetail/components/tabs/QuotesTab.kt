@@ -24,7 +24,7 @@ import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import java.time.LocalDateTime
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
 
 @Composable
 fun QuotesTab(
@@ -97,11 +97,12 @@ private fun QuoteCard(
                 }
             }
 
-            ExpandableText(
+            Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(end = 16.dp),
-                text = quote
+                text = quote,
+                style = GureumTypography.bodyMedium,
             )
         }
     }
@@ -112,35 +113,6 @@ private fun QuoteCard(
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun QuotesTabPreview() {
-    val dummyQuotes = listOf(
-        Quote(
-            id = "1",
-            userId = "user1",
-            userBookId = "book1",
-            content = "네가 4시에 온다면 난 3시부터 행복할거야...",
-            pageNumber = 120,
-            isLiked = false,
-            createdAt = LocalDateTime.of(2025, 7, 29, 10, 0),
-            title = "어린 왕자",
-            author = "생텍쥐페리",
-            publisher = "출판사A",
-            imageUrl = ""
-        ),
-        Quote(
-            id = "2",
-            userId = "user1",
-            userBookId = "book1",
-            content = "사막이 아름다운 건 어딘가에 샘을 감추고 있기 때문이야.",
-            pageNumber = null,
-            isLiked = true,
-            createdAt = LocalDateTime.of(2025, 7, 30, 10, 0),
-            title = "어린 왕자",
-            author = "생텍쥐페리",
-            publisher = "출판사A",
-            imageUrl = ""
-        )
-    )
-
     GureumPageTheme {
         QuotesTab(
             quotes = dummyQuotes,
