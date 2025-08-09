@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.onboarding.components
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,18 +12,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
@@ -34,25 +36,29 @@ import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingPurposeContents
 
 @Composable
 fun OnboardingPurposeCard(
-    modifier: Modifier = Modifier,
     cardItem: OnboardingPurposeContents,
-    selected: Boolean = false,
+    checked: Boolean,
+    modifier: Modifier = Modifier,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
-    var checked by remember { mutableStateOf(selected) }
     val colors = GureumTheme.colors
+    val bgColor by animateColorAsState(
+        targetValue = if (checked) colors.primary50 else colors.background10
+    )
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
-            .clickable(enabled = checked) { checked = !checked }
+            .clickable { onCheckedChange(!checked) }
+            .semantics { role = Role.Checkbox }
             .border(
                 width = 1.dp,
                 color = if (checked) colors.primary50 else colors.background50,
                 shape = CardDefaults.shape
             ),
         colors = CardDefaults.cardColors(
-            containerColor = if (checked) colors.primary50 else colors.background10,
+            containerColor = bgColor,
             contentColor = if (checked) colors.gray800 else colors.gray400,
         ),
     ) {
@@ -61,18 +67,24 @@ fun OnboardingPurposeCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(painter = painterResource(cardItem.gureumRes), contentDescription = "")
+            Spacer(Modifier.width(8.dp))
             Column {
-                Semi14Text(cardItem.title)
+                Semi14Text(
+                    text = cardItem.title,
+                    color = if (checked) colors.gray800 else colors.gray500
+                )
                 Spacer(Modifier.height(8.dp))
-                Medi12Text(cardItem.contents)
+                Medi12Text(
+                    text = cardItem.contents,
+                    color = if (checked) colors.gray800 else colors.gray500
+                )
             }
             Spacer(Modifier.weight(1f))
             Icon(
                 painter = painterResource(
-                    if (checked) R.drawable.ic_checked
-                    else R.drawable.ic_none_checked
+                    if (checked) R.drawable.ic_checked else R.drawable.ic_none_checked
                 ),
-                contentDescription = "",
+                contentDescription = if (checked) "선택됨" else "선택 안됨",
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .padding(end = 12.dp)
@@ -92,6 +104,8 @@ private fun OnboardingPurposeCardPreview() {
                 "독서 기록",
                 "읽은 책을 기록하고 관리해요"
             ),
+            checked = false,
+            onCheckedChange = { }
         )
     }
 }

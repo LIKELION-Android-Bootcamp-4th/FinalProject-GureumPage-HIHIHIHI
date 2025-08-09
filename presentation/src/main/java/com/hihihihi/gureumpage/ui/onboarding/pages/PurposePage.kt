@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,8 @@ import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingPurposeContents
 
 @Composable
 fun PurposePage(viewModel: OnBoardingViewModel) {
+    val selectedPurpose = viewModel.selectedPurposes
+
     OnBoardingMainContents(
         titleText = "구름한장을 사용하는\n목적을 알려주세요",
         subTitleText = "한가지 이상 선택해주세요",
@@ -30,7 +33,14 @@ fun PurposePage(viewModel: OnBoardingViewModel) {
         ) {
             Column {
                 purposeContents.forEach { content ->
-                    OnboardingPurposeCard(cardItem = content)
+                    val isChecked = selectedPurpose.contains(content.title)
+                    OnboardingPurposeCard(
+                        cardItem = content,
+                        checked = isChecked,
+                        onCheckedChange = {
+                            viewModel.togglePurpose(content.title)
+                        },
+                    )
                     Spacer(Modifier.height(10.dp))
                 }
             }
@@ -48,10 +58,11 @@ private val purposeContents = listOf(
     OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 즐기기", "단순히 독서를 더 즐겁게 하고 싶어요"),
 )
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PurposePagePreview() {
     GureumPageTheme {
-//        PurposePage()
+        PurposePage(OnBoardingViewModel())
     }
 }
