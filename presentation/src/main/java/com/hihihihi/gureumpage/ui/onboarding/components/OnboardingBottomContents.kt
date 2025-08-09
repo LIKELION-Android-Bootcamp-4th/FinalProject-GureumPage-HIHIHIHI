@@ -12,9 +12,11 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
-fun OnboardingBottom(
+fun OnboardingBottomContents(
     buttonText: String,
-    explanation: String = ""
+    explanation: String = "",
+    isNextEnabled: Boolean = true,
+    onNext: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -27,11 +29,11 @@ fun OnboardingBottom(
         )
         GureumButton(
             text = buttonText,
+            enabled = isNextEnabled,
             modifier = Modifier
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
-        ) {
-            // TODO 페이지 넘기기 이벤트
-        }
+                .padding(bottom = 24.dp),
+            onClick = onNext
+        )
     }
 }
