@@ -31,6 +31,7 @@ import com.hihihihi.gureumpage.designsystem.components.BodyText
 import com.hihihihi.gureumpage.designsystem.components.TitleText
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
 fun BookSimpleInfoSection() {
@@ -52,7 +53,7 @@ fun BookSimpleInfoSection() {
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            TitleText("멘탈의 연금술")
+            TitleText("멘탈의 연금술", maxLine = 2)
             Spacer(modifier = Modifier.height(8.dp))
             BodyText("보도 섀퍼", color = GureumTheme.colors.gray500)
             Spacer(modifier = Modifier.weight(1f))
@@ -62,28 +63,23 @@ fun BookSimpleInfoSection() {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_arrow_down),
-                    contentDescription = null
+                    painter = painterResource(id = R.drawable.ic_cloud_reading),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
                 )
-                Button(
-                    onClick = {},
-                    contentPadding = PaddingValues(horizontal = 0.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = GureumTheme.colors.gray400
-
-                    )
-                ) {
-                    Text("test")
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_arrow_down),
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(GureumTheme.colors.gray800),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+                Text(
+                    "읽는 중인 책",
+                    style = GureumTypography.bodyMedium,
+                    color = GureumTheme.colors.systemGreen,
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.ic_arrow_down),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(GureumTheme.colors.gray800),
+                )
             }
         }
     }
