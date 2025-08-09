@@ -1,7 +1,13 @@
 package com.hihihihi.gureumpage.di
 
+import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
+import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
+import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -44,5 +50,29 @@ object UseCaseModule {
         repository: QuoteRepository
     ): GetQuoteUseCase {
         return GetQuoteUseCase(repository)
+    }
+
+    @Provides
+    fun provideSignInWithGoogleUseCase(
+        repository: AuthRepository
+    ): SignInWithGoogleUseCase {
+        return SignInWithGoogleUseCase(repository)
+    }
+
+    @Provides
+    fun provideSignInWithKakaoUseCase(
+        kakaoAuthRepository: KakaoAuthRepository,
+        authRepository: AuthRepository
+    ): SignInWithKakaoUseCase {
+        return SignInWithKakaoUseCase(kakaoAuthRepository, authRepository)
+    }
+
+
+    @Provides
+    fun provideSignInWithNaverUseCase(
+        naverAuthRepository: NaverAuthRepository,
+        authRepository: AuthRepository
+    ): SignInWithNaverUseCase {
+        return SignInWithNaverUseCase(naverAuthRepository, authRepository)
     }
 }

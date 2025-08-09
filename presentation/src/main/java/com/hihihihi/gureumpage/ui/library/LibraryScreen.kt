@@ -3,8 +3,10 @@ package com.hihihihi.gureumpage.ui.library
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -26,7 +28,6 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.library.component.BookItem
 import com.hihihihi.gureumpage.ui.library.component.ToggleTab
-
 
 @Composable
 fun LibraryScreen(
@@ -50,25 +51,12 @@ fun LibraryScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        //앱 바 ui 확인용
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp, bottom = 12.dp)
-        ) {
-            Text(
-                text = "서재",
-                style = GureumTypography.headlineSmall,
-                color = GureumTheme.colors.gray800,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-
+        Spacer(Modifier.height(16.dp))
 
         //상단 탭
         ToggleTab(
             isBeforeReading = isBeforeReading,
-            onToggle = { isBeforeReading = it}
+            onToggle = { isBeforeReading = it }
         )
         //ui 상태 분기
         when {
