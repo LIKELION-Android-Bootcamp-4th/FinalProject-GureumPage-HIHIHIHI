@@ -96,6 +96,7 @@ fun LoginScreen(
             }
         )
 
+
         // 임시 버튼
         Button(
             onClick = {
@@ -110,6 +111,13 @@ fun LoginScreen(
             }
         ) {
             Text("마인드맵으로 이동")
+        }
+        Button(
+            onClick = {
+                navController.navigate(NavigationRoute.Search.route)
+            }
+        ) {
+            Text("검색으로 이동")
         }
     }
 }
