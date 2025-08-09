@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
-import android.R.attr.spacing
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +15,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,13 +102,13 @@ private fun PagerIndicator(
 
 private val featurePages = listOf(
     OnboardingFeature(
-        R.drawable.ic_cloud_reading,
+        R.drawable.ic_cloud_library,
         "나만의 디지털 서재",
         "읽은 책, 읽는 중, 완독한 책을\n체계적으로 관리해요",
         listOf("책 상태별 분류 관리", "독서 진행률 추적")
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_reading,
+        R.drawable.ic_cloud_timer,
         "독서 타이머",
         "독서 시간을 측정하고\n꾸준한 독서 습관을 만들어보세요",
         listOf("타이머로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공")
@@ -122,7 +120,7 @@ private val featurePages = listOf(
         listOf("책 상태별 분류 관리", "독서 진행률 추적") // TODO 첫번째와 같음
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_reading,
+        R.drawable.ic_cloud_statistics,
         "독서 통계 & 분석",
         "내 독서 패턴을 분석하고\n더 나은 독서 계획을 세워봐요",
         listOf("장르별 선호도 분석", "시간대별 독서 패턴", "월별/주간/연간 독서량 추이")
