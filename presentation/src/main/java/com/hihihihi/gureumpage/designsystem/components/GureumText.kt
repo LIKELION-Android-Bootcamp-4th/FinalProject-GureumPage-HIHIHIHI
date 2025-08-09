@@ -275,6 +275,7 @@ fun Medi10Text(
     color: Color = GureumTheme.colors.gray700,
     style: TextStyle = GureumTypography.labelSmall,
     maxLine: Int = 4,
+    textAlign: TextAlign = TextAlign.Justify
 ) {
     Text(
         text = text,
@@ -282,7 +283,7 @@ fun Medi10Text(
         style = style,
         maxLines = maxLine,
         modifier = modifier,
-        textAlign = TextAlign.Justify
+        textAlign = textAlign
     )
 }
 

@@ -55,6 +55,7 @@ fun PurposePage(navController: NavHostController) {
     )
 }
 
+// TODO: 이미지 변경하기
 private val purposeContents = listOf(
     OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 기록", "읽은 책을 기록하고 관리해요"),
     OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 습관", "꾸준한 독서 습관을 만들고 싶어요"),
