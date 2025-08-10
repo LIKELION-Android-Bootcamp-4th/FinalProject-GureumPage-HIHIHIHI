@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
-import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -19,7 +18,7 @@ import javax.inject.Inject
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
     private val getUseBookUseCase: GetUserBookUseCase,
-):ViewModel(){
+) : ViewModel() {
 
     // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())
@@ -39,9 +38,6 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-
-
-
     /**
      * 필사 추가 기능
      *
@@ -49,7 +45,7 @@ class BookDetailViewModel @Inject constructor(
      * @param content 명언 내용
      * @param pageNumber 해당 페이지 번호 (nullable)
      */
-    fun addQuote(userBookId: String, content: String, pageNumber: Int?){
+    fun addQuote(userBookId: String, content: String, pageNumber: Int?) {
         viewModelScope.launch {
             // 로딩 상태로 설정
             _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isLoading = true))
@@ -85,7 +81,6 @@ class BookDetailViewModel @Inject constructor(
                     )
                 )
             }
-
         }
     }
 

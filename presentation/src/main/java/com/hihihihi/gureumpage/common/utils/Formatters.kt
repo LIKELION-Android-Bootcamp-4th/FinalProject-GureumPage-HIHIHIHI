@@ -7,7 +7,9 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.NumberFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 /**
  * 일반 숫자 포맷
@@ -57,6 +59,11 @@ class PageFormatter : ValueFormatter() {
 fun formatDateToSimpleString(dateTime: LocalDateTime?): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     return dateTime?.format(formatter) ?: ""
+}
+
+
+fun toLocalDateTime(date: Date): LocalDateTime {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
 }
 
 /**
