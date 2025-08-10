@@ -3,12 +3,19 @@ package com.hihihihi.gureumpage.designsystem.components
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -21,6 +28,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun GureumTextField(
     modifier: Modifier = Modifier,
     value: String,
+    onValueChange: (String) -> Unit,
     hint: String = "",
     maxLines: Int = 1,
     roundedCorner: Dp = 12.75.dp,
@@ -28,9 +36,15 @@ fun GureumTextField(
     textStyle: TextStyle = GureumTypography.bodyMedium,
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
-    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Next,
+    onSubmit: () -> Unit = {},
+    supportingText: @Composable (() -> Unit)? = null,
 ) {
     val colors = GureumTheme.colors
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         placeholder = {
@@ -59,6 +73,19 @@ fun GureumTextField(
         maxLines = maxLines,
         shape = RoundedCornerShape(roundedCorner),
         textStyle = textStyle.copy(textAlign = textAlign),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = keyboardType,
+            imeAction = imeAction
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Next) },
+            onDone = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                onSubmit()
+            }
+        ),
+        supportingText = supportingText
     )
 }
 
