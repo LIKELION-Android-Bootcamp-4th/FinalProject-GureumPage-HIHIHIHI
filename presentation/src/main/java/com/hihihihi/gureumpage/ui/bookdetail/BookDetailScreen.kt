@@ -23,12 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 
 @Composable
 fun BookDetailScreen(
@@ -43,6 +45,10 @@ fun BookDetailScreen(
     // 사용자 입력 내용과 페이지 번호를 상태로 기억
     var content by remember { mutableStateOf("") }
     var pageNumber by remember { mutableStateOf("") }
+
+    LaunchedEffect(bookId) {
+        viewModel.loadUserBookDetails(bookId)
+    }
 
     // addQuoteState가 변할 때마다 실행되는 효과
     LaunchedEffect(uiState.addQuoteState) {
@@ -76,21 +82,54 @@ fun BookDetailScreen(
 
     val scrollState: LazyListState = rememberLazyListState()
 
+
+    when {
+        uiState.isLoading -> {
+            // TODO 로딩 UI
+        }
+        uiState.errorMessage != null -> {
+            // TODO 에러 UI
+        }
+        uiState.userBook != null -> {
+            BookDetailContent(
+                userBook = uiState.userBook!!,
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                uiState = uiState,
+                viewModel = viewModel
+            )
+        }
+        else -> {
+            // TODO 빈 화면 또는 초기 화면
+        }
+    }
+}
+
+@Composable
+fun BookDetailContent(
+    userBook: UserBook,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    uiState: BookDetailUiState,
+    viewModel: BookDetailViewModel
+) {
+    val scrollState = rememberLazyListState()
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         BookDetailFab(
             modifier = Modifier
-                .align(alignment = Alignment.BottomEnd)
+                .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 22.dp),
-            onActionClick = {  }
+            onActionClick = { }
         )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = scrollState,
         ) {
-            item { BookSimpleInfoSection() }
+            item { BookSimpleInfoSection(userBook) }
             item { ReadingProgressSection() }
             item { BookStatisticsCard() }
             item { BookDetailTabs() }
@@ -116,7 +155,7 @@ private fun BookDetailPreview() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                item { BookSimpleInfoSection() }
+                item { BookSimpleInfoSection(dummyUserBook) }
                 item { ReadingProgressSection() }
                 item { BookStatisticsCard() }
                 item { BookDetailTabs() }

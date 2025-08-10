@@ -14,6 +14,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -34,9 +35,12 @@ fun ReadingProgressSection(
             text = "독서 진행도",
             style = GureumTypography.titleMedium,
             color = GureumTheme.colors.gray800,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 2.dp)
         )
-        // TODO: 프로그래스 바 삽입
+        GureumLinearProgressBar(
+            12,
+            123.toFloat()/456
+        )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

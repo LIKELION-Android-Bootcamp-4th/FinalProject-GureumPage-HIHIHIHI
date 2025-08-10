@@ -23,7 +23,7 @@ fun BookInfoTab() {
     ) {
         InfoSection("출판사") { InfoBody("출판사입니다.") }
         InfoSection("ISBN") { InfoBody("K962037084 9791192372730") }
-        InfoSection("장르") { InfoGenre() }
+        InfoSection("카테고리") { InfoGenre() }
         InfoSection("책 소개") { InfoBody("이 책은 독일에서부터 시작되어.. 이 책을 받고 다른 사람에게 돌리지 않을 경우 당신은 행복해지고 삶이 어쩌고 저쩌고") }
         InfoSection("총 페이지") { InfoBody("260") }
     }

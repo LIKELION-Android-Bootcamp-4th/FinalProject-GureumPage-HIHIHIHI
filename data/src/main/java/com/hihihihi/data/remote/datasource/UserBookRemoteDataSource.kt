@@ -10,4 +10,6 @@ interface UserBookRemoteDataSource {
     fun getUserBooks(userId: String): Flow<List<UserBookDto>>
 
     fun getUserBooksByStatus(userId: String,status: ReadingStatus): Flow<List<UserBookDto>>
+
+    fun getUserBook(userBookId: String): Flow<UserBookDto>
 }
