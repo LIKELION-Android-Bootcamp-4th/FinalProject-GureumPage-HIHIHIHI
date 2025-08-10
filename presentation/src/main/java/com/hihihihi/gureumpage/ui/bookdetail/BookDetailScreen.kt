@@ -130,7 +130,7 @@ fun BookDetailContent(
             state = scrollState,
         ) {
             item { BookSimpleInfoSection(userBook) }
-            item { ReadingProgressSection() }
+            item { ReadingProgressSection(userBook) }
             item { BookStatisticsCard() }
             item { BookDetailTabs() }
         }
@@ -156,7 +156,7 @@ private fun BookDetailPreview() {
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item { BookSimpleInfoSection(dummyUserBook) }
-                item { ReadingProgressSection() }
+                item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard() }
                 item { BookDetailTabs() }
             }
