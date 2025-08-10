@@ -1,10 +1,12 @@
 package com.hihihihi.gureumpage.ui.onboarding
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.hihihihi.gureumpage.common.utils.validateNickname
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
 import com.hihihihi.gureumpage.ui.onboarding.model.ThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +38,7 @@ class OnBoardingViewModel @Inject constructor(
 
     fun updateNickname(nickname: String) {
         this.nickname = nickname
+        Log.d("Onboarding", "저장된 닉네임 ${this.nickname}")
     }
 
     val selectedPurposes = mutableStateListOf<String>()
@@ -46,7 +49,7 @@ class OnBoardingViewModel @Inject constructor(
 
     fun isNextEnabled(step: OnboardingStep): Boolean {
         return when (step) {
-            OnboardingStep.Nickname -> nickname.length in 2..8
+            OnboardingStep.Nickname -> nickname.validateNickname()
             OnboardingStep.Purpose -> selectedPurposes.isNotEmpty()
             OnboardingStep.Theme -> selectedTheme != null
             else -> true

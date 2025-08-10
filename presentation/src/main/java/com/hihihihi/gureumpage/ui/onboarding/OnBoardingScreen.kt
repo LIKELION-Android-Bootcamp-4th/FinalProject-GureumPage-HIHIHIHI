@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingBottomContents
@@ -34,7 +33,9 @@ fun OnBoardingScreen(
             steps = steps,
             viewModel = viewModel,
             onFinish = {
-                navController.navigate(NavigationRoute.Home.route)
+                navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
+                }
             },
         )
     }

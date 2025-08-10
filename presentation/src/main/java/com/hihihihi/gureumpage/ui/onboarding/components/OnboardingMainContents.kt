@@ -23,12 +23,13 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun OnBoardingMainContents(
     titleText: String,
     subTitleText: String,
+    modifier: Modifier = Modifier,
     showGureum: Boolean = true,
     gureumRes: Int = R.drawable.ic_cloud_reading,
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
