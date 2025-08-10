@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +18,28 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
+    private val getUseBookUseCase: GetUserBookUseCase,
 ):ViewModel(){
 
     // UI 상태를 관리하는 StateFlow
-    private val _uiState = MutableStateFlow(BookDetailUiState(null,null,addQuoteState = AddQuoteState()))
+    private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
+
+    fun loadUserBookDetails(userBookId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                getUseBookUseCase(userBookId).collect { userBook ->
+                    _uiState.update { it.copy(userBook = userBook, isLoading = false) }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message ?: "알 수 없는 오류", isLoading = false) }
+            }
+        }
+    }
+
+
 
 
     /**

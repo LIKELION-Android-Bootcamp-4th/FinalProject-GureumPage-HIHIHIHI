@@ -65,6 +65,7 @@ fun Semi16Text(
         color = color,
         style = style,
         maxLines = maxLine,
+        overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Justify,
         modifier = underlineModifier.then(modifier),
     )

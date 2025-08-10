@@ -97,3 +97,14 @@ fun pxToDp(px: Int): Dp {
     val density = LocalDensity.current
     return with(density) { px.toDp() }
 }
+
+/**
+ * LocalDateTime 을 HH:mm 형식으로 변환, 범위 있음
+ */
+fun formatTimeRange(startTime: LocalDateTime?, endTime: LocalDateTime?): String {
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+    val start = startTime?.format(timeFormatter) ?: "--:--"
+    val end = endTime?.format(timeFormatter) ?: "--:--"
+    return "$start ~ $end"
+}
