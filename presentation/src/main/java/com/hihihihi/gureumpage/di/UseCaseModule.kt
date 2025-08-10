@@ -10,6 +10,7 @@ import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
@@ -44,6 +45,12 @@ object UseCaseModule {
         return GetUserBookUseCase(repository) // UseCase 생성 후 반환
     }
 
+    @Provides
+    fun provideAddUserBookUseCase(
+        repository: UserBookRepository
+    ): AddUserBookUseCase {
+        return AddUserBookUseCase(repository)
+    }
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
     @Provides
