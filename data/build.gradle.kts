@@ -89,6 +89,6 @@ dependencies {
 
     implementation("com.kakao.sdk:v2-user:2.20.3")
 
-
-
+    implementation(libs.androidx.datastore.preferences)
 }
+
