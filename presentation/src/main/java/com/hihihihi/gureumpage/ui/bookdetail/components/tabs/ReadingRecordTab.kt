@@ -24,7 +24,7 @@ import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.formatTimeRange
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -42,8 +42,6 @@ fun ReadingRecordTab(histories: List<History>) {
             .sortedByDescending { it.date }
             .groupBy { it.date }
             .forEach { (date, dailyRecords) ->
-
-
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
@@ -111,7 +109,7 @@ private fun RecordCard(
                 color = GureumTheme.colors.gray600
             )
             Spacer(modifier = Modifier.weight(1f))
-            TitleText(duration, color = GureumTheme.colors.gray800)
+            Semi16Text(duration, color = GureumTheme.colors.gray800)
         }
     }
 }

@@ -29,7 +29,7 @@ import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -57,7 +57,7 @@ fun BookSimpleInfoSection(
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            TitleText(userBook.title, maxLine = 2)
+            Semi16Text(userBook.title, maxLine = 2)
             Spacer(modifier = Modifier.height(8.dp))
             BodyText(userBook.author, color = GureumTheme.colors.gray500)
             Spacer(modifier = Modifier.weight(1f))
