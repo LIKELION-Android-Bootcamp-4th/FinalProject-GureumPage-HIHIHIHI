@@ -31,7 +31,7 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumCircleProgressBar
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -58,7 +58,7 @@ fun ReadingGoalSection(
             .background(GureumTheme.colors.background)
             .padding(16.dp)
     ) {
-        TitleText("오늘 목표 독서 달성", isUnderline = true)
+        Semi16Text("오늘 목표 독서 달성", isUnderline = true)
         Spacer(Modifier.height(12.dp))
         GureumCard(
             modifier = Modifier

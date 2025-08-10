@@ -96,6 +96,8 @@ fun LoginScreen(
             }
         )
 
+
+        // 임시 버튼
         Button(
             onClick = {
                 navController.navigate(NavigationRoute.Home.route)

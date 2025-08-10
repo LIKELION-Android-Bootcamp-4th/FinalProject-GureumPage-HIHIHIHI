@@ -24,7 +24,7 @@ fun GureumAppBar(
     actions: @Composable () -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
-        title = { TitleText(text = title) },
+        title = { Semi16Text(text = title) },
         navigationIcon = {
             if (showUpButton) {
                 IconButton(
