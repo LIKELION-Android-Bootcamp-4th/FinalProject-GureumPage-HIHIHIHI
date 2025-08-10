@@ -55,7 +55,7 @@ fun ReadingRecordTab(histories: List<History>) {
                         style = GureumTypography.bodySmall
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    TitleText(
+                    Semi16Text(
                         text = formatSecondsToReadableTime(
                             dailyRecords.sumOf { it.readTime }
                         ),

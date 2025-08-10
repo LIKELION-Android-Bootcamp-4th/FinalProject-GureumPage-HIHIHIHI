@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
@@ -31,6 +32,7 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
+import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 
 @Composable
 fun BookDetailScreen(
@@ -93,10 +95,7 @@ fun BookDetailScreen(
         uiState.userBook != null -> {
             BookDetailContent(
                 userBook = uiState.userBook!!,
-                navController = navController,
-                snackbarHostState = snackbarHostState,
-                uiState = uiState,
-                viewModel = viewModel
+                quotes = uiState.quotes,
             )
         }
         else -> {
@@ -108,10 +107,7 @@ fun BookDetailScreen(
 @Composable
 fun BookDetailContent(
     userBook: UserBook,
-    navController: NavHostController,
-    snackbarHostState: SnackbarHostState,
-    uiState: BookDetailUiState,
-    viewModel: BookDetailViewModel
+    quotes: List<Quote>
 ) {
     val scrollState = rememberLazyListState()
 
@@ -132,7 +128,7 @@ fun BookDetailContent(
             item { BookSimpleInfoSection(userBook) }
             item { ReadingProgressSection(userBook) }
             item { BookStatisticsCard() }
-            item { BookDetailTabs() }
+            item { BookDetailTabs(quotes) }
         }
     }
 }
@@ -158,7 +154,7 @@ private fun BookDetailPreview() {
                 item { BookSimpleInfoSection(dummyUserBook) }
                 item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard() }
-                item { BookDetailTabs() }
+                item { BookDetailTabs(dummyQuotes) }
             }
         }
     }

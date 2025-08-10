@@ -10,7 +10,7 @@ import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
+import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.Module
@@ -39,9 +39,10 @@ object UseCaseModule {
 
     @Provides
     fun provideGetUserBookUseCase(
-        repository: UserBookRepository // Repository가 자동 주입됨
-    ): GetUserBookUseCase {
-        return GetUserBookUseCase(repository) // UseCase 생성 후 반환
+        userBookRepository: UserBookRepository, // Repository가 자동 주입됨
+        quoteRepository: QuoteRepository
+    ): GetBookDetailDataUseCase {
+        return GetBookDetailDataUseCase(userBookRepository,quoteRepository) // UseCase 생성 후 반환
     }
 
 
