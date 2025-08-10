@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.ui.statistics.components.GenreCard
 import com.hihihihi.gureumpage.ui.statistics.components.ReadingPageCard
@@ -29,19 +29,19 @@ fun StatisticsScreen() {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            TitleText("독서 장르 분포")
+            Semi16Text("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
             GenreCard()
         }
 
         item {
-            TitleText("독서 시간 분포")
+            Semi16Text("독서 시간 분포")
             Spacer(modifier = Modifier.height(12.dp))
             ReadingTimeCard()
         }
 
         item {
-            TitleText("주간 독서 페이지")
+            Semi16Text("주간 독서 페이지")
             Spacer(modifier = Modifier.height(12.dp))
             ReadingPageCard()
         }

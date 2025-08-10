@@ -1,10 +1,20 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    alias(libs.plugins.google.gms.google.services)
     kotlin("plugin.parcelize")
+}
+
+//local.properties API KEY 사용하기 위함
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        load(localFile.inputStream())
+    }
 }
 
 android {
@@ -13,9 +23,15 @@ android {
 
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        //local.properties API KEY 사용하기 위함
+        buildConfigField ("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
+
+    }
+    //local.properties API KEY 사용하기 위함
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -73,7 +89,6 @@ dependencies {
 
     implementation("com.kakao.sdk:v2-user:2.20.3")
 
-
-
     implementation(libs.androidx.datastore.preferences)
 }
+

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -42,12 +41,12 @@ import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.pxToDp
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import kotlin.math.absoluteValue
 
-@SuppressLint("RestrictedApi")
+@SuppressLint("RestrictedApi", "UnusedBoxWithConstraintsScope")
 @Composable
 fun CurrentReadingBookSection(
     books: List<UserBook>,
@@ -70,7 +69,7 @@ fun CurrentReadingBookSection(
                     .padding(horizontal = 20.dp)
                     .padding(top = 32.dp)
             ) {
-                TitleText("독서중인 책", isUnderline = true)
+                Semi16Text("독서중인 책", isUnderline = true)
             }
 
             Spacer(Modifier.height(10.dp))

@@ -26,15 +26,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.search.Search
 
 @Composable
-fun SearchItem(result: Search, onItemClick: (Search) -> Unit, onAddClick: (Search) -> Unit) {
+fun SearchItem(
+    result: SearchBook,
+    onItemClick: (SearchBook) -> Unit,
+    onAddClick: (SearchBook) -> Unit
+) {
     Column(
         modifier = Modifier
             .background(GureumTheme.colors.background)
@@ -48,7 +52,7 @@ fun SearchItem(result: Search, onItemClick: (Search) -> Unit, onAddClick: (Searc
                     .size(width = 57.dp, height = 80.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
-                model = result.imgUrl,
+                model = result.coverImageUrl,
                 contentDescription = "책",
             )
             Spacer(modifier = Modifier.width(14.dp))
@@ -69,7 +73,10 @@ fun SearchItem(result: Search, onItemClick: (Search) -> Unit, onAddClick: (Searc
                 //출판사
                 BodySubText(result.publisher, modifier = Modifier.padding(top = 4.dp))
                 //페이지
-                BodySubText(result.page.toString() + 'p', modifier = Modifier.padding(top = 4.dp))
+                BodySubText(
+                    result.categoryName.split(">")[1],
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
 
             Box(
@@ -106,12 +113,14 @@ fun SearchItem(result: Search, onItemClick: (Search) -> Unit, onAddClick: (Searc
 private fun SearchPreView() {
     GureumPageTheme {
         SearchItem(
-            Search(
-                "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791158511982.jpg",
+            SearchBook(
                 title = "test title",
                 author = "test author",
                 publisher = "test publisher",
-                page = 1,
+                isbn = "1234567890123",
+                description = "test description",
+                coverImageUrl = "https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791158511982.jpg",
+                categoryName = "test category",
             ),
             onItemClick = {},
             onAddClick = {}

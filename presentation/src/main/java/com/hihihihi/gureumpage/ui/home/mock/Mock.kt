@@ -19,7 +19,6 @@ val mockUserBooks = listOf(
     UserBook(
         userBookId = "ub001",
         userId = "user123",
-        bookId = "book001",
         title = "죄와 벌",
         author = "표도르 도스토예프스키",
         imageUrl = "https://minumsa.minumsa.com/wp-content/uploads/bookcover/284-죄와벌1_표1-500x851.jpg",
@@ -36,7 +35,6 @@ val mockUserBooks = listOf(
     UserBook(
         userBookId = "ub002",
         userId = "user123",
-        bookId = "book002",
         title = "어린 왕자",
         author = "앙투안 드 생텍쥐페리",
         imageUrl = "https://images-ext-1.discordapp.net/external/Dj-FzWSUevc1s_rJdjgHKEDl8VOS4AU-u3-B94EWA9A/https/contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791158511982.jpg?format=webp&width=916&height=1372",

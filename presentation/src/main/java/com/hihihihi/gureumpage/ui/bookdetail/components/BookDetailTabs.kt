@@ -23,6 +23,8 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.BookInfoTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.QuotesTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.ReadingRecordTab
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import kotlinx.coroutines.launch
 
 @Composable
@@ -64,8 +66,8 @@ fun BookDetailTabs() {
         ) { page ->
             when (page) {
                 0 -> BookInfoTab()
-                1 -> QuotesTab()
-                2 -> ReadingRecordTab()
+                1 -> QuotesTab(dummyQuotes)
+                2 -> ReadingRecordTab(dummyRecords)
             }
         }
     }
