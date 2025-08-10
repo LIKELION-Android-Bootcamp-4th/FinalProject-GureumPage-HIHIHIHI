@@ -9,8 +9,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -32,6 +38,7 @@ fun GureumTextField(
     hint: String = "",
     maxLines: Int = 1,
     roundedCorner: Dp = 12.75.dp,
+    isError: Boolean = false,
     textAlign: TextAlign = TextAlign.Start,
     textStyle: TextStyle = GureumTypography.bodyMedium,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -45,6 +52,8 @@ fun GureumTextField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    var hasInteracted by remember { mutableStateOf(false) } // 텍스트 필드와 상호작용 여부
+
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         placeholder = {
@@ -56,7 +65,10 @@ fun GureumTextField(
             )
         },
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = {
+            if (!hasInteracted) hasInteracted = true
+            onValueChange(it)
+        },
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = colors.textFieldOutline,
             unfocusedContainerColor = colors.searchTextField,
@@ -67,6 +79,11 @@ fun GureumTextField(
             focusedContainerColor = colors.searchTextField,
             focusedTextColor = colors.gray800,
             focusedPlaceholderColor = colors.gray400,
+
+            errorBorderColor = colors.systemRed,
+            errorContainerColor = colors.systemRed.copy(alpha = 0.05f),
+            errorTextColor = colors.gray800,
+            errorSupportingTextColor = colors.systemRed/*.copy(alpha = 0.5f)*/
         ),
         trailingIcon = trailingIcon,
         leadingIcon = leadingIcon,
@@ -78,14 +95,19 @@ fun GureumTextField(
             imeAction = imeAction
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocus(FocusDirection.Next) },
+            onNext = {
+                hasInteracted = true
+                focusManager.moveFocus(FocusDirection.Next)
+            },
             onDone = {
+                hasInteracted = true
                 keyboardController?.hide()
                 focusManager.clearFocus()
                 onSubmit()
             }
         ),
-        supportingText = supportingText
+        supportingText = supportingText,
+        isError = isError && hasInteracted,
     )
 }
 
