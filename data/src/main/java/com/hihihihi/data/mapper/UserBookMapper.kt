@@ -29,9 +29,9 @@ fun UserBookDto.toDomain(): UserBook {
     )
 }
 
-fun UserBook.toDto(includeUserBookId: Boolean = true): UserBookDto {
+fun UserBook.toDto(): UserBookDto {
     return UserBookDto(
-        userBookId = if (includeUserBookId) this.userBookId else "",
+        userBookId =  this.userBookId,
         userId = this.userId,
         isbn10 = this.isbn10,
         isbn13 = this.isbn13,
