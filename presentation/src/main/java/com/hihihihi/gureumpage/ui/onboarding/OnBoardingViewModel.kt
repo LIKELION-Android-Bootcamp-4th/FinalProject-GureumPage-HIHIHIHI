@@ -6,18 +6,25 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.user.SetNicknameUseCase
+import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
+import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.gureumpage.common.utils.validateNickname
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
-import com.hihihihi.gureumpage.ui.onboarding.model.ThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class OnBoardingViewModel @Inject constructor(
-//    private val dataStore: DataStore<Preferences>
+    private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
+    private val setNicknameUseCase: SetNicknameUseCase,
+    private val setThemeUseCase: SetThemeUseCase
 ) : ViewModel() {
     private val _steps = MutableStateFlow<List<OnboardingStep>>(emptyList())
     val steps: StateFlow<List<OnboardingStep>> = _steps
@@ -41,6 +48,12 @@ class OnBoardingViewModel @Inject constructor(
         Log.d("Onboarding", "저장된 닉네임 ${this.nickname}")
     }
 
+    fun saveNickname() {
+        viewModelScope.launch {
+            setNicknameUseCase(nickname)
+        }
+    }
+
     val selectedPurposes = mutableStateListOf<String>()
     fun togglePurpose(purpose: String) {
         if (selectedPurposes.contains(purpose)) selectedPurposes.remove(purpose)
@@ -56,10 +69,10 @@ class OnBoardingViewModel @Inject constructor(
         }
     }
 
-    var selectedTheme by mutableStateOf<ThemeType?>(null)
+    var selectedTheme by mutableStateOf<GureumThemeType?>(null)
         private set
 
-    fun selectTheme(theme: ThemeType) {
+    fun selectTheme(theme: GureumThemeType) {
         selectedTheme = theme
     }
 
