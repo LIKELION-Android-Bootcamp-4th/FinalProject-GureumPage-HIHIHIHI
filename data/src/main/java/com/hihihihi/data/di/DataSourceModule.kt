@@ -1,14 +1,7 @@
 package com.hihihihi.data.di
 
-import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
-import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
-import com.hihihihi.data.local.datasourceimpl.UserPreferencesLocalDataSourceImpl
-import com.hihihihi.data.remote.datasource.AuthDataSource
-import com.hihihihi.data.remote.datasource.KakaoDataSource
-import com.hihihihi.data.remote.datasource.NaverDataSource
+import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
@@ -52,7 +45,7 @@ object DataSourceModule {
         auth: FirebaseAuth,
         functions: FirebaseFunctions
     ): AuthDataSource {
-        return AuthDataSourceImpl(auth, functions)
+       return AuthDataSourceImpl(auth, functions)
     }
 
     @Provides
@@ -70,13 +63,21 @@ object DataSourceModule {
         return KakaoDataSourceImpl(context)
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideHistoryRemotedDataSource(
-//        firestore: FirebaseFirestore
-//    ): HistoryRemoteDataSource {
-//        return HistoryRemoteDataSourceImpl(firestore)
-//    }
+    @Provides
+    @Singleton
+    fun provideUserRemoteDataSource(
+        firestore: FirebaseFirestore
+    ): UserRemoteDataSource {
+        return UserRemoteDataSourceImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDailyReadPageRemoteDataSource(
+        firestore: FirebaseFirestore
+    ): DailyReadPageRemoteDataSource {
+        return DailyReadPageRemoteDataSourceImpl(firestore)
+    }
 
     @Provides
     @Singleton
