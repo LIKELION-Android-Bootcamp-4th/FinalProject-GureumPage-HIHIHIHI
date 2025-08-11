@@ -1,10 +1,8 @@
 package com.hihihihi.gureumpage.ui.mypage
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hihihihi.gureumpage.designsystem.components.GureumButton
+import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageCalenderSection
@@ -48,6 +45,10 @@ fun MyPageScreen(
 
     var showNicknameDialog by rememberSaveable  { mutableStateOf(false) } // 다이얼로그 상태
 
+    val timeText = remember(state.totalReadMinutes) {
+        formatSecondsToReadableTimeWithoutSecond(state.totalReadMinutes * 60)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,20 +57,6 @@ fun MyPageScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        //앱 바 ui 확인용
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)
-        ) {
-            Text(
-                text = "마이페이지",
-                style = GureumTypography.headlineSmall,
-                color = colors.gray800,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
 
         when {
             state.loading -> Box(
@@ -91,9 +78,9 @@ fun MyPageScreen(
                     title = "안녕하세요!",
                     badge = state.appellation.ifBlank { "칭호 없음" },
                     nickname = "${state.nickname.ifBlank { "닉네임 없음" }}님",
-                    totalPages = "1892쪽",      // TODO: 실제값 연동 시 교체
-                    totalBooks = "16권",        // TODO: 실제값 연동 시 교체
-                    totalTime = "3,744시간",
+                    totalPages = "${state.totalPages}쪽",
+                    totalBooks = "${state.totalBooks}권",
+                    totalTime = timeText,
                     onEditNicknameClick = { showNicknameDialog = true }
                 )
             }
@@ -113,7 +100,7 @@ fun MyPageScreen(
         MyPageMenuSection()
     }
 
-
+    //닉네임 벼경 다이얼로그
     if (showNicknameDialog) {
         NicknameChangeDialog(
             currentNickname = state.nickname,
