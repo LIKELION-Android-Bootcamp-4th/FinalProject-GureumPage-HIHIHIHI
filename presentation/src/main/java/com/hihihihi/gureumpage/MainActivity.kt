@@ -9,26 +9,36 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    //다크모드 조회용 UseCase
+    @Inject lateinit var getDarkThemeUserCase: GetDarkThemeUserCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GureumPageTheme {
+            //DataStore에서 다크모드 여부 상태 가져오기
+            val isDarkTheme by getDarkThemeUserCase().collectAsState(initial = false)
+
+            // 모드 상태에 따라 GureumPageTheme 에 반영
+            GureumPageTheme(darkTheme = isDarkTheme) {
                 GureumPageApp()
             }
         }
