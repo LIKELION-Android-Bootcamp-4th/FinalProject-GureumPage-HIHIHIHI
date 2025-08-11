@@ -29,6 +29,12 @@ class OnBoardingViewModel @Inject constructor(
     private val _steps = MutableStateFlow<List<OnboardingStep>>(emptyList())
     val steps: StateFlow<List<OnboardingStep>> = _steps
 
+    val selectedPurposes = mutableStateListOf<String>()
+    var nickname by mutableStateOf("")
+        private set
+    var selectedTheme by mutableStateOf<GureumThemeType?>(null)
+        private set
+
     init {
         _steps.value = listOf(
             OnboardingStep.Welcome,
@@ -39,9 +45,6 @@ class OnBoardingViewModel @Inject constructor(
             OnboardingStep.Finish
         )
     }
-
-    var nickname by mutableStateOf("")
-        private set
 
     fun updateNickname(nickname: String) {
         this.nickname = nickname
@@ -54,7 +57,7 @@ class OnBoardingViewModel @Inject constructor(
         }
     }
 
-    val selectedPurposes = mutableStateListOf<String>()
+    // TODO: 추후 사용자 앱 설치 목적 파악을 위해 DB 테이블 만들기 고려
     fun togglePurpose(purpose: String) {
         if (selectedPurposes.contains(purpose)) selectedPurposes.remove(purpose)
         else selectedPurposes.add(purpose)
@@ -69,19 +72,16 @@ class OnBoardingViewModel @Inject constructor(
         }
     }
 
-    var selectedTheme by mutableStateOf<GureumThemeType?>(null)
-        private set
-
-    fun selectTheme(theme: GureumThemeType) {
-        selectedTheme = theme
+    fun saveOnboardingComplete() {
+        viewModelScope.launch {
+            setOnboardingCompleteUseCase(true)
+        }
     }
 
-    // TODO 데이터 스토어에 테마 저장
-//    fun saveTheme() {
-//        selectedTheme?.let { theme ->
-//            viewModelScope.launch {
-//                dataStoreManager.saveTheme(theme)
-//            }
-//        }
-//    }
+    fun saveTheme(theme: GureumThemeType) {
+        selectedTheme = theme
+        viewModelScope.launch {
+            setThemeUseCase(theme)
+        }
+    }
 }

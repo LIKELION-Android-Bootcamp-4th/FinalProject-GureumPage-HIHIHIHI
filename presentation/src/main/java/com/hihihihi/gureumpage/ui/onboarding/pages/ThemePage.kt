@@ -5,19 +5,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingThemeCard
-import com.hihihihi.gureumpage.ui.onboarding.model.ThemeType
 
 @Composable
 fun ThemePage(viewModel: OnBoardingViewModel) {
@@ -36,13 +33,14 @@ fun ThemePage(viewModel: OnBoardingViewModel) {
         Spacer(Modifier.height(24.dp))
         OnboardingThemeCard(
             isDarkTheme = true,
-            selected = selectedTheme == ThemeType.DARK,
-            onSelected = { viewModel.selectTheme(ThemeType.DARK) })
+            selected = selectedTheme == GureumThemeType.DARK,
+            onSelected = { viewModel.saveTheme(GureumThemeType.DARK) }
+        )
         Spacer(Modifier.height(24.dp))
         OnboardingThemeCard(
             isDarkTheme = false,
-            selected = selectedTheme == ThemeType.LIGHT,
-            onSelected = { viewModel.selectTheme(ThemeType.LIGHT) }
+            selected = selectedTheme == GureumThemeType.LIGHT,
+            onSelected = { viewModel.saveTheme(GureumThemeType.LIGHT) }
         )
     }
 }

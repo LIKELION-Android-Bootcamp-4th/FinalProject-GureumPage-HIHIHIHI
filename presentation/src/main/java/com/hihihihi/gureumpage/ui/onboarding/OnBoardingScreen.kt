@@ -33,6 +33,7 @@ fun OnBoardingScreen(
             steps = steps,
             viewModel = viewModel,
             onFinish = {
+                viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
                 }
