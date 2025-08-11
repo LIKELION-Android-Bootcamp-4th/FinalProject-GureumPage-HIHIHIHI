@@ -138,4 +138,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.calendar.compose)
+
+    implementation(libs.google.play.review)
+    implementation(libs.google.play.review.ktx)
 }
