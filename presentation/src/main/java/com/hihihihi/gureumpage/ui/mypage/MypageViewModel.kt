@@ -1,21 +1,40 @@
 package com.hihihihi.gureumpage.ui.mypage
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
 import com.hihihihi.domain.usecase.theme.SetDarkThemeUseCase
+import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
     private val getDarkThemeUserCase: GetDarkThemeUserCase, // 다크모드 조회용 usecase
-    private val setDarkThemeUseCase: SetDarkThemeUseCase // 다크모드 저장용 Usecase
+    private val setDarkThemeUseCase: SetDarkThemeUseCase, // 다크모드 저장용 Usecase
+    private val getDailyReadPagesUseCase: GetDailyReadPagesUseCase, // 잔디
+    private val getUserUseCase: GetUserUseCase, // 사용자 정보 조회
+    private val updateNicknameUseCase: UpdateNicknameUseCase, // 닉네임 변경
+    private val getUserBooksUseCase: GetUserBooksUseCase //총 권수 계산용
 ) : ViewModel() {
+
+    // FirebaseAuth로 현재 uid 참조
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val currentUid: String?
+        get() = auth.currentUser?.uid
 
     //DataStore 에서 다크모드 여부를 Flow 로 받아오는 StateFlow 형태로 보관
     val isDarkTheme: StateFlow<Boolean> =
@@ -26,5 +45,117 @@ class MypageViewModel @Inject constructor(
         viewModelScope.launch {
             setDarkThemeUseCase(enabled) //선택된 모드 상태를 저장
         }
+    }
+
+    //잔디 통계
+    private val _readingStats = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
+    val readingStats: StateFlow<Map<LocalDate,Int>> = _readingStats
+
+    // 마이페이지 사용자 정보
+    private val _uiState = MutableStateFlow(MyPageUiState())
+    val uiState: StateFlow<MyPageUiState> = _uiState
+
+
+    init {
+        // 로그인 상태에서만 진입 -> uid 없으면 로딩 해제
+        val uid = currentUid
+        if (uid != null) {
+            loadUser(uid) //프로필
+            loadReadingStats(uid) //통계
+            loadUserBookStats(uid) // 총 권수
+        } else {
+            // 혹시 모를 예외 흐름에서도 화면은 멈추지 않게 로딩만 해제
+            _uiState.update { it.copy(loading = false) }
+        }
+    }
+
+    fun reloadAll() {
+        currentUid?.let {
+            loadUser(it)
+            loadReadingStats(it)
+            loadUserBookStats(it)
+        }
+    }
+
+
+    private fun loadUser(userId: String) = viewModelScope.launch {
+        _uiState.update { it.copy(loading = true, error = null) }
+        runCatching { getUserUseCase(userId) }
+            .onSuccess { user ->
+                _uiState.update {
+                    if (user == null) MyPageUiState(loading = false)
+                    else it.copy(
+                        loading = false,
+                        nickname = user.nickname.orEmpty(),
+                        appellation = user.appellation.orEmpty(),
+                        error = null
+                    )
+                }
+            }
+            .onFailure { e ->
+                _uiState.update { it.copy(loading = false, error = e.message) }
+            }
+    }
+
+    //닉네임 변경, 현재 uid 기준으로
+    fun changeNickname(newNickname: String) = viewModelScope.launch {
+        val uid = currentUid ?: return@launch
+        runCatching { updateNicknameUseCase(uid, newNickname) }
+            .onSuccess { _uiState.update { it.copy(nickname = newNickname) } }
+            .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
+    }
+
+    // 잔디
+    private fun loadReadingStats(userId: String) = viewModelScope.launch {
+        runCatching { getDailyReadPagesUseCase(userId) }
+            .onSuccess { dailies ->
+                Log.d("DAILY", "가져온 문서 개수 : ${dailies.size}")
+                val grouped: Map<LocalDate, Int> = dailies
+                    .groupBy { it.date } // LocalDate
+                    .mapValues { (_, items) -> items.sumOf { it.totalReadPageCount } }
+
+                _readingStats.value = grouped
+            }
+            .onFailure { e ->
+                _readingStats.value = emptyMap()
+                _uiState.update { it.copy(error = e.message) }
+            }
+    }
+
+
+    // 독서 통계
+    private fun loadUserBookStats(userId: String) = viewModelScope.launch {
+        runCatching {
+            val books = getUserBooksUseCase(userId).first().also { list ->
+                // 진단 로그(원하면 주석 처리)
+                Log.d("MYPAGE", "uid=$userId, books.size=${list.size}")
+                list.firstOrNull()?.let { b ->
+                    Log.d("MYPAGE", "sample title=${b.title}, status=${b.status}, totalReadTime=${b.totalReadTime}, totalPage=${b.totalPage}")
+                }
+            }
+
+            // 완료 도서(권수/페이지 집계 기준)
+            val finished = books.filter { it.status.name.equals("FINISHED", true) || it.endDate != null }
+            val finishedCount = finished.size
+            val totalPages = finished.sumOf { it.totalPage }
+
+            //  총 독서 시간 초' → 분으로 변환해서 합산
+            val totalReadMinutes = books.sumOf { (it.totalReadTime / 60).coerceAtLeast(0) }
+
+            Triple(finishedCount, totalPages, totalReadMinutes)
+        }
+            .onSuccess { (finishedCount, totalPages, totalReadMinutes) ->
+                _uiState.update {
+                    it.copy(
+                        totalBooks = finishedCount,
+                        totalPages = totalPages,
+                        totalReadMinutes = totalReadMinutes
+                    )
+                }
+                Log.d("MYPAGE", "UI 업데이트: books=$finishedCount, pages=$totalPages, minutes=$totalReadMinutes")
+            }
+            .onFailure { e ->
+                _uiState.update { it.copy(error = e.message) }
+            }
     }
 }
