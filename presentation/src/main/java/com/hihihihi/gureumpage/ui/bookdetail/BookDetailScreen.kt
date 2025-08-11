@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -31,6 +32,7 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 
@@ -96,6 +98,7 @@ fun BookDetailScreen(
             BookDetailContent(
                 userBook = uiState.userBook!!,
                 quotes = uiState.quotes,
+                histories = uiState.histories
             )
         }
         else -> {
@@ -107,7 +110,8 @@ fun BookDetailScreen(
 @Composable
 fun BookDetailContent(
     userBook: UserBook,
-    quotes: List<Quote>
+    quotes: List<Quote>,
+    histories: List<History>
 ) {
     val scrollState = rememberLazyListState()
 
@@ -128,7 +132,7 @@ fun BookDetailContent(
             item { BookSimpleInfoSection(userBook) }
             item { ReadingProgressSection(userBook) }
             item { BookStatisticsCard() }
-            item { BookDetailTabs(quotes) }
+            item { BookDetailTabs(quotes, histories) }
         }
     }
 }
@@ -154,7 +158,7 @@ private fun BookDetailPreview() {
                 item { BookSimpleInfoSection(dummyUserBook) }
                 item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard() }
-                item { BookDetailTabs(dummyQuotes) }
+                item { BookDetailTabs(dummyQuotes, dummyRecords) }
             }
         }
     }

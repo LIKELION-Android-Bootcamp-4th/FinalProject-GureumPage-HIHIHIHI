@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
-import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -37,6 +36,7 @@ class BookDetailViewModel @Inject constructor(
                         it.copy(
                             userBook = data.userBook,
                             quotes = data.quotes,
+                            histories = data.history,
                             isLoading = false
                         )
                     }
