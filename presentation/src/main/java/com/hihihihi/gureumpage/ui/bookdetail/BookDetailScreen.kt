@@ -91,9 +91,11 @@ fun BookDetailScreen(
         uiState.isLoading -> {
             // TODO 로딩 UI
         }
+
         uiState.errorMessage != null -> {
             // TODO 에러 UI
         }
+
         uiState.userBook != null -> {
             BookDetailContent(
                 userBook = uiState.userBook!!,
@@ -101,6 +103,7 @@ fun BookDetailScreen(
                 histories = uiState.histories
             )
         }
+
         else -> {
             // TODO 빈 화면 또는 초기 화면
         }
@@ -132,7 +135,7 @@ fun BookDetailContent(
             item { BookSimpleInfoSection(userBook) }
             item { ReadingProgressSection(userBook) }
             item { BookStatisticsCard() }
-            item { BookDetailTabs(quotes, histories) }
+            item { BookDetailTabs(userBook, quotes, histories) }
         }
     }
 }
@@ -149,7 +152,7 @@ private fun BookDetailPreview() {
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(bottom = 32.dp, end = 22.dp),
-                onActionClick = {  }
+                onActionClick = { }
             )
 
             LazyColumn(
@@ -158,7 +161,7 @@ private fun BookDetailPreview() {
                 item { BookSimpleInfoSection(dummyUserBook) }
                 item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard() }
-                item { BookDetailTabs(dummyQuotes, dummyRecords) }
+                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
             }
         }
     }
