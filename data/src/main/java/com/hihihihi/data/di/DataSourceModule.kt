@@ -11,8 +11,8 @@ import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
-import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
@@ -72,6 +72,14 @@ object DataSourceModule {
 
     @Provides
     @Singleton
+    fun provideHistoryRemotedDataSource(
+        firestore: FirebaseFirestore
+    ): HistoryRemoteDataSource {
+        return HistoryRemoteDataSourceImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
     fun provideSearchRemoteDataSource(
         searchApiService: SearchApiService,
         apiKey: String
@@ -79,11 +87,4 @@ object DataSourceModule {
         return SearchRemoteDataSourceImpl(searchApiService, apiKey)
     }
 
-    @Provides
-    @Singleton
-    fun provideHistoryRemoteDataSource(
-        firestore: FirebaseFirestore
-    ): HistoryRemoteDataSource {
-        return HistoryRemoteDataSourceImpl(firestore)
-    }
 }
