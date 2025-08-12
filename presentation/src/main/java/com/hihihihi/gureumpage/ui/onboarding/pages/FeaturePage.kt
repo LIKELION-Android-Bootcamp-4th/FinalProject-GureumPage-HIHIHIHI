@@ -1,17 +1,24 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -19,6 +26,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -30,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -39,9 +48,11 @@ import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingFeature
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+@OptIn(ExperimentalFoundationApi::class)
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun FeaturePage(
-    viewModel: OnBoardingViewModel = hiltViewModel()
+    viewModel: OnBoardingViewModel
 ) {
     val pagerState = rememberPagerState { featurePages.size }
 
@@ -53,51 +64,59 @@ fun FeaturePage(
             }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        HorizontalPager(
-            state = pagerState,
-        ) { pageIndex ->
-            val page = featurePages[pageIndex]
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // 바텀 시스템 내비 영역 인셋
+        val bottomInset = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+        val indicatorPadding =  maxHeight * 0.26f - bottomInset
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(page.gureumImage),
-                    contentDescription = "OnboardingGureumImage",
-                    modifier = Modifier.size(120.dp)
-                )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    text = page.title,
-                    style = GureumTypography.displaySmall,
-                    color = GureumTheme.colors.gray900,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = page.subTitle,
-                    color = GureumTheme.colors.gray500,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 22.sp
-                )
-                Spacer(Modifier.height(24.dp))
-                Column {
-                    page.details.forEach { detail ->
-                        DotWithText(detail)
-                        Spacer(Modifier.height(4.dp))
+        // 오버 스크롤 모션 삭제
+        CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { pageIndex ->
+                val page = featurePages[pageIndex]
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(page.gureumImage),
+                        contentDescription = "OnboardingGureumImage",
+                        modifier = Modifier.size(120.dp)
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        text = page.title,
+                        style = GureumTypography.displaySmall,
+                        color = GureumTheme.colors.gray900,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = page.subTitle,
+                        color = GureumTheme.colors.gray500,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 22.sp
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Column {
+                        page.details.forEach { detail ->
+                            DotWithText(detail)
+                            Spacer(Modifier.height(4.dp))
+                        }
                     }
+                    Spacer(Modifier.height(24.dp))
                 }
-                Spacer(Modifier.height(24.dp))
             }
         }
-        PagerIndicator(state = pagerState)
+        PagerIndicator(
+            state = pagerState, modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = indicatorPadding)
+        )
     }
 }
 
@@ -178,6 +197,6 @@ private val featurePages = listOf(
 @Composable
 private fun FeaturePagePreview() {
     GureumPageTheme {
-        FeaturePage()
+//        FeaturePage()
     }
 }
