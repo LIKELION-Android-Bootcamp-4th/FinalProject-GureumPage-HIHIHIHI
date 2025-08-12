@@ -34,6 +34,7 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
@@ -108,7 +109,18 @@ fun BookDetailScreen(
                 userBook = uiState.userBook!!,
                 quotes = uiState.quotes,
                 histories = uiState.histories,
-                bookStatistic = viewModel.getStatistic()
+                bookStatistic = viewModel.getStatistic(),
+                onEvent = { event ->
+                    when (event){
+                        BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
+                            NavigationRoute.MindMap.createRoute(bookId))
+                        BookDetailFabEvent.NavigateToTimer -> navController.navigate(
+                            NavigationRoute.Timer
+                        )
+                        BookDetailFabEvent.ShowAddQuoteDialog -> TODO()
+                        BookDetailFabEvent.ShowAddReadingHistoryDialog -> TODO()
+                    }
+                }
             )
         }
 
@@ -123,7 +135,8 @@ fun BookDetailContent(
     userBook: UserBook,
     quotes: List<Quote>,
     histories: List<History>,
-    bookStatistic: BookStatistic
+    bookStatistic: BookStatistic,
+    onEvent: (BookDetailFabEvent) -> Unit = {}
 ) {
     val scrollState = rememberLazyListState()
 
@@ -143,7 +156,19 @@ fun BookDetailContent(
         // FAB
         BookDetailFab(
             ReadingStatus.READING,
-            onEvent = { /* TODO */ },
+            onEvent = { event ->
+                when (event) {
+                    BookDetailFabEvent.NavigateToMindmap,
+                    BookDetailFabEvent.NavigateToTimer -> onEvent(event)
+
+                    BookDetailFabEvent.ShowAddQuoteDialog -> {
+
+                    }
+                    BookDetailFabEvent.ShowAddReadingHistoryDialog -> {
+
+                    }
+                }
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 22.dp),

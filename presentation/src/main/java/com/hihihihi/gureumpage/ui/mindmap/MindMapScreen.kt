@@ -22,7 +22,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
 @Composable
-fun MindMapScreen(/*책 id 받기*/) {
+fun MindMapScreen(bookId: String) {
     val context = LocalContext.current
     val adapter = remember { MindMapAdapter(context) }
     var initialized by remember { mutableStateOf(false) } // init 여부
@@ -85,6 +85,6 @@ fun MindMapScreen(/*책 id 받기*/) {
 @Composable
 private fun MindMapPreview() {
     GureumPageTheme {
-        MindMapScreen()
+        MindMapScreen("")
     }
 }
