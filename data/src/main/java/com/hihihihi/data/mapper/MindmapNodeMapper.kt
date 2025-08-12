@@ -4,20 +4,24 @@ import com.hihihihi.data.remote.dto.MindmapNodeDto
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.MindmapNodeType
 
-fun MindmapNodeDto.toDomain(): MindmapNode = MindmapNode(
+fun MindmapNodeDto.toDomain() = MindmapNode(
+    mindmapNodeId = mindmapNodeId,
     mindmapId = mindmapId,
-    nodeId = nodeId,
     nodeTitle = nodeTitle,
     nodeEx = nodeEx,
-    nodeParent = nodeParent,
-    type = MindmapNodeType.valueOf(type.uppercase())
+    parentNodeId = parentNodeId,
+    color = color,
+    icon = icon,
+    deleted = deleted,
 )
 
-fun MindmapNode.toDto(): MindmapNodeDto = MindmapNodeDto(
+fun MindmapNode.toDto() = MindmapNodeDto(
+    mindmapNodeId = mindmapNodeId,
     mindmapId = mindmapId,
-    nodeId = nodeId,
     nodeTitle = nodeTitle,
     nodeEx = nodeEx,
-    nodeParent = nodeParent,
-    type = type.name.lowercase()
+    parentNodeId = parentNodeId,
+    color = color,
+    icon = icon,
+    deleted = deleted
 )
