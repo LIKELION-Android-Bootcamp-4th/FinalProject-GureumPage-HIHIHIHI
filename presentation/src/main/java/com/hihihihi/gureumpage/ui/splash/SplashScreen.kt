@@ -24,7 +24,7 @@ import com.kakao.sdk.common.util.Utility
 @Composable
 fun SplashView(navController: NavHostController) {
     LaunchedEffect(Unit) {
-        FirebaseAuth.getInstance().signOut()
+//        FirebaseAuth.getInstance().signOut()
 
         val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
         Log.e("TAG", "SplashView: 여기 진입 $isLoggedIn", )

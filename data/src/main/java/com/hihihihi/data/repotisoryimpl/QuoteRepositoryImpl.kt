@@ -25,4 +25,11 @@ class QuoteRepositoryImpl @Inject constructor(
         return quoteRemoteDataSource.getQuotes(userId)
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
+
+    override fun getQuotesByUserBookId(userBookId: String): Flow<List<Quote>> {
+        return quoteRemoteDataSource.getQuotesByUserBookId(userBookId)
+            .map { dtoList -> dtoList.map { it.toDomain() } }
+    }
+
+
 }

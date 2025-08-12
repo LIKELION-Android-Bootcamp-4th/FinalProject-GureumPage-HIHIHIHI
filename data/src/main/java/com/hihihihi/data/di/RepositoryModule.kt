@@ -3,6 +3,7 @@ package com.hihihihi.data.di
 import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
+import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.KakaoDataSource
 import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
@@ -13,6 +14,7 @@ import com.hihihihi.data.repotisoryimpl.KakaoAuthRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.NaverAuthRepositoryImpl
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.repotisoryimpl.DailyReadPageRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.HistoryRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
@@ -22,6 +24,7 @@ import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.data.repotisoryimpl.UserRepositoryImpl
 import com.hihihihi.domain.repository.DailyReadPageRepository
+import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -76,6 +79,14 @@ object RepositoryModule {
         kakaoDataSource: KakaoDataSource
     ): KakaoAuthRepository {
         return KakaoAuthRepositoryImpl(kakaoDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryRepository(
+        remoteDataSource: HistoryRemoteDataSource
+    ): HistoryRepository {
+        return HistoryRepositoryImpl(remoteDataSource)
     }
 
     @Provides

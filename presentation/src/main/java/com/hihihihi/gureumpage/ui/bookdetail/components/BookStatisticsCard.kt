@@ -19,9 +19,12 @@ import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.ui.bookdetail.BookStatistic
 
 @Composable
-fun BookStatisticsCard() {
+fun BookStatisticsCard(
+    bookStatistic: BookStatistic
+) {
     GureumCard(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 30.dp)
@@ -32,17 +35,17 @@ fun BookStatisticsCard() {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            HorizontalCenterText("독서 기간", "null")
+            HorizontalCenterText("독서 기간", bookStatistic.readingPeriod)
             VerticalDivider(
                 modifier = Modifier.height(40.dp),
                 color = GureumTheme.colors.gray200
             )
-            HorizontalCenterText("누적 독서", "null")
+            HorizontalCenterText("누적 독서", bookStatistic.totalReadingTime)
             VerticalDivider(
                 modifier = Modifier.fillMaxHeight(1f),
                 color = GureumTheme.colors.gray200
             )
-            HorizontalCenterText("하루 평균", "null")
+            HorizontalCenterText("하루 평균", bookStatistic.averageDailyTime)
         }
     }
 }
@@ -72,6 +75,6 @@ private fun HorizontalCenterText(title: String, value: String) {
 @Composable
 private fun BookStatisticsCardPreview() {
     GureumPageTheme {
-        BookStatisticsCard()
+        BookStatisticsCard(BookStatistic("","",""))
     }
 }

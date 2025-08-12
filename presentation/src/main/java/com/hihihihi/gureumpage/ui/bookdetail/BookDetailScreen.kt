@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,19 +21,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.History
+import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
+import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 
 @Composable
 fun BookDetailScreen(
@@ -87,18 +99,31 @@ fun BookDetailScreen(
         uiState.isLoading -> {
             // TODO 로딩 UI
         }
+
         uiState.errorMessage != null -> {
             // TODO 에러 UI
         }
+
         uiState.userBook != null -> {
             BookDetailContent(
                 userBook = uiState.userBook!!,
-                navController = navController,
-                snackbarHostState = snackbarHostState,
-                uiState = uiState,
-                viewModel = viewModel
+                quotes = uiState.quotes,
+                histories = uiState.histories,
+                bookStatistic = viewModel.getStatistic(),
+                onEvent = { event ->
+                    when (event){
+                        BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
+                            NavigationRoute.MindMap.createRoute(bookId))
+                        BookDetailFabEvent.NavigateToTimer -> navController.navigate(
+                            NavigationRoute.Timer
+                        )
+                        BookDetailFabEvent.ShowAddQuoteDialog -> TODO()
+                        BookDetailFabEvent.ShowAddReadingHistoryDialog -> TODO()
+                    }
+                }
             )
         }
+
         else -> {
             // TODO 빈 화면 또는 초기 화면
         }
@@ -108,32 +133,46 @@ fun BookDetailScreen(
 @Composable
 fun BookDetailContent(
     userBook: UserBook,
-    navController: NavHostController,
-    snackbarHostState: SnackbarHostState,
-    uiState: BookDetailUiState,
-    viewModel: BookDetailViewModel
+    quotes: List<Quote>,
+    histories: List<History>,
+    bookStatistic: BookStatistic,
+    onEvent: (BookDetailFabEvent) -> Unit = {}
 ) {
     val scrollState = rememberLazyListState()
 
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        BookDetailFab(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 32.dp, end = 22.dp),
-            onActionClick = { }
-        )
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = scrollState,
         ) {
             item { BookSimpleInfoSection(userBook) }
-            item { ReadingProgressSection() }
-            item { BookStatisticsCard() }
-            item { BookDetailTabs() }
+            item { ReadingProgressSection(userBook) }
+            item { BookStatisticsCard(bookStatistic) }
+            item { BookDetailTabs(userBook, quotes, histories) }
         }
+
+        // FAB
+        BookDetailFab(
+            ReadingStatus.READING,
+            onEvent = { event ->
+                when (event) {
+                    BookDetailFabEvent.NavigateToMindmap,
+                    BookDetailFabEvent.NavigateToTimer -> onEvent(event)
+
+                    BookDetailFabEvent.ShowAddQuoteDialog -> {
+
+                    }
+                    BookDetailFabEvent.ShowAddReadingHistoryDialog -> {
+
+                    }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 32.dp, end = 22.dp),
+        )
     }
 }
 
@@ -146,19 +185,20 @@ private fun BookDetailPreview() {
             modifier = Modifier.fillMaxSize(),
         ) {
             BookDetailFab(
+                ReadingStatus.READING,
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(bottom = 32.dp, end = 22.dp),
-                onActionClick = {  }
+                onEvent = { }
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item { BookSimpleInfoSection(dummyUserBook) }
-                item { ReadingProgressSection() }
-                item { BookStatisticsCard() }
-                item { BookDetailTabs() }
+                item { ReadingProgressSection(dummyUserBook) }
+                item { BookStatisticsCard(BookStatistic("","","")) }
+                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
@@ -17,6 +18,7 @@ import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
+import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.Module
@@ -45,9 +47,11 @@ object UseCaseModule {
 
     @Provides
     fun provideGetUserBookUseCase(
-        repository: UserBookRepository // Repository가 자동 주입됨
-    ): GetUserBookUseCase {
-        return GetUserBookUseCase(repository) // UseCase 생성 후 반환
+        userBookRepository: UserBookRepository, // Repository가 자동 주입됨
+        quoteRepository: QuoteRepository,
+        historyRepository: HistoryRepository
+    ): GetBookDetailDataUseCase {
+        return GetBookDetailDataUseCase(userBookRepository,quoteRepository,historyRepository) // UseCase 생성 후 반환
     }
 
 
