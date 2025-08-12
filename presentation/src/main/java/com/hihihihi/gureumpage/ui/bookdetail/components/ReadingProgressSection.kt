@@ -14,14 +14,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.UserBook
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import java.util.Date
 
 @Composable
 fun ReadingProgressSection(
+    userBook: UserBook
 //    startDate: Date,
 //    progress: Double,
 //    currentPage: Int,
@@ -39,19 +43,17 @@ fun ReadingProgressSection(
         )
         GureumLinearProgressBar(
             12,
-            123.toFloat()/456
+            userBook.currentPage.toFloat()/userBook.totalPage
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("2025.06.24~", color = GureumTheme.colors.gray300)
+            Text("${formatDateToSimpleString(userBook.startDate)}~", color = GureumTheme.colors.gray300)
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = buildAnnotatedString {
-//                    withStyle(SpanStyle(color = GureumTheme.colors.primaryDeep)) { append("$currentPage") } // TODO: 값으로 주기
-//                    withStyle(SpanStyle(GureumTheme.colors.gray300)) { append("/$totalPage") }
-                    withStyle(SpanStyle(color = GureumTheme.colors.primaryDeep)) { append("123") }
-                    withStyle(SpanStyle(GureumTheme.colors.gray300)) { append("/456") }
+                    withStyle(SpanStyle(color = GureumTheme.colors.primaryDeep)) { append(userBook.currentPage.toString()) } // TODO: 값으로 주기
+                    withStyle(SpanStyle(GureumTheme.colors.gray300)) { append("/${userBook.totalPage}") }
                 },
                 style = GureumTypography.bodySmall,
             )
@@ -64,6 +66,6 @@ fun ReadingProgressSection(
 @Composable
 private fun ReadingProgressSectionPreview() {
     GureumPageTheme {
-        ReadingProgressSection()
+        ReadingProgressSection(dummyUserBook)
     }
 }
