@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,7 +30,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
@@ -124,13 +130,6 @@ fun BookDetailContent(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        BookDetailFab(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 32.dp, end = 22.dp),
-            onActionClick = { }
-        )
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = scrollState,
@@ -140,6 +139,15 @@ fun BookDetailContent(
             item { BookStatisticsCard(bookStatistic) }
             item { BookDetailTabs(userBook, quotes, histories) }
         }
+
+        // FAB
+        BookDetailFab(
+            ReadingStatus.READING,
+            onActionClick = { /* TODO */ },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 32.dp, end = 22.dp),
+        )
     }
 }
 
@@ -152,6 +160,7 @@ private fun BookDetailPreview() {
             modifier = Modifier.fillMaxSize(),
         ) {
             BookDetailFab(
+                ReadingStatus.READING,
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(bottom = 32.dp, end = 22.dp),
