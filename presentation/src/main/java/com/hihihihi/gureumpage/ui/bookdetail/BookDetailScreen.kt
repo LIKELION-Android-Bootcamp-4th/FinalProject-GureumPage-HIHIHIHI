@@ -143,7 +143,7 @@ fun BookDetailContent(
         // FAB
         BookDetailFab(
             ReadingStatus.READING,
-            onActionClick = { /* TODO */ },
+            onEvent = { /* TODO */ },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 22.dp),
@@ -164,7 +164,7 @@ private fun BookDetailPreview() {
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(bottom = 32.dp, end = 22.dp),
-                onActionClick = { }
+                onEvent = { }
             )
 
             LazyColumn(
