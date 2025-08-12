@@ -35,6 +35,7 @@ import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
@@ -117,8 +118,7 @@ fun BookDetailScreen(
                         BookDetailFabEvent.NavigateToTimer -> navController.navigate(
                             NavigationRoute.Timer
                         )
-                        BookDetailFabEvent.ShowAddQuoteDialog -> TODO()
-                        BookDetailFabEvent.ShowAddReadingHistoryDialog -> TODO()
+                        else -> {}
                     }
                 }
             )
@@ -139,6 +139,7 @@ fun BookDetailContent(
     onEvent: (BookDetailFabEvent) -> Unit = {}
 ) {
     val scrollState = rememberLazyListState()
+    var showAddQuoteDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -161,9 +162,7 @@ fun BookDetailContent(
                     BookDetailFabEvent.NavigateToMindmap,
                     BookDetailFabEvent.NavigateToTimer -> onEvent(event)
 
-                    BookDetailFabEvent.ShowAddQuoteDialog -> {
-
-                    }
+                    BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
                     BookDetailFabEvent.ShowAddReadingHistoryDialog -> {
 
                     }
@@ -173,6 +172,13 @@ fun BookDetailContent(
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 22.dp),
         )
+
+        if(showAddQuoteDialog){
+            AddQuoteDialog(
+                onDismiss = {showAddQuoteDialog = false},
+                onSave = { _, _ -> }
+            )
+        }
     }
 }
 
