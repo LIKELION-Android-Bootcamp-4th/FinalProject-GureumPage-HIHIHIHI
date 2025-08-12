@@ -45,7 +45,7 @@ fun GureumNavGraph(
         composable(NavigationRoute.Search.route) { SearchScreen(navController) }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(NavigationRoute.Timer.route) { TimerScreen() }
-        composable(NavigationRoute.MyPage.route) { MyPageScreen() }
+        composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
             arguments = listOf(navArgument("bookId") { type = NavType.StringType })
