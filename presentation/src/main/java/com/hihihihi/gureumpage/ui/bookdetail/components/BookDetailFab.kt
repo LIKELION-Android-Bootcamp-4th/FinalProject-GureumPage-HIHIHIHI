@@ -40,26 +40,27 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.ui.bookdetail.BookDetailFabEvent
 
 @Composable
 fun BookDetailFab(
     readingStatus: ReadingStatus,
     modifier: Modifier = Modifier,
-    onActionClick: (index: Int) -> Unit
+    onEvent: (BookDetailFabEvent) -> Unit
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
     val fabItems = when (readingStatus) {
         ReadingStatus.PLANNED -> emptyList()
         ReadingStatus.READING -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onActionClick(0) },
-            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onActionClick(1) },
-            MiniFabItem(R.drawable.ic_alarm_filled, "독서 타이머 시작") { onActionClick(2) },
-            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onActionClick(3) },
+            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onEvent(BookDetailFabEvent.NavigateToMindmap) },
+            MiniFabItem(R.drawable.ic_alarm_filled, "독서 타이머 시작") { onEvent(BookDetailFabEvent.NavigateToTimer) },
+            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onEvent(BookDetailFabEvent.ShowAddReadingHistoryDialog) },
         )
         ReadingStatus.FINISHED -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onActionClick(0) },
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "마인드맵 그리기") { onActionClick(1) },
+            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onEvent(BookDetailFabEvent.NavigateToMindmap) },
         )
     }
 
@@ -138,17 +139,16 @@ fun MiniFabMenuItem(item: MiniFabItem) {
     }
 }
 
-@Preview
-@Composable
-private fun BookDetailFabPreview() {
-    GureumPageTheme {
-        BookDetailFab(readingStatus = ReadingStatus.READING ,onActionClick = { })
-    }
-}
-
-
 data class MiniFabItem(
     val icon: Int,
     val title: String,
     val onClick: () -> Unit
 )
+
+@Preview
+@Composable
+private fun BookDetailFabPreview() {
+    GureumPageTheme {
+        BookDetailFab(readingStatus = ReadingStatus.READING , onEvent = { })
+    }
+}
