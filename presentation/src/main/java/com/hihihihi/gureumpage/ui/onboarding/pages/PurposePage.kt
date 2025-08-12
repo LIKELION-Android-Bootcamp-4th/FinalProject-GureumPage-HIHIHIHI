@@ -63,6 +63,6 @@ private val purposeContents = listOf(
 @Composable
 private fun PurposePagePreview() {
     GureumPageTheme {
-        PurposePage(OnBoardingViewModel())
+//        PurposePage(OnBoardingViewModel())
     }
 }

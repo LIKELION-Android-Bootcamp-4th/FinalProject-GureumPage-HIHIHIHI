@@ -25,6 +25,8 @@ import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.repository.UserPreferencesRepository
+import com.hihihihi.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
