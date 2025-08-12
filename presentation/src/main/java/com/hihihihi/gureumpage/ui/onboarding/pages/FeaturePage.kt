@@ -1,12 +1,15 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -14,48 +17,92 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
+import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingFeature
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun FeaturePage() {
+fun FeaturePage(
+    viewModel: OnBoardingViewModel = hiltViewModel()
+) {
     val pagerState = rememberPagerState { featurePages.size }
 
-    HorizontalPager(
-        state = pagerState,
-    ) { pageIndex ->
-        val page = featurePages[pageIndex]
-
-        OnBoardingMainContents(
-            titleText = page.title,
-            subTitleText = page.subTitle,
-            gureumRes = page.gureumImage,
-        ) {
-            Spacer(Modifier.height(24.dp))
-            Column {
-                page.details.forEach { detail ->
-                    DotText(detail)
-                    Spacer(Modifier.height(4.dp))
-                }
+    LaunchedEffect(pagerState.currentPage) {
+        snapshotFlow { pagerState.currentPage to pagerState.pageCount }
+            .distinctUntilChanged()
+            .collect { (currentPage, pageCount) ->
+                viewModel.featurePageChanged(currentPage, pageCount)
             }
-            Spacer(Modifier.height(24.dp))
-            PagerIndicator(state = pagerState)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        HorizontalPager(
+            state = pagerState,
+        ) { pageIndex ->
+            val page = featurePages[pageIndex]
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(page.gureumImage),
+                    contentDescription = "OnboardingGureumImage",
+                    modifier = Modifier.size(120.dp)
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = page.title,
+                    style = GureumTypography.displaySmall,
+                    color = GureumTheme.colors.gray900,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = page.subTitle,
+                    color = GureumTheme.colors.gray500,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp
+                )
+                Spacer(Modifier.height(24.dp))
+                Column {
+                    page.details.forEach { detail ->
+                        DotWithText(detail)
+                        Spacer(Modifier.height(4.dp))
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
+            }
         }
+        PagerIndicator(state = pagerState)
     }
 }
 
 @Composable
-private fun DotText(detail: String) {
+private fun DotWithText(detail: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -105,7 +152,7 @@ private val featurePages = listOf(
         R.drawable.ic_cloud_library,
         "나만의 디지털 서재",
         "읽은 책, 읽는 중, 완독한 책을\n체계적으로 관리해요",
-        listOf("책 상태별 분류 관리", "독서 진행률 추적")
+        listOf("책 상태별 분류 관리", "독서 진행률 추적", "책 정보와 내 필사 보기")
     ),
     OnboardingFeature(
         R.drawable.ic_cloud_timer,
@@ -117,7 +164,7 @@ private val featurePages = listOf(
         R.drawable.ic_cloud_reading,
         "필사 & 마인드맵",
         "인상 깊은 문장을 기록하거나\n인물, 정보의 관계를 마인드 맵으로 만들어요",
-        listOf("책 상태별 분류 관리", "독서 진행률 추적") // TODO 첫번째와 같음
+        listOf("책 속 문장 필사", "자유로운 마인드맵 생성", "인물 및 줄거리 관계도")
     ),
     OnboardingFeature(
         R.drawable.ic_cloud_statistics,
