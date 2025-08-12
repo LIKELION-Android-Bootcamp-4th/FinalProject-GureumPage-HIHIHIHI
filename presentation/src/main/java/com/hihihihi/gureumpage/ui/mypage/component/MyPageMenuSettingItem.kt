@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -18,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -27,7 +26,7 @@ fun MyPageMenuSettingItem(
     title: String,
     showSwitch: Boolean = false, // 스위치 노출 여부
     switchChecked: Boolean = false, // 스위치 on/off 상태
-    onSwitchToggle: (Boolean) -> Unit = {}, //스위치 변경 시 콜백
+    onSwitchToggle: (GureumThemeType) -> Unit = {}, //스위치 변경 시 콜백
     textColor: Color = GureumTheme.colors.gray700,
     onClick: () -> Unit //항목 클릭 시 액션
 ) {
@@ -43,11 +42,13 @@ fun MyPageMenuSettingItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = title, style = typography.titleMedium, color = textColor)
-        if(showSwitch) {
+        if (showSwitch) {
             //다크모드 토글 스위치
             Switch(
                 checked = switchChecked,
-                onCheckedChange = onSwitchToggle,
+                onCheckedChange = {
+                    onSwitchToggle(if (it) GureumThemeType.DARK else GureumThemeType.LIGHT)
+                },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = colors.primary,
                     checkedTrackColor = colors.primary50,

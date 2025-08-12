@@ -8,13 +8,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
 fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
-    val isDarkTheme by viewModel.isDarkTheme.collectAsState() // 다크 모드 상태 관찰
+    val theme by viewModel.theme.collectAsState()
 
     val colors = GureumTheme.colors
     val typography = GureumTypography
@@ -32,7 +33,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
         MyPageMenuSettingItem(
             title = "다크모드",
             showSwitch = true,
-            switchChecked = isDarkTheme,
+            switchChecked = (theme == GureumThemeType.DARK),
             onSwitchToggle = { viewModel.toggleTheme(it)}
         ) {
             //TODO: 기능 추가
