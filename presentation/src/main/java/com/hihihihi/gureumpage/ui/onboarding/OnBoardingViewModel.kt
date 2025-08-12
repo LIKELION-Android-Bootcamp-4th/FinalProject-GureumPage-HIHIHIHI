@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
@@ -50,7 +51,8 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun saveNickname() {
-        viewModelScope.launch { setNicknameUseCase(nickname) }
+        val userId: String? = FirebaseAuth.getInstance().currentUser?.uid
+        viewModelScope.launch { setNicknameUseCase(userId!!, nickname) }
     }
 
     // TODO: 추후 사용자 앱 설치 목적 파악을 위해 DB 테이블 만들기 고려

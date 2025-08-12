@@ -6,5 +6,5 @@ import javax.inject.Inject
 class SetNicknameUseCase @Inject constructor(
     private val repository: UserPreferencesRepository
 ) {
-    suspend operator fun invoke(nickname: String) = repository.setNickname(nickname)
+    suspend operator fun invoke(userId: String, nickname: String) = repository.setNickname(userId, nickname)
 }

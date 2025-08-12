@@ -105,8 +105,9 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideUserPreferencesRepository(
-        userPreferencesDataSource: UserPreferencesLocalDataSource
+        userPreferencesDataSource: UserPreferencesLocalDataSource,
+        userRemoteDataSource: UserRemoteDataSource
     ): UserPreferencesRepository {
-        return UserPreferencesRepositoryImpl(userPreferencesDataSource)
+        return UserPreferencesRepositoryImpl(userPreferencesDataSource, userRemoteDataSource)
     }
 }

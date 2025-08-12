@@ -9,6 +9,6 @@ interface UserPreferencesRepository {
     val theme: Flow<GureumThemeType>
 
     suspend fun setOnboardingComplete(complete: Boolean)
-    suspend fun setNickname(nickname: String)
+    suspend fun setNickname(userId: String, nickname: String)
     suspend fun setTheme(theme: GureumThemeType)
 }
