@@ -81,11 +81,7 @@ private fun OnboardingContents(
         bottomContent = { page, step ->
             val isLastPage = page == pagerState.pageCount - 1
             OnboardingBottomContents(
-                buttonText = when (step) {
-                    OnboardingStep.Welcome -> "시작하기"
-                    OnboardingStep.Feature -> "다음 기능"
-                    else -> "다음 단계"
-                },
+                buttonText = if (isLastPage) "시작하기" else "다음 단계",
                 explanation = when (step) {
                     OnboardingStep.Welcome -> "설정은 언제든 변경할 수 있어요"
                     OnboardingStep.Feature -> "옆으로 밀어 구름한장의 기능을 확인해보세요!"
