@@ -1,5 +1,7 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -9,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.hihihihi.gureumpage.common.utils.openAppOnPlayStore
 import com.hihihihi.gureumpage.common.utils.openSupportEmail
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -30,7 +33,13 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
             openSupportEmail(context)
         }
         MyPageMenuSettingItem("오픈소스 라이선스") {
-            //TODO: 기능 추가
+            try {
+                OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스")
+                context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+            } catch (t : Throwable) {
+                Toast.makeText(context, "라이선스 화면을 열 수 없습니다: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+
         }
         MyPageMenuSettingItem(
             title = "다크모드",
@@ -38,10 +47,10 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
             switchChecked = isDarkTheme,
             onSwitchToggle = { viewModel.toggleTheme(it)}
         ) {
-            //TODO: 기능 추가
+
         }
         MyPageMenuSettingItem("로그아웃") {
-            //TODO: 기능 추가
+            viewModel.logout()
         }
         MyPageMenuSettingItem(
             title = "탈퇴",
