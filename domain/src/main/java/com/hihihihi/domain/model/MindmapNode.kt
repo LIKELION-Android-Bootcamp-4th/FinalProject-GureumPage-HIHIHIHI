@@ -2,10 +2,12 @@ package com.hihihihi.domain.model
 
 
 data class MindmapNode(
+    val mindmapNodeId: String,
     val mindmapId: String,
-    val nodeId: String,
     val nodeTitle: String,
     val nodeEx: String,
-    val nodeParent: String?,
-    val type: MindmapNodeType
+    val parentNodeId: String?,
+    val color: String?,
+    val icon: String?,
+    val deleted: Boolean,
 )
