@@ -27,6 +27,8 @@ uiViewbinding = "1.8.3"
 datastore = "1.1.1"
 calendarCompose = "2.4.0"
 playReview = "2.0.2"
+ossLicensesPlugin = "0.10.7"
+playServicesOssLicenses = "17.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +66,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 calendar-compose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
 google-play-review = { module = "com.google.android.play:review", version.ref = "playReview" }
 google-play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
+play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -71,4 +74,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+google-oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 
