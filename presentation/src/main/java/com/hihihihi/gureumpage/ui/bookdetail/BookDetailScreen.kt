@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.History
@@ -100,7 +101,8 @@ fun BookDetailScreen(
             BookDetailContent(
                 userBook = uiState.userBook!!,
                 quotes = uiState.quotes,
-                histories = uiState.histories
+                histories = uiState.histories,
+                bookStatistic = viewModel.getStatistic()
             )
         }
 
@@ -114,7 +116,8 @@ fun BookDetailScreen(
 fun BookDetailContent(
     userBook: UserBook,
     quotes: List<Quote>,
-    histories: List<History>
+    histories: List<History>,
+    bookStatistic: BookStatistic
 ) {
     val scrollState = rememberLazyListState()
 
@@ -134,7 +137,7 @@ fun BookDetailContent(
         ) {
             item { BookSimpleInfoSection(userBook) }
             item { ReadingProgressSection(userBook) }
-            item { BookStatisticsCard() }
+            item { BookStatisticsCard(bookStatistic) }
             item { BookDetailTabs(userBook, quotes, histories) }
         }
     }
@@ -160,7 +163,7 @@ private fun BookDetailPreview() {
             ) {
                 item { BookSimpleInfoSection(dummyUserBook) }
                 item { ReadingProgressSection(dummyUserBook) }
-                item { BookStatisticsCard() }
+                item { BookStatisticsCard(BookStatistic("","","")) }
                 item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
             }
         }
