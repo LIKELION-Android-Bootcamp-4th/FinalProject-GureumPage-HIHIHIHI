@@ -118,7 +118,7 @@ fun BookDetailScreen(
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
                             NavigationRoute.MindMap.createRoute(bookId))
                         BookDetailFabEvent.NavigateToTimer -> navController.navigate(
-                            NavigationRoute.Timer
+                            NavigationRoute.Timer.createRoute(bookId)
                         )
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
                         else -> {}
