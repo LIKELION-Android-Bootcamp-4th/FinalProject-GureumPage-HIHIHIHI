@@ -39,7 +39,7 @@ fun QuotesTab(
         quotes.forEach { quote ->
             QuoteCard(
                 id = quote.id,
-                date = quote.createdAt.toLocalDate().toString(),
+                date = quote.createdAt?.toLocalDate().toString(), //TODO !!처리..
                 page = quote.pageNumber,
                 quote = quote.content,
                 onMenuClick = onMenuClick

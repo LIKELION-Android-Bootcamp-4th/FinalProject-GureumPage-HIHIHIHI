@@ -166,7 +166,10 @@ fun AddQuoteDialog(
                 GureumButton(
                     text = "저장하기",
                     enabled = quote.isNotBlank(),
-                    onClick = { onSave(pageNumber.ifBlank { null }, quote) }
+                    onClick = {
+                        onSave(pageNumber.ifBlank { null }, quote)
+                        onDismiss()
+                    }
                 )
             }
         }
