@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.onboarding
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +23,7 @@ import javax.inject.Inject
 class OnBoardingViewModel @Inject constructor(
     private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
     private val setNicknameUseCase: SetNicknameUseCase,
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
 ) : ViewModel() {
     private val _steps = MutableStateFlow<List<OnboardingStep>>(emptyList())
     val steps: StateFlow<List<OnboardingStep>> = _steps
@@ -32,7 +31,7 @@ class OnBoardingViewModel @Inject constructor(
     val selectedPurposes = mutableStateListOf<String>()
     var nickname by mutableStateOf("")
         private set
-    var selectedTheme by mutableStateOf<GureumThemeType?>(null)
+    var theme by mutableStateOf<GureumThemeType?>(null)
         private set
 
     init {
@@ -48,13 +47,10 @@ class OnBoardingViewModel @Inject constructor(
 
     fun updateNickname(nickname: String) {
         this.nickname = nickname
-        Log.d("Onboarding", "저장된 닉네임 ${this.nickname}")
     }
 
     fun saveNickname() {
-        viewModelScope.launch {
-            setNicknameUseCase(nickname)
-        }
+        viewModelScope.launch { setNicknameUseCase(nickname) }
     }
 
     // TODO: 추후 사용자 앱 설치 목적 파악을 위해 DB 테이블 만들기 고려
@@ -63,25 +59,21 @@ class OnBoardingViewModel @Inject constructor(
         else selectedPurposes.add(purpose)
     }
 
-    fun isNextEnabled(step: OnboardingStep): Boolean {
-        return when (step) {
-            OnboardingStep.Nickname -> nickname.validateNickname()
-            OnboardingStep.Purpose -> selectedPurposes.isNotEmpty()
-            OnboardingStep.Theme -> selectedTheme != null
-            else -> true
-        }
+    fun isNextEnabled(step: OnboardingStep): Boolean = when (step) {
+        OnboardingStep.Nickname -> nickname.validateNickname()
+        OnboardingStep.Purpose -> selectedPurposes.isNotEmpty()
+        OnboardingStep.Theme -> theme != null
+        else -> true
+    }
+
+    fun selectTheme(theme: GureumThemeType) {
+        this@OnBoardingViewModel.theme = theme
     }
 
     fun saveOnboardingComplete() {
         viewModelScope.launch {
+            theme?.let { setThemeUseCase(it) }
             setOnboardingCompleteUseCase(true)
-        }
-    }
-
-    fun saveTheme(theme: GureumThemeType) {
-        selectedTheme = theme
-        viewModelScope.launch {
-            setThemeUseCase(theme)
         }
     }
 }

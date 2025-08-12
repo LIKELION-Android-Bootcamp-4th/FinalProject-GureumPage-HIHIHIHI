@@ -36,6 +36,7 @@ fun OnBoardingScreen(
                 viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
+                    launchSingleTop = true
                 }
             },
         )
