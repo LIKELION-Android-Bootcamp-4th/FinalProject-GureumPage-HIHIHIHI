@@ -1,15 +1,12 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.GureumThemeType
-import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
@@ -42,13 +39,5 @@ fun ThemePage(viewModel: OnBoardingViewModel) {
             selected = selectedTheme == GureumThemeType.LIGHT,
             onSelected = { viewModel.selectTheme(GureumThemeType.LIGHT) }
         )
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ThemePagePreview() {
-    GureumPageTheme {
-//        ThemePage()
     }
 }

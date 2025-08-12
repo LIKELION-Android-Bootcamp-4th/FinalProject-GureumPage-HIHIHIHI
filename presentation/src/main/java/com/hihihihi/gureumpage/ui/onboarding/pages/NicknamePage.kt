@@ -67,7 +67,6 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                     textAlign = TextAlign.End
                 )
             }
-
         }
     }
 }
