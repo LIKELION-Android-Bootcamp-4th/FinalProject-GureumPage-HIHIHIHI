@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.getDailyAverageReadTimeInSeconds
@@ -24,9 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
-    private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
-):ViewModel(){
-
+    private val getUseBookUseCase: GetUserBookUseCase,
+) : ViewModel() {
     // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
@@ -49,7 +49,6 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-
     /**
      * 필사 추가 기능
      *
@@ -57,6 +56,7 @@ class BookDetailViewModel @Inject constructor(
      * @param content 명언 내용
      * @param pageNumber 해당 페이지 번호 (nullable)
      */
+
     fun addQuote(userBookId: String, content: String, pageNumber: Int?, ){
         val userBook = uiState.value.userBook ?: return // 방어 코드
 
