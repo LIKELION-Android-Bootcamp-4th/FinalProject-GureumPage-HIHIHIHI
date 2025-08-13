@@ -15,6 +15,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,23 +26,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageMenuSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.gureumpage.ui.mypage.component.NicknameChangeDialog
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
 fun MyPageScreen(
+    navController: NavHostController,
     viewModel: MypageViewModel = hiltViewModel()
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
     val readingStats by viewModel.readingStats.collectAsState()
     val state by viewModel.uiState.collectAsState()
+
+    //로그아웃 이벤트 수집 -> 로그인 화면으로 이동
+    LaunchedEffect(Unit) {
+        viewModel.logoutEvent.collectLatest {
+            navController.navigate(NavigationRoute.Login.route) {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true}
+                launchSingleTop = true
+            }
+        }
+    }
 
     var showNicknameDialog by rememberSaveable  { mutableStateOf(false) } // 다이얼로그 상태
 
