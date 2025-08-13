@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.getDailyAverageReadTimeInSeconds
@@ -17,15 +16,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
-    private val getUseBookUseCase: GetUserBookUseCase,
+    private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
 ) : ViewModel() {
     // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())

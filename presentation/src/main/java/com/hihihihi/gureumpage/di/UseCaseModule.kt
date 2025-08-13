@@ -20,7 +20,6 @@ import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
@@ -49,7 +48,7 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideGetUserBookUseCase(
+    fun provideGetBookDetailDataUseCase(
         userBookRepository: UserBookRepository, // Repository가 자동 주입됨
         quoteRepository: QuoteRepository,
         historyRepository: HistoryRepository
@@ -59,9 +58,15 @@ object UseCaseModule {
 
     @Provides
     fun provideAddUserBookUseCase(
-        repository: UserBookRepository
+        userBookRepository: UserBookRepository,
+        mindmapRepository: MindmapRepository,
+        mindmapNodeRepository: MindmapNodeRepository,
     ): AddUserBookUseCase {
-        return AddUserBookUseCase(repository)
+        return AddUserBookUseCase(
+            userBookRepository = userBookRepository,
+            mindmapRepository = mindmapRepository,
+            mindmapNodeRepository = mindmapNodeRepository,
+        )
     }
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
