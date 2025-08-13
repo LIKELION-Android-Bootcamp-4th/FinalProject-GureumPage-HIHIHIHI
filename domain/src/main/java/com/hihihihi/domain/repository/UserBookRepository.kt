@@ -13,5 +13,5 @@ interface UserBookRepository {
 
     fun getUserBook(userBookId: String): Flow<UserBook>
 
-    suspend fun addUserBook(userBook: UserBook): Result<Unit>
+    suspend fun addUserBook(userBook: UserBook): Result<String>
 }

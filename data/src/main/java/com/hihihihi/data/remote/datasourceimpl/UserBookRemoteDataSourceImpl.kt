@@ -76,11 +76,11 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
-    override suspend fun addUserBook(userBookDto: UserBookDto): Result<Unit> = try {
+    override suspend fun addUserBook(userBookDto: UserBookDto): Result<String> = try {
         val documentReference = firestore.collection("user_books").document()
         documentReference.set(userBookDto.toMap()).await()
 
-        Result.success(Unit)
+        Result.success(documentReference.id)
     } catch (e: Exception) {
         Result.failure(e)
     }

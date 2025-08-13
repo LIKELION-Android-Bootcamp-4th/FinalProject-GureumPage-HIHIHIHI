@@ -13,5 +13,5 @@ interface UserBookRemoteDataSource {
 
     fun getUserBook(userBookId: String): Flow<UserBookDto>
 
-    suspend fun addUserBook(userBookDto: UserBookDto): Result<Unit>
+    suspend fun addUserBook(userBookDto: UserBookDto): Result<String>
 }
