@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.gyso.treeview.TreeViewEditor
@@ -25,12 +25,13 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.DialogAddNodeBinding
 import java.util.UUID
 import androidx.core.graphics.drawable.toDrawable
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import coil3.load
+import coil3.request.crossfade
+import coil3.request.transformations
+import coil3.transform.RoundedCornersTransformation
 import com.gyso.treeview.model.TreeModel
-import com.hihihihi.domain.operation.NodeEditOperation
+import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.gureumpage.databinding.DialogNodeDetailBinding
-import com.hihihihi.gureumpage.ui.mindmap.mapper.toDomain
 import com.hihihihi.gureumpage.ui.mindmap.model.MindMapNodeData
 
 typealias TreeNode = NodeModel<MindMapNodeData>
@@ -38,12 +39,10 @@ typealias TreeNode = NodeModel<MindMapNodeData>
 class MindMapAdapter(
     val context: Context,
     var onNodeAction: ((node: TreeNode, action: NodeAction) -> Unit)? = null,
-    var onEditOperation: ((operation: NodeEditOperation) -> Unit)? = null,
 ) : TreeViewAdapter<MindMapNodeData>() {
     enum class NodeAction { EDIT, DELETE }
 
     private lateinit var editor: TreeViewEditor // 마인드 맵 편집 객체
-    private var selected: TreeNode? = null      // 현재 선택된 노드
     private var editMode: Boolean = false       // 편집 모드
 
     var mindmapId: String = ""
@@ -51,7 +50,7 @@ class MindMapAdapter(
     private val undoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
     private val redoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
 
-
+    // Editor 설정
     fun setEditor(treeViewEditor: TreeViewEditor) {
         editor = treeViewEditor
         editor.requestMoveNodeByDragging(false) // 화면 드래그 활성화 여부
@@ -67,37 +66,45 @@ class MindMapAdapter(
         val titleView = holder.view.findViewById<TextView>(R.id.node_title)
         val iconView = holder.view.findViewById<TextView>(R.id.node_icon)
         val colorView = holder.view.findViewById<View>(R.id.node_color)
+        val coverView = holder.view.findViewById<ImageView>(R.id.node_book_image)
 
         titleView.text = node.title
 
-        node.color?.toInt()?.let { colorInt ->
-            val bg = colorView.background.mutate() as GradientDrawable// 뷰의 shape drawable을 mutate() 후 tint
-            bg.setColor(colorInt)
-            colorView.background = bg
-            colorView.visibility = View.VISIBLE
-        }
-
-        if (!node.icon.isNullOrEmpty()) {
-            iconView.visibility = View.VISIBLE
-            iconView.text = node.icon
-        } else {
+        // 책 커버(루트 노드)여부
+        val showCover = !node.bookImage.isNullOrBlank() && holder.node.parentNode == null
+        if (showCover) {
+            coverView.visibility = View.VISIBLE
+            coverView.load(node.bookImage) {
+                crossfade(true)
+                transformations(RoundedCornersTransformation(10f))
+            }
             iconView.visibility = View.GONE
+            colorView.visibility = View.GONE
+        } else {
+            coverView.visibility = View.GONE
+            node.color?.let { colorLong ->
+                val colorInt = (colorLong and 0xFFFFFFFF).toInt()
+                (colorView.background.mutate() as GradientDrawable).setColor(colorInt)
+                colorView.visibility = View.VISIBLE
+            } ?: run { colorView.visibility = View.GONE }
+
+            if (!node.icon.isNullOrEmpty()) {
+                iconView.visibility = View.VISIBLE
+                iconView.text = node.icon
+            } else {
+                iconView.visibility = View.GONE
+            }
         }
 
         // 노드 클릭 시 이벤트
         holder.view.setOnClickListener {
-            selected = holder.node
             if (editMode) { // 편집 모드면 노드 추가 다이얼로그
                 showAddNodeDialog(holder.view.context, null) { newNode ->
                     val child = NodeModel(newNode)
                     performAdd(holder.node, child)
-                    onEditOperation?.invoke(
-                        NodeEditOperation.Add(
-                            newNode.toDomain(mindmapId = mindmapId, parentId = holder.node.value.id)
-                        )
-                    )
                 }
-            } else { // 편집 모드 아니면 상세 내용 보기 다이얼로그(or 바텀 시트)
+                Log.d("MindMapAdapter", holder.node.value.id)
+            } else { // 편집 모드 아니면 상세 내용 보기 다이얼로그
                 showDetailDialog(holder.view.context, holder.node)
             }
         }
@@ -110,20 +117,10 @@ class MindMapAdapter(
                 holder.view,
                 onEdit = {
                     onNodeAction?.invoke(holder.node, NodeAction.EDIT)
-                    showAddNodeDialog(holder.view.context, holder.node) { editedUi ->
-                        snapshotBeforeChange()
-                        holder.node.value = editedUi
-                        notifyDataSetChange()
-                        onEditOperation?.invoke(
-                            NodeEditOperation.Update(
-                                editedUi.toDomain(mindmapId = mindmapId, parentId = holder.node.parentNode?.value?.id)
-                            )
-                        )
-                    }
+                    snapshotBeforeChange()
                 },
                 onDelete = {
                     onNodeAction?.invoke(holder.node, NodeAction.DELETE)
-                    onEditOperation?.invoke(NodeEditOperation.Delete(holder.node.value.id))
                 }
             )
             true
@@ -140,6 +137,7 @@ class MindMapAdapter(
         }
     }
 
+    // 노드 추가를 스택에 추가
     fun performAdd(parent: NodeModel<MindMapNodeData>, child: NodeModel<MindMapNodeData>) {
         snapshotBeforeChange()
         editor.addChildNodes(parent, child)
@@ -172,7 +170,6 @@ class MindMapAdapter(
                 cloneChildren(child)                            // 재귀
             }
         }
-
         cloneChildren(origRoot)
         return newModel
     }
@@ -197,6 +194,7 @@ class MindMapAdapter(
         }
     }
 
+    // 편집 모드로 변경 함수
     fun changeEditMode(state: Boolean) {
         editMode = state
         editor.requestMoveNodeByDragging(state)
@@ -224,6 +222,7 @@ class MindMapAdapter(
         }
     }
 
+    // 수정 삭제 팝업
     fun showNodePopup(anchor: View, onEdit: () -> Unit, onDelete: () -> Unit) {
         val context = anchor.context
         val popupView = LayoutInflater.from(context).inflate(R.layout.popup_node_menu, null)
@@ -247,7 +246,9 @@ class MindMapAdapter(
         pw.showAsDropDown(anchor, context.dpToPx(100), -anchor.height) // 팝업 거리 조절
     }
 
+    // 노드 추가 수정 다이얼로그
     fun showAddNodeDialog(context: Context, existingNode: TreeNode? = null, onSave: (MindMapNodeData) -> Unit) {
+        Log.d("MindMapAdapter", "다이얼로그 호출")
         // AndroidViewBinding 경유할 때 테마를 못 찾을 수 있음
         val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
         val binding = DialogAddNodeBinding.inflate(themedInflater)
@@ -263,14 +264,12 @@ class MindMapAdapter(
             binding.editTitle.setText(existingNode.value.title)
             binding.editContent.setText(existingNode.value.content ?: "")
 
-            if (selectedIcon != null) {
-                val imageView = binding.iconContainer.findViewWithTag<ImageView>(selectedIcon)
-                updateIconSelection(binding.iconContainer, imageView)
+            binding.iconContainer.findViewWithTag<ImageView>(selectedIcon)?.let {
+                updateIconSelection(binding.iconContainer, it)
             }
 
-            if (selectedColor != null) {
-                val colorView = binding.colorContainer.findViewWithTag<View>(selectedColor)
-                updateColorSelection(binding.colorContainer, colorView)
+            binding.colorContainer.findViewWithTag<View>(selectedColor)?.let {
+                updateColorSelection(binding.colorContainer, it)
             }
         }
 
@@ -373,7 +372,6 @@ class MindMapAdapter(
                 id = existingNode?.value?.id ?: UUID.randomUUID().toString(),
                 title = binding.editTitle.text.toString(),
                 content = binding.editContent.text.toString(),
-                bookImage = selectedIcon.toString(),
                 icon = selectedIcon,
                 color = selectedColor
             )
@@ -383,6 +381,7 @@ class MindMapAdapter(
         dialog.show()
     }
 
+    // 노드 상세 정보 다이얼로그
     fun showDetailDialog(context: Context, currentNode: TreeNode) {
         val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
         val binding = DialogNodeDetailBinding.inflate(themedInflater)
@@ -414,3 +413,26 @@ class MindMapAdapter(
 
 fun Context.dpToPx(dp: Int): Int =
     (dp * resources.displayMetrics.density).toInt()
+
+// 트리를 스냅샷 리스트로 변환
+fun MindMapAdapter.asDomainList(mindmapId: String): List<MindmapNode> {
+    val model = this.treeModel ?: return emptyList()
+    val nodes = mutableListOf<MindmapNode>()
+    fun dfs(node: TreeNode, parentId: String?) {
+        val value = node.value
+        nodes += MindmapNode(
+            mindmapNodeId = value.id,
+            mindmapId = mindmapId,
+            nodeTitle = value.title,
+            nodeEx = value.content.orEmpty(),
+            parentNodeId = parentId,
+            color = value.color?.toString(),
+            icon = value.icon,
+            deleted = false,
+            bookImage = value.bookImage
+        )
+        node.childNodes.forEach { dfs(it, value.id) }
+    }
+    dfs(model.rootNode, null)
+    return nodes
+}

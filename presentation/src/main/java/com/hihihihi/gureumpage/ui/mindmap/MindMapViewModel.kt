@@ -7,154 +7,99 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.operation.NodeEditOperation
-import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
 import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
 import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MindMapViewModel @Inject constructor(
-    private val observeUseCase: ObserveUseCase,
-    private val applyNodeOperation: ApplyNodeOperation,
-    private val getMindmapUseCase: GetMindmapUseCase
+    private val observeUseCase: ObserveUseCase,             // 노드 실시간 스트림
+    private val applyNodeOperation: ApplyNodeOperation,     // 일괄 변경 적용
 ) : ViewModel() {
+    // 화면에 그릴 스냅샷 노드들
     private val _nodes = MutableStateFlow<List<MindmapNode>>(emptyList())
     val nodes: StateFlow<List<MindmapNode>> = _nodes
 
-    private val _pending = MutableStateFlow<List<NodeEditOperation>>(emptyList())
+    // 편집 시작 시점 스냅샷
+    private var baseline: List<MindmapNode> = emptyList()
 
+    // observe 수신, 저장이 충돌하지 않게하는 플래그
     private var saving by mutableStateOf(false)
-    private var autosaveJob: Job? = null
 
     var editing by mutableStateOf(false)
         private set
     lateinit var mindmapId: String
         private set
 
+    // 마인드맵 로드
     fun load(mindmapId: String) {
         this.mindmapId = mindmapId
         viewModelScope.launch {
+            // 편집중이거나 수정중이 아닐 떄 덮어씀
             observeUseCase(mindmapId).collect { if (!editing && !saving) _nodes.value = it }
         }
     }
 
+    // 편집 시작. 현재 화면 상태를 baseLine으로 고정
     fun startEdit() {
         editing = true
-        _pending.value = emptyList()
+        baseline = _nodes.value
     }
 
-    fun endEdit(autoSave: Boolean = true) {
+    // 편집 종료. 로컬과 서버 연동
+    fun endEdit(currentTree: List<MindmapNode>, autoSave: Boolean = true) {
         if (!editing) return
         viewModelScope.launch {
-            if (autoSave) flush()                          // 남은 델타 저장
+            if (autoSave) {
+                flushDiff(currentTree)
+                _nodes.value = currentTree
+            }
             editing = false
         }
     }
 
-    fun record(operation: NodeEditOperation) {
-        _pending.update { reduce(it + operation) }
-        scheduleAutosave()
-    }
+    // baseLine과 현재 노드 차이 계산해 서버에 적용
+    private suspend fun flushDiff(current: List<MindmapNode>) {
+        val operations =  diff(baseline, current)
 
-    fun saveAndExit() {
-        viewModelScope.launch {
-            flush()
-            editing = false
-        }
-//        val operations = _pending.value
-//        viewModelScope.launch {
-//            if (operations.isNotEmpty()) applyNodeOperation(mindmapId, operations)
-//            _pending.value = emptyList()
-//            editing = false
-//        }
-    }
-
-    private fun scheduleAutosave() {
-        autosaveJob?.cancel()
-        autosaveJob = viewModelScope.launch {
-            delay(800)                                     // 0.8s 디바운스
-            flush()
-        }
-    }
-
-    private suspend fun flush() {
-        val ops = _pending.value
-        if (ops.isEmpty()) return
+        if (operations.isEmpty()) return
         saving = true
         try {
-            applyNodeOperation(mindmapId, ops).getOrThrow()
-            _pending.value = emptyList()
-        } catch (t: Throwable) {
-            // 실패 시 펜딩 유지(재시도 가능)
+            applyNodeOperation(mindmapId, operations).getOrThrow()
         } finally {
             saving = false
         }
     }
 
-    // 같은 노드에 대한 연속 작업을 최소화
-    private fun reduce(ops: List<NodeEditOperation>): List<NodeEditOperation> {
-        val adds = LinkedHashMap<String, MindmapNode>()
-        val updates = LinkedHashMap<String, MindmapNode>()
-        val deletes = LinkedHashSet<String>()
+    // 두 스냅샷 차이를 계산
+    private fun diff(oldList: List<MindmapNode>, newList: List<MindmapNode>): List<NodeEditOperation> {
+        val old = oldList.associateBy { it.mindmapNodeId }
+        val neu = newList.associateBy { it.mindmapNodeId }
+        val operations = mutableListOf<NodeEditOperation>()
 
-        ops.forEach { operation ->
-            when (operation) {
-                is NodeEditOperation.Add -> {
-                    deletes.remove(operation.node.mindmapNodeId)
-                    val id = operation.node.mindmapNodeId
-                    adds[id] = (adds[id]?.copy(
-                        nodeTitle = operation.node.nodeTitle,
-                        nodeEx = operation.node.nodeEx,
-                        icon = operation.node.icon,
-                        color = operation.node.color,
-                        parentNodeId = operation.node.parentNodeId
-                    )) ?: operation.node
-                    updates.remove(id)
-                }
+        // 삭제
+        for ((id, _) in old) if (id !in neu) operations += NodeEditOperation.Delete(id)
 
-                is NodeEditOperation.Update -> {
-                    val id = operation.node.mindmapNodeId
-                    if (adds.containsKey(id)) {
-                        adds[id] = adds[id]!!.copy(
-                            nodeTitle = operation.node.nodeTitle,
-                            nodeEx = operation.node.nodeEx,
-                            icon = operation.node.icon,
-                            color = operation.node.color,
-                            parentNodeId = operation.node.parentNodeId
-                        )
-                    } else if (!deletes.contains(id)) {
-                        updates[id] = operation.node
-                    }
-                }
-
-                is NodeEditOperation.Delete -> {
-                    adds.remove(operation.nodeId)
-                    updates.remove(operation.nodeId)
-                    deletes.add(operation.nodeId)
-                }
+        // 추가/수정
+        for ((id, n) in neu) {
+            val o = old[id]
+            if (o == null) {
+                operations += NodeEditOperation.Add(n)
+            } else if (
+                o.nodeTitle != n.nodeTitle ||
+                o.nodeEx != n.nodeEx ||
+                o.parentNodeId != n.parentNodeId ||
+                o.icon != n.icon ||
+                o.color != n.color ||
+                o.bookImage != n.bookImage
+            ) {
+                operations += NodeEditOperation.Update(n)
             }
         }
-
-        return buildList {
-            adds.values.forEach {
-                add(NodeEditOperation.Add(it))
-            }
-            updates.values.forEach {
-                add(NodeEditOperation.Update(it))
-            }
-            deletes.forEach {
-                add(NodeEditOperation.Delete(it))
-            }
-        }
+        return operations
     }
 }
