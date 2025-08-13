@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,9 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +51,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddManualHistoryDialog(
+    currentPage: Int,
     onDismiss: () -> Unit,
     onSave: (
         date: LocalDateTime,
@@ -70,7 +68,7 @@ fun AddManualHistoryDialog(
     var startTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var endTime by remember { mutableStateOf<LocalDateTime?>(null) }
 
-    var startPage by remember { mutableStateOf("") }
+    var startPage by remember { mutableStateOf(currentPage.toString()) }
     var endPage by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
@@ -199,7 +197,7 @@ fun AddManualHistoryDialog(
                 GureumTextField(
                     value = readTime?.let { formatSecondsToReadableTimeWithoutSecond(it) } ?: "",
                     onValueChange = {},
-                    hint = "총 읽은 시간",
+                    hint = "시작 시간과 끝 시간을 설정해주세요",
                     enabled = false
                 )
 
@@ -253,11 +251,11 @@ fun AddManualHistoryDialog(
                             val startHour = startTime?.hour ?: 0
                             (startHour..23).toList()
                         }
-
                         val minuteValuesForEnd = remember(startTime, tempHour) {
-                            val startMinute = if (tempHour == (startTime?.hour ?: 0)) startTime?.minute ?: 0 else 0
+                            val startMinute = if (tempHour == (startTime?.hour ?: 0)) (startTime?.minute ?: 0) + 1 else 0
                             (startMinute..59).toList()
                         }
+
 
                         GureumNumberPicker(
                             initialHour = tempHour,
@@ -271,7 +269,7 @@ fun AddManualHistoryDialog(
                             tempHour = h
                             tempMinute = m
                         }
-                        Spacer(Modifier.height(10.dp))
+                        Spacer(Modifier.height(24.dp))
                         GureumButton(text = "확인", onClick = {
                             date?.let { d ->
                                 val selectedTime = LocalTime.of(tempHour, tempMinute)
