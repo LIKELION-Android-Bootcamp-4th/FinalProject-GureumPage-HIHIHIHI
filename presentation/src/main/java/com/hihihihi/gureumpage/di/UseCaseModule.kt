@@ -18,10 +18,10 @@ import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
+import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,6 +55,12 @@ object UseCaseModule {
         return GetBookDetailDataUseCase(userBookRepository,quoteRepository,historyRepository) // UseCase 생성 후 반환
     }
 
+    @Provides
+    fun providePatchUserBookUseCase(
+        repository: UserBookRepository
+    ): PatchUserBookUseCase {
+        return PatchUserBookUseCase(repository)
+    }
     @Provides
     fun provideAddUserBookUseCase(
         repository: UserBookRepository

@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.bookdetail.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,7 +38,8 @@ import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 
 @Composable
 fun BookSimpleInfoSection(
-    userBook: UserBook
+    userBook: UserBook,
+    onReadingStatusClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -75,7 +77,7 @@ fun BookSimpleInfoSection(
                     modifier = Modifier.size(40.dp)
                 )
                 Text(
-                    "읽는 중인 책",
+                    userBook.status.displayName,
                     style = GureumTypography.bodyMedium,
                     color = GureumTheme.colors.systemGreen,
                 )
@@ -83,6 +85,7 @@ fun BookSimpleInfoSection(
                     painter = painterResource(id = R.drawable.ic_arrow_down),
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(GureumTheme.colors.gray800),
+                    modifier = Modifier.clickable { onReadingStatusClick() }
                 )
             }
         }
@@ -94,6 +97,6 @@ fun BookSimpleInfoSection(
 @Composable
 private fun BookSimpleInfoSectionPreview() {
     GureumPageTheme {
-        BookSimpleInfoSection(dummyUserBook)
+        BookSimpleInfoSection(dummyUserBook, {})
     }
 }
