@@ -4,6 +4,8 @@ import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.KakaoDataSource
+import com.hihihihi.data.remote.datasource.MindmapNodeRemoteDataSource
+import com.hihihihi.data.remote.datasource.MindmapRemoteDataSource
 import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
@@ -14,6 +16,8 @@ import com.hihihihi.data.repotisoryimpl.NaverAuthRepositoryImpl
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.repotisoryimpl.DailyReadPageRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.HistoryRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.MindmapNodeRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.MindmapRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
@@ -23,6 +27,8 @@ import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.data.repotisoryimpl.UserRepositoryImpl
 import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
+import com.hihihihi.domain.repository.MindmapNodeRepository
+import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -108,5 +114,21 @@ object RepositoryModule {
         remoteDataSource: SearchRemoteDataSource
     ): SearchRepository {
         return SearchRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMindmapRepository(
+        remoteDataSource: MindmapRemoteDataSource
+    ): MindmapRepository {
+        return MindmapRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMindmapNodeRepository(
+        remoteDataSource: MindmapNodeRemoteDataSource
+    ): MindmapNodeRepository {
+        return MindmapNodeRepositoryImpl(remoteDataSource)
     }
 }
