@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.oss.licenses)
 }
 
 
@@ -138,4 +139,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.calendar.compose)
+
+    implementation(libs.google.play.review)
+    implementation(libs.google.play.review.ktx)
+
+    implementation(libs.play.services.oss.licenses)
 }
