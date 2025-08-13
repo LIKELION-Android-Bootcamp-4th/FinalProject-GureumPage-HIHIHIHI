@@ -9,7 +9,9 @@ import com.hihihihi.domain.model.History
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.time.temporal.ChronoUnit
 
 /**
@@ -60,6 +62,11 @@ class PageFormatter : ValueFormatter() {
 fun formatDateToSimpleString(dateTime: LocalDateTime?): String {
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     return dateTime?.format(formatter) ?: ""
+}
+
+
+fun toLocalDateTime(date: Date): LocalDateTime {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
 }
 
 /**

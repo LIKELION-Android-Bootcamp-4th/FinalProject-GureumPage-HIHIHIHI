@@ -1,5 +1,6 @@
 package com.hihihihi.data.remote.mapper
 
+import com.google.firebase.firestore.FieldValue
 import com.hihihihi.data.remote.dto.UserBookDto
 import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.data.common.util.toTimestamp
@@ -31,7 +32,7 @@ fun UserBookDto.toDomain(): UserBook {
 
 fun UserBook.toDto(): UserBookDto {
     return UserBookDto(
-        userBookId =  this.userBookId,
+        userBookId = this.userBookId,
         userId = this.userId,
         isbn10 = this.isbn10,
         isbn13 = this.isbn13,
@@ -52,7 +53,6 @@ fun UserBook.toDto(): UserBookDto {
     )
 }
 
-
 fun UserBookDto.toMap(): Map<String, Any?> {
     return mapOf(
         "user_id" to userId,
@@ -71,6 +71,6 @@ fun UserBookDto.toMap(): Map<String, Any?> {
         "review" to review,
         "rating" to rating,
         "category" to category,
-        "created_at" to createdAt
+        "created_at" to FieldValue.serverTimestamp(),
     )
 }

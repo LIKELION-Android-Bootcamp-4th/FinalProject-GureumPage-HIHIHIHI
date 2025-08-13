@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.home
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,7 +18,6 @@ import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.home.components.CurrentReadingBookSection
-import com.hihihihi.gureumpage.ui.home.components.EmptyView
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
@@ -54,12 +54,15 @@ fun HomeScreen(
         }
 
         else -> {
-            HomeScreenContent(
-                books = uiState.value.books,
-                quotes = uiState.value.quotes,
-                onBookClick = {
-                    navController.navigate(NavigationRoute.BookDetail.createRoute(it))
-                })
+            Column {
+                HomeScreenContent(
+                    books = uiState.value.books,
+                    quotes = uiState.value.quotes,
+                    onBookClick = {
+                        navController.navigate(NavigationRoute.BookDetail.createRoute(it))
+                    },
+                )
+            }
         }
     }
 }
@@ -84,7 +87,6 @@ fun HomeScreenContent(
     ) {
         item {
             SearchBarWithBackground()
-
         }
 
         item {
@@ -111,9 +113,6 @@ fun HomeScreenContent(
         }
     }
 }
-
-
-
 
 @Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
