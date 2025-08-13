@@ -9,9 +9,11 @@ interface UserBookRemoteDataSource {
     // 특정 사용자(userId)의 책 목록을 비동기 스트림(Flow) 형태로 반환
     fun getUserBooks(userId: String): Flow<List<UserBookDto>>
 
-    fun getUserBooksByStatus(userId: String,status: ReadingStatus): Flow<List<UserBookDto>>
+    fun getUserBooksByStatus(userId: String, status: ReadingStatus): Flow<List<UserBookDto>>
 
     fun getUserBook(userBookId: String): Flow<UserBookDto>
 
     suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit>
+
+    suspend fun addUserBook(userBookDto: UserBookDto): Result<Unit>
 }

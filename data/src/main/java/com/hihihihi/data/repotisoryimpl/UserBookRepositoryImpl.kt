@@ -13,7 +13,7 @@ import javax.inject.Inject
 // UserBookRepository 인터페이스 구현체
 class UserBookRepositoryImpl @Inject constructor(
     private val userBookRemoteDataSource: UserBookRemoteDataSource // Firestore 원격 데이터 소스 주입
-): UserBookRepository {
+) : UserBookRepository {
     // 사용자 ID로 책 목록을 가져오는 함수 구현
     override fun getUserBooks(userId: String): Flow<List<UserBook>> {
         return userBookRemoteDataSource.getUserBooks(userId)  // DTO 리스트를 Flow로 받음
@@ -36,4 +36,8 @@ class UserBookRepositoryImpl @Inject constructor(
     }
 
 
+    override suspend fun addUserBook(userBook: UserBook): Result<Unit> {
+        val userBookDto = userBook.toDto()
+        return userBookRemoteDataSource.addUserBook(userBookDto)
+    }
 }
