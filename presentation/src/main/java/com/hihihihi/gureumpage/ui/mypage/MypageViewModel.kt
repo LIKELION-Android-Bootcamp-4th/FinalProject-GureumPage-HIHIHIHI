@@ -4,16 +4,20 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
-import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
-import com.hihihihi.domain.usecase.theme.SetDarkThemeUseCase
+import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,12 +27,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
-    private val getDarkThemeUserCase: GetDarkThemeUserCase, // 다크모드 조회용 usecase
-    private val setDarkThemeUseCase: SetDarkThemeUseCase, // 다크모드 저장용 Usecase
+    private val setThemeUseCase: SetThemeUseCase, // 다크모드 저장용 Usecase
     private val getDailyReadPagesUseCase: GetDailyReadPagesUseCase, // 잔디
     private val getUserUseCase: GetUserUseCase, // 사용자 정보 조회
     private val updateNicknameUseCase: UpdateNicknameUseCase, // 닉네임 변경
-    private val getUserBooksUseCase: GetUserBooksUseCase //총 권수 계산용
+    private val getUserBooksUseCase: GetUserBooksUseCase, //총 권수 계산용
+    getTheme: GetThemeFlowUseCase,
 ) : ViewModel() {
 
     // FirebaseAuth로 현재 uid 참조
@@ -37,13 +41,12 @@ class MypageViewModel @Inject constructor(
         get() = auth.currentUser?.uid
 
     //DataStore 에서 다크모드 여부를 Flow 로 받아오는 StateFlow 형태로 보관
-    val isDarkTheme: StateFlow<Boolean> =
-        getDarkThemeUserCase().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
 
     //스위치 클릭 시 호출
-    fun toggleTheme(enabled: Boolean) {
+    fun toggleTheme(theme: GureumThemeType) {
         viewModelScope.launch {
-            setDarkThemeUseCase(enabled) //선택된 모드 상태를 저장
+            setThemeUseCase(theme) //선택된 모드 상태를 저장
         }
     }
 
@@ -55,6 +58,9 @@ class MypageViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MyPageUiState())
     val uiState: StateFlow<MyPageUiState> = _uiState
 
+    //로그아웃 이벤트
+    private val _logoutEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
     init {
         // 로그인 상태에서만 진입 -> uid 없으면 로딩 해제
@@ -76,7 +82,6 @@ class MypageViewModel @Inject constructor(
             loadUserBookStats(it)
         }
     }
-
 
     private fun loadUser(userId: String) = viewModelScope.launch {
         _uiState.update { it.copy(loading = true, error = null) }
@@ -157,5 +162,15 @@ class MypageViewModel @Inject constructor(
             .onFailure { e ->
                 _uiState.update { it.copy(error = e.message) }
             }
+    }
+
+    //로그아웃: firebase 세션 종료 후 이벤트 발생
+    fun logout() = viewModelScope.launch {
+        runCatching { auth.signOut() }
+            .onSuccess {
+                _uiState.value = MyPageUiState(loading = false)
+                _logoutEvent.tryEmit(Unit)
+            }
+            .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
     }
 }

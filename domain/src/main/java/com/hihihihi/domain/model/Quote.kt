@@ -9,7 +9,7 @@ data class Quote(
     val content: String,
     val pageNumber: Int?,
     val isLiked: Boolean,
-    val createdAt: LocalDateTime,
+    val createdAt: LocalDateTime?,
     val title: String,
     val author: String,
     val publisher: String,

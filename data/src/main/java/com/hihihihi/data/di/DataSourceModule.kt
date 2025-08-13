@@ -4,6 +4,8 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
+import com.hihihihi.data.local.datasourceimpl.UserPreferencesLocalDataSourceImpl
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
@@ -125,5 +127,13 @@ object DataSourceModule {
         fireStore: FirebaseFirestore
     ): MindmapNodeRemoteDataSource {
         return MindmapNodeRemoteDataSourceImpl(fireStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesLocalDataSource(
+        @ApplicationContext context: Context
+    ): UserPreferencesLocalDataSource {
+        return UserPreferencesLocalDataSourceImpl(context)
     }
 }

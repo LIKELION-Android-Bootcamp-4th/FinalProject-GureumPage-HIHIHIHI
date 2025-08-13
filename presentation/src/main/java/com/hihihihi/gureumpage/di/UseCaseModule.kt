@@ -8,6 +8,7 @@ import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.repository.UserPreferencesRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
@@ -19,6 +20,11 @@ import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
 import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
+import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.domain.usecase.user.SetNicknameUseCase
+import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
+import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -99,7 +105,6 @@ object UseCaseModule {
         return SignInWithKakaoUseCase(kakaoAuthRepository, authRepository)
     }
 
-
     @Provides
     fun provideSignInWithNaverUseCase(
         naverAuthRepository: NaverAuthRepository,
@@ -148,5 +153,40 @@ object UseCaseModule {
         repository: MindmapNodeRepository
     ): ApplyNodeOperation {
         return ApplyNodeOperation(repository)
+    }
+
+    @Provides
+    fun provideOnboardingCompleteUseCase(
+        repository: UserPreferencesRepository
+    ): SetOnboardingCompleteUseCase {
+        return SetOnboardingCompleteUseCase(repository)
+    }
+
+    @Provides
+    fun provideSetNicknameUseCase(
+        repository: UserPreferencesRepository
+    ): SetNicknameUseCase {
+        return SetNicknameUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetNicknameUseCase(
+        repository: UserPreferencesRepository
+    ): GetNicknameFlowUseCase {
+        return GetNicknameFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideSetThemeUseCase(
+        repository: UserPreferencesRepository
+    ): SetThemeUseCase {
+        return SetThemeUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetThemeUseCase(
+        repository: UserPreferencesRepository
+    ): GetThemeFlowUseCase {
+        return GetThemeFlowUseCase(repository)
     }
 }

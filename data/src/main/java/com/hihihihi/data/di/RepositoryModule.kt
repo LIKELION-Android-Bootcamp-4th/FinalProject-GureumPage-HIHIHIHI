@@ -1,5 +1,6 @@
 package com.hihihihi.data.di
 
+import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
@@ -21,6 +22,7 @@ import com.hihihihi.data.repotisoryimpl.MindmapRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
+import com.hihihihi.data.repotisoryimpl.UserPreferencesRepositoryImpl
 import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
@@ -32,6 +34,7 @@ import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
+import com.hihihihi.domain.repository.UserPreferencesRepository
 import com.hihihihi.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -130,5 +133,14 @@ object RepositoryModule {
         remoteDataSource: MindmapNodeRemoteDataSource
     ): MindmapNodeRepository {
         return MindmapNodeRepositoryImpl(remoteDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesRepository(
+        userPreferencesDataSource: UserPreferencesLocalDataSource,
+        userRemoteDataSource: UserRemoteDataSource
+    ): UserPreferencesRepository {
+        return UserPreferencesRepositoryImpl(userPreferencesDataSource, userRemoteDataSource)
     }
 }

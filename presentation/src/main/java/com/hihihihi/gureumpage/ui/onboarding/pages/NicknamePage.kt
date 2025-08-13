@@ -51,7 +51,8 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                 hint = "닉네임을 입력해주세요",
                 textAlign = TextAlign.Center,
                 imeAction = ImeAction.Done,
-                isError = !viewModel.nickname.validateNickname()
+                isError = !viewModel.nickname.validateNickname(),
+                onSubmit = { viewModel.saveNickname() }
             ) {
                 Text(
                     text = buildAnnotatedString {
@@ -66,7 +67,6 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                     textAlign = TextAlign.End
                 )
             }
-
         }
     }
 }
@@ -76,6 +76,6 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
 @Composable
 private fun NicknamePagePreview() {
     GureumPageTheme {
-        NicknamePage(OnBoardingViewModel())
+//        NicknamePage(OnBoardingViewModel())
     }
 }
