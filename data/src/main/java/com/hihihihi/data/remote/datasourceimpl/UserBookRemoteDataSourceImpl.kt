@@ -76,6 +76,16 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
+    override suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit> = try{
+        val docRef = firestore.collection("user_books").document(userBookDto.userBookId)
+
+        docRef.set(userBookDto.toMap()).await()
+
+        Result.success(Unit)
+    } catch (e: Exception){
+        Result.failure(e)
+    }
+
     override suspend fun addUserBook(userBookDto: UserBookDto): Result<String> = try {
         val documentReference = firestore.collection("user_books").document()
         documentReference.set(userBookDto.toMap()).await()

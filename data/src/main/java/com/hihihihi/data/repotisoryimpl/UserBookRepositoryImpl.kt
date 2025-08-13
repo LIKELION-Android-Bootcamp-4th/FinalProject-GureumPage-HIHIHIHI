@@ -29,6 +29,13 @@ class UserBookRepositoryImpl @Inject constructor(
         return userBookRemoteDataSource.getUserBook(userBookId).map { it.toDomain() }
     }
 
+    override suspend fun patchUserBook(userBook: UserBook): Result<Unit> {
+        val userBookDto = userBook.toDto()
+
+        return userBookRemoteDataSource.patchUserBook(userBookDto)
+    }
+
+
     override suspend fun addUserBook(userBook: UserBook): Result<String> {
         val userBookDto = userBook.toDto()
         return userBookRemoteDataSource.addUserBook(userBookDto)
