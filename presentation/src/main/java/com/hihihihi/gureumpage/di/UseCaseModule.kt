@@ -3,12 +3,20 @@ package com.hihihihi.gureumpage.di
 import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.MindmapNodeRepository
+import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.UpdateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
+import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
@@ -85,5 +93,47 @@ object UseCaseModule {
         authRepository: AuthRepository
     ): SignInWithNaverUseCase {
         return SignInWithNaverUseCase(naverAuthRepository, authRepository)
+    }
+
+    @Provides
+    fun provideCreateMindmapUseCase(
+        repository: MindmapRepository
+    ): CreateMindmapUseCase {
+        return CreateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetMindmapUseCase(
+        repository: MindmapRepository
+    ): GetMindmapUseCase {
+        return GetMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateMindmapUseCase(
+        repository: MindmapRepository
+    ): UpdateMindmapUseCase {
+        return UpdateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveUseCase(
+        repository: MindmapNodeRepository
+    ): ObserveUseCase {
+        return ObserveUseCase(repository)
+    }
+
+    @Provides
+    fun provideLoadNodesUseCase(
+        repository: MindmapNodeRepository
+    ): LoadNodesUseCase {
+        return LoadNodesUseCase(repository)
+    }
+
+    @Provides
+    fun provideApplyNodeOperation(
+        repository: MindmapNodeRepository
+    ): ApplyNodeOperation {
+        return ApplyNodeOperation(repository)
     }
 }
