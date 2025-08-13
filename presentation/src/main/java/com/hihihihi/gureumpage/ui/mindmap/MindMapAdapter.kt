@@ -25,20 +25,28 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.DialogAddNodeBinding
 import java.util.UUID
 import androidx.core.graphics.drawable.toDrawable
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.gyso.treeview.model.TreeModel
+import com.hihihihi.domain.operation.NodeEditOperation
 import com.hihihihi.gureumpage.databinding.DialogNodeDetailBinding
+import com.hihihihi.gureumpage.ui.mindmap.mapper.toDomain
+import com.hihihihi.gureumpage.ui.mindmap.model.MindMapNodeData
 
 typealias TreeNode = NodeModel<MindMapNodeData>
 
 class MindMapAdapter(
     val context: Context,
     var onNodeAction: ((node: TreeNode, action: NodeAction) -> Unit)? = null,
+    var onEditOperation: ((operation: NodeEditOperation) -> Unit)? = null,
 ) : TreeViewAdapter<MindMapNodeData>() {
     enum class NodeAction { EDIT, DELETE }
 
     private lateinit var editor: TreeViewEditor // 마인드 맵 편집 객체
     private var selected: TreeNode? = null      // 현재 선택된 노드
     private var editMode: Boolean = false       // 편집 모드
+
+    var mindmapId: String = ""
 
     private val undoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
     private val redoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
@@ -83,6 +91,11 @@ class MindMapAdapter(
                 showAddNodeDialog(holder.view.context, null) { newNode ->
                     val child = NodeModel(newNode)
                     performAdd(holder.node, child)
+                    onEditOperation?.invoke(
+                        NodeEditOperation.Add(
+                            newNode.toDomain(mindmapId = mindmapId, parentId = holder.node.value.id)
+                        )
+                    )
                 }
             } else { // 편집 모드 아니면 상세 내용 보기 다이얼로그(or 바텀 시트)
                 showDetailDialog(holder.view.context, holder.node)
@@ -95,8 +108,23 @@ class MindMapAdapter(
 
             showNodePopup(
                 holder.view,
-                onEdit = { onNodeAction?.invoke(holder.node, NodeAction.EDIT) },
-                onDelete = { onNodeAction?.invoke(holder.node, NodeAction.DELETE) }
+                onEdit = {
+                    onNodeAction?.invoke(holder.node, NodeAction.EDIT)
+                    showAddNodeDialog(holder.view.context, holder.node) { editedUi ->
+                        snapshotBeforeChange()
+                        holder.node.value = editedUi
+                        notifyDataSetChange()
+                        onEditOperation?.invoke(
+                            NodeEditOperation.Update(
+                                editedUi.toDomain(mindmapId = mindmapId, parentId = holder.node.parentNode?.value?.id)
+                            )
+                        )
+                    }
+                },
+                onDelete = {
+                    onNodeAction?.invoke(holder.node, NodeAction.DELETE)
+                    onEditOperation?.invoke(NodeEditOperation.Delete(holder.node.value.id))
+                }
             )
             true
         }
@@ -372,7 +400,7 @@ class MindMapAdapter(
             binding.nodeColor.background = bg
             binding.nodeIconContainer.visibility = View.VISIBLE
         }
-        
+
         currentNode.value.icon?.let { emoji ->
             binding.nodeIcon.text = emoji
             binding.nodeIconContainer.visibility = View.VISIBLE

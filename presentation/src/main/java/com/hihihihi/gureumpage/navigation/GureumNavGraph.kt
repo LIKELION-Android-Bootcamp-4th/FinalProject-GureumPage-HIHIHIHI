@@ -11,7 +11,6 @@ import androidx.navigation.navArgument
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
-import com.hihihihi.gureumpage.ui.library.dummyBooks
 import com.hihihihi.gureumpage.ui.login.LoginScreen
 import com.hihihihi.gureumpage.ui.mindmap.MindMapScreen
 import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
@@ -40,14 +39,16 @@ fun GureumNavGraph(
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(
-            NavigationRoute.MindMap.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            route = NavigationRoute.MindMap.route,
+            arguments = listOf(
+                navArgument("mindmapId") { type = NavType.StringType },
+                navArgument("bookId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
-            bookId?.let {
-                MindMapScreen(
-                    bookId = it,
-                )
+            val mindmapId = backStackEntry.arguments?.getString("mindmapId")
+            if (bookId != null && mindmapId != null) {
+                MindMapScreen(bookId = bookId, mindmapId = mindmapId)
             }
         }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
