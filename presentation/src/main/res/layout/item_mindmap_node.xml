@@ -9,6 +9,15 @@
     android:orientation="vertical"
     android:padding="8dp">
 
+    <ImageView
+        android:id="@+id/node_book_image"
+        android:layout_width="72dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:contentDescription="북커버" />
+
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
