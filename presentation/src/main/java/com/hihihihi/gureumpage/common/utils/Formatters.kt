@@ -5,11 +5,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.hihihihi.domain.model.History
 import java.text.NumberFormat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.time.temporal.ChronoUnit
 
 /**
  * 일반 숫자 포맷
@@ -114,4 +117,37 @@ fun formatTimeRange(startTime: LocalDateTime?, endTime: LocalDateTime?): String 
     val start = startTime?.format(timeFormatter) ?: "--:--"
     val end = endTime?.format(timeFormatter) ?: "--:--"
     return "$start ~ $end"
+}
+
+/**
+ * LocalDateTime 과 오늘 날짜 비교해서 일수 계산
+ */
+fun getDayCountLabel(startDateTime: LocalDateTime): String {
+    val startDate = startDateTime.toLocalDate()
+    val today = LocalDate.now()
+
+    val days = ChronoUnit.DAYS.between(startDate, today) + 1
+    return if (days > 999) {
+        "999+일째"
+    } else {
+        "${days}일째"
+    }
+}
+
+/**
+ * History에서 하루 별 독서 시간 평균 계산
+ */
+fun getDailyAverageReadTimeInSeconds(histories: List<History>): String {
+    val dateAveragesInSeconds = histories
+        .filter { it.date != null }
+        .groupBy { it.date!!.toLocalDate() }
+        .map { (_, dailyList) ->
+            dailyList.map { it.readTime }.average()
+        }
+
+    return if (dateAveragesInSeconds.isNotEmpty()) {
+        formatSecondsToReadableTime(dateAveragesInSeconds.average().toInt())
+    } else {
+        "0분"
+    }
 }

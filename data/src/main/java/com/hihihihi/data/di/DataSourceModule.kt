@@ -1,17 +1,27 @@
 package com.hihihihi.data.di
 
+import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.hihihihi.data.remote.datasource.AuthDataSource
+import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
+import com.hihihihi.data.remote.datasource.KakaoDataSource
+import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
-import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.DailyReadPageRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.SearchRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.UserBookRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.UserRemoteDataSourceImpl
 import com.hihihihi.data.remote.service.SearchApiService
 import dagger.Module
 import dagger.Provides
@@ -70,6 +80,23 @@ object DataSourceModule {
         firestore: FirebaseFirestore
     ): HistoryRemoteDataSource {
         return HistoryRemoteDataSourceImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRemoteDataSource(
+        firestore: FirebaseFirestore
+    ): UserRemoteDataSource {
+        return UserRemoteDataSourceImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDailyReadPageRemoteDataSource(
+        firestore: FirebaseFirestore
+    ): DailyReadPageRemoteDataSource {
+        return DailyReadPageRemoteDataSourceImpl(firestore)
+    }
 
     @Provides
     @Singleton

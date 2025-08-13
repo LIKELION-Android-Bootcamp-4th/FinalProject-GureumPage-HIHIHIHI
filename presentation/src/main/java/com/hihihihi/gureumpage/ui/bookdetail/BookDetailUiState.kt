@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
 import com.hihihihi.domain.model.Book
+import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.UserBook
 
@@ -10,6 +11,7 @@ data class BookDetailUiState(
     val isLoading: Boolean = false,         // 화면 전체 로딩 상태 여부
     val errorMessage: String? = null,       // 에러 메시지 (null이면 에러 없음)
     val quotes: List<Quote> = emptyList(),  // 필사 목록
+    val histories: List<History> = emptyList(), // 읽은 책 목록
     val addQuoteState: AddQuoteState = AddQuoteState()  // 필사 추가 상태 관리 객체
 )
 

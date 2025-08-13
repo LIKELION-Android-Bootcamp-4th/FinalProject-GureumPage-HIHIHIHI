@@ -5,13 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
+import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
+import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
+import com.hihihihi.gureumpage.common.utils.getDailyAverageReadTimeInSeconds
+import com.hihihihi.gureumpage.common.utils.getDayCountLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,22 +27,25 @@ class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
     private val getUseBookUseCase: GetUserBookUseCase,
 ) : ViewModel() {
-
     // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
 
     fun loadUserBookDetails(userBookId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            try {
-                getUseBookUseCase(userBookId).collect { userBook ->
-                    _uiState.update { it.copy(userBook = userBook, isLoading = false) }
+            getBookDetailDataUseCase(userBookId)
+                .onStart { _uiState.update { it.copy(isLoading = true)   } }
+                .catch { e -> _uiState.update { it.copy(errorMessage = e.message, isLoading = false) } }
+                .collect{ data ->
+                    _uiState.update {
+                        it.copy(
+                            userBook = data.userBook,
+                            quotes = data.quotes,
+                            histories = data.history,
+                            isLoading = false
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "알 수 없는 오류", isLoading = false) }
-            }
         }
     }
 
@@ -88,4 +99,20 @@ class BookDetailViewModel @Inject constructor(
     fun resetAddQuoteState() {
         _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
     }
+
+    // 통계 반환하는 함수
+    fun getStatistic(): BookStatistic{
+        return BookStatistic(
+            readingPeriod = if(uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(uiState.value.userBook?.startDate!!),
+            totalReadingTime = if(uiState.value.userBook?.totalReadTime == null) "0분" else formatSecondsToReadableTime(uiState.value.userBook?.totalReadTime!!),
+            averageDailyTime = getDailyAverageReadTimeInSeconds(uiState.value.histories)
+        )
+    }
 }
+
+data class BookStatistic(
+    val readingPeriod: String,
+    val totalReadingTime: String,
+    val averageDailyTime: String
+)
+

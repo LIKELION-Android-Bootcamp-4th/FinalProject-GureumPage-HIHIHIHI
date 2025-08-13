@@ -9,4 +9,5 @@ interface QuoteRepository {
     // 성공 시 Result.Success(Unit), 실패 시 Result.Failure(Exception) 반환
     suspend fun addQuote(quote: Quote): Result<Unit>
     fun getQuotes(userId: String): Flow<List<Quote>>
+    fun getQuotesByUserBookId(userBookId: String): Flow<List<Quote>>
 }

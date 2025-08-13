@@ -46,4 +46,25 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
             }
         awaitClose { quotesCollection.remove() }
     }
+
+    override fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>>  = callbackFlow {
+        val quotesCollection = firestore.collection("quotes")
+            .whereEqualTo("userbook_id", userBookId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val quotes = snapshot?.documents?.mapNotNull { document ->
+                    document.toObject(QuoteDto::class.java)?.apply {
+                        quoteId = document.id
+                    }
+                } ?: emptyList()
+                trySend(quotes)
+            }
+        awaitClose { quotesCollection.remove() }
+    }
+
+
 }

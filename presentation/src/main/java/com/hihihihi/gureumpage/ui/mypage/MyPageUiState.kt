@@ -5,6 +5,8 @@ data class MyPageUiState(
     val error: String? = null,
     val nickname: String = "",
     val appellation: String = "",
-    val dailyGoalTime: Int = 0
+    val totalPages: Int = 0,
+    val totalBooks: Int = 0,
+    val totalReadMinutes: Int = 0,
 ) {
 }
