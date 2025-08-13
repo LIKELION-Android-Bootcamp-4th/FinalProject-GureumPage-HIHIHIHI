@@ -29,7 +29,7 @@ val dummyRecords = listOf(
         endTime = now,
         readTime = 5 * 60,
         readPageCount = 3,
-        recordType = RecordType.MENUAL
+        recordType = RecordType.MANUAL
     ),
     History(
         id = "3",

@@ -30,6 +30,7 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.bookdetail.components.AddManualHistoryDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
@@ -57,6 +58,7 @@ fun BookDetailScreen(
 //    var pageNumber by remember { mutableStateOf("") }
 
     var showAddQuoteDialog by remember { mutableStateOf(false) }
+    var showAddManualHistoryDialog by remember { mutableStateOf(false) }
     var showReadingStatusSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(bookId) {
@@ -120,7 +122,7 @@ fun BookDetailScreen(
                             NavigationRoute.Timer.createRoute(bookId)
                         )
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
-                        else -> {}
+                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog = true
                     }
                 }
             )
@@ -136,6 +138,17 @@ fun BookDetailScreen(
             onDismiss = {showAddQuoteDialog = false},
             onSave = { pageNumber, content,  ->
                 viewModel.addQuote(bookId, content, pageNumber?.toIntOrNull())
+            }
+        )
+    }
+
+    if (showAddManualHistoryDialog) {
+        AddManualHistoryDialog(
+            onDismiss = { showAddManualHistoryDialog = false },
+            onSave = {
+                date, startTime, endTime, readTime, readPageCount ->
+//                viewModel.addManualHistory(bookId, date, startTime, endTime, readTime, readPageCount)
+//                showAddManualHistoryDialog = false
             }
         )
     }

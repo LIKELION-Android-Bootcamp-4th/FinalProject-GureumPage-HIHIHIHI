@@ -40,6 +40,7 @@ fun GureumTextField(
     minLines: Int = 1,
     maxLines: Int = 1,
     roundedCorner: Dp = 12.75.dp,
+    enabled: Boolean = true,
     isError: Boolean = false,
     textAlign: TextAlign = TextAlign.Start,
     textStyle: TextStyle = GureumTypography.bodyMedium,
@@ -91,6 +92,7 @@ fun GureumTextField(
         leadingIcon = leadingIcon,
         minLines = minLines,
         maxLines = maxLines,
+        enabled = enabled,
         shape = RoundedCornerShape(roundedCorner),
         textStyle = textStyle.copy(textAlign = textAlign),
         keyboardOptions = KeyboardOptions.Default.copy(

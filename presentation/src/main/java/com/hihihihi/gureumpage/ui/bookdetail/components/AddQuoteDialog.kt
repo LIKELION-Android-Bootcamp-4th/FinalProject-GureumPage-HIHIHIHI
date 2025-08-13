@@ -175,14 +175,3 @@ fun AddQuoteDialog(
         }
     }
 }
-
-
-@Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Composable
-private fun PreviewAddQuoteDialog() {
-    AddQuoteDialog(
-        onDismiss = {},
-        onSave = { _, _ -> }
-    )
-}

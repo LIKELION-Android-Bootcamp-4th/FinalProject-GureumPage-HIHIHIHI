@@ -56,7 +56,7 @@ fun BookDetailFab(
             MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
             MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onEvent(BookDetailFabEvent.NavigateToMindmap) },
             MiniFabItem(R.drawable.ic_alarm_filled, "독서 타이머 시작") { onEvent(BookDetailFabEvent.NavigateToTimer) },
-            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onEvent(BookDetailFabEvent.ShowAddReadingHistoryDialog) },
+            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onEvent(BookDetailFabEvent.ShowAddManualHistoryDialog) },
         )
         ReadingStatus.FINISHED -> listOf(
             MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
