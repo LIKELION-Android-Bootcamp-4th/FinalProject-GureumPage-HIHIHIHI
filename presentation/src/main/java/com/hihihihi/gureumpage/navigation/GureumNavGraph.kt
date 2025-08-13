@@ -66,7 +66,7 @@ fun GureumNavGraph(
                 )
             }
         }
-        composable(NavigationRoute.MyPage.route) { MyPageScreen() }
+        composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
