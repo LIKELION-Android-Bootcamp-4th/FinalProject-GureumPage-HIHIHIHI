@@ -11,9 +11,12 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -55,6 +58,9 @@ class MypageViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MyPageUiState())
     val uiState: StateFlow<MyPageUiState> = _uiState
 
+    //로그아웃 이벤트
+    private val _logoutEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
     init {
         // 로그인 상태에서만 진입 -> uid 없으면 로딩 해제
@@ -157,5 +163,15 @@ class MypageViewModel @Inject constructor(
             .onFailure { e ->
                 _uiState.update { it.copy(error = e.message) }
             }
+    }
+
+    //로그아웃: firebase 세션 종료 후 이벤트 발생
+    fun logout() = viewModelScope.launch {
+        runCatching { auth.signOut() }
+            .onSuccess {
+                _uiState.value = MyPageUiState(loading = false)
+                _logoutEvent.tryEmit(Unit)
+            }
+            .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
     }
 }
