@@ -37,8 +37,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.BodyMediumText
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
@@ -47,6 +49,7 @@ import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.Date
 import java.util.Locale
 
@@ -56,7 +59,14 @@ fun AddBookBottomSheet(
     book: SearchBook,
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onConfirm: (category: String, page: Int) -> Unit,
+    onConfirm: (
+        searchBook: SearchBook,
+        startDate: LocalDateTime,
+        endDate: LocalDateTime,
+        currentPage: Int,
+        totalPage: Int,
+        status: ReadingStatus
+    ) -> Unit,
     onGetBookPageCount: (isbn: String, onResult: (Int?) -> Unit) -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf("읽을 책") }
@@ -64,8 +74,8 @@ fun AddBookBottomSheet(
     var bookPageCount by remember { mutableStateOf<Int?>(null) }
     val focusManager = LocalFocusManager.current
     // "읽은 책" 상태 변수
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf(LocalDateTime.now()) }
+    var endDate by remember { mutableStateOf(LocalDateTime.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var dateFieldToUpdate by remember { mutableStateOf<((String) -> Unit)?>(null) }
     val datePickerState = rememberDatePickerState()
@@ -164,7 +174,8 @@ fun AddBookBottomSheet(
                     CategoryRow(
                         title = title, subtitle = subtitle, isSelected = isSelected, onClick = {
                             selectedCategory = title
-                        })
+                        }
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -218,19 +229,20 @@ fun AddBookBottomSheet(
                     ) {
                         // 시작일 입력 필드
                         DatePickTextField(
-                            value = startDate,
+                            // TODO:
+                            value = formatDateToSimpleString(startDate),
                             placeholder = "시작한 날",
                             onClick = {
-                                dateFieldToUpdate = { newDate -> startDate = newDate }
+//                                dateFieldToUpdate = { newDate -> startDate = toLocalDateTime(newDate) }
                                 showDatePicker = true
                             }
                         )
                         // 종료일 입력 필드
                         DatePickTextField(
-                            value = endDate,
+                            value = formatDateToSimpleString(endDate),
                             placeholder = "다 읽은 날",
                             onClick = {
-                                dateFieldToUpdate = { newDate -> endDate = newDate }
+//                                dateFieldToUpdate = { newDate -> endDate = newDate }
                                 showDatePicker = true
                             }
                         )
@@ -263,10 +275,8 @@ fun AddBookBottomSheet(
                         }
                     }
                 }
-
                 else -> {}
             }
-
 
             Spacer(modifier = Modifier.height(24.dp))
             GureumButton(
@@ -276,9 +286,19 @@ fun AddBookBottomSheet(
                     //페이지 가져오기 기본값 0
                     val page = pageInput.toIntOrNull() ?: 0
                     //viewModel에 전달 할 데이터
-                    onConfirm(selectedCategory, page)
-                })
+                    onConfirm(book, startDate, endDate, page, bookPageCount ?: 0, selectedCategory.toReadingStatus()!!)
+                }
+            )
             Spacer(modifier = Modifier.height(26.dp))
         }
+    }
+}
+
+private fun String.toReadingStatus(): ReadingStatus? {
+    return when (this.trim()) {
+        "읽을 책" -> ReadingStatus.PLANNED
+        "읽는 중" -> ReadingStatus.READING
+        "읽은 책" -> ReadingStatus.FINISHED
+        else -> null
     }
 }

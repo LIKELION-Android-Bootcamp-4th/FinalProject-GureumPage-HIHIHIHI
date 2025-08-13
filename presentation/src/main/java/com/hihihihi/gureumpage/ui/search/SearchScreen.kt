@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -140,18 +139,19 @@ fun SearchScreen(
     //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
     if (bookToAdd != null) {
         AddBookBottomSheet(
-            book = bookToAdd!!, 
-            sheetState = sheetState, 
+            book = bookToAdd!!,
+            sheetState = sheetState,
             onDismiss = {
                 scope.launch {
                     sheetState.hide()
                     bookToAdd = null
                 }
-            }, 
-            onConfirm = { category, page ->
+            },
+            onConfirm = { searchBook, startDate, endDate, currentPage, totalPage, readingState ->
                 scope.launch {
                     sheetState.hide()
                     bookToAdd = null
+                    viewModel.addUserBook(searchBook, startDate, endDate, currentPage, totalPage, readingState)
                 }
             },
             onGetBookPageCount = { isbn, onResult ->

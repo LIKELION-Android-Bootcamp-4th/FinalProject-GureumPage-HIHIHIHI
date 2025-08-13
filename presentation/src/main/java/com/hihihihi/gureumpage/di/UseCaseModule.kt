@@ -17,6 +17,7 @@ import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
+import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -54,6 +55,12 @@ object UseCaseModule {
         return GetBookDetailDataUseCase(userBookRepository,quoteRepository,historyRepository) // UseCase 생성 후 반환
     }
 
+    @Provides
+    fun provideAddUserBookUseCase(
+        repository: UserBookRepository
+    ): AddUserBookUseCase {
+        return AddUserBookUseCase(repository)
+    }
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
     @Provides
