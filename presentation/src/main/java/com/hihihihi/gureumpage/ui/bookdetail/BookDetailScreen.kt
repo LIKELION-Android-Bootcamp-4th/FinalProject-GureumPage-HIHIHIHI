@@ -35,6 +35,7 @@ import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
@@ -54,9 +55,11 @@ fun BookDetailScreen(
     // ViewModel에서 관리하는 UI 상태를 Compose State로 수집
     val uiState by viewModel.uiState.collectAsState()
 
-    // 사용자 입력 내용과 페이지 번호를 상태로 기억
-    var content by remember { mutableStateOf("") }
-    var pageNumber by remember { mutableStateOf("") }
+//    // 사용자 입력 내용과 페이지 번호를 상태로 기억
+//    var content by remember { mutableStateOf("") }
+//    var pageNumber by remember { mutableStateOf("") }
+
+    var showAddQuoteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(bookId) {
         viewModel.loadUserBookDetails(bookId)
@@ -68,8 +71,8 @@ fun BookDetailScreen(
         when {
             state.isSuccess -> {
                 // 추가 성공 시 입력 필드 초기화
-                content = ""
-                pageNumber = ""
+//                content = ""
+//                pageNumber = ""
                 Log.e("TAG", "BookDetailScreen: 성공!")
 
                 // 성공 스낵바 표시
@@ -115,10 +118,10 @@ fun BookDetailScreen(
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
                             NavigationRoute.MindMap.createRoute(bookId))
                         BookDetailFabEvent.NavigateToTimer -> navController.navigate(
-                            NavigationRoute.Timer
+                            NavigationRoute.Timer.createRoute(bookId)
                         )
-                        BookDetailFabEvent.ShowAddQuoteDialog -> TODO()
-                        BookDetailFabEvent.ShowAddReadingHistoryDialog -> TODO()
+                        BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
+                        else -> {}
                     }
                 }
             )
@@ -127,6 +130,15 @@ fun BookDetailScreen(
         else -> {
             // TODO 빈 화면 또는 초기 화면
         }
+    }
+
+    if(showAddQuoteDialog){
+        AddQuoteDialog(
+            onDismiss = {showAddQuoteDialog = false},
+            onSave = { pageNumber, content,  ->
+                viewModel.addQuote(bookId, content, pageNumber?.toIntOrNull())
+            }
+        )
     }
 }
 
@@ -156,19 +168,7 @@ fun BookDetailContent(
         // FAB
         BookDetailFab(
             ReadingStatus.READING,
-            onEvent = { event ->
-                when (event) {
-                    BookDetailFabEvent.NavigateToMindmap,
-                    BookDetailFabEvent.NavigateToTimer -> onEvent(event)
-
-                    BookDetailFabEvent.ShowAddQuoteDialog -> {
-
-                    }
-                    BookDetailFabEvent.ShowAddReadingHistoryDialog -> {
-
-                    }
-                }
-            },
+            onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 32.dp, end = 22.dp),

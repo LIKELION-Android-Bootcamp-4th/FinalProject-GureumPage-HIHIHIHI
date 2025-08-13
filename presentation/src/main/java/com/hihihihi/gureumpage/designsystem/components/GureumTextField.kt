@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -36,6 +37,7 @@ fun GureumTextField(
     value: String,
     onValueChange: (String) -> Unit,
     hint: String = "",
+    minLines: Int = 1,
     maxLines: Int = 1,
     roundedCorner: Dp = 12.75.dp,
     isError: Boolean = false,
@@ -87,6 +89,7 @@ fun GureumTextField(
         ),
         trailingIcon = trailingIcon,
         leadingIcon = leadingIcon,
+        minLines = minLines,
         maxLines = maxLines,
         shape = RoundedCornerShape(roundedCorner),
         textStyle = textStyle.copy(textAlign = textAlign),

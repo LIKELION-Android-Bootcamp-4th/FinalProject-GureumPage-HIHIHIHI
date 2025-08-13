@@ -54,7 +54,18 @@ fun GureumNavGraph(
         composable(NavigationRoute.Library.route) { LibraryScreen() }
         composable(NavigationRoute.Search.route) { SearchScreen(navController) }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
-        composable(NavigationRoute.Timer.route) { TimerScreen() }
+        composable(
+            NavigationRoute.Timer.route,
+            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId")
+            bookId?.let {
+                TimerScreen(
+                    bookId = it,
+                )
+            }
+        }
+        composable(NavigationRoute.MyPage.route) { MyPageScreen() }
         composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
