@@ -3,8 +3,10 @@ package com.hihihihi.gureumpage.ui.bookdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
+import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.getDailyAverageReadTimeInSeconds
 import com.hihihihi.gureumpage.common.utils.getDayCountLabel
@@ -24,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
+    private val patchUserBookUseCase: PatchUserBookUseCase,
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
 ):ViewModel(){
 
@@ -50,13 +53,6 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    /**
-     * 필사 추가 기능
-     *
-     * @param userBookId 사용자 책 ID
-     * @param content 명언 내용
-     * @param pageNumber 해당 페이지 번호 (nullable)
-     */
     fun addQuote(userBookId: String, content: String, pageNumber: Int?, ){
         val userBook = uiState.value.userBook ?: return // 방어 코드
 
@@ -110,6 +106,21 @@ class BookDetailViewModel @Inject constructor(
             totalReadingTime = if(uiState.value.userBook?.totalReadTime == null) "0분" else formatSecondsToReadableTime(uiState.value.userBook?.totalReadTime!!),
             averageDailyTime = getDailyAverageReadTimeInSeconds(uiState.value.histories)
         )
+    }
+
+    fun patchUserBook(status: ReadingStatus?, page: Int?, startDate: LocalDateTime?, endDate: LocalDateTime?){
+        val userBook = uiState.value.userBook ?: return
+
+        val patchUserBook = userBook.copy(
+            status = status ?: userBook.status,
+            currentPage = page ?: userBook.currentPage,
+            startDate = startDate ?: userBook.startDate,
+            endDate = endDate ?: userBook.endDate
+        )
+
+        viewModelScope.launch {
+            patchUserBookUseCase(patchUserBook)
+        }
     }
 }
 

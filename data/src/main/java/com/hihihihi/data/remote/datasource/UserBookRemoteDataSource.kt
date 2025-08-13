@@ -12,4 +12,6 @@ interface UserBookRemoteDataSource {
     fun getUserBooksByStatus(userId: String,status: ReadingStatus): Flow<List<UserBookDto>>
 
     fun getUserBook(userBookId: String): Flow<UserBookDto>
+
+    suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit>
 }

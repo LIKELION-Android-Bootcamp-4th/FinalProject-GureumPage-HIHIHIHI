@@ -2,6 +2,7 @@ package com.hihihihi.data.repotisoryimpl
 
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.mapper.toDomain
+import com.hihihihi.data.remote.mapper.toDto
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.repository.UserBookRepository
@@ -26,6 +27,12 @@ class UserBookRepositoryImpl @Inject constructor(
 
     override fun getUserBook(userBookId: String): Flow<UserBook> {
         return userBookRemoteDataSource.getUserBook(userBookId).map { it.toDomain() }
+    }
+
+    override suspend fun patchUserBook(userBook: UserBook): Result<Unit> {
+        val userBookDto = userBook.toDto()
+
+        return userBookRemoteDataSource.patchUserBook(userBookDto)
     }
 
 
