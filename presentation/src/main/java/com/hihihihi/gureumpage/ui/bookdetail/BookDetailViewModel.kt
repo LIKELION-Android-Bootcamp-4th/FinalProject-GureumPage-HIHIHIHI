@@ -2,8 +2,11 @@ package com.hihihihi.gureumpage.ui.bookdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
@@ -26,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val addQuoteUseCase: AddQuoteUseCase,
+    private val addHistoryUseCase: AddHistoryUseCase,
     private val patchUserBookUseCase: PatchUserBookUseCase,
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
 ):ViewModel(){
@@ -49,6 +53,45 @@ class BookDetailViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    fun addManualHistory(
+        date: LocalDateTime,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        readTime: Int,
+        readPageCount: Int
+    ) {
+        val userBook = uiState.value.userBook ?: return
+        val userId = "iK4v1WW1ZX4gID2HueBi" // TODO 로그인 구현 후 변경
+
+        val history = History(
+            id = "",
+            userId = userId,
+            userBookId = userBook.userBookId,
+            date = date,
+            startTime = startTime,
+            endTime = endTime,
+            readTime = readTime,
+            readPageCount = readPageCount,
+            recordType = RecordType.MANUAL
+        )
+
+        viewModelScope.launch {
+            try {
+                addHistoryUseCase(history)
+
+                // 저장 후 UI 상태 업데이트
+                _uiState.update {
+                    it.copy(histories = it.histories + history)
+                }
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message)
+                }
+            }
         }
     }
 

@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface HistoryRepository {
     fun getHistoriesByUserBookId(userBookId: String): Flow<List<History>>
+
+    suspend fun addHistory(history: History): Result<Unit>
 }

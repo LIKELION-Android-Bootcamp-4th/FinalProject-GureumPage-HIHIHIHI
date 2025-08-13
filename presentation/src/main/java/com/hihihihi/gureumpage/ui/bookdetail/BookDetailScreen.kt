@@ -149,7 +149,13 @@ fun BookDetailScreen(
                 onDismiss = { showAddManualHistoryDialog = false },
                 onSave = {
                     date, startTime, endTime, readTime, readPageCount ->
-                    //iewModel.addManualHistory(bookId, date, startTime, endTime, readTime, readPageCount)
+                    viewModel.addManualHistory(
+                        date,
+                        startTime,
+                        endTime,
+                        readTime,
+                        readPageCount
+                    )
                     showAddManualHistoryDialog = false
                 }
             )
