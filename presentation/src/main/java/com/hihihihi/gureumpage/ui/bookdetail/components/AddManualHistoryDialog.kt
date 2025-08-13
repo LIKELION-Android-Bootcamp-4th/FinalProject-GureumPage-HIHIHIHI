@@ -42,6 +42,7 @@ import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.components.Semi12Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.ui.home.components.GureumNumberPicker
 import com.hihihihi.gureumpage.ui.search.component.DatePickTextField
 import java.time.Duration
 import java.time.Instant
@@ -65,7 +66,6 @@ fun AddManualHistoryDialog(
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-
     var date by remember { mutableStateOf(LocalDateTime.now()) }
     var startTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var endTime by remember { mutableStateOf<LocalDateTime?>(null) }
@@ -74,10 +74,12 @@ fun AddManualHistoryDialog(
     var endPage by remember { mutableStateOf("") }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var editingStartTime by remember { mutableStateOf(true) }
 
-    // 읽은 시간 계산 (초)
+    var tempHour by remember { mutableStateOf(0) }
+    var tempMinute by remember { mutableStateOf(0) }
+
     val readTime = remember(startTime, endTime) {
         if (startTime != null && endTime != null) {
             val seconds = Duration.between(startTime, endTime).seconds
@@ -85,21 +87,17 @@ fun AddManualHistoryDialog(
         } else null
     }
 
-    // 읽은 페이지 계산
     val readPageCount = remember(startPage, endPage) {
         (endPage.toIntOrNull() ?: 0) - (startPage.toIntOrNull() ?: 0)
     }
 
-
+    val canSave = startTime != null && endTime != null &&
+            (endTime!!.isAfter(startTime) || endTime == startTime) &&
+            (endPage.toIntOrNull() ?: 0) >= (startPage.toIntOrNull() ?: 0)
 
     Dialog(onDismissRequest = onDismiss) {
-        GureumCard(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp)
-            ) {
+        GureumCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -134,32 +132,22 @@ fun AddManualHistoryDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Semi12Text(
-                    "날짜",
-                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
-                    color = GureumTheme.colors.gray800
-                )
+                Semi12Text("날짜", modifier = Modifier.padding(start = 4.dp, bottom = 12.dp), color = GureumTheme.colors.gray800)
                 DatePickTextField(
-                    value = date?.format(dateFormatter) ?: "",
+                    value = date.format(dateFormatter),
                     placeholder = "책 읽은 날",
                     onClick = { showDatePicker = true }
                 )
 
-
                 Spacer(modifier = Modifier.height(16.dp))
-                Semi12Text(
-                    "페이지",
-                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
-                    color = GureumTheme.colors.gray800
-                )
+
+                Semi12Text("페이지", modifier = Modifier.padding(start = 4.dp, bottom = 12.dp), color = GureumTheme.colors.gray800)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     GureumTextField(
                         value = startPage,
                         onValueChange = { startPage = it.filter(Char::isDigit) },
                         hint = "시작 페이지",
                         modifier = Modifier.weight(1f)
-
                     )
                     Text("~")
                     GureumTextField(
@@ -167,17 +155,12 @@ fun AddManualHistoryDialog(
                         onValueChange = { endPage = it.filter(Char::isDigit) },
                         hint = "끝 페이지",
                         modifier = Modifier.weight(1f)
-
                     )
                 }
 
-
                 Spacer(modifier = Modifier.height(16.dp))
-                Semi12Text(
-                    "읽은 시간",
-                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
-                    color = GureumTheme.colors.gray800
-                )
+
+                Semi12Text("읽은 시간", modifier = Modifier.padding(start = 4.dp, bottom = 12.dp), color = GureumTheme.colors.gray800)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     GureumTextField(
                         value = startTime?.format(timeFormatter) ?: "",
@@ -186,7 +169,12 @@ fun AddManualHistoryDialog(
                         enabled = false,
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { showStartTimePicker = true }
+                            .clickable {
+                                editingStartTime = true
+                                tempHour = startTime?.hour ?: 0
+                                tempMinute = startTime?.minute ?: 0
+                                showTimePicker = true
+                            }
                     )
                     Text("~")
                     GureumTextField(
@@ -196,35 +184,33 @@ fun AddManualHistoryDialog(
                         enabled = false,
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { showEndTimePicker = true }
+                            .clickable {
+                                editingStartTime = false
+                                tempHour = endTime?.hour ?: 0
+                                tempMinute = endTime?.minute ?: 0
+                                showTimePicker = true
+                            }
                     )
                 }
 
-
                 Spacer(modifier = Modifier.height(16.dp))
-                Semi12Text(
-                    "총 읽은 시간",
-                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
-                    color = GureumTheme.colors.gray800
-                )
+
+                Semi12Text("총 읽은 시간", modifier = Modifier.padding(start = 4.dp, bottom = 12.dp), color = GureumTheme.colors.gray800)
                 GureumTextField(
-                    value = readTime?.let { formatSecondsToReadableTimeWithoutSecond(it)  } ?: "",
+                    value = readTime?.let { formatSecondsToReadableTimeWithoutSecond(it) } ?: "",
                     onValueChange = {},
                     hint = "총 읽은 시간",
-                    enabled = false,
+                    enabled = false
                 )
-
-
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 저장 버튼
                 GureumButton(
                     text = "저장하기",
-                    enabled = date != null && startTime != null && endTime != null,
+                    enabled = canSave,
                     onClick = {
                         onSave(
-                            date!!,
+                            date,
                             startTime!!,
                             endTime!!,
                             readTime ?: 0,
@@ -236,7 +222,6 @@ fun AddManualHistoryDialog(
             }
         }
 
-        // DatePicker
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState()
             DatePickerDialog(
@@ -257,66 +242,54 @@ fun AddManualHistoryDialog(
             }
         }
 
-        // TimePickers
-        val startTimePickerState = rememberTimePickerState()
-        if (showStartTimePicker) {
-            if (showStartTimePicker) {
-                TimePickerDialog(
-                    onDismissRequest = { showStartTimePicker = false },
-                    onConfirm = {
-                        date?.let { d ->
-                            startTime = LocalDateTime.of(
-                                d.toLocalDate(),
-                                LocalTime.of(startTimePickerState.hour, startTimePickerState.minute)
-                            )
-                        }
-                        showStartTimePicker = false
-                    }
-                ) {
-                    TimePicker(state = startTimePickerState)
-                }
-            }
-        }
-
-        val endTimePickerState = rememberTimePickerState()
-        if (showEndTimePicker) {
-            TimePickerDialog(
-                onDismissRequest = { showEndTimePicker = false },
-                onConfirm = {
-                    date?.let { d ->
-                        endTime = LocalDateTime.of(
-                            d.toLocalDate(),
-                            LocalTime.of(endTimePickerState.hour, endTimePickerState.minute)
-                        )
-                    }
-                    showEndTimePicker = false
-                }
+        if (showTimePicker) {
+            Dialog(
+                onDismissRequest = { showTimePicker = false },
             ) {
-                TimePicker(state = endTimePickerState)
+                GureumCard {
+                    Column (modifier = Modifier.padding(20.dp)){
+
+                        val hourValuesForEnd = remember(startTime) {
+                            val startHour = startTime?.hour ?: 0
+                            (startHour..23).toList()
+                        }
+
+                        val minuteValuesForEnd = remember(startTime, tempHour) {
+                            val startMinute = if (tempHour == (startTime?.hour ?: 0)) startTime?.minute ?: 0 else 0
+                            (startMinute..59).toList()
+                        }
+
+                        GureumNumberPicker(
+                            initialHour = tempHour,
+                            initialMinute = tempMinute,
+                            hourValues = if (editingStartTime) (0..23).toList() else hourValuesForEnd,
+                            minuteValues = if (editingStartTime) (0..59).toList() else minuteValuesForEnd,
+                            visibleItemsCount = 5,
+                            unitLabel = "시",
+
+                        ) { h, m ->
+                            tempHour = h
+                            tempMinute = m
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        GureumButton(text = "확인", onClick = {
+                            date?.let { d ->
+                                val selectedTime = LocalTime.of(tempHour, tempMinute)
+                                if (editingStartTime) {
+                                    startTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    // 확정 시점에만 체크
+                                    if (endTime != null && startTime!!.toLocalTime() > endTime!!.toLocalTime()) {
+                                        endTime = null
+                                    }
+                                } else {
+                                    endTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                }
+                            }
+                            showTimePicker = false
+                        })
+                    }
+                }
             }
         }
     }
-
-}
-
-@Composable
-fun TimePickerDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("취소")
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("확인")
-            }
-        },
-        text = { content() }
-    )
 }
