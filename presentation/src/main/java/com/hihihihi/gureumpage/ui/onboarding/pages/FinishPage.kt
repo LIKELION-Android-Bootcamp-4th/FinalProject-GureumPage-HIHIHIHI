@@ -23,6 +23,6 @@ fun FinishPage(viewModel: OnBoardingViewModel) {
 @Composable
 private fun FinishPagePreview() {
     GureumPageTheme {
-        FinishPage(OnBoardingViewModel())
+//        FinishPage(OnBoardingViewModel())
     }
 }

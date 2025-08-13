@@ -33,8 +33,10 @@ fun OnBoardingScreen(
             steps = steps,
             viewModel = viewModel,
             onFinish = {
+                viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
+                    launchSingleTop = true
                 }
             },
         )
@@ -71,7 +73,7 @@ private fun OnboardingContents(
                 OnboardingStep.Welcome -> WelcomePage()
                 OnboardingStep.Nickname -> NicknamePage(viewModel = viewModel)
                 OnboardingStep.Purpose -> PurposePage(viewModel = viewModel)
-                OnboardingStep.Feature -> FeaturePage()
+                OnboardingStep.Feature -> FeaturePage(viewModel = viewModel)
                 OnboardingStep.Theme -> ThemePage(viewModel = viewModel)
                 OnboardingStep.Finish -> FinishPage(viewModel = viewModel)
             }
@@ -82,6 +84,7 @@ private fun OnboardingContents(
                 buttonText = if (isLastPage) "시작하기" else "다음 단계",
                 explanation = when (step) {
                     OnboardingStep.Welcome -> "설정은 언제든 변경할 수 있어요"
+                    OnboardingStep.Feature -> "옆으로 밀어 구름한장의 기능을 확인해보세요!"
                     else -> ""
                 },
                 isNextEnabled = viewModel.isNextEnabled(currentStep),

@@ -13,34 +13,42 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.hihihihi.domain.usecase.theme.GetDarkThemeUserCase
+import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    //다크모드 조회용 UseCase
-    @Inject lateinit var getDarkThemeUserCase: GetDarkThemeUserCase
+    @HiltViewModel
+    class GureumThemeViewModel @Inject constructor(getTheme: GetThemeFlowUseCase) : ViewModel() {
+        val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            //DataStore에서 다크모드 여부 상태 가져오기
-            val isDarkTheme by getDarkThemeUserCase().collectAsState(initial = false)
-
+            val viewModel = hiltViewModel<GureumThemeViewModel>()
+            val currentTheme by viewModel.theme.collectAsState()
             // 모드 상태에 따라 GureumPageTheme 에 반영
-            GureumPageTheme(darkTheme = isDarkTheme) {
-                GureumPageApp()
-            }
+            GureumPageTheme(darkTheme = when (currentTheme) {
+                GureumThemeType.LIGHT -> false
+                else -> true
+            }) { GureumPageApp() }
         }
     }
 }
