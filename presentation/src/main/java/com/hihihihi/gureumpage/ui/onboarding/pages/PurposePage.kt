@@ -1,17 +1,13 @@
 package com.hihihihi.gureumpage.ui.onboarding.pages
 
-import android.annotation.SuppressLint
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingPurposeCard
@@ -57,12 +53,3 @@ private val purposeContents = listOf(
     OnboardingPurposeContents(R.drawable.ic_cloud_reading, "필사 & 메모", "인상 깊은 문장을 기록하고 정리하고 싶어요"),
     OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 즐기기", "단순히 독서를 더 즐겁게 하고 싶어요"),
 )
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun PurposePagePreview() {
-    GureumPageTheme {
-        PurposePage(OnBoardingViewModel())
-    }
-}

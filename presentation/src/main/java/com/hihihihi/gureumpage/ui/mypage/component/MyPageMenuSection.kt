@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hihihihi.domain.model.GureumThemeType
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.hihihihi.gureumpage.common.utils.openAppOnPlayStore
 import com.hihihihi.gureumpage.common.utils.openSupportEmail
@@ -20,7 +21,7 @@ import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
 fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
-    val isDarkTheme by viewModel.isDarkTheme.collectAsState() // 다크 모드 상태 관찰
+    val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
     val typography = GureumTypography
     val context = LocalContext.current
@@ -44,7 +45,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
         MyPageMenuSettingItem(
             title = "다크모드",
             showSwitch = true,
-            switchChecked = isDarkTheme,
+            switchChecked = (theme == GureumThemeType.DARK),
             onSwitchToggle = { viewModel.toggleTheme(it)}
         ) {
 
