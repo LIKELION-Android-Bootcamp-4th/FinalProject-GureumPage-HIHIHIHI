@@ -1,5 +1,6 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.hihihihi.domain.operation.NodeEditOperation
@@ -18,15 +19,20 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override fun observe(mindmapId: String): Flow<List<MindmapNodeDto>> = callbackFlow {
         val collection = nodesCollection()
-            .whereEqualTo("mindmap_id", mindmapId)
+            .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .addSnapshotListener { snap, err ->
                 if (err != null) {
-                    close(err); return@addSnapshotListener
+                    Log.e("MindmapNodeRemoteDataSourceImpl", "OBS error", err)
+                    close(err)
+                    return@addSnapshotListener
                 }
                 val items = snap?.documents
                     ?.mapNotNull { it.toObject(MindmapNodeDto::class.java) }
                     ?: emptyList()
+
+                Log.d("MindmapNodeRemoteDataSourceImpl", "OBS size=${items.size}")
+                items.forEach { Log.d("MindmapNodeRemoteDataSourceImpl", "OBS id=${it.mindmapNodeId} parent=${it.parentNodeId} title=${it.nodeTitle} bookImage=${it.bookImage}") }
                 trySend(items)
             }
         awaitClose { collection.remove() }
@@ -34,9 +40,11 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun loadNodes(mindmapId: String): List<MindmapNodeDto> {
         val snap = nodesCollection()
-            .whereEqualTo("mindmap_id", mindmapId)
+            .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .get().await()
+        Log.d("MindmapNodeRemoteDataSourceImpl", "LOAD size=${snap.documents.size}")
+        snap.documents.forEach { Log.d("MindmapNodeRemoteDataSourceImpl", "LOAD id=${it.id} parent=${it.get("parent_node_id")} title=${it.get("node_title")}") }
 
         return snap.documents.mapNotNull { it.toObject(MindmapNodeDto::class.java) }
     }
@@ -59,6 +67,8 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                                 mindmapNodeId = document.id,
                                 deleted = false
                             )
+                            Log.d("MindmapNodeRemoteDataSourceImpl", "ADD[$chunk] id=${dto.mindmapNodeId} parent=${dto.parentNodeId} title=${dto.nodeTitle}")
+
                             batch.set(document, dto)
                         }
 
@@ -80,6 +90,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                     }
                 }
             }.await()
+            Log.d("MindmapNodeRemoteDataSourceImpl", "chunk[$chunk] committed")
         }
     }
 }

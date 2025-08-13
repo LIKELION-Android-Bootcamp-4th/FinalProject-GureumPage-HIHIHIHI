@@ -10,4 +10,5 @@ data class MindmapNode(
     val color: String?,
     val icon: String?,
     val deleted: Boolean,
+    val bookImage: String?,
 )

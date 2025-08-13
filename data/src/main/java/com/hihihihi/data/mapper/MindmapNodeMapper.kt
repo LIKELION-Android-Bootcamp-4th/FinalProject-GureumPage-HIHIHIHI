@@ -13,6 +13,7 @@ fun MindmapNodeDto.toDomain() = MindmapNode(
     color = color,
     icon = icon,
     deleted = deleted,
+    bookImage = bookImage
 )
 
 fun MindmapNode.toDto() = MindmapNodeDto(
@@ -23,5 +24,6 @@ fun MindmapNode.toDto() = MindmapNodeDto(
     parentNodeId = parentNodeId,
     color = color,
     icon = icon,
-    deleted = deleted
+    deleted = deleted,
+    bookImage = bookImage,
 )
