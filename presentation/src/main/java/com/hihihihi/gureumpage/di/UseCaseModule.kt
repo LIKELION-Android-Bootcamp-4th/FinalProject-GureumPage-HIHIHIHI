@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
@@ -12,6 +13,7 @@ import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
@@ -139,5 +141,14 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): GetThemeFlowUseCase {
         return GetThemeFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetStatisticsUseCase(
+        userBookRepository: UserBookRepository,
+        historyRepository: HistoryRepository,
+        dailyReadPageRepository: DailyReadPageRepository
+    ): GetStatisticsUseCase {
+        return GetStatisticsUseCase(userBookRepository, historyRepository, dailyReadPageRepository)
     }
 }
