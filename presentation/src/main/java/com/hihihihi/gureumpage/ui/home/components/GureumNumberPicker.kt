@@ -21,15 +21,20 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun GureumNumberPicker(
     initialHour: Int = 0,
     initialMinute: Int = 0,
+    visibleItemsCount: Int = 3,
+    unitLabel: String = "시간",
+    hourValues: List<Int> = (0..23).toList(),
+    minuteValues: List<Int> = (0..59).toList(),
     onValueChange: (Int, Int) -> Unit
 ) {
+    val hourStrings = hourValues.map { it.toString().padStart(2,'0') }
+    val minuteStrings = minuteValues.map { it.toString().padStart(2,'0') }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(horizontal = 12.dp)
     ) {
-        val hourValues = remember { (0..23).map { it.toString().padStart(2, '0') } }
-        val minuteValues = remember { (0..59).map { it.toString().padStart(2, '0') } }
 
         val hourPickerState = rememberPickerState()
         val minutePickerState = rememberPickerState()
@@ -47,22 +52,22 @@ fun GureumNumberPicker(
         ) {
             Picker(
                 state = hourPickerState,
-                items = hourValues,
-                visibleItemsCount = 3,
+                items = hourStrings,
+                visibleItemsCount = visibleItemsCount,
                 startIndex = initialHour,
                 modifier = Modifier
                     .weight(1f),
                 textModifier = Modifier.padding(4.dp),
             )
             Text(
-                "시간",
+                unitLabel,
                 style = GureumTypography.titleMedium,
                 color = GureumTheme.colors.gray800,
             )
             Picker(
                 state = minutePickerState,
-                items = minuteValues,
-                visibleItemsCount = 3,
+                items = minuteStrings,
+                visibleItemsCount = visibleItemsCount,
                 startIndex = initialMinute,
                 modifier = Modifier
                     .weight(1f),

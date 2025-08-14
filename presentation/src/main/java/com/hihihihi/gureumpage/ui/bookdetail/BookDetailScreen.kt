@@ -143,14 +143,23 @@ fun BookDetailScreen(
     }
 
     if (showAddManualHistoryDialog) {
-        AddManualHistoryDialog(
-            onDismiss = { showAddManualHistoryDialog = false },
-            onSave = {
-                date, startTime, endTime, readTime, readPageCount ->
-//                viewModel.addManualHistory(bookId, date, startTime, endTime, readTime, readPageCount)
-//                showAddManualHistoryDialog = false
-            }
-        )
+        uiState.userBook?.let {
+            AddManualHistoryDialog(
+                currentPage = it.currentPage,
+                onDismiss = { showAddManualHistoryDialog = false },
+                onSave = {
+                    date, startTime, endTime, readTime, readPageCount ->
+                    viewModel.addManualHistory(
+                        date,
+                        startTime,
+                        endTime,
+                        readTime,
+                        readPageCount
+                    )
+                    showAddManualHistoryDialog = false
+                }
+            )
+        }
     }
 
     if (showReadingStatusSheet && uiState.userBook != null) {
