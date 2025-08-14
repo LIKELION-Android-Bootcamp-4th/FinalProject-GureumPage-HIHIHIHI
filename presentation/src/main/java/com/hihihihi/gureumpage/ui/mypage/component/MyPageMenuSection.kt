@@ -57,7 +57,9 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
             title = "탈퇴",
             textColor = colors.gray400
         ) {
-            //TODO: 기능 추가
-        }
+            viewModel.deleteUserAccount(
+                onSuccess = { Toast.makeText(context, "탈퇴 완료", Toast.LENGTH_SHORT).show() },
+                onError = { e -> Toast.makeText(context, "탈퇴 실패: ${e.message}", Toast.LENGTH_SHORT).show() }
+            )        }
     }
 }

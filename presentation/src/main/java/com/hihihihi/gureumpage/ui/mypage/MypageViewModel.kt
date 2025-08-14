@@ -3,7 +3,10 @@ package com.hihihihi.gureumpage.ui.mypage
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.functions
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -173,4 +177,23 @@ class MypageViewModel @Inject constructor(
             }
             .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
     }
+
+
+    fun deleteUserAccount(
+        onSuccess: () -> Unit = {},
+        onError: (Exception) -> Unit = {}
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            onError(Exception("로그인 필요"))
+            return
+        }
+
+        FirebaseFunctions.getInstance()
+            .getHttpsCallable("deleteUserAccount")
+            .call()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
+    }
+
 }
