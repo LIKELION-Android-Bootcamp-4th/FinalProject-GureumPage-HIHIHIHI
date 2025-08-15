@@ -210,7 +210,7 @@ fun BookDetailContent(
 
         // FAB
         BookDetailFab(
-            ReadingStatus.READING,
+            userBook.status,
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
