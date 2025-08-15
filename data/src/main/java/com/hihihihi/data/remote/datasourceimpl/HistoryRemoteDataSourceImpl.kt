@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Calendar
 import javax.inject.Inject
 
 class HistoryRemoteDataSourceImpl @Inject constructor(
@@ -50,6 +51,49 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
             }
         awaitClose { historiesCollection.remove() }
     }
+
+    override fun getTodayHistoriesByUserId(userId: String): Flow<List<HistoryDto>> {
+        // 오늘 0시
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startOfDay = Timestamp(calendar.time)
+
+        // 오늘 23시 59분 59초
+        calendar.apply {
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+        val endOfDay = Timestamp(calendar.time)
+
+        return callbackFlow {
+            val listenerRegistration = firestore.collection("histories")
+                .whereEqualTo("user_id", userId)
+                .whereGreaterThanOrEqualTo("date", startOfDay)
+                .whereLessThanOrEqualTo("date", endOfDay)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        close(error)
+                        return@addSnapshotListener
+                    }
+                    val histories = snapshot?.documents?.mapNotNull { doc ->
+                        doc.toObject(HistoryDto::class.java)
+                    } ?: emptyList()
+
+                    trySend(histories)
+                }
+
+            awaitClose {
+                listenerRegistration.remove()
+            }
+        }
+    }
+
 
     override suspend fun addHistory(
         historyDto: HistoryDto,

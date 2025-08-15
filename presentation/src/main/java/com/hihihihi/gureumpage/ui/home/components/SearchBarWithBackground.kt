@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Floating
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
@@ -47,6 +48,7 @@ import com.hihihihi.gureumpage.ui.home.mock.mockUser
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun SearchBarWithBackground(
+    user: User,
     onSearchBarClick: () -> Unit = {}
 ) {
     BoxWithConstraints(
@@ -73,7 +75,6 @@ fun SearchBarWithBackground(
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            //TODO 현재는 진짜 TextField 인데 누르면 Search Screen으로 가도록 해야함
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,12 +107,12 @@ fun SearchBarWithBackground(
                         withStyle(
                             GureumTypography.titleLarge.toSpanStyle()
                                 .copy(color = GureumTheme.colors.primary)
-                        ) { append(mockUser.appellation) }
+                        ) { append(user.appellation) }
                         withStyle(
                             GureumTypography.titleLarge.toSpanStyle()
                                 .copy(color = GureumTheme.colors.gray900)
                         ) {
-                            append(" ${mockUser.nickName}")
+                            append(" ${user.nickname}")
 
                         }
                         withStyle(
@@ -173,6 +174,6 @@ private fun HomePreview() {
     val fakeNavController = rememberNavController()
 
     GureumPageTheme {
-        SearchBarWithBackground()
+        SearchBarWithBackground(mockUser)
     }
 }
