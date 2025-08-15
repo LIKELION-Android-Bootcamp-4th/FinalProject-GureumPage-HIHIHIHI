@@ -168,6 +168,19 @@ class BookDetailViewModel @Inject constructor(
             patchUserBookUseCase(patchUserBook)
         }
     }
+
+    fun patchReview(rating: Double, review: String) {
+        val userBook = uiState.value.userBook ?: return
+
+        val patchUserBook = userBook.copy(
+            rating = rating,
+            review = review
+        )
+
+        viewModelScope.launch {
+            patchUserBookUseCase(patchUserBook)
+        }
+    }
 }
 
 data class BookStatistic(
