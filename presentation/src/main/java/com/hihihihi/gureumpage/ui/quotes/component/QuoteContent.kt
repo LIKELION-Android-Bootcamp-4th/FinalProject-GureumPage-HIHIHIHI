@@ -38,7 +38,7 @@ fun QuoteContent(
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(quotes) { item ->
