@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.quotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,8 +22,12 @@ class QuotesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(QuotesUiState(isLoading = true))
     val uiState: StateFlow<QuotesUiState> = _uiState.asStateFlow()
 
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val currentUid: String
+        get() = auth.currentUser!!.uid
+
     init {
-        getQuotes("iK4v1WW1ZX4gID2HueBi")
+        getQuotes(currentUid)
     }
 
     /*fun getQuotes(userId: String) {
