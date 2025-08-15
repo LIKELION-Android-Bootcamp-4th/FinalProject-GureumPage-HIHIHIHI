@@ -43,7 +43,7 @@ fun DetailBottomSheet(
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
-        containerColor = GureumTheme.colors.background,
+        containerColor = GureumTheme.colors.card,
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(
@@ -92,13 +92,13 @@ fun DetailBottomSheet(
                     }
                 }
             }
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(8.dp))
             // 필사 내용
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GureumTheme.colors.card)
+                    .background(GureumTheme.colors.bookBackground)
             ) {
                 Text(
                     text = quote.content,
