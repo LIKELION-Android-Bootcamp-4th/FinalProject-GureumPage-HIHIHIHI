@@ -36,7 +36,7 @@ import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.statistics.components.GenreCard
+import com.hihihihi.gureumpage.ui.statistics.components.CategoryCard
 import com.hihihihi.gureumpage.ui.statistics.components.GureumStatisticsPicker
 import com.hihihihi.gureumpage.ui.statistics.components.ReadingPageCard
 import com.hihihihi.gureumpage.ui.statistics.components.ReadingTimeCard
@@ -60,8 +60,10 @@ fun StatisticsScreen(
     }
     val rangeText = remember(presetIndex) { formatRange(preset) }
 
-    val userId = FirebaseAuth.getInstance().currentUser?.toString()!!
-    LaunchedEffect(userId) { viewModel.loadStatistics(userId, preset) }
+    val userId = FirebaseAuth.getInstance().currentUser?.uid!!
+    LaunchedEffect(userId, presetIndex) {
+        viewModel.loadStatistics(userId, preset)
+    }
 
     if (showPicker) {
         GureumStatisticsPicker(
@@ -109,7 +111,7 @@ fun StatisticsScreen(
         item {
             Semi16Text("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            GenreCard(entries = uiState.category)
+            CategoryCard(entries = uiState.category)
         }
 
         item {
