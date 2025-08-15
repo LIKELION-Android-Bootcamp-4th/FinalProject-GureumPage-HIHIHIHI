@@ -51,26 +51,20 @@ fun StatisticsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPicker by remember { mutableStateOf(false) }
     var presetIndex by rememberSaveable { mutableStateOf(0) }
-    val preset = when (presetIndex) {
-        0 -> DateRangePreset.WEEK
-        1 -> DateRangePreset.MONTH
-        2 -> DateRangePreset.THREE_MONTH
-        3 -> DateRangePreset.SIX_MONTH
-        else -> DateRangePreset.YEAR
-    }
+    val preset = presetFromIndex(presetIndex)
     val rangeText = remember(presetIndex) { formatRange(preset) }
 
-    val userId = FirebaseAuth.getInstance().currentUser?.uid!!
-    LaunchedEffect(userId, presetIndex) {
-        viewModel.loadStatistics(userId, preset)
-    }
 
     if (showPicker) {
         GureumStatisticsPicker(
             initialIndex = presetIndex,
             items = STAT_PRESET_LABELS,
             onDismiss = { showPicker = false },
-            onConfirm = { index -> presetIndex = index }
+            onConfirm = {
+                index -> presetIndex = index
+                showPicker = false
+                viewModel.loadStatistics(presetFromIndex(index))
+            }
         )
     }
 
@@ -145,4 +139,12 @@ private fun StatisticsPreview() {
     GureumPageTheme {
         StatisticsScreen()
     }
+}
+
+fun presetFromIndex(index: Int) = when (index) {
+    0 -> DateRangePreset.WEEK
+    1 -> DateRangePreset.MONTH
+    2 -> DateRangePreset.THREE_MONTH
+    3 -> DateRangePreset.SIX_MONTH
+    else -> DateRangePreset.YEAR
 }
