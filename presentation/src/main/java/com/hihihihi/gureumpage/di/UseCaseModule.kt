@@ -30,6 +30,7 @@ import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
+import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -214,6 +215,13 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): GetNicknameFlowUseCase {
         return GetNicknameFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateDailyGoalTimeUseCase(
+        repository: UserRepository
+    ): UpdateDailyGoalTimeUseCase {
+        return UpdateDailyGoalTimeUseCase(repository)
     }
 
     @Provides

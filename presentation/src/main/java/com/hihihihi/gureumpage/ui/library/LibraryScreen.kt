@@ -23,15 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.library.component.BookItem
 import com.hihihihi.gureumpage.ui.library.component.ToggleTab
 
 @Composable
 fun LibraryScreen(
-    userId: String = "iK4v1WW1ZX4gID2HueBi", // 테스트용 기본 유저 ID
+    navController: NavHostController,
     viewModel: LibraryViewModel = hiltViewModel() // Hilt -> viewModel
 ) {
     //현재 탭 상태 true면 읽기 전, false 면 읽은 책
@@ -90,7 +92,7 @@ fun LibraryScreen(
                     items(filteredBooks) { book ->
                         BookItem(
                             book = book,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            onClicked = {navController.navigate(NavigationRoute.BookDetail.createRoute(it))}
                         )
                     }
                 }

@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +20,11 @@ class LibraryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LibraryUiState(isLoading = true))
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
 
+    val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
     init {
         //테스트용 userid 추후 변경
-        loadUserBooks("iK4v1WW1ZX4gID2HueBi")
+        loadUserBooks(userId)
     }
 
     // 유저 ID에 해당하는 책 목록을 비동기로 가져와 ui 상태에 반영
