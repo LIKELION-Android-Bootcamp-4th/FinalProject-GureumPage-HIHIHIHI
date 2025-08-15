@@ -29,13 +29,13 @@ class GetHomeDataUseCase @Inject constructor(
                 histories.sumOf { it.readTime }
             }
 
-        val userFlow = flow { emit(requireNotNull(userRepository.getUser(userId))) }
+        val userFlow = userRepository.getUserFlow(userId)
 
         return combine(userBooksFlow, quotesFlow, todayReadTimeFlow ,userFlow) { userBooks, quotes, todayReadTime, user ->
             HomeData(
                 userBooks = userBooks,
                 quotes = quotes,
-                todayReadTime = todayReadTime , //TODO
+                todayReadTime = todayReadTime ,
                 user = user
             )
         }

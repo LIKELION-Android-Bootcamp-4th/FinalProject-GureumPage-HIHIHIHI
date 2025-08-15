@@ -24,6 +24,7 @@ import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.User
@@ -70,6 +71,9 @@ fun HomeScreen(
                     },
                     onSearchBarClick = {
                         navController.navigate(NavigationRoute.Search.route)
+                    },
+                    onChangeDailyGoalTime = {
+                        viewModel.changeDailyGoalTime(it)
                     }
                 )
             }
@@ -85,12 +89,14 @@ fun HomeScreenContent(
     todayReadTime: Int,
     dailyGoalTime: Int,
     onBookClick: (String) -> Unit,
+    onChangeDailyGoalTime: (Int) -> Unit,
     onSearchBarClick: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
-    var goalSeconds by remember { mutableStateOf(dailyGoalTime) }
-    val totalReadSeconds = todayReadTime
+    val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
+    val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
+
 
     LazyColumn(
         modifier = Modifier
@@ -123,9 +129,7 @@ fun HomeScreenContent(
             ReadingGoalSection(
                 totalReadSeconds,
                 goalSeconds,
-                onGoalChange = { newGoal ->
-                    goalSeconds = newGoal
-                }
+                onGoalChange = onChangeDailyGoalTime
             )
         }
     }
@@ -136,7 +140,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent( mockUser,mockUserBooks, dummyQuotes, 200,300,onBookClick = {}, {})
+        HomeScreenContent(mockUser, mockUserBooks, dummyQuotes, 200, 300, onBookClick = {}, {}, {})
     }
 }
 

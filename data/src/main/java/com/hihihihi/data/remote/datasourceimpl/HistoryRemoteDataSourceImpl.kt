@@ -1,5 +1,6 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.TimeZone
 import javax.inject.Inject
 
 class HistoryRemoteDataSourceImpl @Inject constructor(
@@ -53,8 +55,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
     }
 
     override fun getTodayHistoriesByUserId(userId: String): Flow<List<HistoryDto>> {
-        // 오늘 0시
-        val calendar = Calendar.getInstance().apply {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
@@ -62,7 +63,6 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
         }
         val startOfDay = Timestamp(calendar.time)
 
-        // 오늘 23시 59분 59초
         calendar.apply {
             set(Calendar.HOUR_OF_DAY, 23)
             set(Calendar.MINUTE, 59)
@@ -77,6 +77,11 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 .whereGreaterThanOrEqualTo("date", startOfDay)
                 .whereLessThanOrEqualTo("date", endOfDay)
                 .addSnapshotListener { snapshot, error ->
+                    if (snapshot != null) {
+                        snapshot.documents.forEach {
+                            Log.e("Debug", "date field: ${it.get("date")}")
+                        }
+                    }
                     if (error != null) {
                         close(error)
                         return@addSnapshotListener
@@ -84,6 +89,8 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                     val histories = snapshot?.documents?.mapNotNull { doc ->
                         doc.toObject(HistoryDto::class.java)
                     } ?: emptyList()
+
+                    Log.e("TAG", "getTodayHistoriesByUserId: ${histories}", )
 
                     trySend(histories)
                 }
