@@ -117,7 +117,7 @@ fun BookDetailScreen(
                 onEvent = { event ->
                     when (event){
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
-                            NavigationRoute.MindMap.createRoute(bookId))
+                            NavigationRoute.MindMap.createRoute(bookId, bookId))
                         BookDetailFabEvent.NavigateToTimer -> navController.navigate(
                             NavigationRoute.Timer.createRoute(bookId)
                         )

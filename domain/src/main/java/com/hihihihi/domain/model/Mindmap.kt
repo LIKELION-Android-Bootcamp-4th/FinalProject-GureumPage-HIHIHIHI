@@ -2,5 +2,6 @@ package com.hihihihi.domain.model
 
 data class Mindmap(
     val mindmapId: String,
-    val userbookId: String
+    val userBookId: String,
+    val rootNodeId: String?,
 )

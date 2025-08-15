@@ -5,10 +5,12 @@ import com.hihihihi.domain.model.Mindmap
 
 fun MindmapDto.toDomain() = Mindmap(
     mindmapId = mindmapId,
-    userbookId = userBookId
+    userBookId = userBookId,
+    rootNodeId = rootNodeId,
 )
 
 fun Mindmap.toDto() = MindmapDto(
     mindmapId = mindmapId,
-    userBookId = userbookId
+    userBookId = userBookId,
+    rootNodeId = rootNodeId,
 )

@@ -1,4 +1,4 @@
-package com.hihihihi.gureumpage.ui.mindmap
+package com.hihihihi.gureumpage.ui.mindmap.model
 
 data class MindMapNodeData(
     val id: String,
