@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.library.component
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,9 +34,10 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.library.model.Book
 
 fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
+
 //한 권의 책정보
 @Composable
-fun BookItem(book: UserBook, modifier: Modifier = Modifier) {
+fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
     Log.d("BookItem", "BookItem 실행됨: ${book.title}")
     val context = LocalContext.current
     val imageRequest = ImageRequest.Builder(context)
@@ -58,6 +60,7 @@ fun BookItem(book: UserBook, modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+            .clickable { onClicked(book.userBookId) }
     ) {
         val iconSize = 20.dp
         val offsetX = iconSize / 2 // 오른쪽으로 아이콘 크기의 절반 만큼 이동
