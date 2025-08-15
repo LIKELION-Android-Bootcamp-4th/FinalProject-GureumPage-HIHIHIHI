@@ -112,13 +112,6 @@ fun AddBookBottomSheet(
                     //추가 후 수정예정
                     style = GureumTypography.bodyLarge, color = GureumTheme.colors.gray800
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_close),
-                        contentDescription = "닫기",
-                        tint = GureumTheme.colors.gray500
-                    )
-                }
             }
             Row(
                 modifier = Modifier
