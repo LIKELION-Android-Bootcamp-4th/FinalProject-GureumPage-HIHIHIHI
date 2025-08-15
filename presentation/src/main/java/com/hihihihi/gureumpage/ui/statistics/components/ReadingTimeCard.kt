@@ -27,7 +27,8 @@ import com.hihihihi.gureumpage.ui.statistics.mockReading
 @Composable
 fun ReadingTimeCard(
     modifier: Modifier = Modifier,
-    labelColor: Int = GureumTheme.colors.gray600.toArgb()
+    labelColor: Int = GureumTheme.colors.gray600.toArgb(),
+    entries: List<BarEntry>
 ) {
     GureumCard(
         modifier = modifier.height(210.dp)
@@ -38,37 +39,14 @@ fun ReadingTimeCard(
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             factory = { context ->
                 HorizontalBarChart(context).apply {
-                    val entries = mutableListOf<BarEntry>()
 
-                    mockReading.reversed().forEach {
-                        entries.add(BarEntry(it.x, it.y))
-                    }
-
-                    val dataSet = BarDataSet(entries, "독서 시간 분포").apply {
-                        val total = entries.sumOf { it.y.toDouble() }.toFloat()
-
-                        colors = ColorTemplate.LIBERTY_COLORS.toList()
-
-                        setDrawValues(true)         // 숫자 퍼센트 표시
-                        valueTextColor = labelColor // 숫자 컬러
-                        valueTextSize = 12f         // 숫자 사이즈
-                        valueFormatter = PercentageOfTotalFormatter(total) // 숫자 포맷
-
-                        isHighlightEnabled = false  // 터치 강조
-                    }
                     setExtraOffsets(0f, 0f, 80f, 0f)
                     setDrawValueAboveBar(true)      // 바 바깥에 숫자 표시
-
-                    data = BarData(dataSet).apply {
-                        barWidth = 0.6f             // 바 두께
-                    }
 
                     description.isEnabled = false   // 설명 표시 여부
                     legend.isEnabled = false        // 범례 표시 여부
                     setTouchEnabled(false)          // 전체 영역 터치
                     setDrawGridBackground(false)    // 백그라운드 컬러
-
-                    animateY(800, Easing.EaseInOutQuad)
 
                     val labels = listOf("새벽", "아침", "점심", "저녁", "밤").reversed()
                     xAxis.apply {
@@ -92,6 +70,29 @@ fun ReadingTimeCard(
                     axisRight.isEnabled = false // 하단 눈금 제거
                 }
             },
+
+            update = { chart ->
+                val total = entries.sumOf { it.y.toDouble() }.toFloat()
+                val dataSet = BarDataSet(entries, "독서 시간 분포").apply {
+                    colors = ColorTemplate.LIBERTY_COLORS.toList()
+
+                    setDrawValues(true)         // 숫자 퍼센트 표시
+                    valueTextColor = labelColor // 숫자 컬러
+                    valueTextSize = 12f         // 숫자 사이즈
+                    valueFormatter = PercentageOfTotalFormatter(total) // 숫자 포맷
+
+                    isHighlightEnabled = false  // 터치 강조
+                }
+
+                chart.apply {
+                    data = BarData(dataSet).apply {
+                        barWidth = 0.6f             // 바 두께
+                    }
+                    animateY(800, Easing.EaseInOutQuad)
+                    notifyDataSetChanged()
+                    invalidate()
+                }
+            }
         )
     }
 }
@@ -101,6 +102,6 @@ fun ReadingTimeCard(
 @Composable
 private fun GureumCardPreview() {
     GureumPageTheme {
-        ReadingTimeCard()
+//        ReadingTimeCard()
     }
 }

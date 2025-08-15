@@ -29,7 +29,9 @@ import com.hihihihi.gureumpage.ui.statistics.mockPages
 fun ReadingPageCard(
     modifier: Modifier = Modifier,
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
-    lineFillColor: Int = GureumTheme.colors.primary50.toArgb()
+    lineFillColor: Int = GureumTheme.colors.primary50.toArgb(),
+    entries: List<Entry>,
+    xLabels: List<String>
 ) {
     GureumCard(
         modifier = modifier.height(210.dp)
@@ -40,40 +42,13 @@ fun ReadingPageCard(
                 .padding(horizontal = 8.dp, vertical = 18.dp),
             factory = { context ->
                 LineChart(context).apply {
-                    val entries = mutableListOf<Entry>()
-
-                    mockPages.forEach { entries.add(Entry(it.x, it.y)) }
-
-                    val dataSet = LineDataSet(entries, "주간 독서 페이지").apply {
-                        color = labelColor
-                        lineWidth = 1.5f // 선 두께
-                        mode = LineDataSet.Mode.CUBIC_BEZIER // 선 모양
-
-                        setDrawCircles(false) // 점 삭제
-                        valueTextSize = 10f
-                        valueTextColor = labelColor
-                        valueFormatter = PageFormatter()
-
-                        setDrawFilled(true)
-                        fillAlpha = 30
-                        fillDrawable = GradientDrawable(
-                            GradientDrawable.Orientation.TOP_BOTTOM,
-                            intArrayOf(lineFillColor, Color.TRANSPARENT)
-                        )
-                    }
-
-                    data = LineData(dataSet)
                     description.isEnabled = false
                     setTouchEnabled(false)
 
-                    animateY(800, Easing.EaseInOutQuad)
-
-                    val week = listOf("일", "월", "화", "수", "목", "금", "토")
                     xAxis.apply {
                         position = XAxis.XAxisPosition.BOTTOM
                         textSize = 12f
                         textColor = labelColor
-                        valueFormatter = IndexAxisValueFormatter(week)
                     }
 
                     axisLeft.isEnabled = false
@@ -81,6 +56,33 @@ fun ReadingPageCard(
                     legend.isEnabled = false
                 }
             },
+            update = { chart ->
+                val dataSet = LineDataSet(entries, "주간 독서 페이지").apply {
+                    color = labelColor
+                    lineWidth = 1.5f // 선 두께
+                    mode = LineDataSet.Mode.CUBIC_BEZIER // 선 모양
+
+                    setDrawCircles(false) // 점 삭제
+                    valueTextSize = 10f
+                    valueTextColor = labelColor
+                    valueFormatter = PageFormatter()
+
+                    setDrawFilled(true)
+                    fillAlpha = 30
+                    fillDrawable = GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        intArrayOf(lineFillColor, Color.TRANSPARENT)
+                    )
+                }
+
+                chart.apply {
+                    data = LineData(dataSet)
+                    xAxis.valueFormatter = IndexAxisValueFormatter(xLabels)
+                    animateY(800, Easing.EaseInOutQuad)
+                    notifyDataSetChanged()
+                    invalidate()
+                }
+            }
         )
     }
 }
@@ -90,6 +92,6 @@ fun ReadingPageCard(
 @Composable
 private fun GureumCardPreview() {
     GureumPageTheme {
-        ReadingPageCard()
+//        ReadingPageCard()
     }
 }

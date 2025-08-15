@@ -22,12 +22,12 @@ import com.hihihihi.gureumpage.common.utils.SimplePercentFormatter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.statistics.mockGenreList
 
 @Composable
-fun GenreCard(
+fun CategoryCard(
     modifier: Modifier = Modifier,
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
+    entries: List<PieEntry>,
 ) {
     GureumCard(modifier = modifier.height(210.dp)) {
         AndroidView(
@@ -36,34 +36,6 @@ fun GenreCard(
                 .padding(horizontal = 8.dp, vertical = 18.dp),
             factory = { context ->
                 PieChart(context).apply {
-                    val entries = mutableListOf<PieEntry>()
-
-                    mockGenreList.sortedByDescending { it.value }.forEach {
-                        entries.add(PieEntry(it.value, it.label))
-                    }
-
-                    val dataSet = PieDataSet(entries, "").apply {
-                        colors = ColorTemplate.LIBERTY_COLORS.toList() // 보이는 컬러 목록
-                        sliceSpace = 0f // 조각 간 간격
-                        setExtraOffsets(0f, 4f, 0f, 8f)
-
-                        valueTextSize = 12f                 // 숫자 크기
-                        valueTextColor = labelColor         // 숫자 컬러
-                        valueFormatter = SimplePercentFormatter() // 숫자 포맷터
-                        setUsePercentValues(true)           // 퍼센트로 표시
-                        selectionShift = 3f                 // 조각 클릭 시 튀어나오는 범위 (클릭 이벤트랑 같이 사용하기)
-                        yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE // 숫자 사이드에 표시
-
-                        valueLinePart1Length = 0.55f // 조각과 이어지는 라인 길이
-                        valueLinePart2Length = 0.15f // 숫자와 이어지는 라인 길이
-                        valueLinePart1OffsetPercentage = 120f // 라인 시작 위치
-
-                        setAutomaticallyDisableSliceSpacing(true)   // 조각 간 간격 자동 조정
-                        isUsingSliceColorAsValueLineColor = true    // 조각 색과 라인 컬러 통일
-                    }
-
-                    data = PieData(dataSet)
-
                     description.isEnabled = false   // 우측 하단 차트 설명 숨김
                     setDrawEntryLabels(false)       // 조각 라벨 보이지 않음
                     setHoleColor(Color.TRANSPARENT) // 중앙 홀 컬러
@@ -77,9 +49,36 @@ fun GenreCard(
                         form = Legend.LegendForm.CIRCLE // 범례 컬러 모양
                         textColor = labelColor          // 텍스트 컬러
                     }
-                    animateY(1200, Easing.EaseInOutQuad)
                 }
             },
+            update = { chart ->
+                val dataSet = PieDataSet(entries, "").apply {
+                    colors = ColorTemplate.LIBERTY_COLORS.toList() // 보이는 컬러 목록
+                    sliceSpace = 0f // 조각 간 간격
+
+                    valueTextSize = 12f                 // 숫자 크기
+                    valueTextColor = labelColor         // 숫자 컬러
+                    valueFormatter = SimplePercentFormatter() // 숫자 포맷터
+                    selectionShift = 3f                 // 조각 클릭 시 튀어나오는 범위 (클릭 이벤트랑 같이 사용하기)
+                    yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE // 숫자 사이드에 표시
+
+                    valueLinePart1Length = 0.55f // 조각과 이어지는 라인 길이
+                    valueLinePart2Length = 0.15f // 숫자와 이어지는 라인 길이
+                    valueLinePart1OffsetPercentage = 120f // 라인 시작 위치
+
+                    setAutomaticallyDisableSliceSpacing(true)   // 조각 간 간격 자동 조정
+                    isUsingSliceColorAsValueLineColor = true    // 조각 색과 라인 컬러 통일
+                }
+
+                chart.apply {
+                    setExtraOffsets(0f, 4f, 0f, 8f)
+                    setUsePercentValues(true)           // 퍼센트로 표시
+                    data = PieData(dataSet)
+                    animateY(1200, Easing.EaseInOutQuad)
+                    notifyDataSetChanged()
+                    invalidate()
+                }
+            }
         )
     }
 }
@@ -89,6 +88,6 @@ fun GenreCard(
 @Composable
 private fun GureumCardPreview() {
     GureumPageTheme {
-        GenreCard()
+//        GenreCard()
     }
 }
