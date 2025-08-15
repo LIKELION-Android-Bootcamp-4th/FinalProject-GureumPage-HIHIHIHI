@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
@@ -29,7 +30,7 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        val userId = "iK4v1WW1ZX4gID2HueBi" // 나중에 FirebaseAuth에서 가져오기
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
         // 유저 책 실시간 구독
         viewModelScope.launch {
@@ -53,5 +54,4 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
-
 }
