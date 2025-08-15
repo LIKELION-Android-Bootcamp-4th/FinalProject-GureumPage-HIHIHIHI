@@ -35,6 +35,7 @@ fun QuotesTab(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .padding(bottom = 20.dp)
     ) {
         quotes.forEach { quote ->
             QuoteCard(
@@ -57,7 +58,7 @@ private fun QuoteCard(
     onMenuClick: (quoteId: String) -> Unit
 ) {
     GureumCard(
-        modifier = Modifier.padding(top = 24.dp)
+        modifier = Modifier.padding(top = 20.dp)
     ) {
         Column(
             modifier = Modifier
