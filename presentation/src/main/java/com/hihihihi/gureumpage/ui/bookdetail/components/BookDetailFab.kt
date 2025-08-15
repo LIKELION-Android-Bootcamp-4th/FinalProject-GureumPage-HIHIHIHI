@@ -10,11 +10,13 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,14 +57,33 @@ fun BookDetailFab(
     val fabItems = when (readingStatus) {
         ReadingStatus.PLANNED -> emptyList()
         ReadingStatus.READING -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
-            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onEvent(BookDetailFabEvent.NavigateToMindmap) },
-            MiniFabItem(R.drawable.ic_alarm_filled, "독서 타이머 시작") { onEvent(BookDetailFabEvent.NavigateToTimer) },
-            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onEvent(BookDetailFabEvent.ShowAddManualHistoryDialog) },
+            MiniFabItem(
+                R.drawable.ic_lightbulb_filled,
+                "필사 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(
+                R.drawable.ic_graph,
+                "마인드맵 그리기"
+            ) { onEvent(BookDetailFabEvent.NavigateToMindmap) },
+            MiniFabItem(
+                R.drawable.ic_alarm_filled,
+                "독서 타이머 시작"
+            ) { onEvent(BookDetailFabEvent.NavigateToTimer) },
+            MiniFabItem(
+                R.drawable.ic_edit_alt_filled,
+                "독서 기록 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddManualHistoryDialog) },
         )
+
         ReadingStatus.FINISHED -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
-            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onEvent(BookDetailFabEvent.NavigateToMindmap) },
+            MiniFabItem(
+                R.drawable.ic_lightbulb_filled,
+                "필사 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(
+                R.drawable.ic_graph,
+                "마인드맵 그리기"
+            ) { onEvent(BookDetailFabEvent.NavigateToMindmap) },
         )
     }
 
@@ -73,7 +96,22 @@ fun BookDetailFab(
         modifier = modifier,
         contentAlignment = Alignment.BottomEnd
     ) {
-        Column(horizontalAlignment = Alignment.End) {
+        if (fabExpanded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.05f))
+                    .noRippleClickable { fabExpanded = false }
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 32.dp, end = 22.dp),
+        )
+        {
             AnimatedVisibility(
                 visible = fabExpanded,
                 enter = fadeIn() + slideInVertically { it } + expandVertically(),
@@ -97,6 +135,17 @@ fun BookDetailFab(
             }
         }
     }
+}
+
+@Composable
+fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
+    return this.then(
+        Modifier
+            .background(color = Color.Transparent)
+            .pointerInput(Unit) {
+                detectTapGestures { onClick() }
+            }
+    )
 }
 
 
@@ -149,6 +198,6 @@ data class MiniFabItem(
 @Composable
 private fun BookDetailFabPreview() {
     GureumPageTheme {
-        BookDetailFab(readingStatus = ReadingStatus.READING , onEvent = { })
+        BookDetailFab(readingStatus = ReadingStatus.READING, onEvent = { })
     }
 }

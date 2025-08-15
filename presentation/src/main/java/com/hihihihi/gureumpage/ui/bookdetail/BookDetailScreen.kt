@@ -214,7 +214,6 @@ fun BookDetailContent(
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 32.dp, end = 22.dp),
         )
     }
 }
