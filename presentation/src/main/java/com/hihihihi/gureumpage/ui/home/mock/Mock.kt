@@ -2,17 +2,14 @@ package com.hihihihi.gureumpage.ui.home.mock
 
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.User
 import com.hihihihi.domain.model.UserBook
 import java.time.LocalDateTime
 
-data class User(
-    val nickName: String,
-    val appellation: String
-)
 
 
 
-val mockUser = User("히히히히", "새벽독서가")
+val mockUser = User("","히히히히", "새벽독서가",0,"",LocalDateTime.now())
 
 
 val mockUserBooks = listOf(

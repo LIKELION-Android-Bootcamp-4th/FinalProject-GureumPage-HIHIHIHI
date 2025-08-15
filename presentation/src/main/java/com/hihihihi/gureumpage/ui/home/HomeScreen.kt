@@ -26,9 +26,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
 import com.hihihihi.gureumpage.ui.home.components.ReadingGoalSection
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
+import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
 
 @Composable
@@ -58,6 +60,7 @@ fun HomeScreen(
 
             Column {
                 HomeScreenContent(
+                    user = homeData.user,
                     books = homeData.userBooks,
                     quotes = homeData.quotes,
                     todayReadTime = homeData.todayReadTime,
@@ -76,6 +79,7 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
+    user: User,
     books: List<UserBook>,
     quotes: List<Quote>,
     todayReadTime: Int,
@@ -85,8 +89,8 @@ fun HomeScreenContent(
 ) {
     val scrollState = rememberLazyListState()
 
-    var goalSeconds by remember { mutableStateOf(3720) }
-    val totalReadSeconds = 3802 // 실제 읽은 시간 데이터로 교체 필요
+    var goalSeconds by remember { mutableStateOf(dailyGoalTime) }
+    val totalReadSeconds = todayReadTime
 
     LazyColumn(
         modifier = Modifier
@@ -97,7 +101,8 @@ fun HomeScreenContent(
     ) {
         item {
             SearchBarWithBackground(
-                onSearchBarClick
+                user = user,
+                onSearchBarClick,
             )
         }
 
@@ -131,7 +136,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUserBooks, dummyQuotes, 200,300,onBookClick = {}, {})
+        HomeScreenContent( mockUser,mockUserBooks, dummyQuotes, 200,300,onBookClick = {}, {})
     }
 }
 
