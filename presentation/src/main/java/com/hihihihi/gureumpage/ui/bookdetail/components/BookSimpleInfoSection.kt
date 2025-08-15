@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
@@ -41,6 +42,18 @@ fun BookSimpleInfoSection(
     userBook: UserBook,
     onReadingStatusClick: () -> Unit
 ) {
+    val statusColor = when (userBook.status) {
+        ReadingStatus.PLANNED -> GureumTheme.colors.gray400
+        ReadingStatus.READING -> GureumTheme.colors.systemGreen
+        ReadingStatus.FINISHED -> GureumTheme.colors.primaryDeep
+    }
+
+    Text(
+        text = "Status",
+        color = statusColor
+    )
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,7 +92,7 @@ fun BookSimpleInfoSection(
                 Text(
                     userBook.status.displayName,
                     style = GureumTypography.bodyMedium,
-                    color = GureumTheme.colors.systemGreen,
+                    color = statusColor,
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow_down),
