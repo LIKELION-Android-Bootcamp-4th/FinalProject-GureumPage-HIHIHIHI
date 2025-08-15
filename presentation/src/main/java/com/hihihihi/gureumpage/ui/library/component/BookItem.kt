@@ -92,7 +92,7 @@ fun BookItem(book: UserBook, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             //작가
             Text(
