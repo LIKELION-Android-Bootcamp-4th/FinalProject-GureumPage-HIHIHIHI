@@ -61,6 +61,9 @@ fun HomeScreen(
                     onBookClick = {
                         navController.navigate(NavigationRoute.BookDetail.createRoute(it))
                     },
+                    onSearchBarClick = {
+                        navController.navigate(NavigationRoute.Search.route)
+                    }
                 )
             }
         }
@@ -71,7 +74,8 @@ fun HomeScreen(
 fun HomeScreenContent(
     books: List<UserBook>,
     quotes: List<Quote>,
-    onBookClick: (String) -> Unit
+    onBookClick: (String) -> Unit,
+    onSearchBarClick: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
@@ -86,7 +90,9 @@ fun HomeScreenContent(
         state = scrollState,
     ) {
         item {
-            SearchBarWithBackground()
+            SearchBarWithBackground(
+                onSearchBarClick
+            )
         }
 
         item {
@@ -119,7 +125,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUserBooks, dummyQuotes, onBookClick = {})
+        HomeScreenContent(mockUserBooks, dummyQuotes, onBookClick = {}, {})
     }
 }
 
