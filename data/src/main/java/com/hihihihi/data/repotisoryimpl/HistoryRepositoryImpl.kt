@@ -1,7 +1,7 @@
 package com.hihihihi.data.repotisoryimpl
 
-import com.google.firebase.Timestamp
 import com.hihihihi.data.mapper.toDomain
+import com.hihihihi.data.mapper.toDto
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.repository.HistoryRepository
@@ -20,5 +20,10 @@ class HistoryRepositoryImpl @Inject constructor(
     override fun getHistoriesByUserId(userId: String): Flow<List<History>> {
         return historyRemoteDataSource.getHistoriesByUserId(userId)
             .map { dtoList -> dtoList.map { it.toDomain() } }
+    }
+
+    override suspend fun addHistory(history: History): Result<Unit> {
+        val dto = history.toDto()
+        return historyRemoteDataSource.addHistory(dto, history.userId)
     }
 }

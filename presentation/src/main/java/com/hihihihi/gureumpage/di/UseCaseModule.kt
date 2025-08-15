@@ -11,6 +11,7 @@ import com.hihihihi.domain.repository.UserPreferencesRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
@@ -83,6 +84,14 @@ object UseCaseModule {
         repository: QuoteRepository
     ): GetQuoteUseCase {
         return GetQuoteUseCase(repository)
+    }
+
+    @Provides
+    fun provideAddHistory(
+        historyRepository: HistoryRepository,
+        userBookRepository: UserBookRepository
+    ): AddHistoryUseCase {
+        return AddHistoryUseCase(historyRepository, userBookRepository)
     }
 
     @Provides
