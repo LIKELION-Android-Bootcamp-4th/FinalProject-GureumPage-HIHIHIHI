@@ -8,6 +8,7 @@ import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
+import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
@@ -15,6 +16,7 @@ import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
+import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
@@ -50,12 +52,26 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideGetHomeDataUseCase(
+        userBookRepository: UserBookRepository,
+        quoteRepository: QuoteRepository,
+        historyRepository: HistoryRepository,
+        userRepository: UserRepository
+    ): GetHomeDataUseCase {
+        return GetHomeDataUseCase(userBookRepository,quoteRepository,historyRepository,userRepository)
+    }
+
+    @Provides
     fun provideGetUserBookUseCase(
         userBookRepository: UserBookRepository, // Repository가 자동 주입됨
         quoteRepository: QuoteRepository,
         historyRepository: HistoryRepository
     ): GetBookDetailDataUseCase {
-        return GetBookDetailDataUseCase(userBookRepository,quoteRepository,historyRepository) // UseCase 생성 후 반환
+        return GetBookDetailDataUseCase(
+            userBookRepository,
+            quoteRepository,
+            historyRepository
+        ) // UseCase 생성 후 반환
     }
 
     @Provides
@@ -64,6 +80,7 @@ object UseCaseModule {
     ): PatchUserBookUseCase {
         return PatchUserBookUseCase(repository)
     }
+
     @Provides
     fun provideAddUserBookUseCase(
         repository: UserBookRepository

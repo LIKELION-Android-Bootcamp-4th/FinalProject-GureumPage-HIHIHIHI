@@ -8,5 +8,7 @@ interface HistoryRepository {
 
     fun getHistoriesByUserId(userId: String): Flow<List<History>>
 
+    fun getTodayHistoriesByUserId(userId: String): Flow<List<History>>
+
     suspend fun addHistory(history: History): Result<Unit>
 }

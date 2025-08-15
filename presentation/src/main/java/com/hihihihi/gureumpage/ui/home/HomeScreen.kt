@@ -53,11 +53,15 @@ fun HomeScreen(
             ErrorView(message = uiState.value.errorMessage!!) // 에러 발생 시 표시될 뷰
         }
 
-        else -> {
+        uiState.value.homeData != null -> {
+            val homeData = uiState.value.homeData!! // null 아님 확정
+
             Column {
                 HomeScreenContent(
-                    books = uiState.value.books,
-                    quotes = uiState.value.quotes,
+                    books = homeData.userBooks,
+                    quotes = homeData.quotes,
+                    todayReadTime = homeData.todayReadTime,
+                    dailyGoalTime = homeData.user.dailyGoalTime,
                     onBookClick = {
                         navController.navigate(NavigationRoute.BookDetail.createRoute(it))
                     },
@@ -74,6 +78,8 @@ fun HomeScreen(
 fun HomeScreenContent(
     books: List<UserBook>,
     quotes: List<Quote>,
+    todayReadTime: Int,
+    dailyGoalTime: Int,
     onBookClick: (String) -> Unit,
     onSearchBarClick: () -> Unit
 ) {
@@ -125,7 +131,7 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUserBooks, dummyQuotes, onBookClick = {}, {})
+        HomeScreenContent(mockUserBooks, dummyQuotes, 200,300,onBookClick = {}, {})
     }
 }
 

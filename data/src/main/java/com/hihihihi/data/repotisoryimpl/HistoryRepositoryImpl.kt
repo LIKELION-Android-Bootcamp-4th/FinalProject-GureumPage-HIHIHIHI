@@ -22,6 +22,11 @@ class HistoryRepositoryImpl @Inject constructor(
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
 
+    override fun getTodayHistoriesByUserId(userId: String): Flow<List<History>> {
+        return historyRemoteDataSource.getTodayHistoriesByUserId(userId)
+            .map { dtoList -> dtoList.map { it.toDomain() } }
+    }
+
     override suspend fun addHistory(history: History): Result<Unit> {
         val dto = history.toDto()
         return historyRemoteDataSource.addHistory(dto, history.userId)
