@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface HistoryRemoteDataSource {
     fun getHistoriesByUserBookId(userBookId: String): Flow<List<HistoryDto>>
+
+    fun getHistoriesByUserId(userId: String): Flow<List<HistoryDto>>
 }
