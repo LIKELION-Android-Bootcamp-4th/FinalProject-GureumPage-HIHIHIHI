@@ -3,10 +3,13 @@ package com.hihihihi.gureumpage.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.model.Mindmap
+import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.repository.SearchRepository
+import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +24,7 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val searchBooksUseCase: SearchBooksUseCase,
     private val addUserBookUseCase: AddUserBookUseCase,
-    private val searchRepository: SearchRepository
+    private val searchRepository: SearchRepository,
 ) : ViewModel() {
     private val _searchResults = MutableStateFlow<List<SearchBook>>(emptyList())
     val searchResults: StateFlow<List<SearchBook>> = _searchResults.asStateFlow()
@@ -55,7 +58,7 @@ class SearchViewModel @Inject constructor(
         endDate: LocalDateTime,
         currentPage: Int,
         totalPage: Int,
-        status: ReadingStatus
+        status: ReadingStatus,
     ) {
         viewModelScope.launch {
             try {
@@ -79,10 +82,26 @@ class SearchViewModel @Inject constructor(
                     category = searchBook.categoryName,
                 )
 
-                val result = addUserBookUseCase(userBook)
+                val mindmap = Mindmap(
+                    mindmapId = "",
+                    userBookId = "",
+                    rootNodeId = "",
+                )
 
+                val rootNode = MindmapNode(
+                    mindmapNodeId = "",
+                    mindmapId = "",
+                    nodeTitle = searchBook.title,
+                    nodeEx = searchBook.description,
+                    parentNodeId = null,
+                    color = null,
+                    icon = null,
+                    deleted = false,
+                    bookImage = searchBook.coverImageUrl
+                )
+
+                addUserBookUseCase(userBook, mindmap, rootNode)
                 // TODO: 성공 실패 처리 하기
-                result.isSuccess
             } catch (e: Exception) {
 
             }

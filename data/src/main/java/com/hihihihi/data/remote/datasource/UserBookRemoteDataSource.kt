@@ -15,5 +15,5 @@ interface UserBookRemoteDataSource {
 
     suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit>
 
-    suspend fun addUserBook(userBookDto: UserBookDto): Result<Unit>
+    suspend fun addUserBook(userBookDto: UserBookDto): Result<String>
 }

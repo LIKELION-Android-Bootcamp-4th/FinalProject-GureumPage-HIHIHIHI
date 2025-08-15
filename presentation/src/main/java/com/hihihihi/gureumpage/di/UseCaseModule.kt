@@ -4,6 +4,8 @@ import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.MindmapNodeRepository
+import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -12,6 +14,12 @@ import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.UpdateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
+import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
@@ -58,7 +66,12 @@ object UseCaseModule {
         historyRepository: HistoryRepository,
         userRepository: UserRepository
     ): GetHomeDataUseCase {
-        return GetHomeDataUseCase(userBookRepository,quoteRepository,historyRepository,userRepository)
+        return GetHomeDataUseCase(
+            userBookRepository,
+            quoteRepository,
+            historyRepository,
+            userRepository
+        )
     }
 
     @Provides
@@ -83,9 +96,15 @@ object UseCaseModule {
 
     @Provides
     fun provideAddUserBookUseCase(
-        repository: UserBookRepository
+        userBookRepository: UserBookRepository,
+        mindmapRepository: MindmapRepository,
+        mindmapNodeRepository: MindmapNodeRepository,
     ): AddUserBookUseCase {
-        return AddUserBookUseCase(repository)
+        return AddUserBookUseCase(
+            userBookRepository = userBookRepository,
+            mindmapRepository = mindmapRepository,
+            mindmapNodeRepository = mindmapNodeRepository,
+        )
     }
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
@@ -132,6 +151,48 @@ object UseCaseModule {
         authRepository: AuthRepository
     ): SignInWithNaverUseCase {
         return SignInWithNaverUseCase(naverAuthRepository, authRepository)
+    }
+
+    @Provides
+    fun provideCreateMindmapUseCase(
+        repository: MindmapRepository
+    ): CreateMindmapUseCase {
+        return CreateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetMindmapUseCase(
+        repository: MindmapRepository
+    ): GetMindmapUseCase {
+        return GetMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateMindmapUseCase(
+        repository: MindmapRepository
+    ): UpdateMindmapUseCase {
+        return UpdateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveUseCase(
+        repository: MindmapNodeRepository
+    ): ObserveUseCase {
+        return ObserveUseCase(repository)
+    }
+
+    @Provides
+    fun provideLoadNodesUseCase(
+        repository: MindmapNodeRepository
+    ): LoadNodesUseCase {
+        return LoadNodesUseCase(repository)
+    }
+
+    @Provides
+    fun provideApplyNodeOperation(
+        repository: MindmapNodeRepository
+    ): ApplyNodeOperation {
+        return ApplyNodeOperation(repository)
     }
 
     @Provides
