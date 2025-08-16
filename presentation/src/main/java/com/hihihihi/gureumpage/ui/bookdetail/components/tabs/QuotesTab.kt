@@ -86,16 +86,16 @@ private fun QuoteCard(
 
                 Spacer(Modifier.weight(1f))
 
-                IconButton(
-                    onClick = { onMenuClick(id) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
-                        contentDescription = "dot_menu",
-                        tint = GureumTheme.colors.gray600
-                    )
-                }
+//                IconButton(
+//                    onClick = { onMenuClick(id) },
+//                    modifier = Modifier.size(32.dp)
+//                ) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
+//                        contentDescription = "dot_menu",
+//                        tint = GureumTheme.colors.gray600
+//                    )
+//                }
             }
 
             Text(
