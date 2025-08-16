@@ -114,7 +114,7 @@ class BookDetailViewModel @Inject constructor(
             createdAt = LocalDateTime.now(),
             title = userBook.title,
             author = userBook.author,
-            publisher = "", //TODO userBook 수정하면 여기도 수정
+            publisher = userBook.publisher?: "",
             imageUrl = userBook.imageUrl
         )
         viewModelScope.launch {
