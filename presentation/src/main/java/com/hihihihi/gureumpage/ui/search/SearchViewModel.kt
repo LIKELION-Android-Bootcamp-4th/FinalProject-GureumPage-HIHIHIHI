@@ -83,7 +83,7 @@ class SearchViewModel @Inject constructor(
                     status = status,
                     review = null,
                     rating = null,
-                    category = searchBook.categoryName,
+                    category = searchBook.categoryName.split(">")[1],
                 )
 
                 val mindmap = Mindmap(
