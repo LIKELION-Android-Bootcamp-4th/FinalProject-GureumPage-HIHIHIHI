@@ -29,7 +29,6 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         var query = firestore.collection("user_books")
             .whereEqualTo("user_id", userId)   // user_id 를 포함하고 있는 문서만 가져옴
 
-
         if (status != null) {
             query = query.whereEqualTo("status", status.name.lowercase()) // 입력한 상태의 userbook만 가져옴
         }
@@ -67,7 +66,6 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
 
             val userBookDto = snapshot?.toObject(UserBookDto::class.java)?.copy(userBookId = snapshot.id)
 
-
             if (userBookDto != null) {
                 trySend(userBookDto).isSuccess
             } else {
@@ -88,11 +86,11 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun addUserBook(userBookDto: UserBookDto): Result<Unit> = try {
+    override suspend fun addUserBook(userBookDto: UserBookDto): Result<String> = try {
         val documentReference = firestore.collection("user_books").document()
         documentReference.set(userBookDto.toMap()).await()
 
-        Result.success(Unit)
+        Result.success(documentReference.id)
     } catch (e: Exception) {
         Result.failure(e)
     }

@@ -2,12 +2,9 @@ package com.hihihihi.gureumpage.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.UserBook
-import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
-import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
+import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
+import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,10 +15,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getUserBooksUseCase: GetUserBooksUseCase, // 유저 책 데이터를 가져오는 UseCase 주입
-    private val getUserBooksByStatusUseCase: GetUserBooksByStatusUseCase,
-    private val getQuoteUseCase: GetQuoteUseCase
+    private val getHomeDataUseCase: GetHomeDataUseCase,
+    private val changeDailyGoalTimeUseCase: UpdateDailyGoalTimeUseCase,
 ) : ViewModel() {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val currentUid: String
+        get() = auth.currentUser!!.uid
+
 
     // UI 상태를 관리하는 StateFlow (내부 업데이트는 _uiState, 외부에선 uiState만 노출)
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -29,29 +29,24 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        val userId = "iK4v1WW1ZX4gID2HueBi" // 나중에 FirebaseAuth에서 가져오기
-
-        // 유저 책 실시간 구독
         viewModelScope.launch {
-            getUserBooksByStatusUseCase(userId, ReadingStatus.READING)
+            getHomeDataUseCase(currentUid)
                 .catch { e ->
-                    _uiState.update { it.copy(errorMessage = e.message, isLoading = false) }
+                    _uiState.update {
+                        it.copy(errorMessage = e.message, isLoading = false)
+                    }
                 }
-                .collect { books ->
-                    _uiState.update { it.copy(books = books, isLoading = false) }
-                }
-        }
-
-        // 명언 실시간 구독
-        viewModelScope.launch {
-            getQuoteUseCase(userId)
-                .catch { e ->
-                    _uiState.update { it.copy(errorMessage = e.message) }
-                }
-                .collect { quotes ->
-                    _uiState.update { it.copy(quotes = quotes) }
+                .collect { homeData ->
+                    _uiState.update {
+                        it.copy(homeData = homeData, isLoading = false)
+                    }
                 }
         }
     }
 
+    fun changeDailyGoalTime(dailyGoalTime: Int) {
+        viewModelScope.launch {
+            changeDailyGoalTimeUseCase(currentUid, dailyGoalTime)
+        }
+    }
 }

@@ -40,18 +40,20 @@ fun GureumNavGraph(
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(
-            NavigationRoute.MindMap.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            route = NavigationRoute.MindMap.route,
+            arguments = listOf(
+                navArgument("mindmapId") { type = NavType.StringType },
+                navArgument("bookId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
-            bookId?.let {
-                MindMapScreen(
-                    bookId = it,
-                )
+            val mindmapId = backStackEntry.arguments?.getString("mindmapId")
+            if (bookId != null && mindmapId != null) {
+                MindMapScreen(bookId = bookId, mindmapId = mindmapId)
             }
         }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
-        composable(NavigationRoute.Library.route) { LibraryScreen() }
+        composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
         composable(NavigationRoute.Search.route) { SearchScreen(navController) }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(

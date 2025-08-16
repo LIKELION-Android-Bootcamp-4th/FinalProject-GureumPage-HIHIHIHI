@@ -1,23 +1,36 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.MindmapNodeRepository
+import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
+import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
+import com.hihihihi.domain.usecase.mindmap.UpdateMindmapUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
+import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
+import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
+import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -48,12 +61,31 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideGetHomeDataUseCase(
+        userBookRepository: UserBookRepository,
+        quoteRepository: QuoteRepository,
+        historyRepository: HistoryRepository,
+        userRepository: UserRepository
+    ): GetHomeDataUseCase {
+        return GetHomeDataUseCase(
+            userBookRepository,
+            quoteRepository,
+            historyRepository,
+            userRepository
+        )
+    }
+
+    @Provides
     fun provideGetUserBookUseCase(
         userBookRepository: UserBookRepository, // Repository가 자동 주입됨
         quoteRepository: QuoteRepository,
         historyRepository: HistoryRepository
     ): GetBookDetailDataUseCase {
-        return GetBookDetailDataUseCase(userBookRepository,quoteRepository,historyRepository) // UseCase 생성 후 반환
+        return GetBookDetailDataUseCase(
+            userBookRepository,
+            quoteRepository,
+            historyRepository
+        ) // UseCase 생성 후 반환
     }
 
     @Provides
@@ -62,11 +94,18 @@ object UseCaseModule {
     ): PatchUserBookUseCase {
         return PatchUserBookUseCase(repository)
     }
+
     @Provides
     fun provideAddUserBookUseCase(
-        repository: UserBookRepository
+        userBookRepository: UserBookRepository,
+        mindmapRepository: MindmapRepository,
+        mindmapNodeRepository: MindmapNodeRepository,
     ): AddUserBookUseCase {
-        return AddUserBookUseCase(repository)
+        return AddUserBookUseCase(
+            userBookRepository = userBookRepository,
+            mindmapRepository = mindmapRepository,
+            mindmapNodeRepository = mindmapNodeRepository,
+        )
     }
 
     // Quote 관련 UseCase를 DI로 주입하는 함수
@@ -116,6 +155,48 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideCreateMindmapUseCase(
+        repository: MindmapRepository
+    ): CreateMindmapUseCase {
+        return CreateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetMindmapUseCase(
+        repository: MindmapRepository
+    ): GetMindmapUseCase {
+        return GetMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateMindmapUseCase(
+        repository: MindmapRepository
+    ): UpdateMindmapUseCase {
+        return UpdateMindmapUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveUseCase(
+        repository: MindmapNodeRepository
+    ): ObserveUseCase {
+        return ObserveUseCase(repository)
+    }
+
+    @Provides
+    fun provideLoadNodesUseCase(
+        repository: MindmapNodeRepository
+    ): LoadNodesUseCase {
+        return LoadNodesUseCase(repository)
+    }
+
+    @Provides
+    fun provideApplyNodeOperation(
+        repository: MindmapNodeRepository
+    ): ApplyNodeOperation {
+        return ApplyNodeOperation(repository)
+    }
+
+    @Provides
     fun provideOnboardingCompleteUseCase(
         repository: UserPreferencesRepository
     ): SetOnboardingCompleteUseCase {
@@ -137,6 +218,13 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideUpdateDailyGoalTimeUseCase(
+        repository: UserRepository
+    ): UpdateDailyGoalTimeUseCase {
+        return UpdateDailyGoalTimeUseCase(repository)
+    }
+
+    @Provides
     fun provideSetThemeUseCase(
         repository: UserPreferencesRepository
     ): SetThemeUseCase {
@@ -148,5 +236,14 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): GetThemeFlowUseCase {
         return GetThemeFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetStatisticsUseCase(
+        userBookRepository: UserBookRepository,
+        historyRepository: HistoryRepository,
+        dailyReadPageRepository: DailyReadPageRepository
+    ): GetStatisticsUseCase {
+        return GetStatisticsUseCase(userBookRepository, historyRepository, dailyReadPageRepository)
     }
 }

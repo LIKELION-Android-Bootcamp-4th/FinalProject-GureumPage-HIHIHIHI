@@ -15,5 +15,5 @@ interface UserBookRepository {
 
     suspend fun patchUserBook(userBook: UserBook): Result<Unit>
 
-    suspend fun addUserBook(userBook: UserBook): Result<Unit>
+    suspend fun addUserBook(userBook: UserBook): Result<String>
 }

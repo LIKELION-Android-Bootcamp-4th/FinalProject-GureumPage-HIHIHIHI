@@ -10,6 +10,8 @@ import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
 import com.hihihihi.data.remote.datasource.KakaoDataSource
+import com.hihihihi.data.remote.datasource.MindmapNodeRemoteDataSource
+import com.hihihihi.data.remote.datasource.MindmapRemoteDataSource
 import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
@@ -19,6 +21,8 @@ import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.DailyReadPageRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.MindmapNodeRemoteDataSourceImpl
+import com.hihihihi.data.remote.datasourceimpl.MindmapRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.SearchRemoteDataSourceImpl
@@ -58,7 +62,7 @@ object DataSourceModule {
         auth: FirebaseAuth,
         functions: FirebaseFunctions
     ): AuthDataSource {
-       return AuthDataSourceImpl(auth, functions)
+        return AuthDataSourceImpl(auth, functions)
     }
 
     @Provides
@@ -107,6 +111,22 @@ object DataSourceModule {
         apiKey: String
     ): SearchRemoteDataSource {
         return SearchRemoteDataSourceImpl(searchApiService, apiKey)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMindmapRemoteDataSource(
+        fireStore: FirebaseFirestore
+    ): MindmapRemoteDataSource {
+        return MindmapRemoteDataSourceImpl(fireStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMindmapNodeRemoteDataSource(
+        fireStore: FirebaseFirestore
+    ): MindmapNodeRemoteDataSource {
+        return MindmapNodeRemoteDataSourceImpl(fireStore)
     }
 
     @Provides

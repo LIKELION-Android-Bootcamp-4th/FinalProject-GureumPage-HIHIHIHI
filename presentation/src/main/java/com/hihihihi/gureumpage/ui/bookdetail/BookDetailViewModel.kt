@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.bookdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
@@ -38,6 +39,11 @@ class BookDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
 
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val currentUid: String
+        get() = auth.currentUser!!.uid
+
+
     fun loadUserBookDetails(userBookId: String) {
         viewModelScope.launch {
             getBookDetailDataUseCase(userBookId)
@@ -64,11 +70,10 @@ class BookDetailViewModel @Inject constructor(
         readPageCount: Int
     ) {
         val userBook = uiState.value.userBook ?: return
-        val userId = "iK4v1WW1ZX4gID2HueBi" // TODO 로그인 구현 후 변경
 
         val history = History(
             id = "",
-            userId = userId,
+            userId = currentUid,
             userBookId = userBook.userBookId,
             date = date,
             startTime = startTime,
@@ -99,11 +104,9 @@ class BookDetailViewModel @Inject constructor(
     fun addQuote(userBookId: String, content: String, pageNumber: Int?, ){
         val userBook = uiState.value.userBook ?: return // 방어 코드
 
-        val userId = "iK4v1WW1ZX4gID2HueBi" //TODO 로그인 구현 후 Auth에서 currentUser 가져오는 식으로 변경
-
         val newQuote = Quote(
             id = "",
-            userId = userId,
+            userId = currentUid,
             userBookId = userBookId,
             content = content,
             pageNumber = pageNumber,
@@ -159,6 +162,19 @@ class BookDetailViewModel @Inject constructor(
             currentPage = page ?: userBook.currentPage,
             startDate = startDate ?: userBook.startDate,
             endDate = endDate ?: userBook.endDate
+        )
+
+        viewModelScope.launch {
+            patchUserBookUseCase(patchUserBook)
+        }
+    }
+
+    fun patchReview(rating: Double, review: String) {
+        val userBook = uiState.value.userBook ?: return
+
+        val patchUserBook = userBook.copy(
+            rating = rating,
+            review = review
         )
 
         viewModelScope.launch {
