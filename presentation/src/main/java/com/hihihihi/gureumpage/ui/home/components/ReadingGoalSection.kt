@@ -3,6 +3,7 @@ package com.hihihihi.gureumpage.ui.home.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,11 +42,8 @@ fun ReadingGoalSection(
     goalSeconds: Int,
     onGoalChange: (Int) -> Unit
 ) {
-
     val isGoalSet = goalSeconds > 0
-    val progress = if (isGoalSet) {
-        (totalReadSeconds.toFloat() / goalSeconds).coerceIn(0f, 1f)
-    } else 0f
+    val progress = if (isGoalSet) (totalReadSeconds.toFloat() / goalSeconds).coerceIn(0f, 1f) else 0f
 
     val goalMinutes = goalSeconds / 60
     val goalHours = goalMinutes / 60
@@ -71,23 +69,29 @@ fun ReadingGoalSection(
                 verticalAlignment = Alignment.CenterVertically,  // Bottom에서 CenterVertically로 변경
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(1f)) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { isPickerOpen = true }) {
                     GureumCircleProgressBar(
                         strokeWidth = 12,
                         size = 140,
                         progress = progress
                     )
 
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         if (isGoalSet) {
                             Text(
                                 text = formatSecondsToReadableTimeWithoutSecond(totalReadSeconds),
                                 style = GureumTypography.headlineLarge,
-                                color = if(totalReadSeconds>goalSeconds) GureumTheme.colors.primary else GureumTheme.colors.gray900
+                                color = if (totalReadSeconds > goalSeconds) GureumTheme.colors.primary else GureumTheme.colors.gray900
                             )
                             Row(
                                 // 가운데가 잘 안맞아서.. 호호
@@ -111,9 +115,6 @@ fun ReadingGoalSection(
                                     tint = GureumTheme.colors.gray500,
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable {
-                                            isPickerOpen = true
-                                        }
                                 )
                             }
 
@@ -122,9 +123,6 @@ fun ReadingGoalSection(
                                 painter = painterResource(R.drawable.ic_plus),
                                 contentDescription = "목표 시간 설정",
                                 tint = Color.Gray,
-                                modifier = Modifier.clickable {
-                                    isPickerOpen = true
-                                }
                             )
                         }
                     }
@@ -138,7 +136,7 @@ fun ReadingGoalSection(
                         .weight(1f)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center,
-                ){
+                ) {
                     if (!isGoalSet) {
                         // 목표가 없을 때
                         Text(
