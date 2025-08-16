@@ -196,14 +196,16 @@ fun BookDetailContent(
             item { BookSimpleInfoSection(userBook, onReadingStatusClick) }
             item { ReadingProgressSection(userBook) }
             item { BookStatisticsCard(bookStatistic) }
-            item {
-                ReviewSection(
-                    initialRating = userBook.rating?.toFloat() ?: 0f,
-                    initialReview = userBook.review ?: "",
-                    onSave = { rating, review ->
-                        onReviewSave(rating, review)
-                    }
-                )
+            if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.review != null){
+                item {
+                    ReviewSection(
+                        initialRating = userBook.rating?.toFloat() ?: 0f,
+                        initialReview = userBook.review ?: "",
+                        onSave = { rating, review ->
+                            onReviewSave(rating, review)
+                        }
+                    )
+                }
             }
             item { BookDetailTabs(userBook, quotes, histories) }
         }
