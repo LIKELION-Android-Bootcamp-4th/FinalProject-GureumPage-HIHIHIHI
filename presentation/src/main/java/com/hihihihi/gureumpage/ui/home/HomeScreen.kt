@@ -22,10 +22,7 @@ import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
@@ -33,18 +30,15 @@ import com.hihihihi.gureumpage.ui.home.components.ReadingGoalSection
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
-
 @Composable
 fun HomeScreen(
     // Hilt로 ViewModel을 주입받음. DI를 통해 뷰모델의 생명주기를 컴포즈에 맞게 관리
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
-
-    ) {
+) {
     // viewModel에서 선언한 uiState Flow를 Compose에서 관찰 (State로 변환).
     // 상태가 변경되면 recomposition 발생
     val uiState = viewModel.uiState.collectAsState()
-
 
     // ui
     when {
@@ -96,7 +90,6 @@ fun HomeScreenContent(
 
     val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
     val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
-
 
     LazyColumn(
         modifier = Modifier
