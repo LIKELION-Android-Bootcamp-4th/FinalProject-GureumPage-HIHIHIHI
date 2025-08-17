@@ -11,12 +11,14 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     private val localDatasource: UserPreferencesLocalDataSource,
     private val remoteDatasource: UserRemoteDataSource
 ) : UserPreferencesRepository {
-    override val onboardingComplete: Flow<Boolean> = localDatasource.onboardingComplete
     override val nickname: Flow<String> = localDatasource.nickname
     override val theme: Flow<GureumThemeType> = localDatasource.theme
 
-    override suspend fun setOnboardingComplete(complete: Boolean) {
-        localDatasource.setOnboardingComplete(complete)
+    override fun getOnboardingComplete(userId: String): Flow<Boolean> =
+        localDatasource.getOnboardingComplete(userId)
+
+    override suspend fun setOnboardingComplete(userId: String, complete: Boolean) {
+        localDatasource.setOnboardingComplete(userId, complete)
     }
 
     override suspend fun setNickname(userId: String, nickname: String) {
@@ -26,5 +28,9 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun setTheme(theme: GureumThemeType) {
         localDatasource.setTheme(theme)
+    }
+
+    override suspend fun clearAll() {
+        localDatasource.clearAll()
     }
 }
