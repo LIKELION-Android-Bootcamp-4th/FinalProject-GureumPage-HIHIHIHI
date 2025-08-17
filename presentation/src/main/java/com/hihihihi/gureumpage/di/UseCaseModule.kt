@@ -12,6 +12,7 @@ import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -148,5 +149,12 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): GetThemeFlowUseCase {
         return GetThemeFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
     }
 }
