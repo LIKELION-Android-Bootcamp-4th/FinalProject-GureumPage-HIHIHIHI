@@ -1,31 +1,106 @@
 package com.hihihihi.gureumpage.ui.onboarding
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingBottomContents
+import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingScaffold
+import com.hihihihi.gureumpage.ui.onboarding.components.OnboardingTopContents
+import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
+import com.hihihihi.gureumpage.ui.onboarding.pages.FeaturePage
+import com.hihihihi.gureumpage.ui.onboarding.pages.FinishPage
+import com.hihihihi.gureumpage.ui.onboarding.pages.NicknamePage
+import com.hihihihi.gureumpage.ui.onboarding.pages.PurposePage
+import com.hihihihi.gureumpage.ui.onboarding.pages.ThemePage
+import com.hihihihi.gureumpage.ui.onboarding.pages.WelcomePage
+import kotlinx.coroutines.launch
 
 @Composable
-fun OnBoardingScreen(navController: NavHostController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("OnBoarding Screen")
-
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.Home.route)
-            }
-        ) {
-            Text("홈으로 이동")
-        }
+fun OnBoardingScreen(
+    navController: NavHostController,
+    viewModel: OnBoardingViewModel = hiltViewModel(),
+) {
+    val steps by viewModel.steps.collectAsState()
+    GureumPageTheme(darkTheme = true) {
+        OnboardingContents(
+            steps = steps,
+            viewModel = viewModel,
+            onFinish = {
+                viewModel.saveOnboardingComplete()
+                navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
+        )
     }
+}
+
+@Composable
+private fun OnboardingContents(
+    steps: List<OnboardingStep>,
+    viewModel: OnBoardingViewModel,
+    onFinish: () -> Unit
+) {
+    val pagerState = rememberPagerState { steps.size }
+    val scope = rememberCoroutineScope()
+
+    val currentStep = steps.getOrNull(pagerState.currentPage) ?: OnboardingStep.Welcome
+
+    OnboardingScaffold(
+        pagerState = pagerState,
+        topContent = { page, step ->
+            if (step !is OnboardingStep.Welcome && step !is OnboardingStep.Finish) {
+                OnboardingTopContents(
+                    onBack = {
+                        scope.launch {
+                            if (pagerState.currentPage > 0) pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
+                    },
+                    progress = computeProgress(pagerState)
+                )
+            }
+        },
+        mainContent = { page, step ->
+            when (step) {
+                OnboardingStep.Welcome -> WelcomePage()
+                OnboardingStep.Nickname -> NicknamePage(viewModel = viewModel)
+                OnboardingStep.Purpose -> PurposePage(viewModel = viewModel)
+                OnboardingStep.Feature -> FeaturePage(viewModel = viewModel)
+                OnboardingStep.Theme -> ThemePage(viewModel = viewModel)
+                OnboardingStep.Finish -> FinishPage(viewModel = viewModel)
+            }
+        },
+        bottomContent = { page, step ->
+            val isLastPage = page == pagerState.pageCount - 1
+            OnboardingBottomContents(
+                buttonText = if (isLastPage) "시작하기" else "다음 단계",
+                explanation = when (step) {
+                    OnboardingStep.Welcome -> "설정은 언제든 변경할 수 있어요"
+                    OnboardingStep.Feature -> "옆으로 밀어 구름한장의 기능을 확인해보세요!"
+                    else -> ""
+                },
+                isNextEnabled = viewModel.isNextEnabled(currentStep),
+                onNext = {
+                    scope.launch {
+                        if (isLastPage) onFinish()
+                        else pagerState.animateScrollToPage(page + 1)
+                    }
+                },
+            )
+        },
+        steps = steps,
+    )
+}
+
+private fun computeProgress(pagerState: PagerState): Float {
+    val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
+    return (position / (pagerState.pageCount - 1)).coerceIn(0f, 1f)
 }

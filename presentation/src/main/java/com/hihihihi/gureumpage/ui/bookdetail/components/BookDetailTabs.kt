@@ -18,15 +18,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.History
+import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.BookInfoTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.QuotesTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.ReadingRecordTab
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailTabs() {
+fun BookDetailTabs(
+    userBook: UserBook,
+    quotes: List<Quote>,
+    histories: List<History>
+) {
     val tabTitles = listOf("책 정보", "필사 목록", "독서 기록")
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val scope = rememberCoroutineScope()
@@ -63,9 +73,9 @@ fun BookDetailTabs() {
             modifier = Modifier.fillMaxWidth(),
         ) { page ->
             when (page) {
-                0 -> BookInfoTab()
-                1 -> QuotesTab()
-                2 -> ReadingRecordTab()
+                0 -> BookInfoTab(userBook)
+                1 -> QuotesTab(quotes)
+                2 -> ReadingRecordTab(histories)
             }
         }
     }
@@ -76,6 +86,6 @@ fun BookDetailTabs() {
 @Composable
 private fun BookDetailTabsPreview() {
     GureumPageTheme {
-        BookDetailTabs()
+        BookDetailTabs(dummyUserBook,dummyQuotes, dummyRecords)
     }
 }

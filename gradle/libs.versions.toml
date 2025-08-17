@@ -24,6 +24,11 @@ retrofit = "3.0.0"
 firebaseFunctions = "22.0.0"
 googleGmsGoogleServices = "4.4.3"
 uiViewbinding = "1.8.3"
+datastore = "1.1.1"
+calendarCompose = "2.4.0"
+playReview = "2.0.2"
+ossLicensesPlugin = "0.10.7"
+playServicesOssLicenses = "17.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,6 +62,11 @@ logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", ver
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions", version.ref = "firebaseFunctions" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+calendar-compose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
+google-play-review = { module = "com.google.android.play:review", version.ref = "playReview" }
+google-play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
+play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -64,4 +74,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+google-oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 

@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.home
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,31 +18,27 @@ import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.home.components.CurrentReadingBookSection
-import com.hihihihi.gureumpage.ui.home.components.EmptyView
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
 import com.hihihihi.gureumpage.ui.home.components.ReadingGoalSection
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
-
+import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
 @Composable
 fun HomeScreen(
     // Hilt로 ViewModel을 주입받음. DI를 통해 뷰모델의 생명주기를 컴포즈에 맞게 관리
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
-
-    ) {
+) {
     // viewModel에서 선언한 uiState Flow를 Compose에서 관찰 (State로 변환).
     // 상태가 변경되면 recomposition 발생
     val uiState = viewModel.uiState.collectAsState()
-
 
     // ui
     when {
@@ -53,27 +50,46 @@ fun HomeScreen(
             ErrorView(message = uiState.value.errorMessage!!) // 에러 발생 시 표시될 뷰
         }
 
-        else -> {
-            HomeScreenContent(
-                books = uiState.value.books,
-                quotes = uiState.value.quotes,
-                onBookClick = {
-                    navController.navigate(NavigationRoute.BookDetail.createRoute(it))
-                })
+        uiState.value.homeData != null -> {
+            val homeData = uiState.value.homeData!! // null 아님 확정
+
+            Column {
+                HomeScreenContent(
+                    user = homeData.user,
+                    books = homeData.userBooks,
+                    quotes = homeData.quotes,
+                    todayReadTime = homeData.todayReadTime,
+                    dailyGoalTime = homeData.user.dailyGoalTime,
+                    onBookClick = {
+                        navController.navigate(NavigationRoute.BookDetail.createRoute(it))
+                    },
+                    onSearchBarClick = {
+                        navController.navigate(NavigationRoute.Search.route)
+                    },
+                    onChangeDailyGoalTime = {
+                        viewModel.changeDailyGoalTime(it)
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
 fun HomeScreenContent(
+    user: User,
     books: List<UserBook>,
     quotes: List<Quote>,
-    onBookClick: (String) -> Unit
+    todayReadTime: Int,
+    dailyGoalTime: Int,
+    onBookClick: (String) -> Unit,
+    onChangeDailyGoalTime: (Int) -> Unit,
+    onSearchBarClick: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
-    var goalSeconds by remember { mutableStateOf(3720) }
-    val totalReadSeconds = 3802 // 실제 읽은 시간 데이터로 교체 필요
+    val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
+    val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
 
     LazyColumn(
         modifier = Modifier
@@ -83,8 +99,10 @@ fun HomeScreenContent(
         state = scrollState,
     ) {
         item {
-            SearchBarWithBackground()
-
+            SearchBarWithBackground(
+                user = user,
+                onSearchBarClick,
+            )
         }
 
         item {
@@ -104,23 +122,18 @@ fun HomeScreenContent(
             ReadingGoalSection(
                 totalReadSeconds,
                 goalSeconds,
-                onGoalChange = { newGoal ->
-                    goalSeconds = newGoal
-                }
+                onGoalChange = onChangeDailyGoalTime
             )
         }
     }
 }
-
-
-
 
 @Preview(name = "DarkMode", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUserBooks, dummyQuotes, onBookClick = {})
+        HomeScreenContent(mockUser, mockUserBooks, dummyQuotes, 200, 300, onBookClick = {}, {}, {})
     }
 }
 

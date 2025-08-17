@@ -1,113 +1,228 @@
 package com.hihihihi.gureumpage.ui.library
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabPosition
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.library.component.BookItem
-import com.hihihihi.gureumpage.ui.library.component.ToggleTab
-
+import kotlinx.coroutines.launch
+import kotlin.collections.lastIndex
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.zIndex
+import com.hihihihi.gureumpage.R
+import kotlin.math.abs
 
 @Composable
 fun LibraryScreen(
-    userId: String = "iK4v1WW1ZX4gID2HueBi", // 테스트용 기본 유저 ID
-    viewModel: LibraryViewModel = hiltViewModel() // Hilt -> viewModel
+    navController: NavHostController,
+    viewModel: LibraryViewModel = hiltViewModel()
 ) {
-    //현재 탭 상태 true면 읽기 전, false 면 읽은 책
-    var isBeforeReading by remember { mutableStateOf(true) }
+    val tabTitles = listOf("읽기 전", "읽은 후")
 
-    //viewModel 에서 책 리시트 가져옴
+    val pagerState = rememberPagerState(pageCount = { tabTitles.size })
+    val scope = rememberCoroutineScope()
+
     val uiState by viewModel.uiState.collectAsState()
 
-    //현재 책 상태에 맞게 필터링
-    val filteredBooks = uiState.books.filter {
-        if (isBeforeReading) it.status != ReadingStatus.FINISHED
-        else it.status == ReadingStatus.FINISHED
-    }
+    val plannedBooks = uiState.books.filter { it.status == ReadingStatus.PLANNED }
+    val finishedBooks = uiState.books.filter { it.status == ReadingStatus.FINISHED }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        //앱 바 ui 확인용
-        Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp, bottom = 12.dp)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "서재",
-                style = GureumTypography.headlineSmall,
-                color = GureumTheme.colors.gray800,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = GureumTheme.colors.card,
+                contentColor = GureumTheme.colors.primary,
+                indicator = { tabPositions ->
+                    SlidingPillIndicator(tabPositions, pagerState)
+                },
+                divider = {},
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(GureumTheme.colors.card)
+                    .padding(4.dp)
+            ) {
+                tabTitles.forEachIndexed { index, text ->
+                    val isSelected = pagerState.currentPage == index
 
-        //상단 탭
-        ToggleTab(
-            isBeforeReading = isBeforeReading,
-            onToggle = { isBeforeReading = it}
-        )
-        //ui 상태 분기
-        when {
-            //로딩 중
-            uiState.isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = GureumTheme.colors.primary)
-                }
-            }
-            //에러 발생
-            uiState.errorMessage != null -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "에러 발생", color = GureumTheme.colors.systemRed)
-                }
-            }
-            //필터링된 책이 없을 경우
-            filteredBooks.isEmpty() -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "표시할 책이 없습니다.", style = GureumTypography.bodyMedium)
-                }
-            }
-            //정상적으로 작동될 떄
-            else -> {
-                //그리드로 책 목록 출력(3열)
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(filteredBooks) { book ->
-                        BookItem(
-                            book = book,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
+                    Tab(
+                        selected = isSelected,
+                        modifier = Modifier
+                            .zIndex(1f)
+                            .clip(RoundedCornerShape(14.dp)),
+                        onClick = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        selectedContentColor = GureumTheme.colors.white,
+                        unselectedContentColor = GureumTheme.colors.gray300,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (index == 0) R.drawable.ic_library_planned
+                                    else R.drawable.ic_library_finished
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (isSelected) GureumTheme.colors.white
+                                else GureumTheme.colors.gray300
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Medi16Text(
+                                text = text,
+                                color = if (isSelected) GureumTheme.colors.white
+                                else GureumTheme.colors.gray300
+                            )
+                        }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    when (page) {
+                        0 -> {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(3),
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(top = 18.dp)
+                            ) {
+                                items(plannedBooks) { book ->
+                                    BookItem(
+                                        book = book,
+                                        onClicked = { navController.navigate(NavigationRoute.BookDetail.createRoute(it)) }
+                                    )
+                                }
+                            }
+                        }
+
+                        1 -> {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(3),
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(top = 18.dp)
+                            ) {
+                                items(finishedBooks) { book ->
+                                    BookItem(
+                                        book = book,
+                                        onClicked = { navController.navigate(NavigationRoute.BookDetail.createRoute(it)) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 위쪽 그래디언트 오버레이
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(16.dp)
+                        .align(Alignment.TopCenter)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    GureumTheme.colors.background,
+                                    Color.Transparent
+                                ),
+                            )
+                        )
+                )
             }
         }
     }
 }
 
+@Composable
+private fun SlidingPillIndicator(
+    positions: List<TabPosition>,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    widthFraction: Float = 1f,
+    height: Dp = 48.dp // 인디케이터 두께
+) {
+    val curr = pagerState.currentPage
+    val off = pagerState.currentPageOffsetFraction
+    val next = (curr + if (off >= 0f) 1 else -1).coerceIn(0, positions.lastIndex)
+
+    val start = positions[curr]
+    val end = positions[next]
+    val fraction = abs(off)
+
+    val tabLeft = lerp(start.left, end.left, fraction)
+    val tabWidth = lerp(start.width, end.width, fraction)
+    val pillWidth = tabWidth * widthFraction
+    val pillLeft = tabLeft + (tabWidth - pillWidth) / 2
+
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .align(Alignment.CenterStart)   // 세로 중앙
+                .offset(x = pillLeft)           // 가로 위치
+                .width(pillWidth)               // 가로 길이 축소
+                .height(height)                 // 두께 줄이기
+                .clip(RoundedCornerShape(14.dp))
+                .background(GureumTheme.colors.primary)
+                .zIndex(-1f)
+        )
+    }
+}

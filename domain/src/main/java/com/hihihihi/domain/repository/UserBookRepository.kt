@@ -10,4 +10,10 @@ interface UserBookRepository {
     fun getUserBooks(userId: String): Flow<List<UserBook>>
 
      fun getUserBooksByStatus(userId: String, status: ReadingStatus): Flow<List<UserBook>>
+
+    fun getUserBook(userBookId: String): Flow<UserBook>
+
+    suspend fun patchUserBook(userBook: UserBook): Result<Unit>
+
+    suspend fun addUserBook(userBook: UserBook): Result<String>
 }

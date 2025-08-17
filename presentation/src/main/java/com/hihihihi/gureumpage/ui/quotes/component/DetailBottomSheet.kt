@@ -43,7 +43,7 @@ fun DetailBottomSheet(
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
-        containerColor = GureumTheme.colors.background,
+        containerColor = GureumTheme.colors.card,
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Row(
@@ -79,7 +79,9 @@ fun DetailBottomSheet(
                                 BodySubText(formatDateToSimpleString(quote.createdAt))
                                 Spacer(modifier = Modifier.padding(start = 10.dp))
                                 // 페이지
-                                BodySubText(quote.pageNumber.toString() + 'p')
+                                quote.pageNumber?.let { page ->
+                                    BodySubText("${page}p")
+                                }
                             }
                             // 저자
                             BodySubText(quote.author)
@@ -87,24 +89,16 @@ fun DetailBottomSheet(
                             BodySubText(quote.publisher)
                         }
 
-                        // 닫기 버튼
-                        IconButton(onClick = { onDismiss() }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_close),
-                                contentDescription = "닫기",
-                                tint = GureumTheme.colors.gray500
-                            )
-                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(8.dp))
             // 필사 내용
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GureumTheme.colors.card)
+                    .background(GureumTheme.colors.bookBackground)
             ) {
                 Text(
                     text = quote.content,

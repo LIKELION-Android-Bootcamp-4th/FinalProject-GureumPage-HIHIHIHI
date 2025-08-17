@@ -38,5 +38,5 @@ data class QuoteDto(
     var isLiked: Boolean = false,
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
-    var createdAt: Timestamp =  Timestamp.now()
+    var createdAt: Timestamp? =  null
 )

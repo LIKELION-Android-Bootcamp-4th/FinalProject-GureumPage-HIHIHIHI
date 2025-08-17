@@ -4,39 +4,51 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @HiltViewModel
+    class GureumThemeViewModel @Inject constructor(getTheme: GetThemeFlowUseCase) : ViewModel() {
+        val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GureumPageTheme {
-                GureumPageApp()
-            }
+            val viewModel = hiltViewModel<GureumThemeViewModel>()
+            val currentTheme by viewModel.theme.collectAsState()
+            // 모드 상태에 따라 GureumPageTheme 에 반영
+            GureumPageTheme(darkTheme = when (currentTheme) {
+                GureumThemeType.LIGHT -> false
+                else -> true
+            }) { GureumPageApp() }
         }
     }
 }
@@ -45,7 +57,6 @@ class MainActivity : ComponentActivity() {
 fun GureumPageApp() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -59,10 +70,21 @@ fun GureumPageApp() {
     )
 
     Scaffold(
+        topBar = {
+            when (currentRoute) {
+                NavigationRoute.Library.route -> GureumAppBar(title = "서재")
+                NavigationRoute.Quotes.route -> GureumAppBar(title = "필사 목록")
+                NavigationRoute.Statistics.route -> GureumAppBar(title = "통계")
+                NavigationRoute.MyPage.route -> GureumAppBar(title = "마이페이지")
+                NavigationRoute.MindMap.route -> GureumAppBar(navController, "마인드맵", true)
+                NavigationRoute.Timer.route -> GureumAppBar(navController, "독서 타이머", true)
+                NavigationRoute.BookDetail.route -> GureumAppBar(navController, "", true)
+            }
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            if(currentRoute != null && hideBottomBarRoutes.none{currentRoute.startsWith(it)})
-            GureumBottomNavBar(navController = navController)
+            if (currentRoute != null && hideBottomBarRoutes.none { currentRoute.startsWith(it) })
+                GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
         GureumNavGraph(

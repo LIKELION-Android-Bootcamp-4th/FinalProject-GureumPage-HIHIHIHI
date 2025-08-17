@@ -2,6 +2,7 @@ package com.hihihihi.data.remote.dto
 
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.domain.model.Book
@@ -12,20 +13,30 @@ import com.hihihihi.domain.model.UserBook
 data class UserBookDto(
     // Firestore 문서 ID는 여기엔 기본 포함되지 않으므로
     // 나중에 수동으로 넣어줘야 해서@PropertyName 필요 없음
+    @get:Exclude @set:Exclude
     var userBookId: String = "", // Firestore 문서 ID를 저장하는 필드
 
     // Firestore 필드명과 Kotlin 프로퍼티명을 매핑
     @get:PropertyName("user_id") @set:PropertyName("user_id")
     var userId: String = "",
 
-    @get:PropertyName("book_id") @set:PropertyName("book_id")
-    var bookId: String = "",
-
     @get:PropertyName("title") @set:PropertyName("title")
     var title: String = "",
 
     @get:PropertyName("author") @set:PropertyName("author")
     var author: String = "",
+
+    @get:PropertyName("publisher") @set:PropertyName("publisher")
+    var publisher: String? = "",
+
+    @get:PropertyName("description") @set:PropertyName("description")
+    var description: String? = "",
+
+    @get:PropertyName("isbn_10") @set:PropertyName("isbn_10")
+    var isbn10: String? = "",
+
+    @get:PropertyName("isbn_13") @set:PropertyName("isbn_13")
+    var isbn13: String? = "",
 
     @get:PropertyName("is_liked") @set:PropertyName("is_liked")
     var isLiked: Boolean = false,
@@ -56,6 +67,9 @@ data class UserBookDto(
 
     @get:PropertyName("rating") @set:PropertyName("rating")
     var rating: Double? = null,
+
+    @get:PropertyName("category") @set:PropertyName("category")
+    var category: String? = null,
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
     var createdAt: Timestamp? = null

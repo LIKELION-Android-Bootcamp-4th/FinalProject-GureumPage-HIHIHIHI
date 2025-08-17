@@ -3,10 +3,12 @@ package com.hihihihi.data.remote.datasourceimpl
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.dto.UserBookDto
+import com.hihihihi.data.remote.mapper.toMap
 import com.hihihihi.domain.model.ReadingStatus
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 
@@ -26,7 +28,6 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
     ): Flow<List<UserBookDto>> = callbackFlow {
         var query = firestore.collection("user_books")
             .whereEqualTo("user_id", userId)   // user_id 를 포함하고 있는 문서만 가져옴
-
 
         if (status != null) {
             query = query.whereEqualTo("status", status.name.lowercase()) // 입력한 상태의 userbook만 가져옴
@@ -52,5 +53,45 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
 
         // Flow가 종료될 때 리스너 해제
         awaitClose { listenerRegistration.remove() }
+    }
+
+    override fun getUserBook(userBookId: String): Flow<UserBookDto> = callbackFlow {
+        val docRef = firestore.collection("user_books").document(userBookId)
+
+        val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+
+            val userBookDto = snapshot?.toObject(UserBookDto::class.java)?.copy(userBookId = snapshot.id)
+
+            if (userBookDto != null) {
+                trySend(userBookDto).isSuccess
+            } else {
+                close(Exception("UserBookDto 변환 실패"))
+            }
+        }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    override suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit> = try{
+        val docRef = firestore.collection("user_books").document(userBookDto.userBookId)
+
+        docRef.set(userBookDto.toMap()).await()
+
+        Result.success(Unit)
+    } catch (e: Exception){
+        Result.failure(e)
+    }
+
+    override suspend fun addUserBook(userBookDto: UserBookDto): Result<String> = try {
+        val documentReference = firestore.collection("user_books").document()
+        documentReference.set(userBookDto.toMap()).await()
+
+        Result.success(documentReference.id)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

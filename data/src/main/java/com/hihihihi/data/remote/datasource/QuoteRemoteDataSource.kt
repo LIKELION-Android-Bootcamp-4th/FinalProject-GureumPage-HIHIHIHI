@@ -10,4 +10,6 @@ interface QuoteRemoteDataSource {
     suspend fun addQuote(quoteDto: QuoteDto): Result<Unit>
 
     fun getQuotes(userId: String): Flow<List<QuoteDto>>
+
+    fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>>
 }

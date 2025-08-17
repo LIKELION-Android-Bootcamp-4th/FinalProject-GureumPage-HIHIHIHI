@@ -1,13 +1,12 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components.tabs
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,47 +15,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.History
+import com.hihihihi.domain.model.RecordType
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
+import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
+import com.hihihihi.gureumpage.common.utils.formatTimeRange
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
-import com.hihihihi.gureumpage.designsystem.components.TitleText
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
+import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 
 @Composable
-fun ReadingRecordTab() {
-    LazyColumn(
+fun ReadingRecordTab(histories: List<History>) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
-//            .heightIn(max = Short.MIN_VALUE.toInt().dp) // TODO: 추후 동적 사이즈 주어야 함
-        userScrollEnabled = false,
+            .padding(bottom = 12.dp)
     ) {
-        stickyHeader {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 24.dp),
-                verticalAlignment = Alignment.Bottom,
-            ) {
-                Text(
-                    text = "2025.07.29",
-                    modifier = Modifier,
-                    color = GureumTheme.colors.gray400,
-                    style = GureumTypography.bodySmall
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                TitleText(
-                    text = "19분",
-                    isUnderline = true
-                )
+        histories
+            .filter { it.date != null }
+            .sortedByDescending { it.date }
+            .groupBy { it.date!!.toLocalDate() }
+            .forEach { (localDate, dailyRecords) ->
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 24.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Text(
+                        text = formatDateToSimpleString(dailyRecords.first().date), 
+                        modifier = Modifier,
+                        color = GureumTheme.colors.gray400,
+                        style = GureumTypography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Semi16Text(
+                        text = formatSecondsToReadableTime(
+                            dailyRecords.sumOf { it.readTime }
+                        ),
+                        isUnderline = true
+                    )
+                }
+                dailyRecords.forEach { record ->
+                    RecordCard(
+                        isTimer = record.recordType == RecordType.TIMER,
+                        id = record.id,
+                        timeRange = formatTimeRange(record.startTime, record.endTime),
+                        duration = formatSecondsToReadableTime(record.readTime)
+                    )
+                }
             }
-        }
-
-        item() {
-            RecordCard()
-            RecordCard()
-        }
     }
 }
 
@@ -64,6 +76,9 @@ fun ReadingRecordTab() {
 private fun RecordCard(
     modifier: Modifier = Modifier,
     isTimer: Boolean = true,
+    id: String,
+    timeRange: String,
+    duration: String
 ) {
     GureumCard(
         modifier = modifier
@@ -81,18 +96,18 @@ private fun RecordCard(
                     if (isTimer) R.drawable.ic_alarm_filled
                     else R.drawable.ic_edit_filled
                 ),
-                contentDescription = "",
+                contentDescription = "기록 형태",
                 tint = GureumTheme.colors.gray300
             )
             Spacer(modifier = Modifier.width(6.dp))
 
             Text(
-                text = "시간 넣기",
+                text = timeRange,
                 style = GureumTypography.titleMedium,
                 color = GureumTheme.colors.gray600
             )
             Spacer(modifier = Modifier.weight(1f))
-            TitleText("9분 30초", color = GureumTheme.colors.gray800)
+            Semi16Text(duration, color = GureumTheme.colors.gray800)
         }
     }
 }
@@ -102,7 +117,7 @@ private fun RecordCard(
 @Composable
 private fun ReadingRecordTabPreview() {
     GureumPageTheme {
-        ReadingRecordTab()
+        ReadingRecordTab(histories = dummyRecords)
     }
 }
 
@@ -111,6 +126,11 @@ private fun ReadingRecordTabPreview() {
 @Composable
 private fun RecordCardPreview() {
     GureumPageTheme {
-        RecordCard(isTimer = false)
+        RecordCard(
+            id = "0",
+            isTimer = false,
+            timeRange = "15:00 ~ 15:10",
+            duration = "9분 30초"
+        )
     }
 }
