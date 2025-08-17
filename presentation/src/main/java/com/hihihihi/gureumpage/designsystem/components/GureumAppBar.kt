@@ -22,6 +22,7 @@ fun GureumAppBar(
     title: String = "",
     showUpButton: Boolean = false,
     actions: @Composable () -> Unit = {},
+    onUpClick: (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
         title = { Semi16Text(text = title) },
@@ -29,7 +30,8 @@ fun GureumAppBar(
             if (showUpButton) {
                 IconButton(
                     onClick = {
-                        navController?.popBackStack()
+                        onUpClick?.invoke()
+                            ?: navController?.popBackStack()
                     }
                 ) {
                     Icon(
@@ -41,7 +43,7 @@ fun GureumAppBar(
                 }
             }
         },
-        actions = { actions },
+        actions = { actions() },
         modifier = Modifier.shadow(
             elevation = 6.dp
         )
