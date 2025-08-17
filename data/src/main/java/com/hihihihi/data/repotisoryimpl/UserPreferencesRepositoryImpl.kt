@@ -29,4 +29,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setTheme(theme: GureumThemeType) {
         localDatasource.setTheme(theme)
     }
+
+    override suspend fun clearAll() {
+        localDatasource.clearAll()
+    }
 }

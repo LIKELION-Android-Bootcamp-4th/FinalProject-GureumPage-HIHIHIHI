@@ -12,4 +12,5 @@ interface UserPreferencesLocalDataSource {
     suspend fun setOnboardingComplete(userId: String, complete: Boolean)
     suspend fun setNickname(nickname: String)
     suspend fun setTheme(theme: GureumThemeType)
+    suspend fun clearAll()
 }

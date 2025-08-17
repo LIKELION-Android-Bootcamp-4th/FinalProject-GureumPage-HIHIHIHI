@@ -14,7 +14,6 @@ import javax.inject.Inject
 private val Context.userPrefsDataStore by preferencesDataStore(name = "user_prefs")
 
 object PrefKeys {
-    val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
     val NICKNAME = stringPreferencesKey("nickname")
     val THEME = stringPreferencesKey("theme")
 
@@ -51,5 +50,9 @@ class UserPreferencesLocalDataSourceImpl @Inject constructor(
 
     override suspend fun setTheme(theme: GureumThemeType) {
         context.userPrefsDataStore.edit { it[PrefKeys.THEME] = theme.name }
+    }
+
+    override suspend fun clearAll() {
+        context.userPrefsDataStore.edit { it.clear() }
     }
 }
