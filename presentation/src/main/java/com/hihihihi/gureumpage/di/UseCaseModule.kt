@@ -1,17 +1,13 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
-import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
-import com.hihihihi.domain.repository.MindmapNodeRepository
-import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
-import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
@@ -24,6 +20,7 @@ import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
 import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
@@ -295,5 +292,12 @@ object UseCaseModule {
         repository: UserRepository
     ): GetUserUseCase {
         return GetUserUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
     }
 }
