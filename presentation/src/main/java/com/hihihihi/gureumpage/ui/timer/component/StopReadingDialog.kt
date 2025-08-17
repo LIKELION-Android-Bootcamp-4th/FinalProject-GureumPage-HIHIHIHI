@@ -36,9 +36,11 @@ fun StopReadingDialog(
     onDismiss: () -> Unit,
     onConfirmStopPages: (startPage: Int, endPage: Int) -> Unit = { _, _ -> onConfirmStop()},
 ) {
-    val c = GureumTheme.colors
-    val t = GureumTypography
-    val corner = 16.dp
+    val colors = GureumTheme.colors
+    val typo = GureumTypography
+
+//    val corner = 16.dp
+//    val hPad = 24.dp
 
     var startPage by remember(currentPage) { mutableStateOf((currentPage ?: 0).takeIf { it > 0 }?.toString() ?: "") }
     var endPage by remember { mutableStateOf("") }
@@ -65,12 +67,12 @@ fun StopReadingDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .widthIn(max = 560.dp)
-                .shadow(12.dp, RoundedCornerShape(corner)),
-            shape = RoundedCornerShape(corner),
-            tonalElevation = 6.dp,
-            border = BorderStroke(1.dp, c.dividerDeep),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface
+                .shadow(12.dp, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = GureumTheme.background.tonalElevation,
+            border = BorderStroke(1.dp, colors.dividerDeep),
+            color = colors.card,
+            contentColor = colors.gray800
         ) {
             Column(
                 modifier = Modifier
@@ -82,7 +84,7 @@ fun StopReadingDialog(
                 Box(Modifier.fillMaxWidth()) {
                     Text(
                         text = "독서를 종료하시겠습니까?",
-                        style = t.headlineSmall,
+                        style = typo.headlineSmall,
                         textAlign = TextAlign.Center,              // ★ 가운데
                         modifier = Modifier
                             .fillMaxWidth()                        // ★ 폭을 채워야 중앙 정렬이 적용됨
@@ -95,7 +97,7 @@ fun StopReadingDialog(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "닫기",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            tint = colors.gray500
                         )
                     }
                 }
@@ -104,25 +106,25 @@ fun StopReadingDialog(
                 Text(
                     text = if (willSave) "현재까지의 독서 기록이 저장됩니다."
                     else "현재까지의 독서 시간 기록이 저장되지 않습니다.",
-                    style = t.bodySmall,
+                    style = typo.bodySmall,
                     textAlign = TextAlign.Center,                 // ★ 가운데
                     modifier = Modifier.fillMaxWidth(),           // ★
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    color = colors.gray500
                 )
 
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "오늘의 독서 시간",
-                    style = t.bodySmall,
+                    text = "오늘의 독서 시간",
+                    style = typo.bodySmall,
                     textAlign = TextAlign.Center,                 // ★ 가운데
                     modifier = Modifier.fillMaxWidth(),           // ★
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = colors.gray400
                 )
 
                 Text(
-                    displayTime,
-                    style = t.headlineLarge,
-                    color = c.primaryDeep,
+                    text = displayTime,
+                    style = typo.headlineLarge,
+                    color = colors.primaryDeep,
                     textAlign = TextAlign.Center,                 // ★ 가운데
                     modifier = Modifier
                         .fillMaxWidth()                           // ★
@@ -132,8 +134,8 @@ fun StopReadingDialog(
                 // 책 정보 카드: 카드 안의 텍스트는 좌측 정렬 유지(디자인 기준)
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    border = BorderStroke(1.dp, c.dividerDeep),
+                    color = colors.card,
+                    border = BorderStroke(1.dp, colors.dividerDeep),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -142,16 +144,16 @@ fun StopReadingDialog(
                             .padding(horizontal = 14.dp, vertical = 10.dp)
                     ) {
                         Text(
-                            title,
-                            style = t.bodyMedium,
+                            text = title,
+                            style = typo.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            author,
-                            style = t.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            text = author,
+                            style = typo.bodySmall,
+                            color = colors.gray500,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -162,8 +164,8 @@ fun StopReadingDialog(
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = "페이지",
-                    style = t.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    style = typo.bodySmall,
+                    color = colors.gray500,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 4.dp, bottom = 8.dp)
@@ -180,7 +182,7 @@ fun StopReadingDialog(
                         hint = "시작 페이지",
                         modifier = Modifier.weight(1f)
                     )
-                    Text("~")
+                    Text("~", style = typo.bodyMedium, color = colors.gray700)
                     GureumTextField(
                         value = endPage,
                         onValueChange = { endPage = it.onlyDigits() },
@@ -198,9 +200,9 @@ fun StopReadingDialog(
                     }
                     if (warn.isNotEmpty()) {
                         Text(
-                            warn,
-                            style = t.bodySmall,
-                            color = c.systemRed,
+                            text = warn,
+                            style = typo.bodySmall,
+                            color = colors.systemRed,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
