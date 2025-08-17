@@ -16,7 +16,6 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 
-
 @Composable
 fun GureumNumberPicker(
     initialHour: Int = 0,
@@ -27,8 +26,11 @@ fun GureumNumberPicker(
     minuteValues: List<Int> = (0..59).toList(),
     onValueChange: (Int, Int) -> Unit
 ) {
-    val hourStrings = hourValues.map { it.toString().padStart(2,'0') }
-    val minuteStrings = minuteValues.map { it.toString().padStart(2,'0') }
+    val hourStrings = hourValues.map { it.toString().padStart(2, '0') }
+    val minuteStrings = minuteValues.map { it.toString().padStart(2, '0') }
+
+    val initialHourIndex = hourValues.indexOf(initialHour).coerceAtLeast(0)
+    val initialMinuteIndex = minuteValues.indexOf(initialMinute).coerceAtLeast(0)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -39,9 +41,24 @@ fun GureumNumberPicker(
         val hourPickerState = rememberPickerState()
         val minutePickerState = rememberPickerState()
 
+        // 초기값 설정
+        LaunchedEffect(hourValues, minuteValues, initialHour, initialMinute) {
+            // 리스트가 변경되거나 초기값이 변경될 때 상태 업데이트
+            if (hourPickerState.selectedItem.isEmpty() ||
+                !hourValues.contains(hourPickerState.selectedItem.toIntOrNull())
+            ) {
+                hourPickerState.selectedItem = initialHour.toString().padStart(2, '0')
+            }
+            if (minutePickerState.selectedItem.isEmpty() ||
+                !minuteValues.contains(minutePickerState.selectedItem.toIntOrNull())
+            ) {
+                minutePickerState.selectedItem = initialMinute.toString().padStart(2, '0')
+            }
+        }
+
         LaunchedEffect(hourPickerState.selectedItem, minutePickerState.selectedItem) {
-            val hour = hourPickerState.selectedItem.toIntOrNull() ?: 0
-            val minute = minutePickerState.selectedItem.toIntOrNull() ?: 0
+            val hour = hourPickerState.selectedItem.toIntOrNull() ?: initialHour
+            val minute = minutePickerState.selectedItem.toIntOrNull() ?: initialMinute
             onValueChange(hour, minute)
         }
 
@@ -54,9 +71,8 @@ fun GureumNumberPicker(
                 state = hourPickerState,
                 items = hourStrings,
                 visibleItemsCount = visibleItemsCount,
-                startIndex = initialHour,
-                modifier = Modifier
-                    .weight(1f),
+                startIndex = initialHourIndex,
+                modifier = Modifier.weight(1f),
                 textModifier = Modifier.padding(4.dp),
             )
             Text(
@@ -68,9 +84,8 @@ fun GureumNumberPicker(
                 state = minutePickerState,
                 items = minuteStrings,
                 visibleItemsCount = visibleItemsCount,
-                startIndex = initialMinute,
-                modifier = Modifier
-                    .weight(1f),
+                startIndex = initialMinuteIndex,
+                modifier = Modifier.weight(1f),
                 textModifier = Modifier.padding(4.dp),
             )
             Text(

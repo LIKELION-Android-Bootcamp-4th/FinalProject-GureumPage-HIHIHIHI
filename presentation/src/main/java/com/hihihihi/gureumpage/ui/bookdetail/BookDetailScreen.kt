@@ -194,8 +194,10 @@ fun BookDetailContent(
             state = scrollState,
         ) {
             item { BookSimpleInfoSection(userBook, onReadingStatusClick) }
-            item { ReadingProgressSection(userBook) }
-            item { BookStatisticsCard(bookStatistic) }
+            if(userBook.status != ReadingStatus.PLANNED) {
+                item { ReadingProgressSection(userBook) }
+                item { BookStatisticsCard(bookStatistic) }
+            }
             if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.review != null){
                 item {
                     ReviewSection(
