@@ -66,7 +66,9 @@ private fun QuoteCard(
                 .padding(start = 16.dp, bottom = 14.dp, top = 8.dp)
         ) {
             Row(
-                modifier = Modifier.padding(end = 10.dp),
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
