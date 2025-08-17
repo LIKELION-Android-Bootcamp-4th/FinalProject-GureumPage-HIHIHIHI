@@ -15,7 +15,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.timer.component.MemoList
 import com.hihihihi.gureumpage.ui.timer.component.NowReadingCard
-import com.hihihihi.gureumpage.ui.timer.component.StopReadingConfirmScreen
+import com.hihihihi.gureumpage.ui.timer.component.StopReadingConfirmDialog
 import com.hihihihi.gureumpage.ui.timer.component.StopReadingDialog
 import com.hihihihi.gureumpage.ui.timer.component.TimerControlsRow
 import com.hihihihi.gureumpage.ui.timer.component.TimerRing
@@ -184,7 +184,7 @@ fun TimerScreen(
     }
     //뒤로가기 다이얼로그
     if (showBackExitScreen) {
-        StopReadingConfirmScreen(
+        StopReadingConfirmDialog(
             displayTime = state.displayTimeMMSS,
             title = state.bookTitle,
             author = state.author,
