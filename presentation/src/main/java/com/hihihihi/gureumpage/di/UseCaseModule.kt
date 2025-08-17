@@ -300,4 +300,11 @@ object UseCaseModule {
     ): GetQuoteByUserBookIdUseCase {
         return GetQuoteByUserBookIdUseCase(repository)
     }
+
+    @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
+    }
 }
