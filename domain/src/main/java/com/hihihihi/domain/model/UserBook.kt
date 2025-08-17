@@ -9,6 +9,8 @@ data class UserBook (
     val isbn13: String? = null,
     val title: String = "",
     val author: String = "",
+    val publisher: String? = null,
+    val description: String? = null,
     val imageUrl: String = "",
     val isLiked: Boolean = false,
     val totalPage: Int = 0,

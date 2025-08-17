@@ -114,7 +114,7 @@ class BookDetailViewModel @Inject constructor(
             createdAt = LocalDateTime.now(),
             title = userBook.title,
             author = userBook.author,
-            publisher = "", //TODO userBook 수정하면 여기도 수정
+            publisher = userBook.publisher?: "",
             imageUrl = userBook.imageUrl
         )
         viewModelScope.launch {
@@ -149,7 +149,9 @@ class BookDetailViewModel @Inject constructor(
     fun getStatistic(): BookStatistic{
         return BookStatistic(
             readingPeriod = if(uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(uiState.value.userBook?.startDate!!),
-            totalReadingTime = if(uiState.value.userBook?.totalReadTime == null) "0분" else formatSecondsToReadableTime(uiState.value.userBook?.totalReadTime!!),
+            totalReadingTime = uiState.value.histories
+                .sumOf { it.readTime }
+                .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
             averageDailyTime = getDailyAverageReadTimeInSeconds(uiState.value.histories)
         )
     }
