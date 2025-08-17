@@ -236,6 +236,13 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
+    }
+
+    @Provides
     fun provideGetStatisticsUseCase(
         userBookRepository: UserBookRepository,
         historyRepository: HistoryRepository,
