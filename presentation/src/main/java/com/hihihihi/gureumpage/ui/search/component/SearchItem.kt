@@ -72,7 +72,7 @@ fun SearchItem(
                 BodySubText(result.author, modifier = Modifier.padding(top = 4.dp))
                 //출판사
                 BodySubText(result.publisher, modifier = Modifier.padding(top = 4.dp))
-                //페이지
+                //카테고리
                 BodySubText(
                     result.categoryName.split(">")[1],
                     modifier = Modifier.padding(top = 4.dp)

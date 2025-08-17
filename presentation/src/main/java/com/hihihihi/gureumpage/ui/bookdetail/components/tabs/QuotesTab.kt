@@ -35,6 +35,7 @@ fun QuotesTab(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .padding(bottom = 20.dp)
     ) {
         quotes.forEach { quote ->
             QuoteCard(
@@ -57,7 +58,7 @@ private fun QuoteCard(
     onMenuClick: (quoteId: String) -> Unit
 ) {
     GureumCard(
-        modifier = Modifier.padding(top = 24.dp)
+        modifier = Modifier.padding(top = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -85,16 +86,16 @@ private fun QuoteCard(
 
                 Spacer(Modifier.weight(1f))
 
-                IconButton(
-                    onClick = { onMenuClick(id) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
-                        contentDescription = "dot_menu",
-                        tint = GureumTheme.colors.gray600
-                    )
-                }
+//                IconButton(
+//                    onClick = { onMenuClick(id) },
+//                    modifier = Modifier.size(32.dp)
+//                ) {
+//                    Icon(
+//                        painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
+//                        contentDescription = "dot_menu",
+//                        tint = GureumTheme.colors.gray600
+//                    )
+//                }
             }
 
             Text(

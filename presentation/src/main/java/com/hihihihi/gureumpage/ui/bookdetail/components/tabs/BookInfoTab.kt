@@ -25,10 +25,10 @@ fun BookInfoTab(
             .fillMaxWidth()
             .padding(24.dp),
     ) {
-        InfoSection("출판사") { InfoBody("출판사입니다.") } //TODO 출판사 빠져있음
+        InfoSection("출판사") { InfoBody(userBook.publisher ?: "") }
         InfoSection("ISBN") { userBook.isbn13?.let { InfoBody(it) } }
         InfoSection("카테고리") { InfoGenre(userBook.category) }
-        InfoSection("책 소개") { InfoBody("이 책은 독일에서부터 시작되어.. 이 책을 받고 다른 사람에게 돌리지 않을 경우 당신은 행복해지고 삶이 어쩌고 저쩌고") } //TODO description 도 빠졌음
+        InfoSection("책 소개") { InfoBody(userBook.description?: "") }
         InfoSection("총 페이지") { InfoBody(userBook.totalPage.toString()) }
     }
 }

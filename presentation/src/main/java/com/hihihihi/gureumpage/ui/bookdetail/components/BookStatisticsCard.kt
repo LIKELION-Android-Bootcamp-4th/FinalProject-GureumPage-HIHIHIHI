@@ -42,7 +42,7 @@ fun BookStatisticsCard(
             )
             HorizontalCenterText("누적 독서", bookStatistic.totalReadingTime)
             VerticalDivider(
-                modifier = Modifier.fillMaxHeight(1f),
+                modifier = Modifier.height(40.dp),
                 color = GureumTheme.colors.gray200
             )
             HorizontalCenterText("하루 평균", bookStatistic.averageDailyTime)

@@ -36,9 +36,10 @@ fun ReadingRecordTab(histories: List<History>) {
             .padding(bottom = 12.dp)
     ) {
         histories
+            .filter { it.date != null }
             .sortedByDescending { it.date }
-            .groupBy { it.date }
-            .forEach { (date, dailyRecords) ->
+            .groupBy { it.date!!.toLocalDate() }
+            .forEach { (localDate, dailyRecords) ->
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
@@ -46,7 +47,7 @@ fun ReadingRecordTab(histories: List<History>) {
                     verticalAlignment = Alignment.Bottom,
                 ) {
                     Text(
-                        text = formatDateToSimpleString(date),
+                        text = formatDateToSimpleString(dailyRecords.first().date), 
                         modifier = Modifier,
                         color = GureumTheme.colors.gray400,
                         style = GureumTypography.bodySmall
@@ -63,7 +64,7 @@ fun ReadingRecordTab(histories: List<History>) {
                     RecordCard(
                         isTimer = record.recordType == RecordType.TIMER,
                         id = record.id,
-                        timeRange = formatTimeRange(record.startTime,record.endTime),
+                        timeRange = formatTimeRange(record.startTime, record.endTime),
                         duration = formatSecondsToReadableTime(record.readTime)
                     )
                 }
