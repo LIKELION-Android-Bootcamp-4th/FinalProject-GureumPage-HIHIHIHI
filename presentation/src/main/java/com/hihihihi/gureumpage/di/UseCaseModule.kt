@@ -1,12 +1,16 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
+import com.hihihihi.domain.repository.MindmapNodeRepository
+import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
+import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
@@ -235,12 +239,6 @@ object UseCaseModule {
         return GetThemeFlowUseCase(repository)
     }
 
-    @Provides
-    fun provideGetQuoteByUserBookIdUseCase(
-        repository: QuoteRepository
-    ): GetQuoteByUserBookIdUseCase {
-        return GetQuoteByUserBookIdUseCase(repository)
-    }
 
     @Provides
     fun provideGetStatisticsUseCase(
