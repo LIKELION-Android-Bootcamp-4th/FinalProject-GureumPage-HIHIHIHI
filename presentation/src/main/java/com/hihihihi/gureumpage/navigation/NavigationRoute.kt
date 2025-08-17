@@ -12,8 +12,8 @@ sealed class NavigationRoute (val route: String) {
     object Library: NavigationRoute("library")
     object Search: NavigationRoute("search")
     object Statistics: NavigationRoute("statistics")
-    object Timer: NavigationRoute("timer/{bookId}"){
-        fun createRoute(bookId: String): String = "timer/$bookId"
+    object Timer: NavigationRoute("timer/{userBookId}"){
+        fun createRoute(userBookId: String): String = "timer/$userBookId"
     }
     object MyPage: NavigationRoute("mypage")
     object BookDetail : NavigationRoute("bookdetail/{bookId}") {
