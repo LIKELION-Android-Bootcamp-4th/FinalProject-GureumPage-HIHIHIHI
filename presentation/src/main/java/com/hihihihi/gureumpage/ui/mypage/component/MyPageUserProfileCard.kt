@@ -40,6 +40,7 @@ fun MyPageUserProfileCard(
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
+    val isDark = GureumTheme.isDarkTheme
 
     GureumCard(
         modifier = Modifier
@@ -74,7 +75,7 @@ fun MyPageUserProfileCard(
                         Text(
                             text = badge,
                             style = typography.titleLarge,
-                            color = colors.point,
+                            color = if (isDark) colors.primary else colors.primaryShallow,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
