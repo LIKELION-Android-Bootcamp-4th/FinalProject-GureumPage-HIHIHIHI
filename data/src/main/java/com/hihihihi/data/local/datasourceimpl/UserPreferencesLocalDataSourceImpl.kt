@@ -17,14 +17,13 @@ object PrefKeys {
     val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
     val NICKNAME = stringPreferencesKey("nickname")
     val THEME = stringPreferencesKey("theme")
+
+    fun getOnboardingCompleteKey(userId: String) = booleanPreferencesKey("onboarding_complete_$userId")
 }
 
 class UserPreferencesLocalDataSourceImpl @Inject constructor(
     private val context: Context
 ) : UserPreferencesLocalDataSource {
-    override val onboardingComplete: Flow<Boolean> =
-        context.userPrefsDataStore.data.map { it[PrefKeys.ONBOARDING_COMPLETE] ?: false }
-
     override val nickname: Flow<String> =
         context.userPrefsDataStore.data.map { it[PrefKeys.NICKNAME] ?: "" }
 
@@ -37,8 +36,13 @@ class UserPreferencesLocalDataSourceImpl @Inject constructor(
             }
         }
 
-    override suspend fun setOnboardingComplete(complete: Boolean) {
-        context.userPrefsDataStore.edit { it[PrefKeys.ONBOARDING_COMPLETE] = complete }
+    override fun getOnboardingComplete(userId: String): Flow<Boolean> =
+        context.userPrefsDataStore.data.map {
+            it[PrefKeys.getOnboardingCompleteKey(userId)] ?: false
+        }
+
+    override suspend fun setOnboardingComplete(userId: String, complete: Boolean) {
+        context.userPrefsDataStore.edit { it[PrefKeys.getOnboardingCompleteKey(userId)] = complete }
     }
 
     override suspend fun setNickname(nickname: String) {
