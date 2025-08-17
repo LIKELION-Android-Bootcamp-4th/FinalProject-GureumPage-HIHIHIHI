@@ -44,12 +44,11 @@ fun PurposePage(viewModel: OnBoardingViewModel) {
     }
 }
 
-// TODO: 이미지 변경하기
 private val purposeContents = listOf(
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 기록", "읽은 책을 기록하고 관리해요"),
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 습관", "꾸준한 독서 습관을 만들고 싶어요"),
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "목표 달성", "독서 목표를 설정하고 달성하고 싶어요"),
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 분석", "독서 패턴을 분석하고 통계를 보고 싶어요"),
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "필사 & 메모", "인상 깊은 문장을 기록하고 정리하고 싶어요"),
-    OnboardingPurposeContents(R.drawable.ic_cloud_reading, "독서 즐기기", "단순히 독서를 더 즐겁게 하고 싶어요"),
+    OnboardingPurposeContents(R.drawable.ic_record, "독서 기록", "읽은 책을 기록하고 관리해요"),
+    OnboardingPurposeContents(R.drawable.ic_habbit, "독서 습관", "꾸준한 독서 습관을 만들고 싶어요"),
+    OnboardingPurposeContents(R.drawable.ic_goal, "목표 달성", "독서 목표를 설정하고 달성하고 싶어요"),
+    OnboardingPurposeContents(R.drawable.ic_statistics, "독서 분석", "독서 패턴을 분석하고 통계를 보고 싶어요"),
+    OnboardingPurposeContents(R.drawable.ic_memo, "필사 & 메모", "인상 깊은 문장을 기록하고 정리하고 싶어요"),
+    OnboardingPurposeContents(R.drawable.ic_enjoy, "독서 즐기기", "단순히 독서를 더 즐겁게 하고 싶어요"),
 )
