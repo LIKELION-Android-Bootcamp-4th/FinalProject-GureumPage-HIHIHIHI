@@ -9,9 +9,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -25,6 +29,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -69,6 +74,14 @@ fun GureumPageApp() {
         NavigationRoute.MindMap.route
     )
 
+    var timerAppbarUp by remember { mutableStateOf(0L) }
+
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != NavigationRoute.Timer.route) {
+            timerAppbarUp = 0L
+        }
+    }
+
     Scaffold(
         topBar = {
             when (currentRoute) {
@@ -77,7 +90,14 @@ fun GureumPageApp() {
                 NavigationRoute.Statistics.route -> GureumAppBar(title = "통계")
                 NavigationRoute.MyPage.route -> GureumAppBar(title = "마이페이지")
                 NavigationRoute.MindMap.route -> GureumAppBar(navController, "마인드맵", true)
-                NavigationRoute.Timer.route -> GureumAppBar(navController, "독서 타이머", true)
+                NavigationRoute.Timer.route -> GureumAppBar(
+                    navController = navController,
+                    title = "독서 타이머",
+                    showUpButton = true,
+                    onUpClick = {
+                        timerAppbarUp = System.currentTimeMillis()
+                    }
+                )
                 NavigationRoute.BookDetail.route -> GureumAppBar(navController, "", true)
             }
         },
@@ -87,10 +107,13 @@ fun GureumPageApp() {
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
-        GureumNavGraph(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding),
-            snackbarHostState = snackbarHostState
-        )
+        CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
+            GureumNavGraph(
+                navController = navController,
+                modifier = Modifier.padding(innerPadding),
+                snackbarHostState = snackbarHostState
+            )
+        }
+
     }
 }
