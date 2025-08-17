@@ -49,11 +49,9 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                     close(error)
                     return@addSnapshotListener
                 }
-                val histories = snapshot?.documents?.mapNotNull { document ->
-                    document.toObject(HistoryDto::class.java)?.apply {
-                        historyId = document.id
-                    }
-                } ?: emptyList()
+                val histories = snapshot?.documents
+                    ?.mapNotNull { it.toHistoryDtoSafely() }
+                    ?: emptyList()
                 trySend(histories)
             }
         awaitClose { historiesCollection.remove() }
@@ -91,9 +89,9 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                         close(error)
                         return@addSnapshotListener
                     }
-                    val histories = snapshot?.documents?.mapNotNull { doc ->
-                        doc.toObject(HistoryDto::class.java)
-                    } ?: emptyList()
+                    val histories = snapshot?.documents
+                        ?.mapNotNull { it.toHistoryDtoSafely() }
+                        ?: emptyList()
 
                     Log.e("TAG", "getTodayHistoriesByUserId: ${histories}", )
 
