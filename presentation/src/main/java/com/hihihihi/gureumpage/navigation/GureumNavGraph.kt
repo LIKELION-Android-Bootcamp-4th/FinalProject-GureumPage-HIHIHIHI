@@ -56,14 +56,21 @@ fun GureumNavGraph(
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(
             NavigationRoute.Timer.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            arguments = listOf(navArgument("userBookId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val bookId = backStackEntry.arguments?.getString("bookId")
-            bookId?.let {
-                TimerScreen(
-                    bookId = it,
-                )
+            val userBookId = requireNotNull(backStackEntry.arguments?.getString("userBookId")) {
+                "TimerScreen requires non-null userBookId"
             }
+            TimerScreen(
+                userBookId = userBookId,
+                onExit = {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
         composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
