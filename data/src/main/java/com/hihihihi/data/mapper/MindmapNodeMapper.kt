@@ -2,7 +2,6 @@ package com.hihihihi.data.mapper
 
 import com.hihihihi.data.remote.dto.MindmapNodeDto
 import com.hihihihi.domain.model.MindmapNode
-import com.hihihihi.domain.model.MindmapNodeType
 
 fun MindmapNodeDto.toDomain() = MindmapNode(
     mindmapNodeId = mindmapNodeId,
