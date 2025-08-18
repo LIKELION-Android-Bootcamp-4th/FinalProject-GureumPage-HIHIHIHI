@@ -1,7 +1,9 @@
 package com.hihihihi.gureumpage
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
@@ -13,15 +15,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
@@ -45,10 +50,12 @@ class MainActivity : ComponentActivity() {
             val viewModel = hiltViewModel<GureumThemeViewModel>()
             val currentTheme by viewModel.theme.collectAsState()
             // 모드 상태에 따라 GureumPageTheme 에 반영
-            GureumPageTheme(darkTheme = when (currentTheme) {
-                GureumThemeType.LIGHT -> false
-                else -> true
-            }) { GureumPageApp() }
+            GureumPageTheme(
+                darkTheme = when (currentTheme) {
+                    GureumThemeType.LIGHT -> false
+                    else -> true
+                }
+            ) { GureumPageApp() }
         }
     }
 }
@@ -57,6 +64,8 @@ class MainActivity : ComponentActivity() {
 fun GureumPageApp() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val context = LocalContext.current
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -68,6 +77,32 @@ fun GureumPageApp() {
         NavigationRoute.Timer.route,
         NavigationRoute.MindMap.route
     )
+
+    BackHandler {
+        val currentRoute = navController.currentBackStackEntry?.destination?.route
+
+        when {
+            // 현재 루트가 홈이면 앱 종료
+            currentRoute == NavigationRoute.Home.route -> {
+                (context as? Activity)?.finish()
+            }
+
+            // 현재 루트가 바텀 내비 아이템이면 홈으로 이동
+            BottomNavItem.items.any { it.route == currentRoute } -> {
+                navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+
+            else -> {
+                navController.popBackStack()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
