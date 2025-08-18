@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -31,7 +33,6 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.library.model.Book
 
 fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
 
@@ -62,7 +63,7 @@ fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
             .padding(8.dp)
             .clickable { onClicked(book.userBookId) }
     ) {
-        val iconSize = 20.dp
+        val iconSize = 16.dp
         val offsetX = iconSize / 2 // 오른쪽으로 아이콘 크기의 절반 만큼 이동
         val offsetY = -iconSize / 2 // 위쪽으로 아이콘 크기의 절반 만큼 이동
 
@@ -111,12 +112,13 @@ fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
         //다 읽은 책 아이콘
         if (book.isRead()) {
             Image(
-                painter = painterResource(id = R.drawable.ic_bookmark),
+                painter = painterResource(id = R.drawable.ic_finish_stamp),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = offsetX, y = offsetY) // 살짝 겹쳐 보이게 끔 위치 조정
-                    .size(20.dp)
+                    .size(36.dp),
+                colorFilter = ColorFilter.tint(GureumTheme.colors.primary, blendMode = BlendMode.SrcIn)
             )
         }
     }
