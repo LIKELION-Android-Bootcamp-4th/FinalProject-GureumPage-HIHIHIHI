@@ -66,13 +66,11 @@ fun SetReadingStatusBottomSheet(
     val focusManager = LocalFocusManager.current
     val today = LocalDate.now()
 
-
     val canSave = when (selectedStatus) {
         ReadingStatus.FINISHED -> startDate != null && endDate != null
         ReadingStatus.READING -> startDate != null && pageInput.isNotBlank()
         else -> true
     }
-
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -97,6 +95,7 @@ fun SetReadingStatusBottomSheet(
             ReadingStatusInputs(
                 selectedStatus = selectedStatus,
                 pageInput = pageInput,
+                lastPage = userBook.totalPage,
                 onPageChange = { pageInput = it },
                 startDate = startDate,
                 onStartDateClick = { showStartDatePicker = true },
@@ -236,6 +235,7 @@ fun ReadingStatusSelector(
 fun ReadingStatusInputs(
     selectedStatus: ReadingStatus,
     pageInput: String,
+    lastPage: Int,
     onPageChange: (String) -> Unit,
     startDate: LocalDateTime?,
     onStartDateClick: () -> Unit,
@@ -258,7 +258,10 @@ fun ReadingStatusInputs(
             Spacer(Modifier.height(14.dp))
             GureumTextField(
                 value = pageInput,
-                onValueChange = { onPageChange(it.filter(Char::isDigit)) },
+                onValueChange = { onPageChange(it.toInt()
+                    .coerceAtMost(lastPage)
+                    .toString()
+                    .filter(Char::isDigit)) },
                 hint = "예 : 157",
                 trailingIcon = {
                     Icon(
