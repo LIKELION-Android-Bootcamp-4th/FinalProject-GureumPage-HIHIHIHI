@@ -50,16 +50,17 @@ fun SearchBarWithBackground(
     user: User,
     onSearchBarClick: () -> Unit = {}
 ) {
+    val backGroundImage = if(GureumTheme.isDarkTheme) R.drawable.bg_home_dark else R.drawable.bg_home_light
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp),
+            .height(250.dp),
     ) {
         val maxWidth: Dp = maxWidth
         val maxHeight: Dp = maxHeight
         Image(
-            //TODO 이미지 테마에 맞춰 변경되어야 함 현재는 Light BG가 없음
-            painter = painterResource(id = R.drawable.bg_home_dark),
+            painter = painterResource(id = backGroundImage),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,6 +163,17 @@ fun SearchBarWithBackground(
                 modifier = Modifier.size(130.dp)
             )
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    color = GureumTheme.colors.background,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                )
+        )
     }
 
 }

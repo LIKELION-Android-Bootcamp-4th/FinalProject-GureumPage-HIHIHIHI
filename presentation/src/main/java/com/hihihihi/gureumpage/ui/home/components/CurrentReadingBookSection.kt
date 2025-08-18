@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.home.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -57,62 +58,54 @@ fun CurrentReadingBookSection(
     onBookClick: (String) -> Unit,
     onAddBookClick: () -> Unit
 ) {
-    val pagerState = rememberPagerState(
-        pageCount = { books.size }
-    )
-    val contentPadding = 30.dp
-    val pageSpacing = 16.dp
-    val scaleSizeRatio = 0.8f
-    Surface(
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        color = GureumTheme.colors.background, // 원하는 배경색
-        modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(GureumTheme.colors.background),
     ) {
-        Column {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 32.dp)
-            ) {
-                Semi16Text("독서중인 책", isUnderline = true)
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            if(books.isEmpty()){
-                EmptyReadingBooksCard(onAddBookClick)
-            }else{
-                ReadingBooksPager(
-                    books = books,
-                    onBookClick = onBookClick
-                )
-            }
-
-            // 아래 그림자 끊기는 것 같아 추가
-            Spacer(Modifier.height(10.dp))
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .padding(top = 8.dp)
+        ) {
+            Semi16Text("독서중인 책", isUnderline = true)
         }
-    }
-}
 
+        Spacer(Modifier.height(10.dp))
+
+        if (books.isEmpty()) {
+            EmptyReadingBooksCard(onAddBookClick)
+        } else {
+            ReadingBooksPager(
+                books = books,
+                onBookClick = onBookClick
+            )
+        }
+
+        // 아래 그림자 끊기는 것 같아 추가
+        Spacer(Modifier.height(10.dp))
+    }
+
+}
 
 
 @Composable
 fun EmptyReadingBooksCard(
     onAddBookClick: () -> Unit
-){
+) {
     GureumCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp),
         onClick = onAddBookClick
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 32.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = "책 추가",
@@ -176,7 +169,8 @@ private fun ReadingBookCard(
         GureumCard(
             modifier = Modifier
                 .graphicsLayer {
-                    val pageOffset = pagerState.currentPage - page + pagerState.currentPageOffsetFraction
+                    val pageOffset =
+                        pagerState.currentPage - page + pagerState.currentPageOffsetFraction
                     alpha = lerp(
                         start = 0.5f,
                         stop = 1f,

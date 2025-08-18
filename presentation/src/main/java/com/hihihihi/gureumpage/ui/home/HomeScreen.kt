@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.User
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
 import com.hihihihi.gureumpage.ui.home.components.ReadingGoalSection
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
@@ -106,11 +107,10 @@ fun HomeScreenContent(
     val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
     val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
 
+
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            // 원래 이 바깥에 이미지를 뒀더니 길어짐에 따라 뒷배경 이미지가 이상하게 작동돼서.. 일단 잔디색 고정값
-            .background(color = Color(0xFF276040)),
+            .fillMaxSize(),
         state = scrollState,
     ) {
         item {
