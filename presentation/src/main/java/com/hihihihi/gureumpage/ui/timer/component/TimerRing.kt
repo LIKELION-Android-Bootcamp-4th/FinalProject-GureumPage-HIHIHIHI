@@ -23,19 +23,21 @@ import kotlin.math.min
 
 @Composable
 fun TimerRing(
-    progress: Float,
+    isRunning: Boolean,
     centerText: String,
     modifier: Modifier = Modifier,
     ringWidth: Dp = 20.dp,
-    trackColor: Color? = null,
-    progressColor: Color? = null,
+    runningColor: Color? = null,
+    pausedColor: Color? = null,
     centerTextColor: Color? = null,
 ) {
-    val theme = GureumTheme.colors
-    val trackC = trackColor ?: theme.gray200
-    val progressC = progressColor ?: theme.primary
-    val textC = centerTextColor ?: theme.gray800
-
+    val colors = GureumTheme.colors
+    val ringColor = if (isRunning) {
+        runningColor ?: colors.primary
+    } else {
+        pausedColor ?: colors.gray300
+    }
+    val textC = centerTextColor ?: colors.gray800
     val strokePx = with(LocalDensity.current) { ringWidth.toPx() }
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -45,21 +47,10 @@ fun TimerRing(
             val topLeft = Offset((size.width - diameter) / 2f, (size.height - diameter) / 2f)
             val arcSize = Size(diameter, diameter)
 
-            // 트랙
             drawArc(
-                color = trackC,
+                color = ringColor,
                 startAngle = -90f,
                 sweepAngle = 360f,
-                useCenter = false,
-                topLeft = topLeft,
-                size = arcSize,
-                style = Stroke(width = strokePx, cap = StrokeCap.Round)
-            )
-            // 진행
-            drawArc(
-                color = progressC,
-                startAngle = -90f,
-                sweepAngle = 360f * progress.coerceIn(0f, 1f),
                 useCenter = false,
                 topLeft = topLeft,
                 size = arcSize,
