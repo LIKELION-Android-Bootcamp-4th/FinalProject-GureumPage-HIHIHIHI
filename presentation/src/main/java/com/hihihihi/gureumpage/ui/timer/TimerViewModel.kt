@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -40,41 +39,78 @@ class TimerViewModel @Inject constructor(
     //스톱워치
     private var stopwatchJob: Job? = null
 
-    init {
-        // 로그인 현재 uid 사용
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid
-//        if (uid != null) observeNowReading(uid)
-        val uid = "iK4v1WW1ZX4gID2HueBi"
-        observeNowReading(uid)
-    }
+    private var booksJob: Job? = null
 
-    private fun observeNowReading(uid: String) = viewModelScope.launch {
-        // Firestore Flow 구독: status == READING
-        getUserBooksByStatus(uid, ReadingStatus.READING).collectLatest { books ->
-            // 최신 책 하나 고르기 (createdAt 기준 내림차순)
-            val pick = books.maxByOrNull { it.createdAt ?: LocalDateTime.MIN }
+    private val currentUid: String?
+        get() = auth.currentUser?.uid
 
-            Log.d("TimerVM", "nowReading => title=${pick?.title}, author=${pick?.author}, image=${pick?.imageUrl}")
+    private var didShowCountdown: Boolean = false
 
+    fun bind(userBookId: String) {
+        val uid = currentUid ?: return
+        booksJob?.cancel()
+        didShowCountdown = false
 
-            if (pick != null) {
-                _uiState.update {
-                    it.copy(
-                        bookTitle = pick.title,
-                        author = pick.author,
-                        bookImageUrl = pick.imageUrl,
-                        startPage = pick.currentPage,
-                        totalPage = pick.totalPage
-                    )
+        booksJob = viewModelScope.launch {
+            // status == READING 전체를 구독하되, 해당 ID 한 권만 반영
+            getUserBooksByStatus(uid, ReadingStatus.READING).collectLatest { books ->
+                val pick = books.firstOrNull { it.userBookId == userBookId }
+                Log.d("TimerVM", "bind => userBookId=$userBookId, pick=${pick?.title}")
+
+                if (pick != null) {
+                    _uiState.update {
+                        it.copy(
+                            bookTitle = pick.title,
+                            author = pick.author,
+                            bookImageUrl = pick.imageUrl,
+                            startPage = pick.currentPage,
+                            totalPage = pick.totalPage
+                        )
+                    }
+                } else {
+                    // 선택한 책을 찾지 못한 경우(상태 변경/삭제 등) 안전 초기화
+                    _uiState.update {
+                        it.copy(
+                            bookTitle = "",
+                            author = "",
+                            bookImageUrl = "",
+                            startPage = null,
+                            totalPage = null
+                        )
+                    }
                 }
             }
         }
     }
 
     fun toggleRun() {
-        if (_uiState.value.isRunning) {
+        val state = _uiState.value
+
+        if (state.countdown != null) return
+
+        if (state.isRunning) {
             pauseStopwatch()
         } else {
+            if (!didShowCountdown) {
+                didShowCountdown = true
+                startWithCountdown()
+            } else {
+                startStopwatch()
+            }
+        }
+    }
+
+    fun startWithCountdown() {
+        if (stopwatchJob?.isActive == true) return
+
+        viewModelScope.launch {
+            for (i in 3 downTo 1) {
+                Log.d("TimerVM", "countdown=$i")
+                _uiState.update { it.copy(countdown = i, isRunning = false) }
+                delay(1000)
+            }
+            Log.d("TimerVM", "countdown done")
+            _uiState.update { it.copy(countdown = null) }
             startStopwatch()
         }
     }
@@ -106,11 +142,11 @@ class TimerViewModel @Inject constructor(
         stopwatchJob?.cancel()
         stopwatchJob = null
         _uiState.update { it.copy(isRunning = false, elapsedSec = 0) }
-        // TODO: 필요 시 중단 시점 기록/저장 로직 연결
+
     }
 
     fun finishAndSave(userBookId: String?, startPage: Int, endPage: Int) {
-        val uid = auth.currentUser?.uid ?: "iK4v1WW1ZX4gID2HueBi"
+        val uid = auth.currentUser?.uid ?: return
         val seconds = _uiState.value.elapsedSec
         val delta = (endPage - startPage).coerceAtLeast(0)
 
@@ -139,6 +175,7 @@ class TimerViewModel @Inject constructor(
     override fun onCleared() {
 //        timerJob?.cancel()
         stopwatchJob?.cancel()
+        booksJob?.cancel()
         super.onCleared()
     }
 
