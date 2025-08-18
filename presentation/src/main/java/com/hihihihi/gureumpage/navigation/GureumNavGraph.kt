@@ -66,8 +66,9 @@ fun GureumNavGraph(
             TimerScreen(
                 userBookId = userBookId,
                 onExit = {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    navController.popBackStack()
+
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(userBookId)) {
                         launchSingleTop = true
                         restoreState = true
                     }
