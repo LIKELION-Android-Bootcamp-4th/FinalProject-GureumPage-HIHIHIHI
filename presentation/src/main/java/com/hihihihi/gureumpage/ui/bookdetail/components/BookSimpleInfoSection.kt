@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,19 +13,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
@@ -41,6 +38,12 @@ fun BookSimpleInfoSection(
     userBook: UserBook,
     onReadingStatusClick: () -> Unit
 ) {
+    val statusColor = when (userBook.status) {
+        ReadingStatus.PLANNED -> GureumTheme.colors.gray400
+        ReadingStatus.READING -> GureumTheme.colors.systemGreen
+        ReadingStatus.FINISHED -> GureumTheme.colors.primaryDeep
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,7 +82,7 @@ fun BookSimpleInfoSection(
                 Text(
                     userBook.status.displayName,
                     style = GureumTypography.bodyMedium,
-                    color = GureumTheme.colors.systemGreen,
+                    color = statusColor,
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_arrow_down),

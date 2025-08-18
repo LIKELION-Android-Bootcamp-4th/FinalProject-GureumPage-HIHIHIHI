@@ -222,6 +222,7 @@ fun Medi16Text(
     color: Color = GureumTheme.colors.gray700,
     style: TextStyle = GureumTypography.bodyLarge,
     maxLine: Int = 4,
+    textAlign: TextAlign = TextAlign.Justify
 ) {
     Text(
         text = text,
@@ -229,7 +230,7 @@ fun Medi16Text(
         style = style,
         maxLines = maxLine,
         modifier = modifier,
-        textAlign = TextAlign.Justify
+        textAlign = textAlign
     )
 }
 
@@ -240,6 +241,7 @@ fun Medi14Text(
     color: Color = GureumTheme.colors.gray700,
     style: TextStyle = GureumTypography.bodyMedium,
     maxLine: Int = 4,
+    textAlign: TextAlign = TextAlign.Justify
 ) {
     Text(
         text = text,
@@ -247,7 +249,7 @@ fun Medi14Text(
         style = style,
         maxLines = maxLine,
         modifier = modifier,
-        textAlign = TextAlign.Justify
+        textAlign = textAlign
     )
 }
 

@@ -26,7 +26,6 @@ import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.Review
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
@@ -120,8 +119,7 @@ fun BookDetailScreen(
                         )
 
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
-                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog =
-                            true
+                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog = true
                     }
                 }
             )
@@ -145,6 +143,7 @@ fun BookDetailScreen(
         uiState.userBook?.let {
             AddManualHistoryDialog(
                 currentPage = it.currentPage,
+                lastPage = it.totalPage,
                 onDismiss = { showAddManualHistoryDialog = false },
                 onSave = { date, startTime, endTime, readTime, readPageCount ->
                     viewModel.addManualHistory(
@@ -194,27 +193,30 @@ fun BookDetailContent(
             state = scrollState,
         ) {
             item { BookSimpleInfoSection(userBook, onReadingStatusClick) }
-            item { ReadingProgressSection(userBook) }
-            item { BookStatisticsCard(bookStatistic) }
-            item {
-                ReviewSection(
-                    initialRating = userBook.rating?.toFloat() ?: 0f,
-                    initialReview = userBook.review ?: "",
-                    onSave = { rating, review ->
-                        onReviewSave(rating, review)
-                    }
-                )
+            if(userBook.status != ReadingStatus.PLANNED) {
+                item { ReadingProgressSection(userBook) }
+                item { BookStatisticsCard(bookStatistic) }
+            }
+            if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.rating != null){
+                item {
+                    ReviewSection(
+                        initialRating = userBook.rating?.toFloat() ?: 0f,
+                        initialReview = userBook.review ?: "",
+                        onSave = { rating, review ->
+                            onReviewSave(rating, review)
+                        }
+                    )
+                }
             }
             item { BookDetailTabs(userBook, quotes, histories) }
         }
 
         // FAB
         BookDetailFab(
-            ReadingStatus.READING,
+            userBook.status,
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 32.dp, end = 22.dp),
         )
     }
 }

@@ -6,7 +6,9 @@ import androidx.compose.ui.unit.Dp
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.hihihihi.domain.model.History
+import com.hihihihi.domain.model.ReadingStatus
 import java.text.NumberFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -64,14 +66,19 @@ fun formatDateToSimpleString(dateTime: LocalDateTime?): String {
     return dateTime?.format(formatter) ?: ""
 }
 
-
-fun toLocalDateTime(date: Date): LocalDateTime {
-    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+/**
+ * Long 타입 밀리세컨드 -> LocalDateTime
+ */
+fun formatMillisToLocalDateTime(millis: Long): LocalDateTime {
+    return Instant.ofEpochMilli(millis)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .atStartOfDay()
 }
 
 /**
-* 초(int)로 받은거 -> "n시간 n분 n초" 포맷
-*/
+ * 초(int)로 받은거 -> "n시간 n분 n초" 포맷
+ */
 fun formatSecondsToReadableTime(seconds: Int): String {
     val hours = seconds / 3600
     val minutes = (seconds % 3600) / 60
@@ -120,19 +127,28 @@ fun formatTimeRange(startTime: LocalDateTime?, endTime: LocalDateTime?): String 
 }
 
 /**
- * LocalDateTime 과 오늘 날짜 비교해서 일수 계산
+ * LocalDateTime 과 오늘 혹은 입력받은 endDate 날짜 비교해서 일수 계산
  */
-fun getDayCountLabel(startDateTime: LocalDateTime): String {
+fun getDayCountLabel(
+    startDateTime: LocalDateTime,
+    endDateTime: LocalDateTime?,
+    status: ReadingStatus
+): String {
     val startDate = startDateTime.toLocalDate()
-    val today = LocalDate.now()
+    val endDate = if (status == ReadingStatus.READING) LocalDate.now() else endDateTime!!.toLocalDate()
 
-    val days = ChronoUnit.DAYS.between(startDate, today) + 1
-    return if (days > 999) {
-        "999+일째"
+    val days = ChronoUnit.DAYS.between(startDate, endDate) + 1
+    val label = if (days > 999) "999+" else days.toString()
+
+    return if (status == ReadingStatus.FINISHED) {
+        // 완독이면 "123" 형식
+        "${label}일"
     } else {
-        "${days}일째"
+        // 그 외는 "123일"
+        "${label}일째"
     }
 }
+
 
 /**
  * History에서 하루 별 독서 시간 평균 계산

@@ -26,6 +26,12 @@ data class UserBookDto(
     @get:PropertyName("author") @set:PropertyName("author")
     var author: String = "",
 
+    @get:PropertyName("publisher") @set:PropertyName("publisher")
+    var publisher: String? = "",
+
+    @get:PropertyName("description") @set:PropertyName("description")
+    var description: String? = "",
+
     @get:PropertyName("isbn_10") @set:PropertyName("isbn_10")
     var isbn10: String? = "",
 

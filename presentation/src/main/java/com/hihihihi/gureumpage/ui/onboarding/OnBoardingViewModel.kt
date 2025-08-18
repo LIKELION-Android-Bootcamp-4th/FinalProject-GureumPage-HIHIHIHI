@@ -85,8 +85,9 @@ class OnBoardingViewModel @Inject constructor(
 
     fun saveOnboardingComplete() {
         viewModelScope.launch {
+            val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
             theme?.let { setThemeUseCase(it) }
-            setOnboardingCompleteUseCase(true)
+            setOnboardingCompleteUseCase(currentUser.uid, true)
         }
     }
 }

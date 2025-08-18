@@ -3,7 +3,7 @@ package com.hihihihi.gureumpage.ui.statistics.components
 import android.content.res.Configuration
 import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,7 +29,7 @@ fun CategoryCard(
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
     entries: List<PieEntry>,
 ) {
-    GureumCard(modifier = modifier.height(210.dp)) {
+    GureumCard(modifier = modifier.heightIn(210.dp, 250.dp)) {
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,7 +71,7 @@ fun CategoryCard(
                 }
 
                 chart.apply {
-                    setExtraOffsets(0f, 4f, 0f, 8f)
+                    setExtraOffsets(10f, 10f, 10f, 8f)
                     setUsePercentValues(true)           // 퍼센트로 표시
                     data = PieData(dataSet)
                     animateY(1200, Easing.EaseInOutQuad)

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,10 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.login.components.SocialLoginButton
-
-
 
 @SuppressLint("ContextCastToActivity")
 @Composable
@@ -95,29 +91,5 @@ fun LoginScreen(
                 } ?: Log.e("LoginScreen", "Activity가 null입니다.")
             }
         )
-
-
-        // 임시 버튼
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.Home.route)
-            }
-        ) {
-            Text("홈으로 이동")
-        }
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.MindMap.route)
-            }
-        ) {
-            Text("마인드맵으로 이동")
-        }
-        Button(
-            onClick = {
-                navController.navigate(NavigationRoute.Search.route)
-            }
-        ) {
-            Text("검색으로 이동")
-        }
     }
 }

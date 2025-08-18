@@ -130,7 +130,7 @@ fun formatRange(range: DateRange): String {
     return "${range.start.toLocalDate().format(fmt)}~${range.end.toLocalDate().format(fmt)}"
 }
 
-val STAT_PRESET_LABELS = listOf("1주", "1달", "3개월", "6개월", "1년")
+val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)

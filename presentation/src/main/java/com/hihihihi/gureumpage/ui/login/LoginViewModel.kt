@@ -16,22 +16,38 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
-import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.common.model.ClientError
-import com.kakao.sdk.common.model.ClientErrorCause
-import com.kakao.sdk.user.UserApiClient
-
+import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
+import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signInWithKakaoUseCase: SignInWithKakaoUseCase,
     private val signInWithNaverUseCase: SignInWithNaverUseCase,
+    private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase
 ) : ViewModel() {
     private val TAG = "AuthViewModel"
 
+    private suspend fun navigateAfterLogin(navController: NavHostController) {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        Log.d(TAG, "유저 정보: ${currentUser.uid}")
+
+        val isOnboardingComplete = getOnboardingCompleteUseCase(currentUser.uid).firstOrNull() ?: false
+        Log.d(TAG, "온보딩 완료 상태: $isOnboardingComplete")
+
+        val destination = if (isOnboardingComplete) {
+            NavigationRoute.Home.route
+        } else {
+            NavigationRoute.OnBoarding.route
+        }
+
+        navController.navigate(destination) {
+            popUpTo(NavigationRoute.Login.route) { inclusive = true }
+        }
+    }
 
     fun googleLogin(
         context: Context,
@@ -54,15 +70,12 @@ class AuthViewModel @Inject constructor(
             try {
                 signInWithGoogleUseCase(data)
                 Log.d(TAG, "구글 로그인 성공")
-                navController.navigate(NavigationRoute.OnBoarding.route) {
-                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
-                }
+                navigateAfterLogin(navController)
             } catch (e: Exception) {
                 Log.e(TAG, "구글 로그인 실패", e)
             }
         }
     }
-
 
     fun kakaoLogin(
         navController: NavHostController
@@ -71,9 +84,7 @@ class AuthViewModel @Inject constructor(
             try {
                 signInWithKakaoUseCase()
                 Log.d(TAG, "카카오 로그인 성공")
-                navController.navigate(NavigationRoute.OnBoarding.route) {
-                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
-                }
+                navigateAfterLogin(navController)
             } catch (e: Exception) {
                 Log.d(TAG, "카카오 로그인 성공")
             }
@@ -81,15 +92,12 @@ class AuthViewModel @Inject constructor(
 
     }
 
-
     fun naverLogin(activity: Activity, navController: NavHostController) {
         viewModelScope.launch {
             try {
                 signInWithNaverUseCase(activity)
                 Log.d(TAG, "네이버 로그인 성공")
-                navController.navigate(NavigationRoute.OnBoarding.route) {
-                    popUpTo(NavigationRoute.Login.route) { inclusive = true }
-                }
+                navigateAfterLogin(navController)
             } catch (e: Exception) {
                 Log.e(TAG, "네이버 로그인 실패", e)
             }

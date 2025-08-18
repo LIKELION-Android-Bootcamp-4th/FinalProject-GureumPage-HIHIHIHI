@@ -1,12 +1,15 @@
 package com.hihihihi.gureumpage.ui.home
 
+import android.app.Activity
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,10 +25,10 @@ import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.components.SearchBarWithBackground
 import com.hihihihi.gureumpage.ui.home.mock.mockUserBooks
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.ui.home.components.RandomQuoteSection
@@ -33,18 +36,24 @@ import com.hihihihi.gureumpage.ui.home.components.ReadingGoalSection
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 import com.hihihihi.gureumpage.ui.home.mock.mockUser
 
-
 @Composable
 fun HomeScreen(
     // Hilt로 ViewModel을 주입받음. DI를 통해 뷰모델의 생명주기를 컴포즈에 맞게 관리
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
-
-    ) {
+) {
     // viewModel에서 선언한 uiState Flow를 Compose에서 관찰 (State로 변환).
     // 상태가 변경되면 recomposition 발생
     val uiState = viewModel.uiState.collectAsState()
 
+    val useDarkIcons = !isSystemInDarkTheme()
+    val view = LocalView.current
+    val window = (view.context as Activity).window
+    SideEffect {
+        window.statusBarColor = Color.Transparent.toArgb()
+        WindowCompat.getInsetsController(window, view)
+            .isAppearanceLightStatusBars = useDarkIcons
+    }
 
     // ui
     when {
@@ -96,7 +105,6 @@ fun HomeScreenContent(
 
     val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
     val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
-
 
     LazyColumn(
         modifier = Modifier

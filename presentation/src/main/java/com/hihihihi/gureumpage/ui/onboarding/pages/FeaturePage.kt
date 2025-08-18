@@ -37,8 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -180,7 +178,7 @@ private val featurePages = listOf(
         listOf("타이머로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공")
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_reading,
+        R.drawable.ic_cloud_mindmap,
         "필사 & 마인드맵",
         "인상 깊은 문장을 기록하거나\n인물, 정보의 관계를 마인드 맵으로 만들어요",
         listOf("책 속 문장 필사", "자유로운 마인드맵 생성", "인물 및 줄거리 관계도")
