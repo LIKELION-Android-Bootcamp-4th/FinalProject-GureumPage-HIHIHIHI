@@ -37,7 +37,6 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 fun SearchItem(
     result: SearchBook,
     onItemClick: (SearchBook) -> Unit,
-    onAddClick: (SearchBook) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -49,8 +48,8 @@ fun SearchItem(
             //책 이미지
             AsyncImage(
                 modifier = Modifier
-                    .size(width = 57.dp, height = 80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .size(width = 60.dp, height = 80.dp)
+                    .clip(RoundedCornerShape(4.dp)),
                 contentScale = ContentScale.Crop,
                 model = result.coverImageUrl,
                 contentDescription = "책",
@@ -79,13 +78,13 @@ fun SearchItem(
                 )
             }
 
+            Spacer(Modifier.width(8.dp))
             Box(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(CircleShape)
                     .align(Alignment.CenterVertically)
-                    .background(GureumTheme.colors.primary)
-                    .clickable { onAddClick(result) },
+                    .background(GureumTheme.colors.primary),
                 contentAlignment = Alignment.Center,
 
                 ) {
@@ -123,7 +122,6 @@ private fun SearchPreView() {
                 categoryName = "test category",
             ),
             onItemClick = {},
-            onAddClick = {}
         )
     }
 }

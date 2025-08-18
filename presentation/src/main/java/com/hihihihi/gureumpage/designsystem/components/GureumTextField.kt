@@ -67,11 +67,11 @@ fun GureumTextField(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         placeholder = {
-            Text(
+            Medi14Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = hint,
-                style = GureumTypography.bodySmall,
                 textAlign = textAlign,
+                color = GureumTheme.colors.gray500
             )
         },
         value = value,

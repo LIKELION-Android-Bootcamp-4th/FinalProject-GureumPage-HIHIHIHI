@@ -59,7 +59,7 @@ fun CategoryRow(
                 Icon(
                     painter = painterResource(R.drawable.ic_checked),
                     contentDescription = "선택 됨",
-                    tint = GureumTheme.colors.white,
+                    tint = Color.Unspecified,
                     modifier = Modifier
                         .size(16.dp)
                         .align(Alignment.Center),
