@@ -2,16 +2,15 @@ package com.hihihihi.gureumpage.ui.search
 
 import android.app.Activity
 import android.content.res.Configuration
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,9 +36,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.SearchBook
+import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.search.component.AddBookBottomSheet
 import com.hihihihi.gureumpage.ui.search.component.SearchItem
 import com.hihihihi.gureumpage.ui.search.component.SearchTopAppBar
@@ -48,7 +47,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    navController: NavController, viewModel: SearchViewModel = hiltViewModel()
+    navController: NavController,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
     //검색어 입력을 위한 상태
     var searchQuery by remember { mutableStateOf("") }
@@ -83,71 +83,61 @@ fun SearchScreen(
         focusRequester.requestFocus()
     }
 
-    Scaffold(
-        topBar = {
-            //컴포넌트
-            SearchTopAppBar(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                onBackClick = { navController.popBackStack() },
-                onCloseClick = {
-                    searchQuery = ""
-                    hasSearched = false
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                },
-                focusRequester = focusRequester,
-                onSearch = { currentQuery ->
-                    //검색 버튼이 눌렸을 때
-                    //키보드 내리고 포커스 해제
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    //검색 로직
-                    viewModel.search(currentQuery)
-                    hasSearched = true
-                })
-        }, modifier = Modifier.background(GureumTheme.colors.background)
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-        ) {
-            //검색이 되지 않았을 경우 보여주는 안내 문구
-            if (!hasSearched) {
-                Text(
-                    text = "책 제목, 작가, 출판사 등\n무엇으로든 검색해 보세요",
-                    color = GureumTheme.colors.gray400,
-                    style = GureumTypography.bodyLarge,
-                    maxLines = 4,
-                    modifier = Modifier
-                        .padding(top = 74.dp)
-                        .align(Alignment.Center),
-                    overflow = TextOverflow.Ellipsis
-                )
-            } else {//검색이 되었을 때 보여주는 뷰
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    items(searchResults) { item ->
-                        SearchItem(result = item, onItemClick = {}, onAddClick = { selectedBook ->
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        SearchTopAppBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onBackClick = { navController.popBackStack() },
+            onCloseClick = {
+                searchQuery = ""
+                hasSearched = false
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            },
+            focusRequester = focusRequester,
+            onSearch = { currentQuery ->
+                //검색 버튼이 눌렸을 때
+                //키보드 내리고 포커스 해제
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                //검색 로직
+                viewModel.search(currentQuery)
+                hasSearched = true
+            }
+        )
+        //검색이 되지 않았을 경우 보여주는 안내 문구
+        if (!hasSearched) {
+            Spacer(Modifier.height(74.dp))
+            Medi16Text(
+                text = "책 제목, 작가, 출판사 등\n무엇으로든 검색해 보세요",
+                color = GureumTheme.colors.gray400,
+                textAlign = TextAlign.Center
+            )
+        } else {//검색이 되었을 때 보여주는 뷰
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(searchResults) { item ->
+                    SearchItem(
+                        result = item,
+                        onItemClick = { selectedBook ->
                             bookToAdd = selectedBook
                             scope.launch { sheetState.show() }
-                        })
-                    }
-                }
-                if (searchResults.isEmpty()) {
-                    Text(
-                        text = "검색 결과가 없습니다.",
-                        color = GureumTheme.colors.gray400,
-                        style = GureumTypography.bodyLarge,
-                        maxLines = 4,
-                        modifier = Modifier
-                            .padding(top = 74.dp)
-                            .align(Alignment.Center),
-                        overflow = TextOverflow.Ellipsis
+                        },
                     )
                 }
+            }
+            if (searchResults.isEmpty()) {
+                Spacer(Modifier.height(74.dp))
+                Medi16Text(
+                    text = "검색 결과가 없습니다.",
+                    color = GureumTheme.colors.gray400,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -162,11 +152,18 @@ fun SearchScreen(
                     bookToAdd = null
                 }
             },
-            onConfirm = { searchBook, startDate, endDate, currentPage, totalPage, readingState ->
+            onConfirm = { book ->
                 scope.launch {
                     sheetState.hide()
                     bookToAdd = null
-                    viewModel.addUserBook(searchBook, startDate, endDate, currentPage, totalPage, readingState)
+                    viewModel.addUserBook(
+                        book.searchBook,
+                        book.startDate,
+                        book.endDate,
+                        book.currentPage,
+                        book.totalPage,
+                        book.status
+                    )
                 }
             },
             onGetBookPageCount = { isbn, onResult ->
