@@ -146,9 +146,9 @@ class BookDetailViewModel @Inject constructor(
     }
 
     // 통계 반환하는 함수
-    fun getStatistic(): BookStatistic{
+    fun getStatistic(): BookStatistic {
         return BookStatistic(
-            readingPeriod = if(uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(uiState.value.userBook?.startDate!!),
+            readingPeriod = if(uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(uiState.value.userBook?.startDate!!, uiState.value.userBook?.endDate ,uiState.value.userBook?.status!!),
             totalReadingTime = uiState.value.histories
                 .sumOf { it.readTime }
                 .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
