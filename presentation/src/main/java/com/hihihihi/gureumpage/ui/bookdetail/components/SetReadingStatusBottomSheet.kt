@@ -26,18 +26,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.common.utils.formatMillisToLocalDateTime
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
+import com.hihihihi.gureumpage.designsystem.components.GureumClickEventTextField
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.search.component.CategoryRow
-import com.hihihihi.gureumpage.ui.search.component.DatePickTextField
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -53,7 +55,7 @@ fun SetReadingStatusBottomSheet(
     onConfirm: (ReadingStatus, Int?, LocalDateTime?, LocalDateTime?) -> Unit,
 ) {
     var selectedStatus by remember { mutableStateOf(userBook.status) }
-    var pageInput by remember { mutableStateOf("1") }
+    var pageInput by remember { mutableStateOf("0") }
 
     var startDate by remember { mutableStateOf<LocalDateTime?>(null) }
     var endDate by remember { mutableStateOf<LocalDateTime?>(null) }
@@ -112,7 +114,7 @@ fun SetReadingStatusBottomSheet(
                         selectedStatus,
                         if (selectedStatus != ReadingStatus.FINISHED) pageInput.toIntOrNull() else userBook.totalPage,
                         if (selectedStatus == ReadingStatus.PLANNED) null else startDate,
-                        if( selectedStatus == ReadingStatus.FINISHED) endDate else null
+                        if (selectedStatus == ReadingStatus.FINISHED) endDate else null
                     )
                 }
             )
@@ -189,10 +191,7 @@ fun SetReadingStatusBottomSheet(
                 TextButton(onClick = {
                     showEndDatePicker = false
                     endDatePickerState.selectedDateMillis?.let { millis ->
-                        val selectedDateTime = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                            .atStartOfDay()
+                        val selectedDateTime = formatMillisToLocalDateTime(millis)
                         endDate = selectedDateTime
                     }
                 }) { Text("확인") }
@@ -249,9 +248,9 @@ fun ReadingStatusInputs(
         ReadingStatus.READING -> {
             Semi16Text("시작한 날")
             Spacer(Modifier.height(14.dp))
-            DatePickTextField(
+            GureumClickEventTextField(
                 value = startDate?.format(formatter) ?: "",
-                placeholder = "시작한 날",
+                hint = "시작한 날",
                 onClick = onStartDateClick
             )
             Spacer(Modifier.height(14.dp))
@@ -266,23 +265,24 @@ fun ReadingStatusInputs(
                         painter = painterResource(id = R.drawable.ic_book_outline),
                         contentDescription = "페이지"
                     )
-                }
+                },
+                keyboardType = KeyboardType.Number
             )
-            BodySubText("시작할 페이지를 입력하세요 (기본값: 1페이지)")
+            BodySubText("시작할 페이지를 입력하세요 (기본값: 0페이지)")
         }
 
         ReadingStatus.FINISHED -> {
             Semi16Text("독서 기간")
             Spacer(Modifier.height(14.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                DatePickTextField(
+                GureumClickEventTextField(
                     value = startDate?.format(formatter) ?: "",
-                    placeholder = "시작한 날",
+                    hint = "시작한 날",
                     onClick = onStartDateClick
                 )
-                DatePickTextField(
+                GureumClickEventTextField(
                     value = endDate?.format(formatter) ?: "",
-                    placeholder = "다 읽은 날",
+                    hint = "다 읽은 날",
                     onClick = onEndDateClick
                 )
             }
