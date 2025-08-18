@@ -154,8 +154,8 @@ fun SearchBarWithBackground(
             modifier = Modifier
                 .offset(
                     x = maxWidth * 0.6f, // 오른쪽 비율 위치
-                    y = maxHeight * 0.38f
-                )  // 아래쪽에서 살짝 위로) // 오른쪽으로 좀 당기고 아래로 살짝 내림
+                    y = maxHeight * 0.3f // 아래 비율 위치
+                )
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_cloud_reading),
