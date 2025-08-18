@@ -47,22 +47,22 @@ fun TimerControlsRow(
                 painter = painterResource(R.drawable.ic_stop),
                 contentDescription = "정지",
                 tint = colors.gray500,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
 
-        // 가운데: 재생/일시정지 (배경 원형 제거 → 아이콘만, 포인트 색상)
+        // 가운데: 재생/일시정지
         IconButton(
             onClick = onToggle,
             modifier = Modifier.size(72.dp) // 중앙은 터치 영역 살짝 크게
         ) {
             Icon(
                 painter = painterResource(
-                    if (isRunning) R.drawable.ic_pause else R.drawable.ic_start
+                    if (isRunning) R.drawable.ic_pause else R.drawable.ic_play
                 ),
                 contentDescription = if (isRunning) "일시정지" else "재생",
                 tint = colors.point,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier.size(72.dp)
             )
         }
 
@@ -75,7 +75,7 @@ fun TimerControlsRow(
                 painter = painterResource(R.drawable.ic_edit_alt_filled),
                 contentDescription = "메모 작성",
                 tint = colors.gray400,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
     }
