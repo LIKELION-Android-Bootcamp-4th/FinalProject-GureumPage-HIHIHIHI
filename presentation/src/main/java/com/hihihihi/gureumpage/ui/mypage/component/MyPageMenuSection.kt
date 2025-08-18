@@ -57,7 +57,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
             title = "탈퇴",
             textColor = colors.gray400
         ) {
-            //TODO: 기능 추가
+            viewModel.withdrawUser()
         }
     }
 }
