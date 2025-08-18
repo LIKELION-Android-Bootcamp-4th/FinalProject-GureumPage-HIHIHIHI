@@ -14,4 +14,6 @@ data class Quote(
     val author: String,
     val publisher: String,
     val imageUrl: String,
+
+    val recordType: RecordType = RecordType.MANUAL
 )

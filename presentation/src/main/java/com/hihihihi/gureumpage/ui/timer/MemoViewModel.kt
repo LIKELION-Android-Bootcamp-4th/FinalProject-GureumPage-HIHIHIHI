@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.RecordType
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +53,7 @@ class MemoViewModel @Inject constructor(
         author: String,
         imageUrl: String,
         publisher: String = "",
+        recordType: RecordType = RecordType.MANUAL,
         onDone: () -> Unit = {}
     ) {
         val uid = auth.currentUser?.uid ?: "iK4v1WW1ZX4gID2HueBi"
@@ -67,7 +69,8 @@ class MemoViewModel @Inject constructor(
                 title = title,
                 author = author,
                 publisher = publisher,
-                imageUrl = imageUrl
+                imageUrl = imageUrl,
+                recordType = recordType
             )
             val r = addQuote(q)
             if (r.isSuccess) onDone()
