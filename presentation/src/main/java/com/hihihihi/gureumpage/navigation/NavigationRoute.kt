@@ -22,5 +22,7 @@ sealed class NavigationRoute(val route: String) {
         fun createRoute(bookId: String): String = "bookdetail/$bookId"
     }
 
-    object Withdraw : NavigationRoute("withdraw")
+    object Withdraw : NavigationRoute("withdraw/{userName}"){
+        fun createRoute(userName: String): String = "withdraw/$userName"
+    }
 }

@@ -22,9 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.navigation.NavigationRoute
 
 data class WithdrawalReason(
     val iconRes: Int,
@@ -43,17 +46,23 @@ private val withdrawalReasons = listOf(
 fun WithdrawScreen(
     userName: String,
     navController: NavHostController,
-    onWithdrawClick: () -> Unit = {},
-    onReconsiderClick: () -> Unit = {}
+    viewModel: WithdrawViewModel = hiltViewModel(),
 ) {
+
+    LaunchedEffect(Unit) {
+        viewModel.withdrawEvent.collect {
+            navController.navigate(NavigationRoute.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
-
         // 제목
         Semi18Text(
             text = "정말 떠나시나요?",
@@ -64,7 +73,7 @@ fun WithdrawScreen(
 
         // 부제목
         Medi14Text(
-            text = "히히히히님과 함께한",
+            text = "${userName}님과 함께한",
             color = GureumTheme.colors.gray400,
         )
 
@@ -139,7 +148,7 @@ fun WithdrawScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Semi16Text(
-                    text = "잠깐만요!",
+                    text = "잠깐만요! 🥺",
                     color = GureumTheme.colors.gray900,
 
                     )
@@ -164,7 +173,7 @@ fun WithdrawScreen(
         ) {
             // 다시 생각해볼게요 버튼
             Button(
-                onClick = onReconsiderClick,
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -181,7 +190,7 @@ fun WithdrawScreen(
 
             // 정말 탈퇴할래요 버튼
             Button(
-                onClick = onWithdrawClick,
+                onClick = { viewModel.withdrawUser() },
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -209,8 +218,6 @@ fun WithdrawScreen(
             text = "새로운 독서 여정을 시작할 수 있어요",
             color = GureumTheme.colors.gray500,
         )
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -252,6 +259,9 @@ fun WithdrawalReasonItem(reason: WithdrawalReason) {
 @Composable
 private fun WithdrawalScreenPreview() {
     GureumPageTheme {
-        WithdrawScreen("name", navController = rememberNavController(), onWithdrawClick = {}, onReconsiderClick = {})
+        WithdrawScreen(
+            "name",
+            navController = rememberNavController(),
+        )
     }
 }
