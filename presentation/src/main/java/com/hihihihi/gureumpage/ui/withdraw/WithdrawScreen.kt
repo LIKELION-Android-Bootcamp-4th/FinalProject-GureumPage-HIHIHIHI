@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 
@@ -39,7 +40,9 @@ private val withdrawalReasons = listOf(
 )
 
 @Composable
-fun WithdrawalScreen(
+fun WithdrawScreen(
+    userName: String,
+    navController: NavHostController,
     onWithdrawClick: () -> Unit = {},
     onReconsiderClick: () -> Unit = {}
 ) {
@@ -249,6 +252,6 @@ fun WithdrawalReasonItem(reason: WithdrawalReason) {
 @Composable
 private fun WithdrawalScreenPreview() {
     GureumPageTheme {
-        WithdrawalScreen()
+        WithdrawScreen("name", navController = rememberNavController(), onWithdrawClick = {}, onReconsiderClick = {})
     }
 }
