@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.Dp
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.hihihihi.domain.model.History
+import com.hihihihi.domain.model.ReadingStatus
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -120,19 +121,28 @@ fun formatTimeRange(startTime: LocalDateTime?, endTime: LocalDateTime?): String 
 }
 
 /**
- * LocalDateTime 과 오늘 날짜 비교해서 일수 계산
+ * LocalDateTime 과 오늘 혹은 입력받은 endDate 날짜 비교해서 일수 계산
  */
-fun getDayCountLabel(startDateTime: LocalDateTime): String {
+fun getDayCountLabel(
+    startDateTime: LocalDateTime,
+    endDateTime: LocalDateTime?,
+    status: ReadingStatus
+): String {
     val startDate = startDateTime.toLocalDate()
-    val today = LocalDate.now()
+    val endDate = if(status == ReadingStatus.READING) LocalDate.now() else endDateTime!!.toLocalDate()
 
-    val days = ChronoUnit.DAYS.between(startDate, today) + 1
-    return if (days > 999) {
-        "999+일째"
+    val days = ChronoUnit.DAYS.between(startDate, endDate) + 1
+    val label = if (days > 999) "999+" else days.toString()
+
+    return if (status == ReadingStatus.FINISHED) {
+        // 완독이면 "123" 형식
+        "${label}일"
     } else {
-        "${days}일째"
+        // 그 외는 "123일"
+        "${label}일째"
     }
 }
+
 
 /**
  * History에서 하루 별 독서 시간 평균 계산

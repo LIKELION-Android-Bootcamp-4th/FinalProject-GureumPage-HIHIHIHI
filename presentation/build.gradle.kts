@@ -144,4 +144,7 @@ dependencies {
     implementation(libs.google.play.review.ktx)
 
     implementation(libs.play.services.oss.licenses)
+
+    implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+
 }

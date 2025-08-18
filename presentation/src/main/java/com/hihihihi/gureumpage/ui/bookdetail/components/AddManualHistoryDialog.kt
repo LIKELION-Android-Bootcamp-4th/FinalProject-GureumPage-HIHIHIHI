@@ -1,5 +1,11 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hihihihi.gureumpage.R
@@ -36,6 +43,8 @@ import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSe
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
+import com.hihihihi.gureumpage.designsystem.components.Medi12Text
+import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi12Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -89,9 +98,16 @@ fun AddManualHistoryDialog(
         (endPage.toIntOrNull() ?: 0) - (startPage.toIntOrNull() ?: 0)
     }
 
+    val startPageNum = startPage.toIntOrNull()
+    val endPageNum = endPage.toIntOrNull()
+    val hasPageError = endPageNum != null && startPageNum != null && endPageNum < startPageNum
+
+
     val canSave = startTime != null && endTime != null &&
             (endTime!!.isAfter(startTime) || endTime == startTime) &&
-            (endPage.toIntOrNull() ?: 0) >= (startPage.toIntOrNull() ?: 0)
+            startPageNum != null && endPageNum != null &&
+            startPageNum > 0 && endPageNum > 0 &&
+            endPageNum >= startPageNum
 
     Dialog(onDismissRequest = onDismiss) {
         GureumCard(modifier = Modifier.fillMaxWidth()) {
@@ -139,22 +155,64 @@ fun AddManualHistoryDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Semi12Text("페이지", modifier = Modifier.padding(start = 4.dp, bottom = 12.dp), color = GureumTheme.colors.gray800)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    GureumTextField(
-                        value = startPage,
-                        onValueChange = { startPage = it.filter(Char::isDigit) },
-                        hint = "시작 페이지",
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text("~")
-                    GureumTextField(
-                        value = endPage,
-                        onValueChange = { endPage = it.filter(Char::isDigit) },
-                        hint = "끝 페이지",
-                        modifier = Modifier.weight(1f)
-                    )
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            GureumTextField(
+                                value = startPage,
+                                onValueChange = { startPage = it.filter(Char::isDigit) },
+                                hint = "시작 페이지",
+                                isError = hasPageError,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.Top)
+                        ) {
+                            Medi16Text(
+                                "~",
+                                color = GureumTheme.colors.gray600
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            GureumTextField(
+                                value = endPage,
+                                onValueChange = { endPage = it.filter(Char::isDigit) },
+                                hint = "끝 페이지",
+                                isError = hasPageError,
+                                modifier = Modifier.fillMaxWidth(),
+                                imeAction = ImeAction.Done
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = hasPageError,
+                        enter = fadeIn(animationSpec = tween(200)) + slideInVertically(
+                            initialOffsetY = { -it / 3 },
+                            animationSpec = tween(200)
+                        ),
+                        exit = fadeOut(animationSpec = tween(150)) + slideOutVertically(
+                            targetOffsetY = { -it / 3 },
+                            animationSpec = tween(150)
+                        )
+                    ) {
+                        Medi12Text(
+                            text = "종료 페이지는 시작 페이지보다 커야 합니다",
+                            color = GureumTheme.colors.systemRed,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 4.dp, top = 4.dp)
+                        )
+                    }
                 }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -174,7 +232,10 @@ fun AddManualHistoryDialog(
                                 showTimePicker = true
                             }
                     )
-                    Text("~")
+                    Medi16Text(
+                        "~",
+                        color = GureumTheme.colors.gray600
+                    )
                     GureumTextField(
                         value = endTime?.format(timeFormatter) ?: "",
                         onValueChange = {},
@@ -187,7 +248,7 @@ fun AddManualHistoryDialog(
                                 tempHour = endTime?.hour ?: 0
                                 tempMinute = endTime?.minute ?: 0
                                 showTimePicker = true
-                            }
+                            },
                     )
                 }
 
@@ -247,21 +308,32 @@ fun AddManualHistoryDialog(
                 GureumCard {
                     Column (modifier = Modifier.padding(20.dp)){
 
-                        val hourValuesForEnd = remember(startTime) {
+                        // 종료 시간 선택 시 제약 조건 계산
+                        val (hourValues, minuteValues) = if (editingStartTime) {
+                            Pair((0..23).toList(), (0..59).toList())
+                        } else {
                             val startHour = startTime?.hour ?: 0
-                            (startHour..23).toList()
+                            val startMinute = startTime?.minute ?: 0
+
+                            val availableHours = (startHour..23).toList()
+                            val availableMinutes = if (tempHour == startHour) {
+                                (startMinute+1..59).toList()
+                            } else {
+                                (0..59).toList()
+                            }
+
+                            Pair(availableHours, availableMinutes)
                         }
-                        val minuteValuesForEnd = remember(startTime, tempHour) {
-                            val startMinute = if (tempHour == (startTime?.hour ?: 0)) (startTime?.minute ?: 0) + 1 else 0
-                            (startMinute..59).toList()
-                        }
+
+                        val validTempHour = if (hourValues.contains(tempHour)) tempHour else hourValues.first()
+                        val validTempMinute = if (minuteValues.contains(tempMinute)) tempMinute else minuteValues.first()
 
 
                         GureumNumberPicker(
-                            initialHour = tempHour,
-                            initialMinute = tempMinute,
-                            hourValues = if (editingStartTime) (0..23).toList() else hourValuesForEnd,
-                            minuteValues = if (editingStartTime) (0..59).toList() else minuteValuesForEnd,
+                            initialHour = validTempHour,
+                            initialMinute = validTempMinute,
+                            hourValues = hourValues,
+                            minuteValues = minuteValues,
                             visibleItemsCount = 5,
                             unitLabel = "시",
 
@@ -274,14 +346,20 @@ fun AddManualHistoryDialog(
                             date?.let { d ->
                                 val selectedTime = LocalTime.of(tempHour, tempMinute)
                                 if (editingStartTime) {
-                                    startTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
-                                    // 확정 시점에만 체크
-                                    if (endTime != null && startTime!!.toLocalTime() > endTime!!.toLocalTime()) {
-                                        endTime = null
+                                    val newStartTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    startTime = newStartTime
+
+                                    // 종료 시간이 시작 시간보다 이전이면 조정
+                                    if (endTime != null && endTime!!.isBefore(newStartTime)) {
+                                        endTime = newStartTime
                                     }
                                 } else {
-                                    endTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
-                                }
+                                    // 종료 시간 설정
+                                    val newEndTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    // 시작 시간 이후인지 다시 한번 확인
+                                    if (startTime == null || !newEndTime.isBefore(startTime!!)) {
+                                        endTime = newEndTime
+                                    }                                }
                             }
                             showTimePicker = false
                         })

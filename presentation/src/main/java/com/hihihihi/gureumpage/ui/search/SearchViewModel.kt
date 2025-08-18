@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -61,6 +62,7 @@ class SearchViewModel @Inject constructor(
         status: ReadingStatus,
     ) {
         viewModelScope.launch {
+            Log.e("TAG", "addUserBook: ${searchBook.publisher} ${searchBook.description}", )
             try {
                 val userBook = UserBook(
                     userBookId = "",
@@ -69,6 +71,8 @@ class SearchViewModel @Inject constructor(
                     isbn13 = searchBook.isbn,
                     title = searchBook.title,
                     author = searchBook.author,
+                    publisher = searchBook.publisher,
+                    description = searchBook.description,
                     imageUrl = searchBook.coverImageUrl,
                     isLiked = false,
                     totalPage = totalPage,
@@ -79,7 +83,7 @@ class SearchViewModel @Inject constructor(
                     status = status,
                     review = null,
                     rating = null,
-                    category = searchBook.categoryName,
+                    category = searchBook.categoryName.split(">")[1],
                 )
 
                 val mindmap = Mindmap(
