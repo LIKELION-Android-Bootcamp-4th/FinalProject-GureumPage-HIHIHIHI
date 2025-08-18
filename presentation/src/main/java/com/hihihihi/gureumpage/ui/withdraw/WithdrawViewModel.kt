@@ -7,6 +7,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.functions
+import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.gureumpage.ui.mypage.MyPageUiState
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.oauth.NidOAuthLogin
@@ -27,7 +28,9 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
-class WithdrawViewModel @Inject constructor(): ViewModel() {
+class WithdrawViewModel @Inject constructor(
+    private val clearUserDataUseCase: ClearUserDataUseCase
+): ViewModel() {
 
     private val _uiState = MutableStateFlow(WithdrawUiState())
     val uiState: StateFlow<WithdrawUiState> = _uiState.asStateFlow()
@@ -73,6 +76,8 @@ class WithdrawViewModel @Inject constructor(): ViewModel() {
             val deleteAccount = functions.getHttpsCallable("deleteUserAccount")
             val result = deleteAccount.call().await()
             Log.d("WITHDRAWAL", "Functions 호출 성공: $result")
+
+            clearUserDataUseCase.clearAll()
 
             // 3. 상태 초기화 및 로그아웃 이벤트 발생
             _uiState.value = WithdrawUiState(loading = false)
