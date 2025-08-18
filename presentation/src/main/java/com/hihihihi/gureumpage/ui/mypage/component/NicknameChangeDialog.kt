@@ -67,7 +67,7 @@ fun NicknameChangeDialog(
             Column(
                 modifier = Modifier
                     .background(colors.gray0)
-                    .padding(20.dp)
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
                     .heightIn(min = 260.dp), // 최소 높이
                 verticalArrangement = Arrangement.Top
             ) {
@@ -77,7 +77,12 @@ fun NicknameChangeDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("닉네임 변경", style = typo.headlineSmall, color = colors.gray800)
+                    Text(
+                        text = "닉네임 변경",
+                        style = typo.headlineSmall,
+                        color = colors.gray800,
+                        modifier = Modifier.weight(1f)
+                    )
                     Icon(
                         imageVector = Icons.Outlined.Close,
                         contentDescription = "닫기",
@@ -88,13 +93,14 @@ fun NicknameChangeDialog(
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(16.dp))
 
-                // 안내? 문구
+                // 안내 문구
                 Text(
                     text = "변경할 닉네임을 입력해주세요",
                     style = typo.bodySmall,
-                    color = colors.gray400
+                    color = colors.gray400,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -118,13 +124,13 @@ fun NicknameChangeDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp), //2줄 힌트 대비
+                        .heightIn(min = 56.dp),
                     textStyle = typo.bodyMedium.copy(color = colors.gray800),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = colors.gray0,
                         unfocusedContainerColor = colors.gray0,
                         disabledContainerColor = colors.gray0,
-                        focusedIndicatorColor = colors.textFieldOutline,   // 아웃라인 색
+                        focusedIndicatorColor = colors.textFieldOutline,
                         unfocusedIndicatorColor = colors.textFieldOutline,
                         cursorColor = colors.gray600,
                         focusedTextColor = colors.gray800,
@@ -134,8 +140,13 @@ fun NicknameChangeDialog(
                     ),
                     //필드 안 힌트
                     placeholder = {
-                        Text("닉네임으로 나만의 개성을 표현해 보세요", style = typo.bodyMedium, color = colors.gray300)
+                        Text(
+                            "닉네임으로 나만의 개성을 표현해 보세요",
+                            style = typo.bodyMedium,
+                            color = colors.gray300
+                        )
                     },
+
                     isError = rule is NicknameRule.Length ||
                             rule is NicknameRule.IllegalChar ||
                             rule is NicknameRule.ForbiddenWord
@@ -151,7 +162,13 @@ fun NicknameChangeDialog(
                     is NicknameRule.ForbiddenWord -> "부적절한 단어는 포함할 수 없어요." to colors.systemRed
                     is NicknameRule.Ok -> "사용 가능한 닉네임입니다." to colors.systemGreen
                 }
-                Text(text = msg, style = typo.bodySmall, color = msgColor)
+                Text(
+                    text = msg,
+                    style = typo.bodySmall,
+                    color = msgColor,
+                    modifier = Modifier.fillMaxWidth()
+
+                )
 
                 Spacer(Modifier.height(36.dp))
 

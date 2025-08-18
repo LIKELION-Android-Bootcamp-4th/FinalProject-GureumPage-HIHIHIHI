@@ -50,12 +50,12 @@ fun MyPageUserProfileCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 20.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Top
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {
                     //인사
@@ -64,11 +64,10 @@ fun MyPageUserProfileCard(
                         style = typography.titleLarge,
                         color = colors.gray800
                     )
-                    Spacer(Modifier.height(2.dp))
+                    Spacer(Modifier.height(4.dp))
 
                     //칭호 + 닉네임
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         //칭호
@@ -79,7 +78,7 @@ fun MyPageUserProfileCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         //닉네임
                         Text(
                             text = nickname,
@@ -93,7 +92,7 @@ fun MyPageUserProfileCard(
 
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(40.dp)
                         .clickable { onEditNicknameClick() }, // 다이얼로그 열기
                     contentAlignment = Alignment.Center
                 ) {
@@ -108,31 +107,34 @@ fun MyPageUserProfileCard(
             }
 
             //구분선
-            Spacer(modifier = Modifier.height(12.dp))
-            Divider(color = colors.dividerDeep, thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = colors.dividerDeep, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(20.dp))
 
             //독서 통계
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatColumn("총 페이지", totalPages)
-                StatColumn("총 권수", totalBooks)
-                StatColumn("총 독서 시간", totalTime)
+                StatColumn("총 페이지", totalPages, modifier = Modifier.weight(1f))
+                StatColumn("총 권수", totalBooks, modifier = Modifier.weight(1f))
+                StatColumn("총 독서 시간", totalTime, modifier = Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-private fun StatColumn(label: String, value: String) {
+private fun StatColumn(label: String, value: String, modifier: Modifier = Modifier) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(text = label, style = typography.bodySmall, color = colors.gray500)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
         Text(text = value, style = typography.bodyMedium, color = colors.gray800)
     }
 }

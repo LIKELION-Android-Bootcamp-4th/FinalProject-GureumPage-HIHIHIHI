@@ -37,7 +37,7 @@ fun MyPageMenuSettingItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .clickable { onClick() }, // TODO: 기능 구현 (화면이동)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
