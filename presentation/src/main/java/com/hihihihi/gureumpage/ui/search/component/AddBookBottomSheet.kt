@@ -12,15 +12,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,22 +34,19 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
+import com.hihihihi.gureumpage.common.utils.formatMillisToLocalDateTime
 import com.hihihihi.gureumpage.designsystem.components.BodyMediumText
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
+import com.hihihihi.gureumpage.designsystem.components.GureumBetweenDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
+import com.hihihihi.gureumpage.designsystem.components.GureumClickEventTextField
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi18Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.search.model.Book
-import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,9 +65,7 @@ fun AddBookBottomSheet(
     var startDate by remember { mutableStateOf<LocalDateTime?>(null) }
     var endDate by remember { mutableStateOf<LocalDateTime?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var dateFieldToUpdate by remember { mutableStateOf<((String) -> Unit)?>(null) } // TODO
     var isSelectingStartDate by remember { mutableStateOf(true) }
-    val datePickerState = rememberDatePickerState()
 
     // 화면진입 시 페이지 수를 가져오는 로직
     LaunchedEffect(book.isbn) {
@@ -170,7 +160,10 @@ fun AddBookBottomSheet(
                     GureumTextField(
                         value = pageInput,
                         onValueChange = {
-                            pageInput = it.filter { char -> char.isDigit() }
+                            pageInput = it.toInt()
+                                .coerceAtMost(bookPageCount ?: Int.MAX_VALUE)
+                                .toString()
+                                .filter { char -> char.isDigit() }
                         },
                         hint = "예 : 157",
                         trailingIcon = {
@@ -192,52 +185,54 @@ fun AddBookBottomSheet(
                     Spacer(modifier = Modifier.height(14.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         // 시작일 입력 필드
-                        DatePickTextField(
+                        GureumClickEventTextField(
                             value = startDate?.let { formatDateToSimpleString(it) } ?: "",
-                            placeholder = "시작한 날",
+                            hint = "시작한 날",
                             onClick = {
                                 isSelectingStartDate = true
                                 showDatePicker = true
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_calendar_outline),
+                                    contentDescription = "날짜 선택"
+                                )
                             }
                         )
                         // 종료일 입력 필드
-                        DatePickTextField(
+                        GureumClickEventTextField(
                             value = formatDateToSimpleString(endDate),
-                            placeholder = "다 읽은 날",
+                            hint = "다 읽은 날",
                             onClick = {
                                 isSelectingStartDate = false
                                 showDatePicker = true
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_calendar_outline),
+                                    contentDescription = "날짜 선택"
+                                )
                             }
                         )
                     }
                     if (showDatePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showDatePicker = false },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        showDatePicker = false
-                                        // 선택된 날짜를 Long(밀리초) 타입으로 가져옴
-                                        datePickerState.selectedDateMillis?.let { millis ->
-                                            val selectedDate =
-                                                Instant.ofEpochSecond(millis).atZone(ZoneId.systemDefault())
-                                                    .toLocalDateTime()
+                        GureumBetweenDatePicker(
+                            isSelectingStart = isSelectingStartDate,
+                            startDate = startDate,
+                            endDate = endDate,
+                            onDismiss = { showDatePicker = false },
+                            onConfirm = { millis ->
+                                val selectedDate = formatMillisToLocalDateTime(millis)
 
-                                            if (isSelectingStartDate) {
-                                                startDate = selectedDate
-                                            } else {
-                                                endDate = selectedDate
-                                            }
-                                        }
-                                    }
-                                ) { Text("확인") }
+                                if (isSelectingStartDate) {
+                                    startDate = selectedDate
+                                } else {
+                                    endDate = selectedDate
+                                }
+
+                                pageInput = bookPageCount.toString()
                             },
-                            dismissButton = {
-                                TextButton(onClick = { showDatePicker = false }) { Text("취소") }
-                            }
-                        ) {
-                            DatePicker(state = datePickerState)
-                        }
+                        )
                     }
                 }
 
