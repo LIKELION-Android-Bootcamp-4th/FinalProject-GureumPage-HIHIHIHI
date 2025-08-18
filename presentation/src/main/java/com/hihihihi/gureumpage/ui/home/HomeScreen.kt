@@ -108,7 +108,8 @@ fun HomeScreenContent(
         item {
             CurrentReadingBookSection(
                 books = books,
-                onBookClick = { onBookClick(it) }
+                onBookClick = { onBookClick(it) },
+                onAddBookClick = onSearchBarClick
             )
         }
 
