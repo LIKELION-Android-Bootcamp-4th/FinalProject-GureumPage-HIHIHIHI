@@ -26,7 +26,6 @@ import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.Review
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
@@ -120,8 +119,7 @@ fun BookDetailScreen(
                         )
 
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
-                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog =
-                            true
+                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog = true
                     }
                 }
             )
@@ -145,6 +143,7 @@ fun BookDetailScreen(
         uiState.userBook?.let {
             AddManualHistoryDialog(
                 currentPage = it.currentPage,
+                lastPage = it.totalPage,
                 onDismiss = { showAddManualHistoryDialog = false },
                 onSave = { date, startTime, endTime, readTime, readPageCount ->
                     viewModel.addManualHistory(
@@ -198,7 +197,7 @@ fun BookDetailContent(
                 item { ReadingProgressSection(userBook) }
                 item { BookStatisticsCard(bookStatistic) }
             }
-            if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.review != null){
+            if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.rating != null){
                 item {
                     ReviewSection(
                         initialRating = userBook.rating?.toFloat() ?: 0f,
