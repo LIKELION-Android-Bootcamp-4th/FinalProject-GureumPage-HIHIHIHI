@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -16,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
@@ -30,11 +33,11 @@ fun SocialLoginButton(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -54,9 +57,21 @@ fun SocialLoginButton(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .size(24.dp),
+                    .size(16.dp),
                 tint = Color.Unspecified
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun PreviewButton() {
+    SocialLoginButton(
+        text = "카카오 로그인",
+        textColor = Color.Black,
+        iconResId = R.drawable.ic_kakao,
+        backgroundColor = Color(0xFFFEE500), // Kakao Yellow
+        onClick = {}
+    )
 }
