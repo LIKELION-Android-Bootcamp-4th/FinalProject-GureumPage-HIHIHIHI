@@ -14,11 +14,12 @@ import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
+// TODO: GureumClickEventTextField 로 바꾸기. 삭제 할 텍스트 필드
 @Composable
 fun DatePickTextField(value: String, placeholder: String, onClick: () -> Unit) {
     OutlinedTextField(
         value = value,
-        onValueChange = {},
+        onValueChange = { },
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
