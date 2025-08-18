@@ -19,20 +19,46 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
-
 sealed class BottomNavItem(
     val route: String,
     val label: String,
     val unSelectedIconResId: Int,
     val onSelectedIconResId: Int
 ) {
-    object Home : BottomNavItem("home", "홈", R.drawable.ic_home_outline, R.drawable.ic_home_filled)
-    object Library : BottomNavItem("library", "내 서재", R.drawable.ic_book_outline, R.drawable.ic_book_filled)
-    object Quotes : BottomNavItem("quotes", "필사", R.drawable.ic_lightbulb_outline, R.drawable.ic_lightbulb_filled)
-    object Statistics :
-        BottomNavItem("statistics", "통계", R.drawable.ic_chart_pie_outline, R.drawable.ic_chart_pie_filled)
+    object Home : BottomNavItem(
+        NavigationRoute.Home.route,
+        "홈",
+        R.drawable.ic_home_outline,
+        R.drawable.ic_home_filled
+    )
 
-    object MyPage : BottomNavItem("mypage", "마이페이지", R.drawable.ic_user_outline, R.drawable.ic_user_filled)
+    object Library : BottomNavItem(
+        NavigationRoute.Library.route,
+        "내 서재",
+        R.drawable.ic_book_outline,
+        R.drawable.ic_book_filled
+    )
+
+    object Quotes : BottomNavItem(
+        NavigationRoute.Quotes.route,
+        "필사",
+        R.drawable.ic_lightbulb_outline,
+        R.drawable.ic_lightbulb_filled
+    )
+
+    object Statistics : BottomNavItem(
+        NavigationRoute.Statistics.route,
+        "통계",
+        R.drawable.ic_chart_pie_outline,
+        R.drawable.ic_chart_pie_filled
+    )
+
+    object MyPage : BottomNavItem(
+        NavigationRoute.MyPage.route,
+        "마이페이지",
+        R.drawable.ic_user_outline,
+        R.drawable.ic_user_filled
+    )
 
     companion object {
         val items = listOf(Library, Quotes, Home, Statistics, MyPage)
@@ -59,12 +85,15 @@ fun GureumBottomNavBar(navController: NavHostController) {
                 selected = isSelected,
                 label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            popUpTo(NavigationRoute.Home.route) {
+                                saveState = true
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
