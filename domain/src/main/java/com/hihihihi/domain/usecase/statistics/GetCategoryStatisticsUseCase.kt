@@ -1,13 +1,13 @@
 package com.hihihihi.domain.usecase.statistics
 
 import android.util.Log.e
-import android.util.Log.i
 import com.hihihihi.domain.model.CategorySlice
 import com.hihihihi.domain.model.DailyReadPage
 import com.hihihihi.domain.model.DateRange
 import com.hihihihi.domain.model.DateRangePreset
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Page
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.Statistics
 import com.hihihihi.domain.model.TimeSlice
 import com.hihihihi.domain.model.UserBook
@@ -15,10 +15,8 @@ import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -102,8 +100,11 @@ private fun categoryFromUserBooks(books: List<UserBook>, range: DateRange): List
         val pivot = book.endDate ?: book.startDate ?: return false // 비교할 값의 기준
         return !pivot.isBefore(range.start) && !pivot.isAfter(range.end)
     }
-    return books.filter(::inRange)
-        .groupBy { it.category ?: "기타" } // 카테고리 이름으로 그룹
+    return books
+        .asSequence()
+        .filter { it.status != ReadingStatus.PLANNED }  // 읽기 전 제외
+        .filter(::inRange)
+        .groupBy { it.category ?: "기타" }               // 카테고리 이름으로 그룹
         .map { (category, books) -> CategorySlice(category, books.size.toFloat()) }
         .sortedByDescending { it.value }
 }
