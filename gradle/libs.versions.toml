@@ -27,7 +27,7 @@ uiViewbinding = "1.8.3"
 datastore = "1.1.1"
 calendarCompose = "2.4.0"
 playReview = "2.0.2"
-ossLicensesPlugin = "0.10.7"
+ossLicensesPlugin = "0.10.6"
 playServicesOssLicenses = "17.2.1"
 
 [libraries]
