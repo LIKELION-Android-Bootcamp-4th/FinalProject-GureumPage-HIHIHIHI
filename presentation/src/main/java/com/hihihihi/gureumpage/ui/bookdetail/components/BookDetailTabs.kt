@@ -86,6 +86,6 @@ fun BookDetailTabs(
 @Composable
 private fun BookDetailTabsPreview() {
     GureumPageTheme {
-        BookDetailTabs(dummyUserBook,dummyQuotes, dummyRecords)
+        BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords)
     }
 }

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 
-
 fun openAppOnPlayStore(context: Context) {
     val pkg = context.packageName
     val marketUri = Uri.parse("market://details?id=$pkg")

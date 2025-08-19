@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class KakaoAuthRepositoryImpl @Inject constructor(
     private val kakaoDataSource: KakaoDataSource
-): KakaoAuthRepository {
+) : KakaoAuthRepository {
     override suspend fun login(): String {
         return kakaoDataSource.signIn()
     }

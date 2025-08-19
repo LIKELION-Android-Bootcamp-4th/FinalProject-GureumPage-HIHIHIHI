@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -103,7 +102,6 @@ class MindMapAdapter(
                     val child = NodeModel(newNode)
                     performAdd(holder.node, child)
                 }
-                Log.d("MindMapAdapter", holder.node.value.id)
             } else { // 편집 모드 아니면 상세 내용 보기 다이얼로그
                 showDetailDialog(holder.view.context, holder.node)
             }
@@ -248,7 +246,6 @@ class MindMapAdapter(
 
     // 노드 추가 수정 다이얼로그
     fun showAddNodeDialog(context: Context, existingNode: TreeNode? = null, onSave: (MindMapNodeData) -> Unit) {
-        Log.d("MindMapAdapter", "다이얼로그 호출")
         // AndroidViewBinding 경유할 때 테마를 못 찾을 수 있음
         val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
         val binding = DialogAddNodeBinding.inflate(themedInflater)

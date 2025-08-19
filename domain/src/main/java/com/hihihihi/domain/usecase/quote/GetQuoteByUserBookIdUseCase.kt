@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class GetQuoteByUserBookIdUseCase @Inject constructor(
     private val repository: QuoteRepository
-){
+) {
     operator fun invoke(userBookId: String): Flow<List<Quote>> =
         repository.getQuotesByUserBookId(userBookId)
 }

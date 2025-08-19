@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
-
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -47,7 +46,6 @@ fun MyPageMenuSettingItem(
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
-
 
     var pressed by remember { mutableStateOf(false) }
 

@@ -8,5 +8,4 @@ data class MyPageUiState(
     val totalPages: Int = 0,
     val totalBooks: Int = 0,
     val totalReadMinutes: Int = 0,
-) {
-}
+)

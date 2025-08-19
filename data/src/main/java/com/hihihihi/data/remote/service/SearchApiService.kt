@@ -14,7 +14,7 @@ interface SearchApiService {
         @Query("Output") output: String = "JS",
         @Query("Version") version: String = "20131101"
     ): Response<SearchBookListDto>
-    
+
     @GET("ItemLookUp.aspx")
     suspend fun getBookDetail(
         @Query("TTBKey") ttbkey: String,

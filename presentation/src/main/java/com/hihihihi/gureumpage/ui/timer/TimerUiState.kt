@@ -13,9 +13,7 @@ data class TimerUiState(
     val startPage: Int? = null,
     val totalPage: Int? = null,
     val countdown: Int? = null
-    ) {
-
-
+) {
     val progress: Float
         get() {
             val period = ringPeriodSec.coerceAtLeast(1)

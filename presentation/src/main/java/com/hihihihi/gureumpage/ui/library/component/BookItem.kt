@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.library.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -39,23 +38,15 @@ fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
 //한 권의 책정보
 @Composable
 fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
-    Log.d("BookItem", "BookItem 실행됨: ${book.title}")
     val context = LocalContext.current
     val imageRequest = ImageRequest.Builder(context)
         .data(book.imageUrl)
         .crossfade(true)
         .listener(
-            onStart = {
-                Log.d("bookItem", "이미지 로딩 시작 : ${book.imageUrl}")
-            },
-            onSuccess = { _, _ ->
-                Log.d("bookItem", "이미지 로딩 성공 : ${book.imageUrl}")
-            },
-            onError = { _, result ->
-                Log.e("bookItem", "이미지 로딩 실패 : ${book.imageUrl}", result.throwable)
-            }
+            onStart = {},
+            onSuccess = { _, _ -> },
+            onError = { _, result -> }
         ).build()
-
 
     Box(
         modifier = Modifier

@@ -19,7 +19,7 @@ class SearchRemoteDataSourceImpl @Inject constructor(
             emptyList()
         }
     }
-    
+
     override suspend fun getBookDetail(isbn: String): BookDetailDto? {
         return try {
             val response = searchApiService.getBookDetail(apiKey, itemId = isbn)

@@ -33,7 +33,7 @@ fun openSupportEmail(context: Context) {
 
     val intent = Intent(Intent.ACTION_SENDTO).apply {
         data = Uri.parse("mailto:") // SENDTO + mailto: 로 메일 앱만 타겟팅
-        putExtra(Intent.EXTRA_EMAIL, arrayOf("support@example.com")) // TODO: 실제 지원 메일로 교체
+        putExtra(Intent.EXTRA_EMAIL, arrayOf("gureumpage@gmail.com"))
         putExtra(Intent.EXTRA_SUBJECT, subject)
         putExtra(Intent.EXTRA_TEXT, body)
     }

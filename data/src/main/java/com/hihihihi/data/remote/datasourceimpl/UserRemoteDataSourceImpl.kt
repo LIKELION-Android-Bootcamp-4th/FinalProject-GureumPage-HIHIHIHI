@@ -1,10 +1,8 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.remote.dto.UserDto
-import com.hihihihi.domain.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,7 +27,7 @@ class UserRemoteDataSourceImpl @Inject constructor(
 
         val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error) 
+                close(error)
                 return@addSnapshotListener
             }
 
@@ -53,6 +51,4 @@ class UserRemoteDataSourceImpl @Inject constructor(
     override suspend fun updateDailyGoalTime(userId: String, dailyGoalTime: Int) {
         col.document(userId).update("daily_goal_time", dailyGoalTime).await()
     }
-
-
 }

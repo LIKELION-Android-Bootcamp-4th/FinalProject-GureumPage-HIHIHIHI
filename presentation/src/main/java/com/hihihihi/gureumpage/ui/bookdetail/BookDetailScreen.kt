@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -66,9 +65,6 @@ fun BookDetailScreen(
         val state = uiState.addQuoteState
         when {
             state.isSuccess -> {
-                // 추가 성공 시 입력 필드 초기화
-                Log.e("TAG", "BookDetailScreen: 성공!")
-
                 // 성공 스낵바 표시
                 snackbarHostState.showSnackbar("필사 추가 성공!")
 
@@ -77,9 +73,6 @@ fun BookDetailScreen(
             }
 
             state.error != null -> {
-                // 에러 발생 시 로그 출력
-                Log.e("TAG", "BookDetailScreen: 에러=${state.error}")
-
                 // 에러 메시지 스낵바 표시
                 snackbarHostState.showSnackbar("에러: ${state.error}")
 
@@ -194,11 +187,11 @@ fun BookDetailContent(
             state = scrollState,
         ) {
             item { BookSimpleInfoSection(userBook, onReadingStatusClick) }
-            if(userBook.status != ReadingStatus.PLANNED) {
+            if (userBook.status != ReadingStatus.PLANNED) {
                 item { ReadingProgressSection(userBook) }
                 item { BookStatisticsCard(bookStatistic) }
             }
-            if(userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.rating != null){
+            if (userBook.status == ReadingStatus.FINISHED || userBook.review != null || userBook.rating != null) {
                 item {
                     ReviewSection(
                         initialRating = userBook.rating?.toFloat() ?: 0f,

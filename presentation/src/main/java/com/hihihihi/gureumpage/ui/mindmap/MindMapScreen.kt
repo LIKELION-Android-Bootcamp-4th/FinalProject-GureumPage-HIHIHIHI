@@ -71,7 +71,7 @@ fun MindMapScreen(
             val modelRoot = NodeModel(root.toUi())
             val model = TreeModel(modelRoot)
             val map = mutableMapOf(root.mindmapNodeId to modelRoot)
-            
+
             fun attach(pid: String) {
                 nodes.filter { it.parentNodeId == pid }.forEach { child ->
                     val cm = NodeModel(child.toUi())

@@ -47,7 +47,7 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
         awaitClose { quotesCollection.remove() }
     }
 
-    override fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>>  = callbackFlow {
+    override fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>> = callbackFlow {
         val quotesCollection = firestore.collection("quotes")
             .whereEqualTo("userbook_id", userBookId)
             .addSnapshotListener { snapshot, error ->
@@ -65,6 +65,4 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
             }
         awaitClose { quotesCollection.remove() }
     }
-
-
 }

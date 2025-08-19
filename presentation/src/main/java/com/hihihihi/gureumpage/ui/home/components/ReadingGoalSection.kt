@@ -176,7 +176,6 @@ fun ReadingGoalSection(
                 }
             }
         }
-
     }
 
     if (isPickerOpen) {

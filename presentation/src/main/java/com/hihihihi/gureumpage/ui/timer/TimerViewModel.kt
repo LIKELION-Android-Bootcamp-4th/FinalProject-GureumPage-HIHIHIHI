@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.timer
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -21,20 +20,15 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     private val getUserBooksByStatus: GetUserBooksByStatusUseCase,
-//    private val saveReadingTime: SaveReadingTimeUseCase
     private val addHistory: AddHistoryUseCase,
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState
-
-    //타이머
-//    private var timerJob: Job? = null
 
     //스톱워치
     private var stopwatchJob: Job? = null
@@ -55,7 +49,6 @@ class TimerViewModel @Inject constructor(
             // status == READING 전체를 구독하되, 해당 ID 한 권만 반영
             getUserBooksByStatus(uid, ReadingStatus.READING).collectLatest { books ->
                 val pick = books.firstOrNull { it.userBookId == userBookId }
-                Log.d("TimerVM", "bind => userBookId=$userBookId, pick=${pick?.title}")
 
                 if (pick != null) {
                     _uiState.update {
@@ -105,11 +98,9 @@ class TimerViewModel @Inject constructor(
 
         viewModelScope.launch {
             for (i in 3 downTo 1) {
-                Log.d("TimerVM", "countdown=$i")
                 _uiState.update { it.copy(countdown = i, isRunning = false) }
                 delay(1000)
             }
-            Log.d("TimerVM", "countdown done")
             _uiState.update { it.copy(countdown = null) }
             startStopwatch()
         }
@@ -168,7 +159,6 @@ class TimerViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.update { it.copy(elapsedSec = 0, isRunning = false) }
                 }
-                .onFailure { Log.e("TimerVM", "save failed", it) }
         }
     }
 
@@ -221,5 +211,4 @@ class TimerViewModel @Inject constructor(
 //        timerJob = null
 //        // cancelJobOnly=false일 땐 추가 동작이 필요하면 여기에
 //    }
-
 }

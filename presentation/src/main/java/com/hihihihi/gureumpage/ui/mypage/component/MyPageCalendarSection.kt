@@ -39,7 +39,6 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-
 @Composable
 fun MyPageCalenderSection(
     stats: Map<LocalDate, Int>
@@ -109,7 +108,7 @@ fun MyPageCalenderSection(
 fun DayCell(day: CalendarDay, today: LocalDate, level: Int) {
     val colors = GureumTheme.colors
 
-    val color = when(level) {
+    val color = when (level) {
         0 -> colors.gray200
         1 -> colors.primary10
         2 -> colors.primary30
@@ -194,7 +193,7 @@ fun WeekHeader(dayOfWeek: DayOfWeek) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 3.5.dp, end= 4.dp),
+            .padding(bottom = 3.5.dp, end = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val label = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())

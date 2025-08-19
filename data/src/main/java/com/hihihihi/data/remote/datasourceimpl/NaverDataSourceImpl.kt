@@ -1,7 +1,6 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import android.app.Activity
-import android.content.Context
 import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.OAuthLoginCallback
@@ -10,7 +9,7 @@ import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
 class NaverDataSourceImpl @Inject constructor(
-): NaverDataSource {
+) : NaverDataSource {
 
     override suspend fun signIn(activity: Activity): String = suspendCancellableCoroutine { cont ->
         NaverIdLoginSDK.authenticate(activity, object : OAuthLoginCallback {

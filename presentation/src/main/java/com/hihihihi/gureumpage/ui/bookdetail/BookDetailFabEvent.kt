@@ -4,4 +4,5 @@ sealed class BookDetailFabEvent {
     object NavigateToMindmap : BookDetailFabEvent()
     object NavigateToTimer : BookDetailFabEvent()
     object ShowAddQuoteDialog : BookDetailFabEvent()
-    object ShowAddManualHistoryDialog : BookDetailFabEvent()}
+    object ShowAddManualHistoryDialog : BookDetailFabEvent()
+}

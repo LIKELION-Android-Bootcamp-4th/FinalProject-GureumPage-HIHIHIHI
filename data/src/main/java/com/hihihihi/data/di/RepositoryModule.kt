@@ -67,9 +67,8 @@ object RepositoryModule {
     fun provideAuthRepository(
         authDataSource: AuthDataSource
     ): AuthRepository {
-       return AuthRepositoryImpl(authDataSource)
+        return AuthRepositoryImpl(authDataSource)
     }
-
 
     @Provides
     @Singleton
@@ -99,7 +98,7 @@ object RepositoryModule {
     @Singleton
     fun provideUserRepository(
         remoteDataSource: UserRemoteDataSource
-    ) : UserRepository {
+    ): UserRepository {
         return UserRepositoryImpl(remoteDataSource)
     }
 

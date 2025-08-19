@@ -1,6 +1,5 @@
 package com.hihihihi.domain.usecase.statistics
 
-import android.util.Log.e
 import com.hihihihi.domain.model.CategorySlice
 import com.hihihihi.domain.model.DailyReadPage
 import com.hihihihi.domain.model.DateRange
@@ -41,36 +40,30 @@ class GetStatisticsUseCase @Inject constructor(
 
         return combine(booksFlow, historiesFlow, dailiesFlow) { books, histories, dailies ->
             try {
-
                 // 카테고리 계산
                 val category = try {
-                    categoryFromUserBooks(books, range).also { e("STAT", "category 계산 완료: $it") }
+                    categoryFromUserBooks(books, range)
                 } catch (ex: Exception) {
-                    e("STAT", "category 계산 에러", ex)
                     emptyList<CategorySlice>()
                 }
 
                 // 독서 시간 계산
                 val time = try {
-                    readingTime(histories, range).also { e("STAT", "readingTime 계산 완료: $it") }
+                    readingTime(histories, range)
                 } catch (ex: Exception) {
-                    e("STAT", "readingTime 에러", ex)
                     emptyList<TimeSlice>()
                 }
 
                 // 페이지 계산
                 val (pages, xLabels) = try {
-                    readingPages(dailies, preset, range).also { e("STAT", "readingPages 계산 완료: $it") }
+                    readingPages(dailies, preset, range)
                 } catch (ex: Exception) {
-                    e("STAT", "readingPages 에러", ex)
                     emptyList<Page>() to emptyList<String>()
                 }
 
                 // 최종 통계
-                e("STAT", "Statistics 생성 완료: category=$category, time=$time, pages=$pages, xLabels=$xLabels")
                 Statistics(category, time, pages, xLabels)
             } catch (e: Exception) {
-                e("STAT", "combine 전체 에러:", e)
                 Statistics(emptyList(), emptyList(), emptyList(), emptyList())
             }
         }.distinctUntilChanged()
@@ -143,7 +136,6 @@ private fun readingTime(histories: List<History>, range: DateRange): List<TimeSl
                 if (startMax.isBefore(endMin)) {
                     val minutes = ChronoUnit.MINUTES.between(startMax, endMin)
                     acc[index] += minutes
-                    e("STAT", "history=${hist.userBookId}, bucket=${bucket.label}, minutes=$minutes")
                 }
             }
 
@@ -208,7 +200,7 @@ private fun readingPages(
                     val day = startDay.plusDays(dayIndex.toLong())
                     sum += byDate[day] ?: 0f
                 }
-                val label ="${startDay.plusDays(startIndex.toLong()).dayOfMonth}일"
+                val label = "${startDay.plusDays(startIndex.toLong()).dayOfMonth}일"
                 Page(label, it.toFloat(), sum)
             }
             pts to pts.map { it.label }
