@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,13 +27,13 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
 fun MyPageUserProfileCard(
-    //ui 확인용 더미 데이터
-    title: String = "안녕하세요!",
-    badge: String = "새벽 독서가", // 칭호
-    nickname: String = "히히히히님", // 유저 닉네임
-    totalPages: String = "1892쪽",
-    totalBooks: String = "16권",
-    totalTime: String = "3,744시간",
+    modifier: Modifier = Modifier,
+    title: String ,
+    badge: String , // 칭호
+    nickname: String , // 유저 닉네임
+    totalPages: String ,
+    totalBooks: String ,
+    totalTime: String ,
     onEditNicknameClick: () -> Unit = {} // 연필 아이콘 클릭 시 콜백
 ) {
     val colors = GureumTheme.colors
@@ -67,7 +65,6 @@ fun MyPageUserProfileCard(
 
                     //칭호 + 닉네임
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         //칭호

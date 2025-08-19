@@ -8,13 +8,12 @@ sealed class NavigationRoute(val route: String) {
     object MindMap : NavigationRoute("mindmap/{bookId}/{mindmapId}") {
         fun createRoute(bookId: String, mindmapId: String?): String = "mindmap/$bookId/$mindmapId"
     }
-
-    object Quotes : NavigationRoute("quotes")
-    object Library : NavigationRoute("library")
-    object Search : NavigationRoute("search")
-    object Statistics : NavigationRoute("statistics")
-    object Timer : NavigationRoute("timer/{bookId}") {
-        fun createRoute(bookId: String): String = "timer/$bookId"
+    object Quotes: NavigationRoute("quotes")
+    object Library: NavigationRoute("library")
+    object Search: NavigationRoute("search")
+    object Statistics: NavigationRoute("statistics")
+    object Timer: NavigationRoute("timer/{userBookId}"){
+        fun createRoute(userBookId: String): String = "timer/$userBookId"
     }
 
     object MyPage : NavigationRoute("mypage")
