@@ -28,7 +28,7 @@ import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 fun NicknamePage(viewModel: OnBoardingViewModel) {
 
     OnBoardingMainContents(
-        titleText = "어떻게 불러드릴까요?",
+        titleText = "어떻게 불러드릴까요?",         
         subTitleText = "앱에서 사용할 닉네임을 설정해주세요"
     ) {
         Spacer(Modifier.height(6.dp))

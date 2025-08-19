@@ -131,7 +131,7 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideAddHistoryUseCase(
+    fun provideAddHistory(
         historyRepository: HistoryRepository,
         userBookRepository: UserBookRepository
     ): AddHistoryUseCase {
@@ -275,6 +275,13 @@ object UseCaseModule {
         dailyReadPageRepository: DailyReadPageRepository
     ): GetStatisticsUseCase {
         return GetStatisticsUseCase(userBookRepository, historyRepository, dailyReadPageRepository)
+    }
+
+    @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
     }
 
     @Provides
