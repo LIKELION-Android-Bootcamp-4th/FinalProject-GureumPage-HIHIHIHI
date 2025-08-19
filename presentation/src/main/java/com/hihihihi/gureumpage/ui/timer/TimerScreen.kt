@@ -39,7 +39,6 @@ fun TimerScreen(
 
     // UI 상태 수집
     val state by viewModel.uiState.collectAsState()
-
     val memoState by memoViewModel.ui.collectAsState()
 
     // 정지 확인 다이얼로그 상태
@@ -69,7 +68,7 @@ fun TimerScreen(
 
     LaunchedEffect(userBookId) {
         viewModel.bind(userBookId)
-        memoViewModel.observe(userBookId)
+        memoViewModel.clear()
         showBackExitScreen = false
         showStopDialog = false
         showAddQuoteDialog = false
@@ -141,7 +140,7 @@ fun TimerScreen(
             // 메모 영역
             val lines = remember(memoState.items, userBookId) {
                 memoState.items
-                    .filter { q -> q.recordType == RecordType.TIMER && q.userBookId == userBookId }
+                    .filter {  q -> q.userBookId == userBookId }
                     .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
             }
 
@@ -203,6 +202,7 @@ fun TimerScreen(
                 onConfirmStopPages = { s, e ->
                     viewModel.finishAndSave(userBookId, s, e)
                     showStopDialog = false
+                    onExit()
                 }
             )
         }
@@ -221,7 +221,6 @@ fun TimerScreen(
                         title = state.bookTitle,
                         author = state.author,
                         imageUrl = state.bookImageUrl,
-                        recordType = RecordType.TIMER
                     ) {
                         // 저장 성공 후 다이얼로그 닫고 타이머 재개
                         showAddQuoteDialog = false
