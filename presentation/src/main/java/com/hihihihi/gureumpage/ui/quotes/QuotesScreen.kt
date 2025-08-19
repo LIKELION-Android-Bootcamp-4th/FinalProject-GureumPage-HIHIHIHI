@@ -1,6 +1,8 @@
 package com.hihihihi.gureumpage.ui.quotes
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -50,7 +52,11 @@ fun QuotesScreen(
         }
 
         !uiState.isLoading && uiState.quotes.isEmpty() -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Semi18Text("아직 필사가 없어요")
                 Spacer(Modifier.height(16.dp))
                 Medi16Text("책에서 인상 깊은 한 줄을 남겨 보세요.")
