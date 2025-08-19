@@ -8,12 +8,14 @@ import com.hihihihi.domain.repository.MindmapNodeRepository
 import com.hihihihi.domain.repository.MindmapRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
+import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
 import com.hihihihi.domain.repository.UserRepository
 import com.hihihihi.domain.usecase.auth.SignInWithGoogleUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
 import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
 import com.hihihihi.domain.usecase.mindmap.UpdateMindmapUseCase
@@ -24,14 +26,19 @@ import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
+import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
+import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
+import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
@@ -125,7 +132,7 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideAddHistory(
+    fun provideAddHistoryUseCase(
         historyRepository: HistoryRepository,
         userBookRepository: UserBookRepository
     ): AddHistoryUseCase {
@@ -153,6 +160,13 @@ object UseCaseModule {
         authRepository: AuthRepository
     ): SignInWithNaverUseCase {
         return SignInWithNaverUseCase(naverAuthRepository, authRepository)
+    }
+
+    @Provides
+    fun provideGetDailyReadPagesUseCase(
+        repository: DailyReadPageRepository
+    ): GetDailyReadPagesUseCase {
+        return GetDailyReadPagesUseCase(repository)
     }
 
     @Provides
@@ -219,11 +233,26 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideGetOnboardingCompleteUseCase(
+        repository: UserPreferencesRepository
+    ): GetOnboardingCompleteUseCase {
+        return GetOnboardingCompleteUseCase(repository)
+    }
+
+    @Provides
     fun provideUpdateDailyGoalTimeUseCase(
         repository: UserRepository
     ): UpdateDailyGoalTimeUseCase {
         return UpdateDailyGoalTimeUseCase(repository)
     }
+
+    @Provides
+    fun provideUpdateNicknameUseCase(
+        repository: UserRepository
+    ): UpdateNicknameUseCase {
+        return UpdateNicknameUseCase(repository)
+    }
+
 
     @Provides
     fun provideSetThemeUseCase(
@@ -247,6 +276,27 @@ object UseCaseModule {
         dailyReadPageRepository: DailyReadPageRepository
     ): GetStatisticsUseCase {
         return GetStatisticsUseCase(userBookRepository, historyRepository, dailyReadPageRepository)
+    }
+
+    @Provides
+    fun provideSearchBooksUseCase(
+        repository: SearchRepository
+    ): SearchBooksUseCase {
+        return SearchBooksUseCase(repository)
+    }
+
+    @Provides
+    fun provideClearUserDataUseCase(
+        repository: UserPreferencesRepository
+    ): ClearUserDataUseCase {
+        return ClearUserDataUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetUserUseCase(
+        repository: UserRepository
+    ): GetUserUseCase {
+        return GetUserUseCase(repository)
     }
 
     @Provides

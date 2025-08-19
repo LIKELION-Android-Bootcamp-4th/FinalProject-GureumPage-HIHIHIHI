@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -84,13 +85,11 @@ fun SearchTopAppBar(
             }
             IconButton(onClick = onCloseClick) {
                 Icon(
-                    //임시 close 아이콘
-                    painter = painterResource(R.drawable.ic_close),
+                    painter = painterResource(R.drawable.ic_text_clear),
                     contentDescription = "검색 취소",
-                    tint = GureumTheme.colors.gray800
+                    tint = Color.Unspecified
                 )
             }
         }
-        //Divider(color = GureumTheme.colors.gray400.copy(0.3f), thickness = 1.dp)
     }
 }
