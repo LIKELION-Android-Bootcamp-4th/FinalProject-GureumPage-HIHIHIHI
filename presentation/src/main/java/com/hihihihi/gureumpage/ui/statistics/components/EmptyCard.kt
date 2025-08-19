@@ -16,7 +16,9 @@ import com.hihihihi.gureumpage.designsystem.components.Semi18Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 
 @Composable
-fun EmptyCard() {
+fun EmptyCard(
+    subText: String = "첫 책을 추가해 통계를 시작해 보세요.",
+) {
     GureumCard(modifier = Modifier.height(210.dp)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -24,7 +26,7 @@ fun EmptyCard() {
         ) {
             Semi18Text("아직 통계가 없어요")
             Spacer(Modifier.height(16.dp))
-            Medi16Text("읽은 책을 기록하면 보여드릴게요.")
+            Medi16Text(subText)
         }
     }
 }
