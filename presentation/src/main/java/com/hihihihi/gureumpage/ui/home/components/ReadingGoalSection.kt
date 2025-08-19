@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
@@ -166,7 +167,9 @@ fun ReadingGoalSection(
                             Text(
                                 "오늘의 독서를 시작해주세요!",
                                 style = GureumTypography.bodyMedium,
-                                color = GureumTheme.colors.gray500
+                                color = GureumTheme.colors.gray500,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
                             )
                         }
                     }

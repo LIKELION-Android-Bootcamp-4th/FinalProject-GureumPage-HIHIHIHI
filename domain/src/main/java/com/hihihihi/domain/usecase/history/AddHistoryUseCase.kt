@@ -15,15 +15,7 @@ class AddHistoryUseCase @Inject constructor(
         return try {
             historyRepository.addHistory(history)
 
-            val userBook = userBookRepository.getUserBook(history.userBookId).first()
-            val newCurrentPage = (userBook.currentPage) + history.readPageCount
-
-            userBookRepository.patchUserBook(
-                userBook.copy(currentPage = newCurrentPage)
-            ).getOrThrow()
-
             Result.success(Unit)
-
         } catch (e: Exception) {
             Result.failure(e)
         }

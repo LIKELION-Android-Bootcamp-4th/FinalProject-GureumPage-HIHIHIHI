@@ -20,6 +20,7 @@ import com.hihihihi.gureumpage.ui.search.SearchScreen
 import com.hihihihi.gureumpage.ui.splash.SplashView
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
+import com.hihihihi.gureumpage.ui.withdraw.WithdrawScreen
 
 
 @Composable
@@ -78,6 +79,16 @@ fun GureumNavGraph(
                     navController = navController,
                     snackbarHostState = snackbarHostState
                 )
+            }
+        }
+
+        composable(
+            route = NavigationRoute.Withdraw.route,
+            arguments = listOf(navArgument("userName") { type = NavType.StringType })
+            ) { backStackEntry ->
+            val userName = backStackEntry.arguments?.getString("userName")
+            userName?.let {
+                WithdrawScreen(userName = it, navController = navController)
             }
         }
     }

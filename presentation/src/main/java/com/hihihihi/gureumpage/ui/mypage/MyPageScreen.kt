@@ -112,7 +112,11 @@ fun MyPageScreen(
             color = colors.background10
         )
 
-        MyPageMenuSection()
+        MyPageMenuSection(
+            onWithDrawClick = {
+                navController.navigate(NavigationRoute.Withdraw.createRoute(state.nickname))
+            }
+        )
     }
 
     //닉네임 벼경 다이얼로그
