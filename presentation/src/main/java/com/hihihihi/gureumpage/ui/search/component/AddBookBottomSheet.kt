@@ -178,10 +178,12 @@ fun AddBookBottomSheet(
                     GureumTextField(
                         value = pageInput,
                         onValueChange = {
-                            pageInput = it.toInt()
-                                .coerceAtMost(bookPageCount ?: Int.MAX_VALUE)
-                                .toString()
-                                .filter { char -> char.isDigit() }
+                            val digits = it.filter(Char::isDigit)
+                            val max = bookPageCount ?: Int.MAX_VALUE
+                            pageInput = digits.toIntOrNull()
+                                ?.coerceAtMost(max)
+                                ?.toString()
+                                ?: ""
                         },
                         hint = "예 : 157",
                         trailingIcon = {
