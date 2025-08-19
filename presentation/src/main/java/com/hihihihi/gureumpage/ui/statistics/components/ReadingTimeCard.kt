@@ -17,12 +17,10 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.hihihihi.gureumpage.common.utils.PercentageOfTotalFormatter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.statistics.mockReading
 
 @Composable
 fun ReadingTimeCard(
@@ -30,8 +28,16 @@ fun ReadingTimeCard(
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
     entries: List<BarEntry>
 ) {
+    val sliceColors = listOf(
+        androidx.compose.ui.graphics.Color(0xFFD0E8B8).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFF58D8D).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFFFB37B).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFFEED8E).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFA8B1E5).toArgb(),
+    )
+
     GureumCard(
-        modifier = modifier.height(210.dp)
+        modifier = modifier.height(220.dp)
     ) {
         AndroidView(
             modifier = Modifier
@@ -40,7 +46,7 @@ fun ReadingTimeCard(
             factory = { context ->
                 HorizontalBarChart(context).apply {
 
-                    setExtraOffsets(0f, 0f, 80f, 0f)
+                    setExtraOffsets(0f, 0f, 40f, 0f)
                     setDrawValueAboveBar(true)      // 바 바깥에 숫자 표시
 
                     description.isEnabled = false   // 설명 표시 여부
@@ -74,7 +80,7 @@ fun ReadingTimeCard(
             update = { chart ->
                 val total = entries.sumOf { it.y.toDouble() }.toFloat()
                 val dataSet = BarDataSet(entries, "독서 시간 분포").apply {
-                    colors = ColorTemplate.LIBERTY_COLORS.toList()
+                    colors = sliceColors
 
                     setDrawValues(true)         // 숫자 퍼센트 표시
                     valueTextColor = labelColor // 숫자 컬러

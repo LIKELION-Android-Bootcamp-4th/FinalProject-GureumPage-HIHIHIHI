@@ -58,6 +58,7 @@ fun StatisticsPicker(
                     visibleItemsCount = 3,
                     modifier = Modifier.weight(1f),
                     textModifier = Modifier.padding(4.dp),
+                    startIndex = initialIndex,
                 )
                 Spacer(Modifier.width(72.dp))
             }
