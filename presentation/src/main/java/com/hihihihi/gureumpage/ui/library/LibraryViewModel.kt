@@ -23,7 +23,6 @@ class LibraryViewModel @Inject constructor(
     val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
     init {
-        //테스트용 userid 추후 변경
         loadUserBooks(userId)
     }
 

@@ -48,7 +48,7 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
             GureumTextField(
                 value = viewModel.nickname,
                 onValueChange = {
-                    viewModel.updateNickname(it)
+                    viewModel.updateNickname(it.trim())
                 },
                 hint = "닉네임을 입력해주세요",
                 textAlign = TextAlign.Center,

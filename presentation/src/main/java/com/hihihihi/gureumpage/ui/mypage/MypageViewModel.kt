@@ -3,12 +3,7 @@ package com.hihihihi.gureumpage.ui.mypage
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.functions
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -16,9 +11,6 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
-import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.oauth.NidOAuthLogin
-import com.navercorp.nid.oauth.OAuthLoginCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,12 +22,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
@@ -139,7 +127,6 @@ class MypageViewModel @Inject constructor(
             }
     }
 
-
     // 독서 통계
     private fun loadUserBookStats(userId: String) = viewModelScope.launch {
         runCatching {
@@ -185,7 +172,4 @@ class MypageViewModel @Inject constructor(
             }
             .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
     }
-
-
-
 }
