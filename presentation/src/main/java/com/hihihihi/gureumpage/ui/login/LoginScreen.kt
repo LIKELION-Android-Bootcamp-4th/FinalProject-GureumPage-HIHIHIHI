@@ -13,32 +13,32 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
+import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
-import com.hihihihi.gureumpage.designsystem.components.Semi24Text
-import com.hihihihi.gureumpage.designsystem.components.Semi40Text
-import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -48,11 +48,12 @@ import com.hihihihi.gureumpage.ui.login.components.SocialLoginButton
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("bg_login.json"))
 
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -63,10 +64,16 @@ fun LoginScreen(
     }
 
     val activity = LocalContext.current as? Activity
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
 
-    GureumPageTheme (
+    GureumPageTheme(
         darkTheme = true,
-    ){
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -113,6 +120,7 @@ fun LoginScreen(
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_google,
                     backgroundColor = Color.White,
+                    enabled = !uiState.isLoading,
                     onClick = {
                         viewModel.googleLogin(context, googleLauncher)
                     }
@@ -124,7 +132,9 @@ fun LoginScreen(
                     text = "카카오 로그인",
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_kakao,
-                    backgroundColor = Color(0xFFFEE500), // Kakao Yellow
+                    backgroundColor = Color(0xFFFEE500),
+                    enabled = !uiState.isLoading,
+
                     onClick = {
                         viewModel.kakaoLogin(navController)
                     }
@@ -136,7 +146,8 @@ fun LoginScreen(
                     text = "네이버 로그인",
                     textColor = Color.White,
                     iconResId = R.drawable.ic_naver,
-                    backgroundColor = Color(0xFF03C75A), // Naver Green
+                    backgroundColor = Color(0xFF03C75A),
+                    enabled = !uiState.isLoading,
                     onClick = {
                         activity?.let {
                             viewModel.naverLogin(it, navController)
@@ -150,6 +161,52 @@ fun LoginScreen(
                     color = GureumTheme.colors.gray600,
                 )
             }
+        }
+
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            GureumTheme.background.color,
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = GureumTheme.colors.primary
+                        )
+
+                        if (uiState.loadingMessage?.isNotEmpty() == true) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Medi14Text(
+                                text = uiState.loadingMessage!!,
+                                color = GureumTheme.colors.gray700
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                containerColor = GureumTheme.colors.systemRed,
+                contentColor = Color.White
+            )
         }
     }
 }
