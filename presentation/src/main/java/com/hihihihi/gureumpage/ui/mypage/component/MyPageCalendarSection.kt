@@ -55,6 +55,9 @@ fun MyPageCalenderSection(
     val startMonth = currentMonth.minusMonths(100)
     val endMonth = currentMonth.plusMonths(100)
 
+    // 우측 1/3부터 보이도록: 최근 4개월 정도를 기본 가시 시작점으로 잡음
+    val rightOneThirdAnchorMonths = 4L
+
     //요일 시작: 일/월 자동 적용
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() }
 
@@ -75,7 +78,7 @@ fun MyPageCalenderSection(
             val state = rememberHeatMapCalendarState(
                 startMonth = startMonth,
                 endMonth = endMonth,
-                firstVisibleMonth = currentMonth.minusMonths(1),
+                firstVisibleMonth = currentMonth.minusMonths(rightOneThirdAnchorMonths),
                 firstDayOfWeek = firstDayOfWeek
             )
             HeatMapCalendar(
@@ -97,7 +100,7 @@ fun MyPageCalenderSection(
                 }
             )
         }
-            HeatLegendWithLabel()
+        HeatLegendWithLabel()
     }
 }
 

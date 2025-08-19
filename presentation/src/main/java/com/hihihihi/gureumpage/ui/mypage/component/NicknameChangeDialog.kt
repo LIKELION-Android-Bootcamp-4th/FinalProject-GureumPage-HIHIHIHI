@@ -67,7 +67,7 @@ fun NicknameChangeDialog(
             Column(
                 modifier = Modifier
                     .background(colors.gray0)
-                    .padding(20.dp)
+                    .padding(horizontal = 24.dp, vertical = 20.dp)
                     .heightIn(min = 260.dp), // 최소 높이
                 verticalArrangement = Arrangement.Top
             ) {
@@ -141,7 +141,7 @@ fun NicknameChangeDialog(
                             rule is NicknameRule.ForbiddenWord
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
 
                 // 검증 메세지 (rule 상태에 따라 색상/문구 변경)
                 val (msg, msgColor) = when (rule) {
