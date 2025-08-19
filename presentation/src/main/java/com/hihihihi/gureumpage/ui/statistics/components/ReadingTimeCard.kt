@@ -37,7 +37,7 @@ fun ReadingTimeCard(
     )
 
     GureumCard(
-        modifier = modifier.height(210.dp)
+        modifier = modifier.height(220.dp)
     ) {
         AndroidView(
             modifier = Modifier

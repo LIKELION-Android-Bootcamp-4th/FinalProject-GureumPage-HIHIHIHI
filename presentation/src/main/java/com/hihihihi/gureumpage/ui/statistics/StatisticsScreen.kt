@@ -53,7 +53,7 @@ fun StatisticsScreen(
     var presetIndex by rememberSaveable { mutableStateOf(0) }
     val preset = presetFromIndex(presetIndex)
     val rangeText = remember(presetIndex) { formatRange(preset) }
-
+    val title = remember(presetIndex) { pagesTitle(preset) }
 
     if (showPicker) {
         StatisticsPicker(
@@ -118,7 +118,7 @@ fun StatisticsScreen(
         }
 
         item {
-            Semi16Text("주간 독서 페이지")
+            Semi16Text(title)
             Spacer(modifier = Modifier.height(12.dp))
             if (uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f }) EmptyCard("책을 읽고 페이지를 기록해 주세요.")
             else ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
@@ -126,14 +126,19 @@ fun StatisticsScreen(
     }
 }
 
-fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String =
-    formatRange(presetToRange(preset, now))
-
-fun formatRange(range: DateRange): String {
-    val fmt = DateTimeFormatter.ofPattern("yyyy.MM.dd")
-    return "${range.start.toLocalDate().format(fmt)}~${range.end.toLocalDate().format(fmt)}"
+fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String {
+    val range: DateRange = presetToRange(preset, now)
+    val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+    return "${range.start.toLocalDate().format(formatter)}~${range.end.toLocalDate().format(formatter)}"
 }
 
+private fun pagesTitle(preset: DateRangePreset) = when (preset) {
+    DateRangePreset.WEEK -> "주간 독서 페이지"
+    DateRangePreset.MONTH -> "월간 독서 페이지"
+    DateRangePreset.THREE_MONTH -> "3개월 독서 페이지"
+    DateRangePreset.SIX_MONTH -> "6개월 독서 페이지"
+    DateRangePreset.YEAR -> "연간 독서 페이지"
+}
 val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
