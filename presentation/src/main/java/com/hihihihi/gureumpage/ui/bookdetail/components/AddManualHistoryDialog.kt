@@ -334,7 +334,7 @@ fun AddManualHistoryDialog(
 
                             val availableHours = (startHour..23).toList()
                             val availableMinutes = if (tempHour == startHour) {
-                                (startMinute + 1..59).toList()
+                                (startMinute + 0..59).toList()
                             } else {
                                 (0..59).toList()
                             }
