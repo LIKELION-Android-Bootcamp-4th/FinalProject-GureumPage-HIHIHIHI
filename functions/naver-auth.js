@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const axios = require("axios");
+const {v4: uuidv4} = require("uuid");
 const {mapNaverUser} = require("./utils/social-mapper");
 const {createOrUpdateUserDoc} = require("./create-or-update-user-doc");
 
@@ -16,10 +17,11 @@ module.exports.handler = async (request) => {
     });
 
     const user = mapNaverUser(res.data);
-    const customToken = await admin.auth().createCustomToken(user.uid, user);
+    const newUid = `${user.uid}_${uuidv4()}`;
+    const customToken = await admin.auth().createCustomToken(newUid, user);
 
     await createOrUpdateUserDoc({
-      uid: user.uid,
+      uid: newUid,
       provider: "naver",
     });
 
