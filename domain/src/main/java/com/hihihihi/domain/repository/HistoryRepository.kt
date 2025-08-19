@@ -10,5 +10,5 @@ interface HistoryRepository {
 
     fun getTodayHistoriesByUserId(userId: String): Flow<List<History>>
 
-    suspend fun addHistory(history: History): Result<Unit>
+    suspend fun addHistory(history: History, currentPage: Int): Result<Unit>
 }

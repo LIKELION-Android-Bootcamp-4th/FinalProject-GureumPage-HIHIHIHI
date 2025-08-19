@@ -10,5 +10,5 @@ interface HistoryRemoteDataSource {
 
     fun getTodayHistoriesByUserId(userId: String): Flow<List<HistoryDto>>
 
-    suspend fun addHistory(history: HistoryDto, uid: String): Result<Unit>
+    suspend fun addHistory(history: HistoryDto, uid: String, currentPage: Int): Result<Unit>
 }

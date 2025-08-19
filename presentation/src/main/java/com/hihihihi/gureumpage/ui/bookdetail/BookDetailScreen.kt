@@ -138,13 +138,14 @@ fun BookDetailScreen(
                 currentPage = it.currentPage,
                 lastPage = it.totalPage,
                 onDismiss = { showAddManualHistoryDialog = false },
-                onSave = { date, startTime, endTime, readTime, readPageCount ->
+                onSave = { date, startTime, endTime, readTime, readPageCount, currentPage ->
                     viewModel.addManualHistory(
                         date,
                         startTime,
                         endTime,
                         readTime,
-                        readPageCount
+                        readPageCount,
+                        currentPage
                     )
                     showAddManualHistoryDialog = false
                 }
