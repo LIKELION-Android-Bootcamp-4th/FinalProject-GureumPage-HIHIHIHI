@@ -52,8 +52,13 @@ fun MyPageScreen(
     LaunchedEffect(Unit) {
         viewModel.logoutEvent.collectLatest {
             navController.navigate(NavigationRoute.Login.route) {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true}
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                    saveState = false
+                }
+
                 launchSingleTop = true
+                restoreState = false
             }
         }
     }
@@ -90,6 +95,7 @@ fun MyPageScreen(
             else -> {
                 //프로필 카드 ( 연필 아이콘 클릭 -> 다이얼로그 오픈)
                 MyPageUserProfileCard(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     title = "안녕하세요!",
                     badge = state.appellation.ifBlank { "칭호 없음" },
                     nickname = "${state.nickname.ifBlank { "닉네임 없음" }}님",
