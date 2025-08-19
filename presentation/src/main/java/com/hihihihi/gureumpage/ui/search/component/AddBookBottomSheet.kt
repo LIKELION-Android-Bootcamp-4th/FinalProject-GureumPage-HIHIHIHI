@@ -251,11 +251,12 @@ fun AddBookBottomSheet(
 
                         if (isSelectingStartDate) {
                             startDate = selectedDate
+                            if (selectedCategory.toReadingStatus() == ReadingStatus.READING && pageInput.isEmpty()) {
+                                pageInput = "0"
+                            }
                         } else {
                             endDate = selectedDate
                         }
-
-                        pageInput = bookPageCount.toString()
                     },
                 )
             }
