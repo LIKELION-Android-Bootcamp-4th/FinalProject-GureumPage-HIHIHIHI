@@ -1,5 +1,6 @@
 package com.hihihihi.domain.usecase.userbook
 
+import android.util.Log
 import com.hihihihi.domain.model.Mindmap
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.UserBook
@@ -19,9 +20,11 @@ class AddUserBookUseCase @Inject constructor(
             val userBookId = userBookRepository.addUserBook(userBook).getOrThrow()
             val rootNodeId = "${userBookId}Root"
 
+            Log.e("TAG", "invoke: ${userBook.userId}", )
             val operations = listOf(
                 NodeEditOperation.Add(
                     rootNode.copy(
+                        userId = userBook.userId,
                         mindmapId = userBookId,
                         mindmapNodeId = "${userBookId}Root",
                         bookImage = userBook.imageUrl,
@@ -31,6 +34,7 @@ class AddUserBookUseCase @Inject constructor(
                 ),
                 NodeEditOperation.Add(
                     rootNode.copy(
+                        userId = userBook.userId,
                         mindmapId = userBookId,
                         mindmapNodeId = "${userBookId}Child1",
                         nodeTitle = "클릭해서 노드를 추가해요",
@@ -44,6 +48,7 @@ class AddUserBookUseCase @Inject constructor(
                 ),
                 NodeEditOperation.Add(
                     rootNode.copy(
+                        userId = userBook.userId,
                         mindmapId = userBookId,
                         mindmapNodeId = "${userBookId}Child2",
                         nodeTitle = "꾹 눌러서 수정·삭제해요",
@@ -60,6 +65,7 @@ class AddUserBookUseCase @Inject constructor(
 
             mindmapRepository.createMindmap(
                 mindmap.copy(
+                    userId = userBook.userId,
                     mindmapId = userBookId,
                     userBookId = userBookId,
                     rootNodeId = rootNodeId,

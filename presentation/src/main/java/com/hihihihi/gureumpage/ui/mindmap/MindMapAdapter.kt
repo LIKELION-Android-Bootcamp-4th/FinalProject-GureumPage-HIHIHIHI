@@ -369,6 +369,7 @@ class MindMapAdapter(
 
         binding.btnSave.setOnClickListener {
             val node = MindMapNodeData(
+                userId = "",
                 id = existingNode?.value?.id ?: UUID.randomUUID().toString(),
                 title = binding.editTitle.text.toString(),
                 content = binding.editContent.text.toString(),
@@ -421,6 +422,7 @@ fun MindMapAdapter.asDomainList(mindmapId: String): List<MindmapNode> {
     fun dfs(node: TreeNode, parentId: String?) {
         val value = node.value
         nodes += MindmapNode(
+            userId =value.userId,
             mindmapNodeId = value.id,
             mindmapId = mindmapId,
             nodeTitle = value.title,

@@ -87,12 +87,14 @@ class SearchViewModel @Inject constructor(
                 )
 
                 val mindmap = Mindmap(
+                    userId = FirebaseAuth.getInstance().currentUser?.uid!!,
                     mindmapId = "",
                     userBookId = "",
                     rootNodeId = "",
                 )
 
                 val rootNode = MindmapNode(
+                    userId = FirebaseAuth.getInstance().currentUser?.uid!!,
                     mindmapNodeId = "",
                     mindmapId = "",
                     nodeTitle = searchBook.title,
