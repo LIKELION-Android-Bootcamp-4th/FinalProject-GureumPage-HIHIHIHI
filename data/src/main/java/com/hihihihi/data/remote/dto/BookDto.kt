@@ -2,7 +2,6 @@ package com.hihihihi.data.remote.dto
 
 import androidx.annotation.Keep
 import com.google.firebase.firestore.PropertyName
-import com.hihihihi.domain.model.Book
 
 @Keep
 data class BookDto(

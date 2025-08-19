@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-
 class UserBookRemoteDataSourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : UserBookRemoteDataSource {
@@ -76,13 +75,13 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
-    override suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit> = try{
+    override suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit> = try {
         val docRef = firestore.collection("user_books").document(userBookDto.userBookId)
 
         docRef.set(userBookDto.toMap()).await()
 
         Result.success(Unit)
-    } catch (e: Exception){
+    } catch (e: Exception) {
         Result.failure(e)
     }
 

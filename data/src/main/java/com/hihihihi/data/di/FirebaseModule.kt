@@ -32,6 +32,4 @@ object FirebaseModule {
     fun provideFirebaseFunctions(): FirebaseFunctions {
         return FirebaseFunctions.getInstance()
     }
-
-
 }

@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val remote: UserRemoteDataSource
-) : UserRepository{
+) : UserRepository {
 
     override suspend fun getUser(userId: String): User? {
         val dto = remote.getUser(userId) ?: return null
@@ -29,7 +29,4 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun updateDailyGoalTime(userId: String, dailyGoalTime: Int) {
         remote.updateDailyGoalTime(userId, dailyGoalTime)
     }
-
-
-
 }
