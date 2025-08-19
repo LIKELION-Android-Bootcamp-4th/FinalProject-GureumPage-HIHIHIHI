@@ -55,11 +55,26 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                             else nodesCollection().document(operation.node.mindmapNodeId)
 
                             val dto = operation.node.copy(
+                                userId = operation.node.userId,
                                 mindmapId = mindmapId,
                                 mindmapNodeId = document.id,
                                 deleted = false
                             )
-                            batch.set(document, dto)
+
+                            val dataMap = mapOf(
+                                "user_id" to dto.userId,
+                                "mindmapNodeId" to dto.mindmapNodeId,
+                                "mindmapId" to dto.mindmapId,
+                                "nodeTitle" to dto.nodeTitle,
+                                "nodeEx" to dto.nodeEx,
+                                "parentNodeId" to dto.parentNodeId,
+                                "color" to dto.color,
+                                "icon" to dto.icon,
+                                "deleted" to dto.deleted,
+                                "bookImage" to dto.bookImage
+                            )
+
+                            batch.set(document, dataMap)
                         }
 
                         is NodeEditOperation.Update -> {

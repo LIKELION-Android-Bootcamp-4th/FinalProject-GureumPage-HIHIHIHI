@@ -5,6 +5,7 @@ import com.hihihihi.gureumpage.ui.mindmap.model.MindMapNodeData
 
 fun MindmapNode.toUi(): MindMapNodeData =
     MindMapNodeData(
+        userId = userId,
         id = mindmapNodeId,
         title = nodeTitle,
         content = nodeEx,
@@ -15,6 +16,7 @@ fun MindmapNode.toUi(): MindMapNodeData =
 
 fun MindMapNodeData.toDomain(mindmapId: String, parentId: String?): MindmapNode =
     MindmapNode(
+        userId = userId,
         mindmapNodeId = id,
         mindmapId = mindmapId,
         nodeTitle = title,
