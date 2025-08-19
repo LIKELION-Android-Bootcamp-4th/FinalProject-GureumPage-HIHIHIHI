@@ -19,7 +19,6 @@ fun Quote.toDto(): QuoteDto = QuoteDto(
     author = author,
     publisher = publisher,
     imageUrl = imageUrl,
-    recordType = recordType.name
 )
 
 fun QuoteDto.toDomain(): Quote = Quote(
@@ -34,7 +33,6 @@ fun QuoteDto.toDomain(): Quote = Quote(
     author = author,
     publisher = publisher,
     imageUrl = imageUrl,
-    recordType = runCatching { RecordType.valueOf(recordType) }.getOrElse { RecordType.MANUAL }
 )
 
 fun QuoteDto.toMap(): Map<String, Any?> {
@@ -49,6 +47,5 @@ fun QuoteDto.toMap(): Map<String, Any?> {
         "author" to author,
         "publisher" to publisher,
         "image_url" to imageUrl,
-        "record_type" to recordType
     )
 }

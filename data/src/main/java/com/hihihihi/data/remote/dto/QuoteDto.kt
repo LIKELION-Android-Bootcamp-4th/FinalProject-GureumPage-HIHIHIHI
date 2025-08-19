@@ -39,7 +39,4 @@ data class QuoteDto(
 
     @get:PropertyName("created_at") @set:PropertyName("created_at")
     var createdAt: Timestamp? =  null,
-
-    @get:PropertyName("record_type") @set:PropertyName("record_type")
-    var recordType: String = "MANUAL"
 )
