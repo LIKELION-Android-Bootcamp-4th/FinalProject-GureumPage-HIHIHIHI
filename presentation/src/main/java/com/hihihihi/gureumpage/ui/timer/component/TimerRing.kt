@@ -60,7 +60,7 @@ fun TimerRing(
 
         Text(
             text = centerText,
-            style = GureumTypography.displayMedium,
+            style = GureumTypography.displayLarge,
             color = textC,
             textAlign = TextAlign.Center
         )
