@@ -22,7 +22,7 @@ fun NowReadingCard(
     author: String,
     imageUrl: String?,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = null,
 ) {
     val colors = GureumTheme.colors
     val isDark = GureumTheme.isDarkTheme
@@ -31,7 +31,6 @@ fun NowReadingCard(
         modifier = modifier,
         corner = 12.dp,
         elevation = 1.dp,
-        onClick = onClick
     ) {
         Row(
             modifier = Modifier
