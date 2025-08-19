@@ -108,8 +108,8 @@ fun StopReadingDialog(
                     text = if (willSave) "현재까지의 독서 기록이 저장됩니다."
                     else "현재까지의 독서 시간 기록이 저장되지 않습니다.",
                     style = typo.bodySmall,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
-                    modifier = Modifier.fillMaxWidth(),           // ★
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                     color = colors.gray500
                 )
 
@@ -117,8 +117,8 @@ fun StopReadingDialog(
                 Text(
                     text = "오늘의 독서 시간",
                     style = typo.bodySmall,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
-                    modifier = Modifier.fillMaxWidth(),           // ★
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                     color = colors.gray400
                 )
 
@@ -126,9 +126,9 @@ fun StopReadingDialog(
                     text = displayTime,
                     style = typo.headlineLarge,
                     color = colors.primaryDeep,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .fillMaxWidth()                           // ★
+                        .fillMaxWidth()
                         .padding(top = 2.dp, bottom = 10.dp)
                 )
 

@@ -5,6 +5,7 @@ import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.data.remote.dto.QuoteDto
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.model.RecordType
 
 fun Quote.toDto(): QuoteDto = QuoteDto(
     quoteId = id,
@@ -17,7 +18,7 @@ fun Quote.toDto(): QuoteDto = QuoteDto(
     title = title,
     author = author,
     publisher = publisher,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
 )
 
 fun QuoteDto.toDomain(): Quote = Quote(
@@ -31,7 +32,7 @@ fun QuoteDto.toDomain(): Quote = Quote(
     title = title,
     author = author,
     publisher = publisher,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
 )
 
 fun QuoteDto.toMap(): Map<String, Any?> {
@@ -45,6 +46,6 @@ fun QuoteDto.toMap(): Map<String, Any?> {
         "title" to title,
         "author" to author,
         "publisher" to publisher,
-        "image_url" to imageUrl
+        "image_url" to imageUrl,
     )
 }
