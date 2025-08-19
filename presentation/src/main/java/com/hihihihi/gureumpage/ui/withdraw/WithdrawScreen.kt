@@ -8,16 +8,22 @@ import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi18Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import kotlinx.coroutines.delay
 
 data class WithdrawalReason(
     val iconRes: Int,
@@ -50,6 +57,21 @@ fun WithdrawScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
+
+    var currentHighlightedIndex by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000)
+            currentHighlightedIndex = (currentHighlightedIndex + 1) % withdrawalReasons.size
+
+            listState.animateScrollToItem(
+                index = currentHighlightedIndex,
+                scrollOffset = -50
+            )
+        }
+    }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
@@ -91,7 +113,6 @@ fun WithdrawScreen(
             color = GureumTheme.colors.gray400,
         )
 
-
         Spacer(modifier = Modifier.height(24.dp))
 
         // 경고 박스
@@ -128,11 +149,16 @@ fun WithdrawScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(4.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(withdrawalReasons) { reason ->
-                WithdrawalReasonItem(reason = reason)
+            itemsIndexed(withdrawalReasons) { index, reason ->
+                WithdrawalReasonItem(
+                    reason = reason,
+                    isHighlighted = index == currentHighlightedIndex
+                )
             }
         }
 
@@ -159,8 +185,7 @@ fun WithdrawScreen(
                 Semi16Text(
                     text = "잠깐만요! 🥺",
                     color = GureumTheme.colors.gray900,
-
-                    )
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Medi14Text(
                     text = "지금까지 쌓아온 독서 기록들이 정말 아까워요.",
@@ -229,9 +254,8 @@ fun WithdrawScreen(
             text = "새로운 독서 여정을 시작할 수 있어요",
             color = GureumTheme.colors.gray500,
         )
-
-
     }
+
     if (uiState.isLoading) {
         Box(
             modifier = Modifier
@@ -277,25 +301,65 @@ fun WithdrawScreen(
             contentColor = Color.White
         )
     }
-
 }
 
 @Composable
-fun WithdrawalReasonItem(reason: WithdrawalReason) {
+fun WithdrawalReasonItem(
+    reason: WithdrawalReason,
+    isHighlighted: Boolean = false
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isHighlighted) 1f else 0.9f,
+        animationSpec = tween(300),
+        label = "scale"
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isHighlighted) {
+            GureumTheme.colors.background50
+        } else {
+            GureumTheme.colors.background10
+        },
+        animationSpec = tween(500),
+        label = "backgroundColor"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isHighlighted) {
+            GureumTheme.colors.primary10
+        } else {
+            Color.Transparent
+        },
+        animationSpec = tween(500),
+        label = "borderColor"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .scale(scale)
             .background(
-                GureumTheme.colors.background10,
+                backgroundColor,
                 RoundedCornerShape(12.dp)
             )
-            .padding(16.dp),
+            .then(
+                if (isHighlighted) {
+                    Modifier.border(
+                        2.dp,
+                        borderColor,
+                        RoundedCornerShape(12.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = reason.iconRes),
             contentDescription = null,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(if (isHighlighted) 36.dp else 32.dp)
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -303,12 +367,12 @@ fun WithdrawalReasonItem(reason: WithdrawalReason) {
         Column {
             Semi14Text(
                 text = reason.title,
-                color = GureumTheme.colors.gray700,
+                color = if (isHighlighted) GureumTheme.colors.gray900 else GureumTheme.colors.gray700,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Semi12Text(
                 text = reason.description,
-                color = GureumTheme.colors.gray500,
+                color = if (isHighlighted) GureumTheme.colors.gray600 else GureumTheme.colors.gray500,
             )
         }
     }
