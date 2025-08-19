@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -58,7 +59,7 @@ fun AddBookBottomSheet(
     onGetBookPageCount: (isbn: String, onResult: (Int?) -> Unit) -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf(ReadingStatus.PLANNED.displayName) }
-    var pageInput by remember { mutableStateOf("") }
+    var pageInput by remember { mutableStateOf("0") }
     var bookPageCount by remember { mutableStateOf<Int?>(null) }
     val focusManager = LocalFocusManager.current
 
@@ -153,9 +154,26 @@ fun AddBookBottomSheet(
             //토글 여부에 따라 달라지는 하단 뷰
             when (selectedCategory.toReadingStatus()) {
                 ReadingStatus.READING -> {
+                    Semi16Text("시작한 날")
+                    Spacer(Modifier.height(14.dp))
+                    GureumClickEventTextField(
+                        value = startDate?.let { formatDateToSimpleString(it) } ?: "",
+                        hint = "시작한 날",
+                        onClick = {
+                            isSelectingStartDate = true
+                            showDatePicker = true
+                        },
+                        trailingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_calendar_outline),
+                                contentDescription = "날짜 선택"
+                            )
+                        }
+                    )
+                    Spacer(Modifier.height(8.dp))
+
                     Semi16Text("현재 페이지 (선택사항)")
                     Spacer(modifier = Modifier.height(14.dp))
-
                     //사용자 페이지 입력 필드
                     GureumTextField(
                         value = pageInput,
@@ -172,7 +190,8 @@ fun AddBookBottomSheet(
                                 contentDescription = "페이지"
                             )
                         },
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
                     )
                     BodySubText(
                         "시작할 페이지를 입력하세요 (기본값: 0페이지)",
@@ -215,28 +234,28 @@ fun AddBookBottomSheet(
                             }
                         )
                     }
-                    if (showDatePicker) {
-                        GureumBetweenDatePicker(
-                            isSelectingStart = isSelectingStartDate,
-                            startDate = startDate,
-                            endDate = endDate,
-                            onDismiss = { showDatePicker = false },
-                            onConfirm = { millis ->
-                                val selectedDate = formatMillisToLocalDateTime(millis)
-
-                                if (isSelectingStartDate) {
-                                    startDate = selectedDate
-                                } else {
-                                    endDate = selectedDate
-                                }
-
-                                pageInput = bookPageCount.toString()
-                            },
-                        )
-                    }
                 }
 
                 else -> {}
+            }
+            if (showDatePicker) {
+                GureumBetweenDatePicker(
+                    isSelectingStart = isSelectingStartDate,
+                    startDate = startDate,
+                    endDate = endDate,
+                    onDismiss = { showDatePicker = false },
+                    onConfirm = { millis ->
+                        val selectedDate = formatMillisToLocalDateTime(millis)
+
+                        if (isSelectingStartDate) {
+                            startDate = selectedDate
+                        } else {
+                            endDate = selectedDate
+                        }
+
+                        pageInput = bookPageCount.toString()
+                    },
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
