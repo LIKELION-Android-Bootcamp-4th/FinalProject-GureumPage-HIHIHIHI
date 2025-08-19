@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.validateNickname
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -28,6 +29,7 @@ import com.hihihihi.gureumpage.ui.onboarding.components.OnBoardingMainContents
 fun NicknamePage(viewModel: OnBoardingViewModel) {
 
     OnBoardingMainContents(
+        gureumRes = R.drawable.ic_cloud_question,
         titleText = "어떻게 불러드릴까요?",
         subTitleText = "앱에서 사용할 닉네임을 설정해주세요"
     ) {

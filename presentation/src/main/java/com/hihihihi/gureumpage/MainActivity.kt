@@ -71,7 +71,8 @@ fun GureumPageApp() {
         NavigationRoute.OnBoarding.route,
         NavigationRoute.BookDetail.route,
         NavigationRoute.Timer.route,
-        NavigationRoute.MindMap.route
+        NavigationRoute.MindMap.route,
+        NavigationRoute.Withdraw.route
     )
 
     var timerAppbarUp by remember { mutableStateOf(0L) }
@@ -99,6 +100,7 @@ fun GureumPageApp() {
                     }
                 )
                 NavigationRoute.BookDetail.route -> GureumAppBar(navController, "", true)
+                NavigationRoute.Withdraw.route -> GureumAppBar(navController, "계정 탈퇴", true)
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
