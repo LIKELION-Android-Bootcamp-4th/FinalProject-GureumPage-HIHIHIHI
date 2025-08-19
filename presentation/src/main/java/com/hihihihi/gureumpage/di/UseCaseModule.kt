@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.di
 
 import com.hihihihi.domain.repository.AuthRepository
+import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.MindmapNodeRepository
@@ -278,13 +279,6 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideGetQuoteByUserBookIdUseCase(
-        repository: QuoteRepository
-    ): GetQuoteByUserBookIdUseCase {
-        return GetQuoteByUserBookIdUseCase(repository)
-    }
-
-    @Provides
     fun provideSearchBooksUseCase(
         repository: SearchRepository
     ): SearchBooksUseCase {
@@ -303,13 +297,6 @@ object UseCaseModule {
         repository: UserRepository
     ): GetUserUseCase {
         return GetUserUseCase(repository)
-    }
-
-    @Provides
-    fun provideGetQuoteByUserBookIdUseCase(
-        repository: QuoteRepository
-    ): GetQuoteByUserBookIdUseCase {
-        return GetQuoteByUserBookIdUseCase(repository)
     }
 
     @Provides
