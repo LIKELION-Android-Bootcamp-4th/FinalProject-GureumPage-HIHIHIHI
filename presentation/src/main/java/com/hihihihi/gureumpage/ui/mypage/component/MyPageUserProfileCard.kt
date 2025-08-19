@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,18 +27,17 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
 fun MyPageUserProfileCard(
-    //ui 확인용 더미 데이터
-    title: String = "안녕하세요!",
-    badge: String = "새벽 독서가", // 칭호
-    nickname: String = "히히히히님", // 유저 닉네임
-    totalPages: String = "1892쪽",
-    totalBooks: String = "16권",
-    totalTime: String = "3,744시간",
+    modifier: Modifier = Modifier,
+    title: String ,
+    badge: String , // 칭호
+    nickname: String , // 유저 닉네임
+    totalPages: String ,
+    totalBooks: String ,
+    totalTime: String ,
     onEditNicknameClick: () -> Unit = {} // 연필 아이콘 클릭 시 콜백
 ) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
-    val isDark = GureumTheme.isDarkTheme
 
     GureumCard(
         modifier = Modifier
@@ -50,12 +47,12 @@ fun MyPageUserProfileCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 20.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
             ) {
                 Column(Modifier.weight(1f)) {
                     //인사
@@ -64,7 +61,7 @@ fun MyPageUserProfileCard(
                         style = typography.titleLarge,
                         color = colors.gray800
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(2.dp))
 
                     //칭호 + 닉네임
                     Row(
@@ -74,11 +71,11 @@ fun MyPageUserProfileCard(
                         Text(
                             text = badge,
                             style = typography.titleLarge,
-                            color = if (isDark) colors.primary else colors.primaryShallow,
+                            color = colors.point,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         //닉네임
                         Text(
                             text = nickname,
@@ -92,7 +89,7 @@ fun MyPageUserProfileCard(
 
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(36.dp)
                         .clickable { onEditNicknameClick() }, // 다이얼로그 열기
                     contentAlignment = Alignment.Center
                 ) {
@@ -107,34 +104,31 @@ fun MyPageUserProfileCard(
             }
 
             //구분선
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Divider(color = colors.dividerDeep, thickness = 1.dp)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             //독서 통계
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatColumn("총 페이지", totalPages, modifier = Modifier.weight(1f))
-                StatColumn("총 권수", totalBooks, modifier = Modifier.weight(1f))
-                StatColumn("총 독서 시간", totalTime, modifier = Modifier.weight(1f))
+                StatColumn("총 페이지", totalPages)
+                StatColumn("총 권수", totalBooks)
+                StatColumn("총 독서 시간", totalTime)
             }
         }
     }
 }
 
 @Composable
-private fun StatColumn(label: String, value: String, modifier: Modifier = Modifier) {
+private fun StatColumn(label: String, value: String) {
     val colors = GureumTheme.colors
     val typography = GureumTypography
 
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, style = typography.bodySmall, color = colors.gray500)
-        Spacer(Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(text = value, style = typography.bodyMedium, color = colors.gray800)
     }
 }
