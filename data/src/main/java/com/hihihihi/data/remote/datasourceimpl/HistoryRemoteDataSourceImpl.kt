@@ -113,11 +113,11 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
         historyRef.set(historyDto).await()
 
         val dateStr = historyDto.date?.toDate()?.let { ts ->
-            val cal = java.util.Calendar.getInstance()
+            val cal = Calendar.getInstance()
             cal.time = ts
             "%04d-%02d-%02d".format(
-                cal.get(java.util.Calendar.YEAR),
-                cal.get(java.util.Calendar.MONTH) + 1,
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1,
                 cal.get(java.util.Calendar.DAY_OF_MONTH)
             )
         } ?: throw IllegalArgumentException("date is null")
@@ -147,6 +147,26 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                     "updated_at" to Timestamp.now()
                 )
             ).await()
+        }
+
+
+        val userBookSnapshot = firestore.collection("user_books")
+            .whereEqualTo(FieldPath.documentId(), historyDto.userBookId)
+            .get()
+            .await()
+
+        if (userBookSnapshot.documents.isNotEmpty()) {
+            val userBookDoc = userBookSnapshot.documents.first()
+            val currentPage = userBookDoc.getLong("current_page") ?: 0
+            val totalReadTime = userBookDoc.getLong("total_read_time") ?: 0
+            val updatedCurrentPage = currentPage + historyDto.readPageCount
+            userBookDoc.reference.update(
+                mapOf(
+                    "current_page" to updatedCurrentPage,
+                    "total_read_time" to totalReadTime + historyDto.readTime
+                )
+            ).await()
+            Log.e("TAG", "addHistory: 완료! ${updatedCurrentPage}, ${totalReadTime}", )
         }
 
         Result.success(Unit)
