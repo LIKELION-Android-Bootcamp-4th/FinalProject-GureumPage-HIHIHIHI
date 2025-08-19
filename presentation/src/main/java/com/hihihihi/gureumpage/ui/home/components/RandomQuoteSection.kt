@@ -47,7 +47,6 @@ import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 import java.time.LocalDateTime
 
-
 @Composable
 fun RandomQuoteSection(
     quotes: List<Quote>,
@@ -55,9 +54,11 @@ fun RandomQuoteSection(
     // 현재 인덱스 저장해서 다음 랜덤때 제외하도록
     var currentIndex by remember { mutableStateOf(0) }
 
-    Column(modifier = Modifier
-        .background(GureumTheme.colors.background)
-        .padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .background(GureumTheme.colors.background)
+            .padding(16.dp)
+    ) {
         Semi16Text("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
         if (quotes.isNotEmpty()) {
@@ -73,7 +74,7 @@ fun RandomQuoteSection(
                     }
                 }
             )
-        }else{
+        } else {
             // 필사 목록 비어있을 때 처리
             QuoteCard(
                 quote = "아직 필사가 등록되지 않았어요. 필사를 하나 추가하고 구름이를 눌러보세요! 작성한 필사 중 하나를 랜덤으로 소개해드릴게요.",
@@ -85,7 +86,6 @@ fun RandomQuoteSection(
         }
     }
 }
-
 
 @Composable
 fun QuoteCard(

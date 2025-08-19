@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadingGoalPicker(
@@ -39,7 +38,6 @@ fun ReadingGoalPicker(
         selectedHour = initialHour
         selectedMinute = initialMinute
     }
-
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

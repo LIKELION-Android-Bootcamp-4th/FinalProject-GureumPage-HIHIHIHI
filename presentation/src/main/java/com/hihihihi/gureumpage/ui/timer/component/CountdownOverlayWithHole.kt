@@ -77,7 +77,9 @@ fun CountdownOverlayWithHole(
             }
             .pointerInput(Unit) {
                 awaitPointerEventScope {
-                    while (true) { awaitPointerEvent() }
+                    while (true) {
+                        awaitPointerEvent()
+                    }
                 }
             },
         contentAlignment = Alignment.Center

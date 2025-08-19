@@ -23,7 +23,6 @@ import com.hihihihi.gureumpage.common.utils.PageFormatter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.statistics.mockPages
 
 @Composable
 fun ReadingPageCard(

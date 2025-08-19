@@ -22,7 +22,6 @@ import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
 import com.hihihihi.gureumpage.ui.withdraw.WithdrawScreen
 
-
 @Composable
 fun GureumNavGraph(
     navController: NavHostController,

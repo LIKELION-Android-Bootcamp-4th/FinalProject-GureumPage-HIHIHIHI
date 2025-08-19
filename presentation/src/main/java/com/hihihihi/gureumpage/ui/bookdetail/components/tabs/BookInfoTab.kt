@@ -28,7 +28,7 @@ fun BookInfoTab(
         InfoSection("출판사") { InfoBody(userBook.publisher ?: "") }
         InfoSection("ISBN") { userBook.isbn13?.let { InfoBody(it) } }
         InfoSection("카테고리") { InfoGenre(userBook.category) }
-        InfoSection("책 소개") { InfoBody(userBook.description?: "") }
+        InfoSection("책 소개") { InfoBody(userBook.description ?: "") }
         InfoSection("총 페이지") { InfoBody(userBook.totalPage.toString()) }
     }
 }
@@ -62,7 +62,7 @@ private fun InfoBody(text: String) {
 @Composable
 private fun InfoGenre(category: String?) {
     if (category != null) {
-        GureumGenreChip( category, modifier = Modifier.padding(bottom = 18.dp))
+        GureumGenreChip(category, modifier = Modifier.padding(bottom = 18.dp))
     }
 }
 

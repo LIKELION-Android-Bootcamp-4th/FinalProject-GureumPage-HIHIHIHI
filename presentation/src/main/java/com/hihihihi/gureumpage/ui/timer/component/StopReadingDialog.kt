@@ -35,13 +35,10 @@ fun StopReadingDialog(
     willSave: Boolean = true,
     onConfirmStop: () -> Unit,
     onDismiss: () -> Unit,
-    onConfirmStopPages: (startPage: Int, endPage: Int) -> Unit = { _, _ -> onConfirmStop()},
+    onConfirmStopPages: (startPage: Int, endPage: Int) -> Unit = { _, _ -> onConfirmStop() },
 ) {
     val colors = GureumTheme.colors
     val typo = GureumTypography
-
-//    val corner = 16.dp
-//    val hPad = 24.dp
 
     var startPage by remember(currentPage) { mutableStateOf((currentPage ?: 0).takeIf { it > 0 }?.toString() ?: "") }
     var endPage by remember { mutableStateOf("") }
@@ -79,16 +76,16 @@ fun StopReadingDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally // ★ 전체 가운데 정렬
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // 제목 + 닫기
                 Box(Modifier.fillMaxWidth()) {
                     Text(
                         text = "독서를 종료하시겠습니까?",
                         style = typo.headlineSmall,
-                        textAlign = TextAlign.Center,              // ★ 가운데
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxWidth()                        // ★ 폭을 채워야 중앙 정렬이 적용됨
+                            .fillMaxWidth()
                             .align(Alignment.Center)
                     )
                     IconButton(

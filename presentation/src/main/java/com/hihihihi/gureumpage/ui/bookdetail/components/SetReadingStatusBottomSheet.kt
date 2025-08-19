@@ -259,10 +259,14 @@ fun ReadingStatusInputs(
             Spacer(Modifier.height(14.dp))
             GureumTextField(
                 value = pageInput,
-                onValueChange = { onPageChange(it.toInt()
-                    .coerceAtMost(lastPage)
-                    .toString()
-                    .filter(Char::isDigit)) },
+                onValueChange = {
+                    onPageChange(
+                        it.toInt()
+                            .coerceAtMost(lastPage)
+                            .toString()
+                            .filter(Char::isDigit)
+                    )
+                },
                 hint = "예 : 157",
                 trailingIcon = {
                     Icon(

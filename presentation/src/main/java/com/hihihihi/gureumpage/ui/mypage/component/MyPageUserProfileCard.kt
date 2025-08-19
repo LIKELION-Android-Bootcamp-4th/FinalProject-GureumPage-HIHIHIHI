@@ -28,12 +28,12 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 @Composable
 fun MyPageUserProfileCard(
     modifier: Modifier = Modifier,
-    title: String ,
-    badge: String , // 칭호
-    nickname: String , // 유저 닉네임
-    totalPages: String ,
-    totalBooks: String ,
-    totalTime: String ,
+    title: String,
+    badge: String, // 칭호
+    nickname: String, // 유저 닉네임
+    totalPages: String,
+    totalBooks: String,
+    totalTime: String,
     onEditNicknameClick: () -> Unit = {} // 연필 아이콘 클릭 시 콜백
 ) {
     val colors = GureumTheme.colors

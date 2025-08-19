@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme

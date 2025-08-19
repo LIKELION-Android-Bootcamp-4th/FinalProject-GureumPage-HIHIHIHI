@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -10,7 +9,6 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.repository.SearchRepository
-import com.hihihihi.domain.usecase.mindmap.CreateMindmapUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +60,6 @@ class SearchViewModel @Inject constructor(
         status: ReadingStatus,
     ) {
         viewModelScope.launch {
-            Log.e("TAG", "addUserBook: ${searchBook.publisher} ${searchBook.description}", )
             try {
                 val userBook = UserBook(
                     userBookId = "",

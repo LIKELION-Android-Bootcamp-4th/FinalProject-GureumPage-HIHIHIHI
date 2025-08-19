@@ -1,21 +1,17 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -82,7 +78,11 @@ fun AddQuoteDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Semi12Text("페이지 번호(선택사항)", modifier = Modifier.padding(start = 4.dp), color = GureumTheme.colors.gray800)
+                Semi12Text(
+                    "페이지 번호(선택사항)",
+                    modifier = Modifier.padding(start = 4.dp),
+                    color = GureumTheme.colors.gray800
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 GureumTextField(
                     value = pageNumber,
@@ -115,7 +115,8 @@ fun AddQuoteDialog(
                             GureumTypography.titleSmall.toSpanStyle()
                                 .copy(color = GureumTheme.colors.primary)
                         ) { append(" *") }
-                    }, modifier = Modifier.padding(start = 4.dp))
+                    }, modifier = Modifier.padding(start = 4.dp)
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 GureumTextField(
                     value = quote,

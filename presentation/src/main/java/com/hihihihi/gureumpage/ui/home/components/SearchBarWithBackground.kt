@@ -50,7 +50,7 @@ fun SearchBarWithBackground(
     user: User,
     onSearchBarClick: () -> Unit = {}
 ) {
-    val backGroundImage = if(GureumTheme.isDarkTheme) R.drawable.bg_home_dark else R.drawable.bg_home_light
+    val backGroundImage = if (GureumTheme.isDarkTheme) R.drawable.bg_home_dark else R.drawable.bg_home_light
 
     BoxWithConstraints(
         modifier = Modifier
@@ -175,7 +175,6 @@ fun SearchBarWithBackground(
                 )
         )
     }
-
 }
 
 
@@ -183,8 +182,6 @@ fun SearchBarWithBackground(
 @Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun HomePreview() {
-    val fakeNavController = rememberNavController()
-
     GureumPageTheme {
         SearchBarWithBackground(mockUser)
     }

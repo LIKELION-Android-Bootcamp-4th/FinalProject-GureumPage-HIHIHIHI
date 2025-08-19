@@ -139,6 +139,7 @@ private fun pagesTitle(preset: DateRangePreset) = when (preset) {
     DateRangePreset.SIX_MONTH -> "6개월 독서 페이지"
     DateRangePreset.YEAR -> "연간 독서 페이지"
 }
+
 val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)

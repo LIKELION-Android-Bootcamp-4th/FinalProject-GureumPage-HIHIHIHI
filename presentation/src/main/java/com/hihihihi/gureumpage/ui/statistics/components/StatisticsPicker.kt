@@ -77,6 +77,6 @@ fun StatisticsPicker(
 @Composable
 private fun GureumStatisticsPickerPreview() {
     GureumPageTheme {
-        StatisticsPicker(0, listOf("1주", "1개월", "3개월", "6개월", "1년"), {},{})
+        StatisticsPicker(0, listOf("1주", "1개월", "3개월", "6개월", "1년"), {}, {})
     }
 }

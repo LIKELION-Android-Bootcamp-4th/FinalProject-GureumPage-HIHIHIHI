@@ -35,12 +35,14 @@ fun SplashView(
                     launchSingleTop = true
                 }
             }
+
             SplashViewModel.NavTarget.Onboarding -> {
                 navController.navigate(NavigationRoute.OnBoarding.route) {
                     popUpTo(NavigationRoute.Splash.route) { inclusive = true }
                     launchSingleTop = true
                 }
             }
+
             SplashViewModel.NavTarget.Home -> {
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.Splash.route) { inclusive = true }

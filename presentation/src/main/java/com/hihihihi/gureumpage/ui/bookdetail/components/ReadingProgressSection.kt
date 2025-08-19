@@ -18,19 +18,17 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
-import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
-import java.util.Date
 
 @Composable
 fun ReadingProgressSection(
     userBook: UserBook
 ) {
     val start = formatDateToSimpleString(userBook.startDate)
-    val end = if(userBook.status == ReadingStatus.FINISHED) formatDateToSimpleString(userBook.endDate) else ""
+    val end = if (userBook.status == ReadingStatus.FINISHED) formatDateToSimpleString(userBook.endDate) else ""
 
     Column(
         modifier = Modifier.padding(horizontal = 20.dp),
@@ -44,7 +42,7 @@ fun ReadingProgressSection(
         )
         GureumLinearProgressBar(
             12,
-            userBook.currentPage.toFloat()/userBook.totalPage
+            userBook.currentPage.toFloat() / userBook.totalPage
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween

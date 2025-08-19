@@ -11,7 +11,7 @@ fun MindmapNode.toUi(): MindMapNodeData =
         icon = icon,
         color = color?.toLong(),
         bookImage = bookImage,
-        )
+    )
 
 fun MindMapNodeData.toDomain(mindmapId: String, parentId: String?): MindmapNode =
     MindmapNode(

@@ -12,9 +12,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hihihihi.domain.model.RecordType
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.timer.component.MemoList
@@ -105,7 +103,6 @@ fun TimerScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-//                .background(colors.background)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -140,7 +137,7 @@ fun TimerScreen(
             // 메모 영역
             val lines = remember(memoState.items, userBookId) {
                 memoState.items
-                    .filter {  q -> q.userBookId == userBookId }
+                    .filter { q -> q.userBookId == userBookId }
                     .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
             }
 

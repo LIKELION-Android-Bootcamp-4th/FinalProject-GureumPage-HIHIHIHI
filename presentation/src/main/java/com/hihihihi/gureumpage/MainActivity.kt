@@ -135,6 +135,7 @@ fun GureumPageApp() {
                         timerAppbarUp = System.currentTimeMillis()
                     }
                 )
+
                 NavigationRoute.BookDetail.route -> GureumAppBar(navController, "", true)
                 NavigationRoute.Withdraw.route -> GureumAppBar(navController, "계정 탈퇴", true)
             }

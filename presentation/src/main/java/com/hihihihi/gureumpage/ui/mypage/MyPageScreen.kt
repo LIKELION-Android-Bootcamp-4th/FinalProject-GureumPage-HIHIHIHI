@@ -29,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageMenuSection
@@ -37,14 +36,12 @@ import com.hihihihi.gureumpage.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.gureumpage.ui.mypage.component.NicknameChangeDialog
 import kotlinx.coroutines.flow.collectLatest
 
-
 @Composable
 fun MyPageScreen(
     navController: NavHostController,
     viewModel: MypageViewModel = hiltViewModel()
 ) {
     val colors = GureumTheme.colors
-    val typography = GureumTypography
     val readingStats by viewModel.readingStats.collectAsState()
     val state by viewModel.uiState.collectAsState()
 
@@ -56,14 +53,13 @@ fun MyPageScreen(
                     inclusive = true
                     saveState = false
                 }
-
                 launchSingleTop = true
                 restoreState = false
             }
         }
     }
 
-    var showNicknameDialog by rememberSaveable  { mutableStateOf(false) } // 다이얼로그 상태
+    var showNicknameDialog by rememberSaveable { mutableStateOf(false) } // 다이얼로그 상태
 
     val timeText = remember(state.totalReadMinutes) {
         formatSecondsToReadableTimeWithoutSecond(state.totalReadMinutes * 60)
@@ -80,7 +76,9 @@ fun MyPageScreen(
 
         when {
             state.loading -> Box(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()

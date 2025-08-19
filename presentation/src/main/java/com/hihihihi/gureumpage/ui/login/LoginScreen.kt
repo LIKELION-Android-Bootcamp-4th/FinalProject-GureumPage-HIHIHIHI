@@ -2,7 +2,6 @@ package com.hihihihi.gureumpage.ui.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -13,32 +12,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
-import com.hihihihi.gureumpage.designsystem.components.Semi24Text
-import com.hihihihi.gureumpage.designsystem.components.Semi40Text
-import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -52,8 +40,6 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
 
-    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("bg_login.json"))
-
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -64,9 +50,9 @@ fun LoginScreen(
 
     val activity = LocalContext.current as? Activity
 
-    GureumPageTheme (
+    GureumPageTheme(
         darkTheme = true,
-    ){
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -138,9 +124,7 @@ fun LoginScreen(
                     iconResId = R.drawable.ic_naver,
                     backgroundColor = Color(0xFF03C75A), // Naver Green
                     onClick = {
-                        activity?.let {
-                            viewModel.naverLogin(it, navController)
-                        } ?: Log.e("LoginScreen", "Activity가 null입니다.")
+                        activity?.let { viewModel.naverLogin(it, navController) }
                     }
                 )
 
