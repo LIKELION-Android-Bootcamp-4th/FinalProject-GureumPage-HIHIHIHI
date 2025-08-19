@@ -106,7 +106,8 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun addHistory(
         historyDto: HistoryDto,
-        uid: String
+        uid: String,
+        currentPage: Int
     ): Result<Unit> = try {
         val historyRef = firestore.collection("histories").document()
         historyDto.historyId = historyRef.id
@@ -157,16 +158,13 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
 
         if (userBookSnapshot.documents.isNotEmpty()) {
             val userBookDoc = userBookSnapshot.documents.first()
-            val currentPage = userBookDoc.getLong("current_page") ?: 0
             val totalReadTime = userBookDoc.getLong("total_read_time") ?: 0
-            val updatedCurrentPage = currentPage + historyDto.readPageCount
             userBookDoc.reference.update(
                 mapOf(
-                    "current_page" to updatedCurrentPage,
+                    "current_page" to currentPage,
                     "total_read_time" to totalReadTime + historyDto.readTime
                 )
             ).await()
-            Log.e("TAG", "addHistory: 완료! ${updatedCurrentPage}, ${totalReadTime}", )
         }
 
         Result.success(Unit)

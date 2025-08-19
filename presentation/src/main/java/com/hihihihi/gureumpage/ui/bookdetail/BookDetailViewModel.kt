@@ -67,7 +67,8 @@ class BookDetailViewModel @Inject constructor(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         readTime: Int,
-        readPageCount: Int
+        readPageCount: Int,
+        currentPage: Int
     ) {
         val userBook = uiState.value.userBook ?: return
 
@@ -85,7 +86,7 @@ class BookDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                addHistoryUseCase(history)
+                addHistoryUseCase(history, currentPage = currentPage)
 
                 // 저장 후 UI 상태 업데이트
                 _uiState.update {
