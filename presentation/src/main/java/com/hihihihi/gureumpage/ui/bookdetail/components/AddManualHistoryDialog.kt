@@ -166,10 +166,9 @@ fun AddManualHistoryDialog(
                             GureumTextField(
                                 value = startPage,
                                 onValueChange = {
-                                    val digits = it.filter(Char::isDigit)
-                                    val max = lastPage
-                                    startPage = digits.toIntOrNull()
-                                        ?.coerceAtMost(max)
+                                    startPage = it.filter(Char::isDigit)
+                                        .toIntOrNull()
+                                        ?.coerceAtMost(lastPage)
                                         ?.toString()
                                         ?: ""
                                 },
@@ -194,10 +193,11 @@ fun AddManualHistoryDialog(
                             GureumTextField(
                                 value = endPage,
                                 onValueChange = {
-                                    endPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
+                                    endPage = it.filter(Char::isDigit)
+                                        .toIntOrNull()
+                                        ?.coerceAtMost(lastPage)
+                                        ?.toString()
+                                        ?: ""
                                 },
                                 hint = "끝 페이지",
                                 isError = hasPageError,
