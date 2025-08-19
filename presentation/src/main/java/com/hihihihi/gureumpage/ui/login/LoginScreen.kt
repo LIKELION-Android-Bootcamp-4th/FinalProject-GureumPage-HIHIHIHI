@@ -5,7 +5,9 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,14 +16,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.Medi12Text
+import com.hihihihi.gureumpage.designsystem.components.Medi16Text
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
+import com.hihihihi.gureumpage.designsystem.components.Semi24Text
+import com.hihihihi.gureumpage.designsystem.components.Semi40Text
+import com.hihihihi.gureumpage.designsystem.theme.GureumColors
+import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.login.components.SocialLoginButton
 
 @SuppressLint("ContextCastToActivity")
@@ -31,6 +51,8 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("bg_login.json"))
 
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -42,54 +64,92 @@ fun LoginScreen(
 
     val activity = LocalContext.current as? Activity
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Login Screen", style = MaterialTheme.typography.headlineSmall)
+    GureumPageTheme (
+        darkTheme = true,
+    ){
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(GureumTheme.colors.background, Color(0xFF00153F))
+                    )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    "구름한장",
+                    style = GureumTypography.displayMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = GureumTheme.colors.gray900
+                )
 
-        Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-        // 🔵 Google
-        SocialLoginButton(
-            text = "구글 로그인",
-            textColor = Color.Black,
-            iconResId = R.drawable.ic_google,
-            backgroundColor = Color.White,
-            onClick = {
-                viewModel.googleLogin(context, googleLauncher)
+                Medi16Text(
+                    "한 장 한 장 쌓이는",
+                    color = GureumTheme.colors.gray700,
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Semi16Text(
+                    "나의 소중한 독서 기록",
+                    color = GureumTheme.colors.primary,
+                )
+
+                Spacer(modifier = Modifier.height(120.dp))
+
+
+                SocialLoginButton(
+                    text = "구글 로그인",
+                    textColor = Color.Black,
+                    iconResId = R.drawable.ic_google,
+                    backgroundColor = Color.White,
+                    onClick = {
+                        viewModel.googleLogin(context, googleLauncher)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SocialLoginButton(
+                    text = "카카오 로그인",
+                    textColor = Color.Black,
+                    iconResId = R.drawable.ic_kakao,
+                    backgroundColor = Color(0xFFFEE500), // Kakao Yellow
+                    onClick = {
+                        viewModel.kakaoLogin(navController)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SocialLoginButton(
+                    text = "네이버 로그인",
+                    textColor = Color.White,
+                    iconResId = R.drawable.ic_naver,
+                    backgroundColor = Color(0xFF03C75A), // Naver Green
+                    onClick = {
+                        activity?.let {
+                            viewModel.naverLogin(it, navController)
+                        } ?: Log.e("LoginScreen", "Activity가 null입니다.")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Medi12Text(
+                    "로그인하여 나만의 독서 여정을 시작해보세요 ✨",
+                    color = GureumTheme.colors.gray600,
+                )
             }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 🟡 Kakao
-        SocialLoginButton(
-            text = "카카오 로그인",
-            textColor = Color.Black,
-            iconResId = R.drawable.ic_kakao,
-            backgroundColor = Color(0xFFFEE500), // Kakao Yellow
-            onClick = {
-                viewModel.kakaoLogin(navController)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 🟢 Naver
-        SocialLoginButton(
-            text = "네이버 로그인",
-            textColor = Color.White,
-            iconResId = R.drawable.ic_naver,
-            backgroundColor = Color(0xFF03C75A), // Naver Green
-            onClick = {
-                activity?.let {
-                    viewModel.naverLogin(it, navController)
-                } ?: Log.e("LoginScreen", "Activity가 null입니다.")
-            }
-        )
+        }
     }
 }
