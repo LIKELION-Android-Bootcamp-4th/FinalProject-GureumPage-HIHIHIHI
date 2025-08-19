@@ -123,23 +123,23 @@ private fun readingTime(histories: List<History>, range: DateRange): List<TimeSl
     val acc = LongArray(buckets.size)
 
     histories.forEach { hist ->
-        val s0 = hist.startTime ?: return@forEach
-        val e0 = hist.endTime ?: return@forEach
-        var s = if (s0.isBefore(range.start)) range.start else s0
-        val e = if (e0.isAfter(range.end)) range.end else e0
+        val baseStartDay = hist.startTime ?: return@forEach
+        val baseEndDay = hist.endTime ?: return@forEach
+        var startDay = if (baseStartDay.isBefore(range.start)) range.start else baseStartDay
+        val endDay = if (baseEndDay.isAfter(range.end)) range.end else baseEndDay
 
-        if (!s.isBefore(e)) return@forEach
+        if (!startDay.isBefore(endDay)) return@forEach
 
-        while (!s.toLocalDate().isAfter(e.toLocalDate())) {
-            val day = s.toLocalDate()
-            val segEnd = minOf(e, day.atTime(LocalTime.MAX))
+        while (!startDay.toLocalDate().isAfter(endDay.toLocalDate())) {
+            val day = startDay.toLocalDate()
+            val segEnd = minOf(endDay, day.atTime(LocalTime.MAX))
 
             buckets.forEachIndexed { index, bucket ->
-                val bs = day.atTime(bucket.start)
-                val be =
+                val bucketStart = day.atTime(bucket.start)
+                val bucketEnd =
                     if (bucket.end == LocalTime.MIDNIGHT) day.plusDays(1).atStartOfDay() else day.atTime(bucket.end)
-                val startMax = maxOf(s, bs)
-                val endMin = minOf(segEnd, be)
+                val startMax = maxOf(startDay, bucketStart)
+                val endMin = minOf(segEnd, bucketEnd)
 
                 if (startMax.isBefore(endMin)) {
                     val minutes = ChronoUnit.MINUTES.between(startMax, endMin)
@@ -149,8 +149,8 @@ private fun readingTime(histories: List<History>, range: DateRange): List<TimeSl
             }
 
             // 안전하게 하루 단위로 이동
-            s = day.plusDays(1).atStartOfDay()
-            if (!s.isBefore(e) && s != e) break // 혹시 무한루프 방지
+            startDay = day.plusDays(1).atStartOfDay()
+            if (!startDay.isBefore(endDay) && startDay != endDay) break // 혹시 무한루프 방지
         }
     }
 
