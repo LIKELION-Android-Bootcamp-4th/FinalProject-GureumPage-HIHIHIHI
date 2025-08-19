@@ -113,14 +113,14 @@ fun StatisticsScreen(
         item {
             Semi16Text("독서 시간 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.time.isEmpty()) EmptyCard()
+            if (uiState.time.isEmpty() || uiState.time.all { it.y == 0f }) EmptyCard()
             else ReadingTimeCard(entries = uiState.time)
         }
 
         item {
             Semi16Text("주간 독서 페이지")
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.pages.isEmpty()) EmptyCard()
+            if (uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f }) EmptyCard()
             else ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
         }
     }
