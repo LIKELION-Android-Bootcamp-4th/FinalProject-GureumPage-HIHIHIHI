@@ -48,6 +48,15 @@ fun WithdrawScreen(
     navController: NavHostController,
     viewModel: WithdrawViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.withdrawEvent.collect {
@@ -174,6 +183,7 @@ fun WithdrawScreen(
             // 다시 생각해볼게요 버튼
             Button(
                 onClick = { navController.popBackStack() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -191,6 +201,7 @@ fun WithdrawScreen(
             // 정말 탈퇴할래요 버튼
             Button(
                 onClick = { viewModel.withdrawUser() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -218,7 +229,55 @@ fun WithdrawScreen(
             text = "새로운 독서 여정을 시작할 수 있어요",
             color = GureumTheme.colors.gray500,
         )
+
+
     }
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(
+                        GureumTheme.background.color,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(40.dp),
+                        color = GureumTheme.colors.primary
+                    )
+
+                    if (uiState.loadingMessage?.isNotEmpty() == true) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Medi14Text(
+                            text = uiState.loadingMessage!!,
+                            color = GureumTheme.colors.gray700
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+    ) { data ->
+        Snackbar(
+            snackbarData = data,
+            containerColor = GureumTheme.colors.systemRed,
+            contentColor = Color.White
+        )
+    }
+
 }
 
 @Composable

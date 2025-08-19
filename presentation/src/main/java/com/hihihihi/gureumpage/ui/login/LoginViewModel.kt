@@ -22,9 +22,7 @@ import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.update
 
 
 @HiltViewModel
@@ -64,13 +62,6 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun setLoading(isLoading: Boolean, message: String = "") {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = isLoading,
-                loadingMessage = message,
-                errorMessage = null
-            )
-        }
         _uiState.value = _uiState.value.copy(
             isLoading = isLoading,
             loadingMessage = message,
