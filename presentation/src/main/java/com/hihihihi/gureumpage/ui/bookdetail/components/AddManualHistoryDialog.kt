@@ -65,7 +65,8 @@ fun AddManualHistoryDialog(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         readTime: Int,
-        readPageCount: Int
+        readPageCount: Int,
+            currentPage: Int
     ) -> Unit,
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -295,7 +296,8 @@ fun AddManualHistoryDialog(
                             startTime!!,
                             endTime!!,
                             readTime ?: 0,
-                            readPageCount
+                            readPageCount,
+                            endPage.toInt()
                         )
                         onDismiss()
                     }

@@ -11,9 +11,9 @@ class AddHistoryUseCase @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val userBookRepository: UserBookRepository
 ) {
-    suspend operator fun invoke(history: History): Result<Unit> {
+    suspend operator fun invoke(history: History, currentPage: Int): Result<Unit> {
         return try {
-            historyRepository.addHistory(history)
+            historyRepository.addHistory(history, currentPage)
 
             Result.success(Unit)
         } catch (e: Exception) {

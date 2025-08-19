@@ -164,7 +164,7 @@ class TimerViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            addHistory(history)
+            addHistory(history, endPage)
                 .onSuccess {
                     _uiState.update { it.copy(elapsedSec = 0, isRunning = false) }
                 }
