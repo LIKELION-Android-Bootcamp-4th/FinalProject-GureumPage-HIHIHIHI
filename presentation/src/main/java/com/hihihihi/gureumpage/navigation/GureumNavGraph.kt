@@ -11,7 +11,6 @@ import androidx.navigation.navArgument
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
-import com.hihihihi.gureumpage.ui.library.dummyBooks
 import com.hihihihi.gureumpage.ui.login.LoginScreen
 import com.hihihihi.gureumpage.ui.mindmap.MindMapScreen
 import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
@@ -21,6 +20,7 @@ import com.hihihihi.gureumpage.ui.search.SearchScreen
 import com.hihihihi.gureumpage.ui.splash.SplashView
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
+import com.hihihihi.gureumpage.ui.withdraw.WithdrawScreen
 
 
 @Composable
@@ -87,6 +87,16 @@ fun GureumNavGraph(
                     navController = navController,
                     snackbarHostState = snackbarHostState
                 )
+            }
+        }
+
+        composable(
+            route = NavigationRoute.Withdraw.route,
+            arguments = listOf(navArgument("userName") { type = NavType.StringType })
+            ) { backStackEntry ->
+            val userName = backStackEntry.arguments?.getString("userName")
+            userName?.let {
+                WithdrawScreen(userName = it, navController = navController)
             }
         }
     }

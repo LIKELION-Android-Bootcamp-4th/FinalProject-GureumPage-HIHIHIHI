@@ -20,7 +20,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
-fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
+fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onWithDrawClick: () ->Unit) {
     val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
     val typography = GureumTypography
@@ -57,7 +57,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel()) {
             title = "탈퇴",
             textColor = colors.gray400
         ) {
-            viewModel.withdrawUser()
+            onWithDrawClick()
         }
     }
 }

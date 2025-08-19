@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -21,15 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.Quote
-import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
-import com.hihihihi.gureumpage.designsystem.theme.GureumColors
+import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -100,9 +96,8 @@ fun DetailBottomSheet(
                     .clip(RoundedCornerShape(16.dp))
                     .background(GureumTheme.colors.bookBackground)
             ) {
-                Text(
+                Medi16Text(
                     text = quote.content,
-                    style = GureumTypography.bodySmall,
                     color = GureumTheme.colors.gray800,
                     modifier = Modifier.padding(16.dp)
                 )

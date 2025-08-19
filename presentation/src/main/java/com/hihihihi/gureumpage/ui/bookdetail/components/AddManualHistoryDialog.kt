@@ -166,10 +166,12 @@ fun AddManualHistoryDialog(
                             GureumTextField(
                                 value = startPage,
                                 onValueChange = {
-                                    startPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
+                                    val digits = it.filter(Char::isDigit)
+                                    val max = lastPage
+                                    startPage = digits.toIntOrNull()
+                                        ?.coerceAtMost(max)
+                                        ?.toString()
+                                        ?: ""
                                 },
                                 hint = "시작 페이지",
                                 isError = hasPageError,

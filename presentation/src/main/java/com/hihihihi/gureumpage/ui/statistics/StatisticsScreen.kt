@@ -1,6 +1,8 @@
 package com.hihihihi.gureumpage.ui.statistics
 
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,9 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.DateRange
 import com.hihihihi.domain.model.DateRangePreset
 import com.hihihihi.domain.usecase.statistics.presetToRange
@@ -37,7 +36,8 @@ import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.statistics.components.CategoryCard
-import com.hihihihi.gureumpage.ui.statistics.components.GureumStatisticsPicker
+import com.hihihihi.gureumpage.ui.statistics.components.EmptyCard
+import com.hihihihi.gureumpage.ui.statistics.components.StatisticsPicker
 import com.hihihihi.gureumpage.ui.statistics.components.ReadingPageCard
 import com.hihihihi.gureumpage.ui.statistics.components.ReadingTimeCard
 import java.time.LocalDateTime
@@ -56,12 +56,12 @@ fun StatisticsScreen(
 
 
     if (showPicker) {
-        GureumStatisticsPicker(
+        StatisticsPicker(
             initialIndex = presetIndex,
             items = STAT_PRESET_LABELS,
             onDismiss = { showPicker = false },
-            onConfirm = {
-                index -> presetIndex = index
+            onConfirm = { index ->
+                presetIndex = index
                 showPicker = false
                 viewModel.loadStatistics(presetFromIndex(index))
             }
@@ -75,29 +75,30 @@ fun StatisticsScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Semi14Text(
                     text = rangeText,
                     color = GureumTheme.colors.gray700
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = { showPicker = true }
+
+                Row(
+                    modifier = Modifier
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = { showPicker = true },
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Semi16Text(STAT_PRESET_LABELS[presetIndex], color = GureumTheme.colors.gray700)
-                        Spacer(Modifier.width(8.dp))
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_down),
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = GureumTheme.colors.gray800
-                        )
-                    }
+                    Semi16Text(STAT_PRESET_LABELS[presetIndex], color = GureumTheme.colors.gray700)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = GureumTheme.colors.gray800
+                    )
                 }
             }
         }
@@ -105,19 +106,22 @@ fun StatisticsScreen(
         item {
             Semi16Text("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            CategoryCard(entries = uiState.category)
+            if (uiState.category.isEmpty()) EmptyCard()
+            else CategoryCard(entries = uiState.category)
         }
 
         item {
             Semi16Text("독서 시간 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            ReadingTimeCard(entries = uiState.time)
+            if (uiState.time.isEmpty() || uiState.time.all { it.y == 0f }) EmptyCard("새 기록을 추가하면 추이가 표시돼요.")
+            else ReadingTimeCard(entries = uiState.time)
         }
 
         item {
             Semi16Text("주간 독서 페이지")
             Spacer(modifier = Modifier.height(12.dp))
-            ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
+            if (uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f }) EmptyCard("책을 읽고 페이지를 기록해 주세요.")
+            else ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
         }
     }
 }
