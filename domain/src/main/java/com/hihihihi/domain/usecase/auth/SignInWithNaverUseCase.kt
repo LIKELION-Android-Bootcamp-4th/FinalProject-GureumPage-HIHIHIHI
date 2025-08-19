@@ -5,7 +5,6 @@ import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.NaverAuthRepository
 import javax.inject.Inject
 
-
 class SignInWithNaverUseCase @Inject constructor(
     private val naverAuthRepository: NaverAuthRepository,
     private val authRepository: AuthRepository,

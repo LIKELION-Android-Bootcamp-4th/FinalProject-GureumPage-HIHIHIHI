@@ -134,9 +134,8 @@ object UseCaseModule {
     @Provides
     fun provideAddHistory(
         historyRepository: HistoryRepository,
-        userBookRepository: UserBookRepository
     ): AddHistoryUseCase {
-        return AddHistoryUseCase(historyRepository, userBookRepository)
+        return AddHistoryUseCase(historyRepository)
     }
 
     @Provides

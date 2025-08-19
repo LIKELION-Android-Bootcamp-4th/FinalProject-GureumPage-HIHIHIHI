@@ -1,6 +1,5 @@
 package com.hihihihi.domain.model
 
-
 data class MindmapNode(
     val mindmapNodeId: String,
     val mindmapId: String,
