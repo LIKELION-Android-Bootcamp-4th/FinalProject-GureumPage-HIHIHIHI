@@ -8,8 +8,8 @@ import com.google.firebase.firestore.PropertyName
 data class DailyReadPageDto(
     var docId: String = "",
 
-    @get:PropertyName("uid") @set:PropertyName("uid")
-    var uid: String = "",
+    @get:PropertyName("user_id") @set:PropertyName("user_id")
+    var userId: String = "",
 
     @get:PropertyName("date") @set:PropertyName("date")
     var date: String = "",

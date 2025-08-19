@@ -6,6 +6,6 @@ import java.time.LocalDateTime
 data class DailyReadPage(
     val date: LocalDate,
     val totalReadPageCount: Int,
-    val uid: String,
+    val userId: String,
     val updatedAt: LocalDateTime?
 )

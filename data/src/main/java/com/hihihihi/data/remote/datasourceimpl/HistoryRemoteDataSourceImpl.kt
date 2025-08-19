@@ -124,14 +124,14 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
 
 
         val querySnapshot = firestore.collection("daily_read_pages")
-            .whereEqualTo("uid", uid)
+            .whereEqualTo("user_id", uid)
             .whereEqualTo("date", dateStr)
             .get()
             .await()
 
         if (querySnapshot.documents.isEmpty()) {
             val newDaily = DailyReadPageDto(
-                uid = uid,
+                userId = uid,
                 date = dateStr,
                 totalReadPageCount = historyDto.readPageCount.toLong(),
                 updatedAt = Timestamp.now()
