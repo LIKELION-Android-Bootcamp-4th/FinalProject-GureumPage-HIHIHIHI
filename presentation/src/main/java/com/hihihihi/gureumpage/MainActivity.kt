@@ -66,7 +66,8 @@ fun GureumPageApp() {
         NavigationRoute.OnBoarding.route,
         NavigationRoute.BookDetail.route,
         NavigationRoute.Timer.route,
-        NavigationRoute.MindMap.route
+        NavigationRoute.MindMap.route,
+        NavigationRoute.Withdraw.route
     )
 
     Scaffold(
@@ -79,6 +80,7 @@ fun GureumPageApp() {
                 NavigationRoute.MindMap.route -> GureumAppBar(navController, "마인드맵", true)
                 NavigationRoute.Timer.route -> GureumAppBar(navController, "독서 타이머", true)
                 NavigationRoute.BookDetail.route -> GureumAppBar(navController, "", true)
+                NavigationRoute.Withdraw.route -> GureumAppBar(navController, "계정 탈퇴", true)
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
