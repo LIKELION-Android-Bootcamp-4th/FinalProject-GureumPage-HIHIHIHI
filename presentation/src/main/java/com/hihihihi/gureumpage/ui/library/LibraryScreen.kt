@@ -48,6 +48,7 @@ import kotlin.collections.lastIndex
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.zIndex
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.Semi18Text
 import kotlin.math.abs
 
 @Composable
@@ -66,11 +67,7 @@ fun LibraryScreen(
     val finishedBooks = uiState.books.filter { it.status == ReadingStatus.FINISHED }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(16.dp))
 
             TabRow(
@@ -82,7 +79,7 @@ fun LibraryScreen(
                 },
                 divider = {},
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(GureumTheme.colors.card)
                     .padding(4.dp)
@@ -138,35 +135,76 @@ fun LibraryScreen(
                 ) { page ->
                     when (page) {
                         0 -> {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(3),
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(top = 18.dp)
-                            ) {
-                                items(plannedBooks) { book ->
-                                    BookItem(
-                                        book = book,
-                                        onClicked = { navController.navigate(NavigationRoute.BookDetail.createRoute(it)) }
-                                    )
+                            if (plannedBooks.isEmpty()) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Semi18Text("아직 담은 책이 없어요")
+                                    Spacer(Modifier.height(16.dp))
+                                    Medi16Text("읽고 싶은 책을 추가해 보세요.")
+                                }
+                            } else {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(3),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(top = 18.dp)
+                                ) {
+                                    items(plannedBooks) { book ->
+                                        BookItem(
+                                            book = book,
+                                            onClicked = {
+                                                navController.navigate(
+                                                    NavigationRoute.BookDetail.createRoute(
+                                                        it
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
 
                         1 -> {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(3),
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(top = 18.dp)
-                            ) {
-                                items(finishedBooks) { book ->
-                                    BookItem(
-                                        book = book,
-                                        onClicked = { navController.navigate(NavigationRoute.BookDetail.createRoute(it)) }
-                                    )
+                            if (finishedBooks.isEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Semi18Text("아직 완독한 책이 없어요")
+                                    Spacer(Modifier.height(16.dp))
+                                    Medi16Text("첫 완독을 기록하면 서재가 채워져요.")
+                                }
+                            } else {
+
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(3),
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(top = 18.dp)
+                                ) {
+                                    items(finishedBooks) { book ->
+                                        BookItem(
+                                            book = book,
+                                            onClicked = {
+                                                navController.navigate(
+                                                    NavigationRoute.BookDetail.createRoute(
+                                                        it
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
