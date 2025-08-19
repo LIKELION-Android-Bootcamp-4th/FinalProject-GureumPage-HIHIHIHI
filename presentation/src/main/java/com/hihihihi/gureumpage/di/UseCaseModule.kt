@@ -24,6 +24,7 @@ import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
 import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
@@ -267,6 +268,7 @@ object UseCaseModule {
         return GetThemeFlowUseCase(repository)
     }
 
+
     @Provides
     fun provideGetStatisticsUseCase(
         userBookRepository: UserBookRepository,
@@ -295,5 +297,12 @@ object UseCaseModule {
         repository: UserRepository
     ): GetUserUseCase {
         return GetUserUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetQuoteByUserBookIdUseCase(
+        repository: QuoteRepository
+    ): GetQuoteByUserBookIdUseCase {
+        return GetQuoteByUserBookIdUseCase(repository)
     }
 }
