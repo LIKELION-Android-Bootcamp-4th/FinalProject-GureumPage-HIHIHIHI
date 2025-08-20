@@ -1,20 +1,26 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components.tabs
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
+import com.hihihihi.gureumpage.designsystem.components.Medi14Text
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -25,20 +31,38 @@ fun QuotesTab(
     quotes: List<Quote>,
     onMenuClick: (quoteId: String) -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 20.dp)
-    ) {
-        quotes.forEach { quote ->
-            QuoteCard(
-                id = quote.id,
-                date = quote.createdAt?.toLocalDate().toString(),
-                page = quote.pageNumber,
-                quote = quote.content,
-                onMenuClick = onMenuClick
+    if (quotes.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 100.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Semi16Text("아직 등록한 필사가 없어요.")
+            Spacer(Modifier.height(16.dp))
+            Medi14Text(
+                "필사 추가를 통해\n마음에 드는 문장을 남겨보세요!",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 20.dp)
+        ) {
+            quotes.forEach { quote ->
+                QuoteCard(
+                    id = quote.id,
+                    date = quote.createdAt?.toLocalDate().toString(),
+                    page = quote.pageNumber,
+                    quote = quote.content,
+                    onMenuClick = onMenuClick
+                )
+            }
         }
     }
 }
