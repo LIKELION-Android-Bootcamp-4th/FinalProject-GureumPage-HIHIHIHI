@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.mypage
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -113,11 +114,8 @@ class MypageViewModel @Inject constructor(
     private fun loadReadingStats(userId: String) = viewModelScope.launch {
         runCatching { getDailyReadPagesUseCase(userId) }
             .onSuccess { dailies ->
-                val grouped: Map<LocalDate, Int> = dailies
-                    .groupBy { it.date } // LocalDate
-                    .mapValues { (_, items) -> items.sumOf { it.totalReadPageCount } }
-
-                _readingStats.value = grouped
+                val mapped = dailies.associate { it.date to it.totalReadPageCount }
+                _readingStats.value = mapped
             }
             .onFailure { e ->
                 _readingStats.value = emptyMap()
