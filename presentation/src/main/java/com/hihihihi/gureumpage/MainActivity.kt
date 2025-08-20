@@ -83,6 +83,7 @@ fun GureumPageApp() {
         NavigationRoute.MindMap.route,
         NavigationRoute.Withdraw.route,
         NavigationRoute.Search.route,
+        NavigationRoute.Splash.route
     )
 
     var timerAppbarUp by remember { mutableStateOf(0L) }

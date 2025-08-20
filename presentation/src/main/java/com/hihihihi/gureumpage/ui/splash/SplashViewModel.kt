@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -30,13 +31,16 @@ class SplashViewModel @Inject constructor(
 
     init {
         auth.addAuthStateListener { fb ->
-            val user = fb.currentUser
-            if (user == null) {
-                _nav.value = NavTarget.Login
-            } else {
-                viewModelScope.launch {
-                    val done = getOnboardingCompleteUseCase(user.uid).firstOrNull() ?: false
-                    _nav.value = if (done) NavTarget.Home else NavTarget.Onboarding
+            viewModelScope.launch {
+                delay(3000)
+                val user = fb.currentUser
+                if (user == null) {
+                    _nav.value = NavTarget.Login
+                } else {
+                    viewModelScope.launch {
+                        val done = getOnboardingCompleteUseCase(user.uid).firstOrNull() ?: false
+                        _nav.value = if (done) NavTarget.Home else NavTarget.Onboarding
+                    }
                 }
             }
         }
