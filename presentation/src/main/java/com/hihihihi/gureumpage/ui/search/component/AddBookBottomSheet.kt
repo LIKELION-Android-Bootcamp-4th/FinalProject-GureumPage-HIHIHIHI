@@ -18,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +55,7 @@ import java.time.LocalDateTime
 fun AddBookBottomSheet(
     book: SearchBook,
     sheetState: SheetState,
+    isLoading: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (Book) -> Unit,
     onGetBookPageCount: (isbn: String, onResult: (Int?) -> Unit) -> Unit
@@ -73,6 +75,25 @@ fun AddBookBottomSheet(
         if (book.isbn.isNotBlank()) {
             onGetBookPageCount(book.isbn) { pageCount ->
                 bookPageCount = pageCount
+            }
+        }
+    }
+
+    val isButtonEnabled by remember {
+        derivedStateOf {
+            if (isLoading) {
+                false
+            } else {
+                when (selectedCategory.toReadingStatus()) {
+                    ReadingStatus.PLANNED -> true
+                    ReadingStatus.READING -> {
+                        startDate != null && pageInput.isNotBlank()
+                    }
+                    ReadingStatus.FINISHED -> {
+                        startDate != null && endDate != null
+                    }
+                    else -> false
+                }
             }
         }
     }
@@ -263,7 +284,9 @@ fun AddBookBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
             GureumButton(
-                "서재에 추가", onClick = {
+                "서재에 추가",
+                enabled = isButtonEnabled,
+                onClick = {
                     //포커스 제거
                     focusManager.clearFocus()
                     //페이지 가져오기 기본값 0

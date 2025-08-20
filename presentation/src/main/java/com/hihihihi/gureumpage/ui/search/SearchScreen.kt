@@ -187,6 +187,7 @@ fun SearchScreen(
         AddBookBottomSheet(
             book = bookToAdd!!,
             sheetState = sheetState,
+            isLoading = uiState.isAddingBook,
             onDismiss = {
                 scope.launch {
                     sheetState.hide()
