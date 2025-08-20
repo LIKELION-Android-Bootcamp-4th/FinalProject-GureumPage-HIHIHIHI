@@ -19,7 +19,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
-fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(), onWithDrawClick: () -> Unit) {
+fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onLogoutClick: () ->Unit ,onWithDrawClick: () -> Unit) {
     val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
     val context = LocalContext.current
@@ -49,7 +49,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(), onWithDrawCl
 
         }
         MyPageMenuSettingItem("로그아웃") {
-            viewModel.logout()
+            onLogoutClick()
         }
         MyPageMenuSettingItem(
             title = "탈퇴",

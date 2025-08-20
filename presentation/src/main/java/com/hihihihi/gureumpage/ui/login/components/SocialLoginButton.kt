@@ -27,6 +27,7 @@ fun SocialLoginButton(
     textColor: Color,
     iconResId: Int,
     backgroundColor: Color,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Button(

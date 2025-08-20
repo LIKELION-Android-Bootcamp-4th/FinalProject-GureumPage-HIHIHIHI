@@ -37,13 +37,33 @@ class WithdrawViewModel @Inject constructor(
     private val _withdrawEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val withdrawEvent: SharedFlow<Unit> = _withdrawEvent.asSharedFlow()
 
+    private fun setLoading(isLoading: Boolean, message: String = "") {
+
+        _uiState.value = _uiState.value.copy(
+            isLoading = isLoading,
+            loadingMessage = message,
+            errorMessage = null
+        )
+    }
+
+    private fun setError(message: String) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = false,
+            errorMessage = message
+        )
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
     fun withdrawUser() = viewModelScope.launch {
-        _uiState.update { it.copy(loading = true, error = null) }
+        setLoading(true, "사용자 정보를 확인하는중...")
 
         try {
             val currentUser = FirebaseAuth.getInstance().currentUser
             if (currentUser == null) {
-                _uiState.update { it.copy(loading = false, error = "로그인된 사용자가 없습니다") }
+                setError("로그인된 사용자가 없습니다")
                 return@launch
             }
 
@@ -52,19 +72,22 @@ class WithdrawViewModel @Inject constructor(
             // 1. 먼저 소셜 플랫폼에서 연결 해제
             when (providerId) {
                 "kakao" -> {
+                    setLoading(true, "카카오 계정 연결 해제하는중...")
                     unlinkKakaoAccount()
                 }
-
                 "naver" -> {
+                    setLoading(true, "네이버 계정 연결 해제하는중...")
                     unlinkNaverAccount()
                 }
-
-                "google.com" -> {}
-
-                else -> {}
+                "google.com" -> {
+                    setLoading(true, "구글 계정 연결 해제하는중...")
+                }
+                else -> {
+                }
             }
 
             // 2. Firebase Functions 호출 (Firestore + Auth 삭제)
+            setLoading(true, "사용자 데이터를 삭제하는중...")
             val functions = Firebase.functions
             val deleteAccount = functions.getHttpsCallable("deleteUserAccount")
             val result = deleteAccount.call().await()
@@ -72,7 +95,7 @@ class WithdrawViewModel @Inject constructor(
             clearUserDataUseCase.clearAll()
 
             // 3. 상태 초기화 및 로그아웃 이벤트 발생
-            _uiState.value = WithdrawUiState(loading = false)
+            setLoading(false)
             _withdrawEvent.tryEmit(Unit)
         } catch (e: Exception) {
 
@@ -83,7 +106,7 @@ class WithdrawViewModel @Inject constructor(
                 else -> "탈퇴 처리 중 오류가 발생했습니다: ${e.message}"
             }
 
-            _uiState.update { it.copy(loading = false, error = errorMessage) }
+            setError(errorMessage)
         }
     }
 
