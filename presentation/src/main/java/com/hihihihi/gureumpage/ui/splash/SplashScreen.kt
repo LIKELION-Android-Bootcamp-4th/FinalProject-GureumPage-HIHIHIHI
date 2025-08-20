@@ -55,8 +55,6 @@ fun SplashView(
     // 임시 스플래쉬
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("구름한장", style = GureumTypography.displayLarge)
-            Spacer(modifier = Modifier.height(16.dp))
             CircularProgressIndicator()
         }
     }
