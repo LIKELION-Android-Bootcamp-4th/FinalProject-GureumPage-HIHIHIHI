@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 interface DailyReadPageRepository {
-    suspend fun getDailyReadPages(uid: String): List<DailyReadPage>
+    suspend fun getDailyReadPages(userId: String): List<DailyReadPage>
 
-    fun getDailyReadPagesFlow(uid: String): Flow<List<DailyReadPage>> = flow {
-        emit(getDailyReadPages(uid))
+    fun getDailyReadPagesFlow(userId: String): Flow<List<DailyReadPage>> = flow {
+        emit(getDailyReadPages(userId))
     }
 }

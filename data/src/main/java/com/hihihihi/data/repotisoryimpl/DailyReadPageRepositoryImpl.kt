@@ -10,7 +10,7 @@ class DailyReadPageRepositoryImpl @Inject constructor(
     private val remote: DailyReadPageRemoteDataSource
 ) : DailyReadPageRepository {
 
-    override suspend fun getDailyReadPages(uid: String): List<DailyReadPage> {
-        return remote.getDailyReadPages(uid).map { it.toDomain() }
+    override suspend fun getDailyReadPages(userId: String): List<DailyReadPage> {
+        return remote.getDailyReadPages(userId).map { it.toDomain() }
     }
 }

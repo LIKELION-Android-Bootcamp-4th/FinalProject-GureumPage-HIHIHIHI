@@ -66,7 +66,7 @@ fun AddManualHistoryDialog(
         endTime: LocalDateTime,
         readTime: Int,
         readPageCount: Int,
-            currentPage: Int
+        currentPage: Int
     ) -> Unit,
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -306,16 +306,14 @@ fun AddManualHistoryDialog(
         }
 
         if (showDatePicker) {
-            val datePickerState = rememberDatePickerState()
             GureumPastToTodayDatePicker(
                 onDismiss = { showDatePicker = false },
-                onConfirm = {
-                    datePickerState.selectedDateMillis?.let {
-                        val localDate = Instant.ofEpochMilli(it)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        date = localDate.atStartOfDay()
-                    }
+                onConfirm = { millis ->
+                    val localDate = Instant.ofEpochMilli(millis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    date = localDate.atStartOfDay()
+                    showDatePicker = false
                 }
             )
         }
@@ -344,7 +342,8 @@ fun AddManualHistoryDialog(
                             Pair(availableHours, availableMinutes)
                         }
 
-                        val validTempHour = if (hourValues.contains(tempHour)) tempHour else hourValues.first()
+                        val validTempHour =
+                            if (hourValues.contains(tempHour)) tempHour else hourValues.first()
                         val validTempMinute =
                             if (minuteValues.contains(tempMinute)) tempMinute else minuteValues.first()
 
@@ -366,7 +365,8 @@ fun AddManualHistoryDialog(
                             date?.let { d ->
                                 val selectedTime = LocalTime.of(tempHour, tempMinute)
                                 if (editingStartTime) {
-                                    val newStartTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    val newStartTime =
+                                        LocalDateTime.of(d.toLocalDate(), selectedTime)
                                     startTime = newStartTime
 
                                     // 종료 시간이 시작 시간보다 이전이면 조정

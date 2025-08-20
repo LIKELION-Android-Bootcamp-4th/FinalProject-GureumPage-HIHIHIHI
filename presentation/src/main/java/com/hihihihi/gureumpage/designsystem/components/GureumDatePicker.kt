@@ -29,7 +29,6 @@ fun GureumPastToTodayDatePicker(
                 val date = toLocalDate(utcTimeMillis, systemTime)
                 return !date.isAfter(today) // 오늘 포함 미래 불가
             }
-
             override fun isSelectableYear(year: Int) = true
         }
     }
@@ -46,7 +45,7 @@ fun GureumPastToTodayDatePicker(
             TextButton(
                 onClick = {
                     state.selectedDateMillis?.let(onConfirm)
-                    onDismiss
+                    onDismiss()
                 }
             ) { Text("확인") }
         },

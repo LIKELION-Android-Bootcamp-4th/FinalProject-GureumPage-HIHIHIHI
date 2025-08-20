@@ -129,7 +129,7 @@ fun GureumPageApp() {
                 NavigationRoute.MindMap.route -> GureumAppBar(navController, "마인드맵", true)
                 NavigationRoute.Timer.route -> GureumAppBar(
                     navController = navController,
-                    title = "독서 타이머",
+                    title = "독서 스톱워치",
                     showUpButton = true,
                     onUpClick = {
                         timerAppbarUp = System.currentTimeMillis()

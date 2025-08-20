@@ -173,9 +173,9 @@ private val featurePages = listOf(
     ),
     OnboardingFeature(
         R.drawable.ic_cloud_timer,
-        "독서 타이머",
+        "독서 스톱워치",
         "독서 시간을 측정하고\n꾸준한 독서 습관을 만들어보세요",
-        listOf("타이머로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공")
+        listOf("스톱워치로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공")
     ),
     OnboardingFeature(
         R.drawable.ic_cloud_mindmap,
