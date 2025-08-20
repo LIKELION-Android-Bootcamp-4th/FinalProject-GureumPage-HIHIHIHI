@@ -2,7 +2,6 @@
 <resources>
 
     <style name="Theme.GureumPage" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
