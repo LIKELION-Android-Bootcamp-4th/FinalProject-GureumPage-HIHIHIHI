@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.mypage.component
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -19,18 +20,27 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
-fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onLogoutClick: () ->Unit ,onWithDrawClick: () -> Unit) {
+fun MyPageMenuSection(
+    viewModel: MypageViewModel = hiltViewModel(),
+    onLogoutClick: () -> Unit,
+    onWithDrawClick: () -> Unit
+) {
     val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
     val context = LocalContext.current
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(
+        modifier = Modifier.padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         MyPageMenuSettingItem("평가하기") {
             openAppOnPlayStore(context)
         }
+
         MyPageMenuSettingItem("문의하기") {
             openSupportEmail(context)
         }
+
         MyPageMenuSettingItem("오픈소스 라이선스") {
             try {
                 OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스")
@@ -38,24 +48,35 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onLogoutClick
             } catch (t: Throwable) {
                 Toast.makeText(context, "라이선스 화면을 열 수 없습니다: ${t.message}", Toast.LENGTH_SHORT).show()
             }
-
         }
+
         MyPageMenuSettingItem(
             title = "다크모드",
             showSwitch = true,
+            showArrow = false,
             switchChecked = (theme == GureumThemeType.DARK),
             onSwitchToggle = { viewModel.toggleTheme(it) }
-        ) {
+        ) { }
 
-        }
-        MyPageMenuSettingItem("로그아웃") {
+        MyPageMenuSettingItem(
+            title = "로그아웃",
+            showArrow = false,
+        ) {
             onLogoutClick()
         }
+
         MyPageMenuSettingItem(
             title = "탈퇴",
-            textColor = colors.gray400
+            textColor = colors.gray400,
+            showArrow = false,
         ) {
             onWithDrawClick()
         }
+
+        MyPageMenuSettingItem(
+            title = "버전 1.0.1",
+            textColor = colors.gray400,
+            showArrow = false,
+        ) {}
     }
 }

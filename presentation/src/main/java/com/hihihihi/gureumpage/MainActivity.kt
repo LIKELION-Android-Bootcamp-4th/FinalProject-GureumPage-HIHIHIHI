@@ -3,6 +3,7 @@ package com.hihihihi.gureumpage
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -35,6 +36,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -136,6 +138,7 @@ fun GureumPageApp() {
 
     val context = LocalContext.current
 
+    var lastBackMillis by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -164,7 +167,14 @@ fun GureumPageApp() {
         when {
             // 현재 루트가 홈이면 앱 종료
             currentRoute == NavigationRoute.Home.route -> {
-                (context as? Activity)?.finish()
+                val currentTime = System.currentTimeMillis()
+
+                if (currentTime - lastBackMillis < 2000L) {
+                    (context as? Activity)?.finish()
+                } else {
+                    lastBackMillis = currentTime
+                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
+                }
             }
 
             // 현재 루트가 바텀 내비 아이템이면 홈으로 이동
@@ -246,8 +256,9 @@ fun NetworkWarningBanner(
                 tint = GureumTheme.colors.white
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Column ( modifier = Modifier.weight(1f),
-            ){
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
                 Semi16Text(
                     "앗, 네트워크 연결이 끊어졌어요!",
                     color = GureumTheme.colors.white
