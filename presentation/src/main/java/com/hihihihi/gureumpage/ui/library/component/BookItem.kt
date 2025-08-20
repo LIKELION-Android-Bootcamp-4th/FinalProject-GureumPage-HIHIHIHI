@@ -1,0 +1,105 @@
+package com.hihihihi.gureumpage.ui.library.component
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.UserBook
+import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+
+fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
+
+//한 권의 책정보
+@Composable
+fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClicked(book.userBookId) }
+    ) {
+        val iconSize = 16.dp
+        val offsetX = iconSize / 2 // 오른쪽으로 아이콘 크기의 절반 만큼 이동
+        val offsetY = -iconSize / 2 // 위쪽으로 아이콘 크기의 절반 만큼 이동
+
+        // 책 카드 ui
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
+        ) {
+            //이미지
+            BookCoverImage(
+                imageUrl = book.imageUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(2f / 3f)
+                    .clip(RoundedCornerShape(8.dp)),
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            //제목
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = GureumTheme.colors.gray800,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            //작가
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodySmall,
+                color = GureumTheme.colors.gray500,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        //다 읽은 책 아이콘
+        if (book.isRead()) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_finish_stamp),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = offsetX, y = offsetY) // 살짝 겹쳐 보이게 끔 위치 조정
+                    .size(36.dp),
+                colorFilter = ColorFilter.tint(GureumTheme.colors.primary, blendMode = BlendMode.SrcIn)
+            )
+        }
+    }
+}

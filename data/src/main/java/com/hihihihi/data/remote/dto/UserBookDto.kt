@@ -1,0 +1,72 @@
+package com.hihihihi.data.remote.dto
+
+import androidx.annotation.Keep
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.PropertyName
+
+@Keep  // Proguard 등 난독화 도구에서 제거되지 않도록 유지
+data class UserBookDto(
+    // Firestore 문서 ID는 여기엔 기본 포함되지 않으므로
+    // 나중에 수동으로 넣어줘야 해서@PropertyName 필요 없음
+    @get:Exclude @set:Exclude
+    var userBookId: String = "", // Firestore 문서 ID를 저장하는 필드
+
+    // Firestore 필드명과 Kotlin 프로퍼티명을 매핑
+    @get:PropertyName("user_id") @set:PropertyName("user_id")
+    var userId: String = "",
+
+    @get:PropertyName("title") @set:PropertyName("title")
+    var title: String = "",
+
+    @get:PropertyName("author") @set:PropertyName("author")
+    var author: String = "",
+
+    @get:PropertyName("publisher") @set:PropertyName("publisher")
+    var publisher: String? = "",
+
+    @get:PropertyName("description") @set:PropertyName("description")
+    var description: String? = "",
+
+    @get:PropertyName("isbn_10") @set:PropertyName("isbn_10")
+    var isbn10: String? = "",
+
+    @get:PropertyName("isbn_13") @set:PropertyName("isbn_13")
+    var isbn13: String? = "",
+
+    @get:PropertyName("is_liked") @set:PropertyName("is_liked")
+    var isLiked: Boolean = false,
+
+    @get:PropertyName("image_url") @set:PropertyName("image_url")
+    var imageUrl: String = "",
+
+    @get:PropertyName("total_page") @set:PropertyName("total_page")
+    var totalPage: Int = 0,
+
+    @get:PropertyName("current_page") @set:PropertyName("current_page")
+    var currentPage: Int? = 0,
+
+    @get:PropertyName("start_date") @set:PropertyName("start_date")
+    var startDate: Timestamp? = null,
+
+    @get:PropertyName("end_date") @set:PropertyName("end_date")
+    var endDate: Timestamp? = null,
+
+    @get:PropertyName("total_read_time") @set:PropertyName("total_read_time")
+    var totalReadTime: Int? = 0,
+
+    @get:PropertyName("status") @set:PropertyName("status")
+    var status: String = "planned", // "planned", "reading", "finished"
+
+    @get:PropertyName("review") @set:PropertyName("review")
+    var review: String? = null,
+
+    @get:PropertyName("rating") @set:PropertyName("rating")
+    var rating: Double? = null,
+
+    @get:PropertyName("category") @set:PropertyName("category")
+    var category: String? = null,
+
+    @get:PropertyName("created_at") @set:PropertyName("created_at")
+    var createdAt: Timestamp? = null
+)

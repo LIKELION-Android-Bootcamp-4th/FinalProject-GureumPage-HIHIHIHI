@@ -1,0 +1,17 @@
+package com.hihihihi.domain.model
+
+import java.time.LocalDateTime
+
+data class Quote(
+    val id: String,
+    val userId: String,
+    val userBookId: String,
+    val content: String,
+    val pageNumber: Int?,
+    val isLiked: Boolean,
+    val createdAt: LocalDateTime?,
+    val title: String,
+    val author: String,
+    val publisher: String,
+    val imageUrl: String,
+)

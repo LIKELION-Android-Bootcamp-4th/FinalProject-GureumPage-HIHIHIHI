@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -40,4 +42,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Dagger - Hilt
+    implementation(libs.hilt.android.v2562)
+    ksp(libs.hilt.android.compiler)
+
+//    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+//    implementation("com.google.firebase:firebase-auth")
 }

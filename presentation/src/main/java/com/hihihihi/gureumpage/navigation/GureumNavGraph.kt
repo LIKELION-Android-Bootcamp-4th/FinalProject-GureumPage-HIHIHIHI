@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.navigation
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -16,37 +17,85 @@ import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
 import com.hihihihi.gureumpage.ui.onboarding.OnBoardingScreen
 import com.hihihihi.gureumpage.ui.quotes.QuotesScreen
 import com.hihihihi.gureumpage.ui.search.SearchScreen
+import com.hihihihi.gureumpage.ui.splash.SplashView
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
-
+import com.hihihihi.gureumpage.ui.withdraw.WithdrawScreen
 
 @Composable
 fun GureumNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String = NavigationRoute.Splash.route,
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavigationRoute.Login.route,
+        startDestination = startDestination,
         modifier = modifier
-    ){
-        composable(NavigationRoute.Home.route) { HomeScreen(navController) }
+    ) {
+        composable(NavigationRoute.Splash.route) { SplashView(navController) }
+        composable(NavigationRoute.Home.route) { HomeScreen(navController = navController) }
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
-        composable(NavigationRoute.MindMap.route) { MindMapScreen() }
+        composable(
+            route = NavigationRoute.MindMap.route,
+            arguments = listOf(
+                navArgument("mindmapId") { type = NavType.StringType },
+                navArgument("bookId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId")
+            val mindmapId = backStackEntry.arguments?.getString("mindmapId")
+            if (bookId != null && mindmapId != null) {
+                MindMapScreen(bookId = bookId, mindmapId = mindmapId)
+            }
+        }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
-        composable(NavigationRoute.Library.route) { LibraryScreen() }
-        composable(NavigationRoute.Search.route) { SearchScreen() }
+        composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
+        composable(NavigationRoute.Search.route) { SearchScreen(navController) }
         composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
-        composable(NavigationRoute.Timer.route) { TimerScreen() }
-        composable(NavigationRoute.MyPage.route) { MyPageScreen() }
+        composable(
+            NavigationRoute.Timer.route,
+            arguments = listOf(navArgument("userBookId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userBookId = requireNotNull(backStackEntry.arguments?.getString("userBookId")) {
+                "TimerScreen requires non-null userBookId"
+            }
+            TimerScreen(
+                userBookId = userBookId,
+                onExit = {
+                    navController.popBackStack()
+
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(userBookId)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
             arguments = listOf(navArgument("bookId") { type = NavType.StringType })
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
             bookId?.let {
-                BookDetailScreen(bookId = it, navController)
+                BookDetailScreen(
+                    bookId = it,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState
+                )
+            }
+        }
+
+        composable(
+            route = NavigationRoute.Withdraw.route,
+            arguments = listOf(navArgument("userName") { type = NavType.StringType })
+            ) { backStackEntry ->
+            val userName = backStackEntry.arguments?.getString("userName")
+            userName?.let {
+                WithdrawScreen(userName = it, navController = navController)
             }
         }
     }

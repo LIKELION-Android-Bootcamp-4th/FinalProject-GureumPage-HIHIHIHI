@@ -1,6 +1,20 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+    kotlin("plugin.parcelize")
+}
+
+//local.properties API KEY 사용하기 위함
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        load(localFile.inputStream())
+    }
 }
 
 android {
@@ -9,9 +23,15 @@ android {
 
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        //local.properties API KEY 사용하기 위함
+        buildConfigField ("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
+
+    }
+    //local.properties API KEY 사용하기 위함
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -39,7 +59,36 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.firebase.functions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Dagger - Hilt
+    implementation(libs.hilt.android.v2562)
+    ksp(libs.hilt.android.compiler)
+
+    // Gson
+    implementation(libs.gson)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:21.4.0")
+
+    implementation("com.navercorp.nid:oauth:5.9.0")
+
+    implementation("com.kakao.sdk:v2-user:2.20.3")
+
+    implementation(libs.androidx.datastore.preferences)
 }
+
