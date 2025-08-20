@@ -222,7 +222,8 @@ fun TimerScreen(
                         // 저장 성공 후 다이얼로그 닫고 타이머 재개
                         showAddQuoteDialog = false
                     }
-                }
+                },
+                lastPage = state.totalPage
             )
         }
         //뒤로가기 다이얼로그

@@ -30,8 +30,9 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
 @Composable
 fun AddQuoteDialog(
+    lastPage: Int?,
     onDismiss: () -> Unit,
-    onSave: (page: String?, content: String) -> Unit
+    onSave: (page: String?, content: String) -> Unit,
 ) {
     var pageNumber by remember { mutableStateOf("") }
     var quote by remember { mutableStateOf("") }
@@ -86,7 +87,13 @@ fun AddQuoteDialog(
                 Spacer(modifier = Modifier.height(6.dp))
                 GureumTextField(
                     value = pageNumber,
-                    onValueChange = { pageNumber = it.filter(Char::isDigit) },
+                    onValueChange = {
+                        pageNumber = it.filter(Char::isDigit)
+                            .toIntOrNull()
+                            ?.coerceAtMost(lastPage ?: Int.MAX_VALUE)
+                            ?.toString()
+                            ?: ""
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     hint = "예: 157",
                     trailingIcon = {
