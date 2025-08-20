@@ -290,14 +290,16 @@ fun AddBookBottomSheet(
                     focusManager.clearFocus()
                     //페이지 가져오기 기본값 0
                     val page = pageInput.toIntOrNull() ?: 0
+                    val status = selectedCategory.toReadingStatus()!!
+                    val lastPage = bookPageCount ?: 0
                     //viewModel에 전달 할 데이터
                     val addBook = Book(
                         searchBook = book,
                         startDate = startDate ?: LocalDateTime.now(),
                         endDate = endDate ?: LocalDateTime.now(),
-                        currentPage = page,
-                        totalPage = bookPageCount ?: 0,
-                        status = selectedCategory.toReadingStatus()!!
+                        currentPage = if (status == ReadingStatus.FINISHED) lastPage else page,
+                        totalPage = lastPage,
+                        status = status
                     )
                     onConfirm(addBook)
                 }
