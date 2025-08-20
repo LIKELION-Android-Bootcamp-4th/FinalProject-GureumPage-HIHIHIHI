@@ -15,5 +15,4 @@ class MindmapRepositoryImpl @Inject constructor(
     override suspend fun getMindmap(mindmapId: String): Mindmap = remoteDataSource.getMindmap(mindmapId).toDomain()
 
     override suspend fun updateMindmap(mindmap: Mindmap): Result<Unit> = remoteDataSource.updateMindmap(mindmap.toDto())
-
 }

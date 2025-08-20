@@ -13,7 +13,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.time.temporal.ChronoUnit
 
 /**
@@ -105,7 +104,6 @@ fun formatSecondsToReadableTimeWithoutSecond(seconds: Int): String {
     }.trim()
 }
 
-
 /**
  * px 을 Dp 로 변환
  */
@@ -148,7 +146,6 @@ fun getDayCountLabel(
         "${label}일째"
     }
 }
-
 
 /**
  * History에서 하루 별 독서 시간 평균 계산

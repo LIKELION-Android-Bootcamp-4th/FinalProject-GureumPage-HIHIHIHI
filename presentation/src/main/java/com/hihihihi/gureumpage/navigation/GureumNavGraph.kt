@@ -11,7 +11,6 @@ import androidx.navigation.navArgument
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
-import com.hihihihi.gureumpage.ui.library.dummyBooks
 import com.hihihihi.gureumpage.ui.login.LoginScreen
 import com.hihihihi.gureumpage.ui.mindmap.MindMapScreen
 import com.hihihihi.gureumpage.ui.mypage.MyPageScreen
@@ -22,7 +21,6 @@ import com.hihihihi.gureumpage.ui.splash.SplashView
 import com.hihihihi.gureumpage.ui.statistics.StatisticsScreen
 import com.hihihihi.gureumpage.ui.timer.TimerScreen
 import com.hihihihi.gureumpage.ui.withdraw.WithdrawScreen
-
 
 @Composable
 fun GureumNavGraph(
@@ -67,8 +65,9 @@ fun GureumNavGraph(
             TimerScreen(
                 userBookId = userBookId,
                 onExit = {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    navController.popBackStack()
+
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(userBookId)) {
                         launchSingleTop = true
                         restoreState = true
                     }

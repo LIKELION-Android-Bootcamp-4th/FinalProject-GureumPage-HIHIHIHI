@@ -29,7 +29,6 @@ fun GureumPastToTodayDatePicker(
                 val date = toLocalDate(utcTimeMillis, systemTime)
                 return !date.isAfter(today) // 오늘 포함 미래 불가
             }
-
             override fun isSelectableYear(year: Int) = true
         }
     }
@@ -46,7 +45,7 @@ fun GureumPastToTodayDatePicker(
             TextButton(
                 onClick = {
                     state.selectedDateMillis?.let(onConfirm)
-                    onDismiss
+                    onDismiss()
                 }
             ) { Text("확인") }
         },
@@ -84,6 +83,7 @@ fun GureumBetweenDatePicker(
                 val validMax = max?.let { !date.isAfter(it) } ?: true
                 return validMin && validMax
             }
+
             override fun isSelectableYear(year: Int): Boolean {
                 val yearMin = min?.year ?: 1900
                 val yearMax = max?.year ?: today.year

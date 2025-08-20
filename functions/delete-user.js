@@ -55,6 +55,16 @@ async function deleteUserAccountHandler(request) {
       batch.delete(doc.ref);
     });
 
+    // 5. daily_read_pages 삭제
+    const dailyReadPagesSnap = await db.collection("daily_read_pages")
+        .where("uid", "==", uid)
+        .get();
+
+    dailyReadPagesSnap.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+
     // 5. 첫 번째 배치 커밋 (Firestore 배치는 500개 제한)
     await batch.commit();
     console.log(`User ${uid} 기본 데이터 삭제 완료`);

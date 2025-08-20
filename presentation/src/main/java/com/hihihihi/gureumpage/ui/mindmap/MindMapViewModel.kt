@@ -64,7 +64,7 @@ class MindMapViewModel @Inject constructor(
 
     // baseLine과 현재 노드 차이 계산해 서버에 적용
     private suspend fun flushDiff(current: List<MindmapNode>) {
-        val operations =  diff(baseline, current)
+        val operations = diff(baseline, current)
 
         if (operations.isEmpty()) return
         saving = true

@@ -10,23 +10,10 @@ data class TimerUiState(
     val memoLines: List<String> = emptyList(),
     //30분 마다 프로그래스바 갱신
     val ringPeriodSec: Int = 1800,
-
     val startPage: Int? = null,
     val totalPage: Int? = null,
-
+    val countdown: Int? = null
 ) {
-//    val progress: Float
-//        get() = if (targetSec <= 0) 0f
-//        else (elapsedSec.coerceAtLeast(0).toFloat() / targetSec).coerceIn(0f, 1f)
-//
-//    val displayTimeMMSS: String
-//        get() {
-//            val remaining = (targetSec - elapsedSec).coerceAtLeast(0)
-//            val m = remaining / 60
-//            val s = remaining % 60
-//            return "%d:%02d".format(m, s)
-//        }
-
     val progress: Float
         get() {
             val period = ringPeriodSec.coerceAtLeast(1)

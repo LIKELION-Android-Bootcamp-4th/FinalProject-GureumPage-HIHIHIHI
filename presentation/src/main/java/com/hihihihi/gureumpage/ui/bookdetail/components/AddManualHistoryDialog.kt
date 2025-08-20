@@ -65,7 +65,8 @@ fun AddManualHistoryDialog(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         readTime: Int,
-        readPageCount: Int
+        readPageCount: Int,
+        currentPage: Int
     ) -> Unit,
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -162,48 +163,41 @@ fun AddManualHistoryDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            GureumTextField(
-                                value = startPage,
-                                onValueChange = {
-                                    startPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
-                                },
-                                hint = "시작 페이지",
-                                isError = hasPageError,
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardType = KeyboardType.Number,
-                            )
-                        }
+                        GureumTextField(
+                            value = startPage,
+                            onValueChange = {
+                                startPage = it.filter(Char::isDigit)
+                                    .toIntOrNull()
+                                    ?.coerceAtMost(lastPage)
+                                    ?.toString()
+                                    ?: ""
+                            },
+                            hint = "시작 페이지",
+                            isError = hasPageError,
+                            modifier = Modifier.weight(1f),
+                            keyboardType = KeyboardType.Number,
+                        )
 
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Top)
-                        ) {
-                            Medi16Text(
-                                "~",
-                                color = GureumTheme.colors.gray600
-                            )
-                        }
+                        Medi16Text(
+                            text = "~",
+                            color = GureumTheme.colors.gray600,
+                        )
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            GureumTextField(
-                                value = endPage,
-                                onValueChange = {
-                                    endPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
-                                },
-                                hint = "끝 페이지",
-                                isError = hasPageError,
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done
-                            )
-                        }
+                        GureumTextField(
+                            value = endPage,
+                            onValueChange = {
+                                endPage = it.filter(Char::isDigit)
+                                    .toIntOrNull()
+                                    ?.coerceAtMost(lastPage)
+                                    ?.toString()
+                                    ?: ""
+                            },
+                            hint = "끝 페이지",
+                            isError = hasPageError,
+                            modifier = Modifier.weight(1f),
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        )
                     }
 
                     AnimatedVisibility(
@@ -293,7 +287,8 @@ fun AddManualHistoryDialog(
                             startTime!!,
                             endTime!!,
                             readTime ?: 0,
-                            readPageCount
+                            readPageCount,
+                            endPage.toInt()
                         )
                         onDismiss()
                     }
@@ -302,16 +297,14 @@ fun AddManualHistoryDialog(
         }
 
         if (showDatePicker) {
-            val datePickerState = rememberDatePickerState()
             GureumPastToTodayDatePicker(
                 onDismiss = { showDatePicker = false },
-                onConfirm = {
-                    datePickerState.selectedDateMillis?.let {
-                        val localDate = Instant.ofEpochMilli(it)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                        date = localDate.atStartOfDay()
-                    }
+                onConfirm = { millis ->
+                    val localDate = Instant.ofEpochMilli(millis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    date = localDate.atStartOfDay()
+                    showDatePicker = false
                 }
             )
         }
@@ -332,7 +325,7 @@ fun AddManualHistoryDialog(
 
                             val availableHours = (startHour..23).toList()
                             val availableMinutes = if (tempHour == startHour) {
-                                (startMinute + 1..59).toList()
+                                (startMinute + 0..59).toList()
                             } else {
                                 (0..59).toList()
                             }
@@ -340,7 +333,8 @@ fun AddManualHistoryDialog(
                             Pair(availableHours, availableMinutes)
                         }
 
-                        val validTempHour = if (hourValues.contains(tempHour)) tempHour else hourValues.first()
+                        val validTempHour =
+                            if (hourValues.contains(tempHour)) tempHour else hourValues.first()
                         val validTempMinute =
                             if (minuteValues.contains(tempMinute)) tempMinute else minuteValues.first()
 

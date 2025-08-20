@@ -1,10 +1,9 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.remote.dto.UserDto
-import com.hihihihi.domain.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -25,23 +24,28 @@ class UserRemoteDataSourceImpl @Inject constructor(
     }
 
     override fun getUserFlow(userId: String): Flow<UserDto> = callbackFlow {
+        Log.e("TAG", "getUserFlow: ${userId}")
         val docRef = firestore.collection("users").document(userId)
 
         val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                close(error) 
+                close(error)
                 return@addSnapshotListener
             }
 
-            val dto = snapshot?.toObject(UserDto::class.java)
-            if (dto != null) {
-                dto.userId = snapshot.id
-                trySend(dto).isSuccess
+
+            if (snapshot?.exists() == true) {
+                val dto = snapshot?.toObject(UserDto::class.java)
+                if (dto != null) {
+                    dto.userId = snapshot.id
+                    trySend(dto).isSuccess
+                } else {
+                    close(Exception("User 파싱 실패"))
+                }
             } else {
-                close(Exception("User 조회 실패"))
+                Log.e("TAG", "getUserFlow: 유저 없음")
             }
         }
-
         awaitClose { listenerRegistration.remove() }
     }
 
@@ -53,6 +57,4 @@ class UserRemoteDataSourceImpl @Inject constructor(
     override suspend fun updateDailyGoalTime(userId: String, dailyGoalTime: Int) {
         col.document(userId).update("daily_goal_time", dailyGoalTime).await()
     }
-
-
 }

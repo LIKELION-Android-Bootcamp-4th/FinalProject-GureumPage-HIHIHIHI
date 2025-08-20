@@ -15,5 +15,7 @@ interface UserBookRemoteDataSource {
 
     suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit>
 
-    suspend fun addUserBook(userBookDto: UserBookDto): Result<String>
+    suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean
+
+    suspend fun addUserBook(userId: String, rawIsbn: String, userBookDto: UserBookDto): Result<String>
 }

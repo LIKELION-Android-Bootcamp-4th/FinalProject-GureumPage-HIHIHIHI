@@ -10,7 +10,6 @@ import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -19,8 +18,8 @@ class GetHomeDataUseCase @Inject constructor(
     private val quoteRepository: QuoteRepository,
     private val historyRepository: HistoryRepository,
     private val userRepository: UserRepository
-    ) {
-     operator fun invoke(userId: String): Flow<HomeData> {
+) {
+    operator fun invoke(userId: String): Flow<HomeData> {
         val userBooksFlow = userBookRepository.getUserBooksByStatus(userId, ReadingStatus.READING)
         val quotesFlow = quoteRepository.getQuotes(userId)
 
@@ -31,16 +30,20 @@ class GetHomeDataUseCase @Inject constructor(
 
         val userFlow = userRepository.getUserFlow(userId)
 
-        return combine(userBooksFlow, quotesFlow, todayReadTimeFlow ,userFlow) { userBooks, quotes, todayReadTime, user ->
+        return combine(
+            userBooksFlow,
+            quotesFlow,
+            todayReadTimeFlow,
+            userFlow
+        ) { userBooks, quotes, todayReadTime, user ->
             HomeData(
                 userBooks = userBooks,
                 quotes = quotes,
-                todayReadTime = todayReadTime ,
+                todayReadTime = todayReadTime,
                 user = user
             )
         }
     }
-
 }
 
 data class HomeData(

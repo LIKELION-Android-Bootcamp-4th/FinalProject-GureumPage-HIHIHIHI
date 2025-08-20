@@ -10,9 +10,9 @@ class DailyReadPageRemoteDataSourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : DailyReadPageRemoteDataSource {
 
-    override suspend fun getDailyReadPages(uid: String): List<DailyReadPageDto> {
+    override suspend fun getDailyReadPages(userId: String): List<DailyReadPageDto> {
         val snapshot = firestore.collection("daily_read_pages")
-            .whereEqualTo("uid", uid)
+            .whereEqualTo("user_id", userId)
             .get()
             .await()
 

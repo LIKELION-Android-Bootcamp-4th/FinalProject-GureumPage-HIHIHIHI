@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,13 +35,10 @@ fun StopReadingDialog(
     willSave: Boolean = true,
     onConfirmStop: () -> Unit,
     onDismiss: () -> Unit,
-    onConfirmStopPages: (startPage: Int, endPage: Int) -> Unit = { _, _ -> onConfirmStop()},
+    onConfirmStopPages: (startPage: Int, endPage: Int) -> Unit = { _, _ -> onConfirmStop() },
 ) {
     val colors = GureumTheme.colors
     val typo = GureumTypography
-
-//    val corner = 16.dp
-//    val hPad = 24.dp
 
     var startPage by remember(currentPage) { mutableStateOf((currentPage ?: 0).takeIf { it > 0 }?.toString() ?: "") }
     var endPage by remember { mutableStateOf("") }
@@ -78,16 +76,16 @@ fun StopReadingDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally // ★ 전체 가운데 정렬
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // 제목 + 닫기
                 Box(Modifier.fillMaxWidth()) {
                     Text(
                         text = "독서를 종료하시겠습니까?",
                         style = typo.headlineSmall,
-                        textAlign = TextAlign.Center,              // ★ 가운데
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxWidth()                        // ★ 폭을 채워야 중앙 정렬이 적용됨
+                            .fillMaxWidth()
                             .align(Alignment.Center)
                     )
                     IconButton(
@@ -107,8 +105,8 @@ fun StopReadingDialog(
                     text = if (willSave) "현재까지의 독서 기록이 저장됩니다."
                     else "현재까지의 독서 시간 기록이 저장되지 않습니다.",
                     style = typo.bodySmall,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
-                    modifier = Modifier.fillMaxWidth(),           // ★
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                     color = colors.gray500
                 )
 
@@ -116,8 +114,8 @@ fun StopReadingDialog(
                 Text(
                     text = "오늘의 독서 시간",
                     style = typo.bodySmall,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
-                    modifier = Modifier.fillMaxWidth(),           // ★
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                     color = colors.gray400
                 )
 
@@ -125,9 +123,9 @@ fun StopReadingDialog(
                     text = displayTime,
                     style = typo.headlineLarge,
                     color = colors.primaryDeep,
-                    textAlign = TextAlign.Center,                 // ★ 가운데
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .fillMaxWidth()                           // ★
+                        .fillMaxWidth()
                         .padding(top = 2.dp, bottom = 10.dp)
                 )
 
@@ -187,7 +185,8 @@ fun StopReadingDialog(
                         value = endPage,
                         onValueChange = { endPage = it.onlyDigits() },
                         hint = "끝 페이지",
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        imeAction = ImeAction.Done
                     )
                 }
 

@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.withdraw
 
 data class WithdrawUiState(
-    val loading: Boolean = false,
-    val error: String? = null
+    val isLoading: Boolean = false,
+    val loadingMessage: String = "",
+    val errorMessage: String? = null
 )

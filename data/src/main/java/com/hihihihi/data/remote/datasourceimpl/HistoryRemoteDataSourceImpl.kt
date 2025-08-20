@@ -1,8 +1,6 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
@@ -79,11 +77,6 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 .whereGreaterThanOrEqualTo("date", startOfDay)
                 .whereLessThanOrEqualTo("date", endOfDay)
                 .addSnapshotListener { snapshot, error ->
-                    if (snapshot != null) {
-                        snapshot.documents.forEach {
-                            Log.e("Debug", "date field: ${it.get("date")}")
-                        }
-                    }
                     if (error != null) {
                         close(error)
                         return@addSnapshotListener
@@ -91,9 +84,6 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                     val histories = snapshot?.documents?.mapNotNull { doc ->
                         doc.toObject(HistoryDto::class.java)
                     } ?: emptyList()
-
-                    Log.e("TAG", "getTodayHistoriesByUserId: ${histories}", )
-
                     trySend(histories)
                 }
 
@@ -106,32 +96,33 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun addHistory(
         historyDto: HistoryDto,
-        uid: String
+        uid: String,
+        currentPage: Int
     ): Result<Unit> = try {
         val historyRef = firestore.collection("histories").document()
         historyDto.historyId = historyRef.id
         historyRef.set(historyDto).await()
 
         val dateStr = historyDto.date?.toDate()?.let { ts ->
-            val cal = java.util.Calendar.getInstance()
+            val cal = Calendar.getInstance()
             cal.time = ts
             "%04d-%02d-%02d".format(
-                cal.get(java.util.Calendar.YEAR),
-                cal.get(java.util.Calendar.MONTH) + 1,
-                cal.get(java.util.Calendar.DAY_OF_MONTH)
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1,
+                cal.get(Calendar.DAY_OF_MONTH)
             )
         } ?: throw IllegalArgumentException("date is null")
 
 
         val querySnapshot = firestore.collection("daily_read_pages")
-            .whereEqualTo("uid", uid)
+            .whereEqualTo("user_id", uid)
             .whereEqualTo("date", dateStr)
             .get()
             .await()
 
         if (querySnapshot.documents.isEmpty()) {
             val newDaily = DailyReadPageDto(
-                uid = uid,
+                userId = uid,
                 date = dateStr,
                 totalReadPageCount = historyDto.readPageCount.toLong(),
                 updatedAt = Timestamp.now()
@@ -145,6 +136,22 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 mapOf(
                     "totalReadPageCount" to updatedCount,
                     "updated_at" to Timestamp.now()
+                )
+            ).await()
+        }
+
+        val userBookSnapshot = firestore.collection("user_books")
+            .whereEqualTo(FieldPath.documentId(), historyDto.userBookId)
+            .get()
+            .await()
+
+        if (userBookSnapshot.documents.isNotEmpty()) {
+            val userBookDoc = userBookSnapshot.documents.first()
+            val totalReadTime = userBookDoc.getLong("total_read_time") ?: 0
+            userBookDoc.reference.update(
+                mapOf(
+                    "current_page" to currentPage,
+                    "total_read_time" to totalReadTime + historyDto.readTime
                 )
             ).await()
         }

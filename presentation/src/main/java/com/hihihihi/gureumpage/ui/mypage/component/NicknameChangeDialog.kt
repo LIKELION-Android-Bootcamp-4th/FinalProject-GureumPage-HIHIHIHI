@@ -46,7 +46,6 @@ fun NicknameChangeDialog(
     val colors = GureumTheme.colors
     val typo = GureumTypography
 
-
     var text by remember { mutableStateOf(TextFieldValue("")) } // 처음 진입 시 빈 값
     val rule = remember(text) { validateNickname(text.text) } // 긴단 검증
     val canSave = rule is NicknameRule.Ok // 저장 가능 여부

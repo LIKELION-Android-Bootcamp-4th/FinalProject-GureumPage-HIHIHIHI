@@ -8,8 +8,8 @@ import javax.inject.Inject
 
 class GetUserBooksByStatusUseCase @Inject constructor(
     private val repository: UserBookRepository
-){
-    operator fun invoke (userId: String, status: ReadingStatus): Flow<List<UserBook>> {
+) {
+    operator fun invoke(userId: String, status: ReadingStatus): Flow<List<UserBook>> {
         return repository.getUserBooksByStatus(userId, status)
     }
 }

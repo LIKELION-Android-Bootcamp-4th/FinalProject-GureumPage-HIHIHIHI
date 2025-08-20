@@ -23,7 +23,6 @@ import com.hihihihi.gureumpage.common.utils.PageFormatter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.statistics.mockPages
 
 @Composable
 fun ReadingPageCard(
@@ -60,7 +59,7 @@ fun ReadingPageCard(
                 val dataSet = LineDataSet(entries, "주간 독서 페이지").apply {
                     color = labelColor
                     lineWidth = 1.5f // 선 두께
-                    mode = LineDataSet.Mode.CUBIC_BEZIER // 선 모양
+                    mode = LineDataSet.Mode.HORIZONTAL_BEZIER // 선 모양
 
                     setDrawCircles(false) // 점 삭제
                     valueTextSize = 10f

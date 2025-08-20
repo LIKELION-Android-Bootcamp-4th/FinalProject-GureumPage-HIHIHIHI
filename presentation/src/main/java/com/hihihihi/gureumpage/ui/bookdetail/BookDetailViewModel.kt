@@ -24,9 +24,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -71,7 +69,8 @@ class BookDetailViewModel @Inject constructor(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         readTime: Int,
-        readPageCount: Int
+        readPageCount: Int,
+        currentPage: Int
     ) {
         val userBook = uiState.value.userBook ?: return
 
@@ -89,7 +88,7 @@ class BookDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                addHistoryUseCase(history)
+                addHistoryUseCase(history, currentPage = currentPage)
 
                 // 저장 후 UI 상태 업데이트
                 _uiState.update {
@@ -105,7 +104,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
 
-    fun addQuote(userBookId: String, content: String, pageNumber: Int?, ){
+    fun addQuote(userBookId: String, content: String, pageNumber: Int?) {
         val userBook = uiState.value.userBook ?: return // 방어 코드
 
         val newQuote = Quote(
@@ -118,7 +117,7 @@ class BookDetailViewModel @Inject constructor(
             createdAt = LocalDateTime.now(),
             title = userBook.title,
             author = userBook.author,
-            publisher = userBook.publisher?: "",
+            publisher = userBook.publisher ?: "",
             imageUrl = userBook.imageUrl
         )
         viewModelScope.launch {
@@ -126,7 +125,7 @@ class BookDetailViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isLoading = true))
 
             // 명언 추가 UseCase 실행
-            val result =  addQuoteUseCase(newQuote)
+            val result = addQuoteUseCase(newQuote)
 
             // 결과에 따라 상태 업데이트
             if (result.isSuccess) {
@@ -152,7 +151,11 @@ class BookDetailViewModel @Inject constructor(
     // 통계 반환하는 함수
     fun getStatistic(): BookStatistic {
         return BookStatistic(
-            readingPeriod = if(uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(uiState.value.userBook?.startDate!!, uiState.value.userBook?.endDate ,uiState.value.userBook?.status!!),
+            readingPeriod = if (uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(
+                uiState.value.userBook?.startDate!!,
+                uiState.value.userBook?.endDate,
+                uiState.value.userBook?.status!!
+            ),
             totalReadingTime = uiState.value.histories
                 .sumOf { it.readTime }
                 .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
@@ -160,7 +163,7 @@ class BookDetailViewModel @Inject constructor(
         )
     }
 
-    fun patchUserBook(status: ReadingStatus?, page: Int?, startDate: LocalDateTime?, endDate: LocalDateTime?){
+    fun patchUserBook(status: ReadingStatus?, page: Int?, startDate: LocalDateTime?, endDate: LocalDateTime?) {
         val userBook = uiState.value.userBook ?: return
 
         val patchUserBook = userBook.copy(

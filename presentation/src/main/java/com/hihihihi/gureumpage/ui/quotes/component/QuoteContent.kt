@@ -43,7 +43,8 @@ fun QuoteContent(
             ) {
                 items(quotes) { item ->
                     QuoteItem(
-                        item = item, onItemClick = {
+                        item = item,
+                        onItemClick = {
                             onQuoteSelected(item)
                             scope.launch {
                                 sheetState.show()

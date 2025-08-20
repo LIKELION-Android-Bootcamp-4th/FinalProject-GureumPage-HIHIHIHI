@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val getUserBooksUseCase: GetUserBooksUseCase // 유저 책 목록 가져오는 UseCase
-): ViewModel(){
+) : ViewModel() {
 
     // ui 상태 :
     private val _uiState = MutableStateFlow(LibraryUiState(isLoading = true))
@@ -23,7 +23,6 @@ class LibraryViewModel @Inject constructor(
     val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
     init {
-        //테스트용 userid 추후 변경
         loadUserBooks(userId)
     }
 

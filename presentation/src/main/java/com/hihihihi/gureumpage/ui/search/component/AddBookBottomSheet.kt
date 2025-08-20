@@ -18,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -53,12 +55,13 @@ import java.time.LocalDateTime
 fun AddBookBottomSheet(
     book: SearchBook,
     sheetState: SheetState,
+    isLoading: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (Book) -> Unit,
     onGetBookPageCount: (isbn: String, onResult: (Int?) -> Unit) -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf(ReadingStatus.PLANNED.displayName) }
-    var pageInput by remember { mutableStateOf("") }
+    var pageInput by remember { mutableStateOf("0") }
     var bookPageCount by remember { mutableStateOf<Int?>(null) }
     val focusManager = LocalFocusManager.current
 
@@ -72,6 +75,25 @@ fun AddBookBottomSheet(
         if (book.isbn.isNotBlank()) {
             onGetBookPageCount(book.isbn) { pageCount ->
                 bookPageCount = pageCount
+            }
+        }
+    }
+
+    val isButtonEnabled by remember {
+        derivedStateOf {
+            if (isLoading) {
+                false
+            } else {
+                when (selectedCategory.toReadingStatus()) {
+                    ReadingStatus.PLANNED -> true
+                    ReadingStatus.READING -> {
+                        startDate != null && pageInput.isNotBlank()
+                    }
+                    ReadingStatus.FINISHED -> {
+                        startDate != null && endDate != null
+                    }
+                    else -> false
+                }
             }
         }
     }
@@ -153,17 +175,36 @@ fun AddBookBottomSheet(
             //토글 여부에 따라 달라지는 하단 뷰
             when (selectedCategory.toReadingStatus()) {
                 ReadingStatus.READING -> {
+                    Semi16Text("시작한 날")
+                    Spacer(Modifier.height(14.dp))
+                    GureumClickEventTextField(
+                        value = startDate?.let { formatDateToSimpleString(it) } ?: "",
+                        hint = "시작한 날",
+                        onClick = {
+                            isSelectingStartDate = true
+                            showDatePicker = true
+                        },
+                        trailingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_calendar_outline),
+                                contentDescription = "날짜 선택"
+                            )
+                        }
+                    )
+                    Spacer(Modifier.height(8.dp))
+
                     Semi16Text("현재 페이지 (선택사항)")
                     Spacer(modifier = Modifier.height(14.dp))
-
                     //사용자 페이지 입력 필드
                     GureumTextField(
                         value = pageInput,
                         onValueChange = {
-                            pageInput = it.toInt()
-                                .coerceAtMost(bookPageCount ?: Int.MAX_VALUE)
-                                .toString()
-                                .filter { char -> char.isDigit() }
+                            val digits = it.filter(Char::isDigit)
+                            val max = bookPageCount ?: Int.MAX_VALUE
+                            pageInput = digits.toIntOrNull()
+                                ?.coerceAtMost(max)
+                                ?.toString()
+                                ?: ""
                         },
                         hint = "예 : 157",
                         trailingIcon = {
@@ -172,7 +213,8 @@ fun AddBookBottomSheet(
                                 contentDescription = "페이지"
                             )
                         },
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
                     )
                     BodySubText(
                         "시작할 페이지를 입력하세요 (기본값: 0페이지)",
@@ -215,33 +257,36 @@ fun AddBookBottomSheet(
                             }
                         )
                     }
-                    if (showDatePicker) {
-                        GureumBetweenDatePicker(
-                            isSelectingStart = isSelectingStartDate,
-                            startDate = startDate,
-                            endDate = endDate,
-                            onDismiss = { showDatePicker = false },
-                            onConfirm = { millis ->
-                                val selectedDate = formatMillisToLocalDateTime(millis)
-
-                                if (isSelectingStartDate) {
-                                    startDate = selectedDate
-                                } else {
-                                    endDate = selectedDate
-                                }
-
-                                pageInput = bookPageCount.toString()
-                            },
-                        )
-                    }
                 }
 
                 else -> {}
             }
+            if (showDatePicker) {
+                GureumBetweenDatePicker(
+                    isSelectingStart = isSelectingStartDate,
+                    startDate = startDate,
+                    endDate = endDate,
+                    onDismiss = { showDatePicker = false },
+                    onConfirm = { millis ->
+                        val selectedDate = formatMillisToLocalDateTime(millis)
+
+                        if (isSelectingStartDate) {
+                            startDate = selectedDate
+                            if (selectedCategory.toReadingStatus() == ReadingStatus.READING && pageInput.isEmpty()) {
+                                pageInput = "0"
+                            }
+                        } else {
+                            endDate = selectedDate
+                        }
+                    },
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
             GureumButton(
-                "서재에 추가", onClick = {
+                "서재에 추가",
+                enabled = isButtonEnabled,
+                onClick = {
                     //포커스 제거
                     focusManager.clearFocus()
                     //페이지 가져오기 기본값 0

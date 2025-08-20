@@ -21,13 +21,9 @@ private val LightColorScheme = lightColorScheme(
 
     secondary = LightGureum.gray200,
     onSecondary = LightGureum.gray0,
-//    secondaryContainer = LightGureum.dividerShallow,
-//    onSecondaryContainer = LightGureum.gray100,
 
     tertiary = LightGureum.primary50,
     onTertiary = LightGureum.gray500,
-//    tertiaryContainer = LightGureum.primary10,
-//    onTertiaryContainer = LightGureum.gray500,
 
     error = LightGureum.systemRed,
     onError = LightGureum.white,

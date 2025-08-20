@@ -16,7 +16,7 @@ data class PageCount(
 )
 
 val mockGenreList = listOf(
-    Genre(3f, "소설",),
+    Genre(3f, "소설"),
     Genre(4f, "판타지"),
     Genre(5f, "자기계발"),
 )

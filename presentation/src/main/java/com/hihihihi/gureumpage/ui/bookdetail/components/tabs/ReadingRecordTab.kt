@@ -47,7 +47,7 @@ fun ReadingRecordTab(histories: List<History>) {
                     verticalAlignment = Alignment.Bottom,
                 ) {
                     Text(
-                        text = formatDateToSimpleString(dailyRecords.first().date), 
+                        text = formatDateToSimpleString(dailyRecords.first().date),
                         modifier = Modifier,
                         color = GureumTheme.colors.gray400,
                         style = GureumTypography.bodySmall
