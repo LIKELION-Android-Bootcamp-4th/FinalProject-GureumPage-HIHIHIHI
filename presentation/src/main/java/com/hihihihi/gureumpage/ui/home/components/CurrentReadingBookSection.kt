@@ -42,6 +42,7 @@ import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
 import com.hihihihi.gureumpage.common.utils.pxToDp
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
@@ -215,7 +216,13 @@ private fun BookCardContent(
     Column(modifier = Modifier.padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             // 책 표지
-            BookCoverImage(book = book)
+            BookCoverImage(
+                imageUrl = book.imageUrl,
+                modifier = Modifier
+                    .height(80.dp)
+                    .aspectRatio(0.75f)
+                    .clip(RoundedCornerShape(4.dp)),
+            )
 
             Spacer(Modifier.width(12.dp))
 
@@ -232,24 +239,6 @@ private fun BookCardContent(
         // 진행률 정보
         BookProgress(book = book)
     }
-}
-
-@Composable
-private fun BookCoverImage(book: UserBook) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(book.imageUrl)
-            .crossfade(true)
-            .build(),
-        contentDescription = "책 표지",
-        modifier = Modifier
-            .height(80.dp)
-            .aspectRatio(0.75f)
-            .clip(RoundedCornerShape(4.dp)),
-        placeholder = painterResource(R.drawable.ic_cloud_reading),
-        error = painterResource(R.drawable.ic_cloud_reading),
-        contentScale = ContentScale.Crop
-    )
 }
 
 @Composable

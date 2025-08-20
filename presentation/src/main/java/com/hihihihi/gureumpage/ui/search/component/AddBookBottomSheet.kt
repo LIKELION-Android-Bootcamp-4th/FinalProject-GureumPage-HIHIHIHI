@@ -39,6 +39,7 @@ import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.common.utils.formatMillisToLocalDateTime
 import com.hihihihi.gureumpage.designsystem.components.BodyMediumText
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.GureumBetweenDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumClickEventTextField
@@ -120,13 +121,11 @@ fun AddBookBottomSheet(
                     .padding(top = 20.dp)
             ) {
                 //책 표지
-                AsyncImage(
+                BookCoverImage(
                     modifier = Modifier
                         .size(width = 80.dp, height = 112.dp)
                         .clip(RoundedCornerShape(4.dp)),
-                    contentScale = ContentScale.Crop,
-                    model = book.coverImageUrl,
-                    contentDescription = "책 표지",
+                    imageUrl = book.coverImageUrl,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 //책 설명
