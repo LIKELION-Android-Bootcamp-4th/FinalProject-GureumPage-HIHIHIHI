@@ -19,7 +19,7 @@ async function createOrUpdateUserDoc({uid, provider}) {
 
     if (!existingDoc.exists) {
       userData.nickname = "";
-      userData.appellation = "";
+      userData.appellation = "꼬마 구름";
       userData.daily_goal_time = 0;
     }
 
