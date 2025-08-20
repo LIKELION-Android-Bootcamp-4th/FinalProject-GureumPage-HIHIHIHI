@@ -6,10 +6,28 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +36,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,8 +50,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
+import com.hihihihi.gureumpage.designsystem.components.Medi14Text
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
@@ -44,8 +70,17 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @HiltViewModel
-    class GureumThemeViewModel @Inject constructor(getTheme: GetThemeFlowUseCase) : ViewModel() {
+    class GureumThemeViewModel @Inject constructor(
+        getTheme: GetThemeFlowUseCase,
+        private val networkManager: NetworkManager
+    ) : ViewModel() {
         val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
+
+        val showNetworkWarning = networkManager.showNetworkWarning
+
+        fun dismissNetworkWarning() {
+            networkManager.dismissNetworkWarning()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,13 +89,24 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel = hiltViewModel<GureumThemeViewModel>()
             val currentTheme by viewModel.theme.collectAsState()
+            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(
                 darkTheme = when (currentTheme) {
                     GureumThemeType.LIGHT -> false
                     else -> true
                 }
-            ) { GureumPageApp() }
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    GureumPageApp()
+
+                    if (showNetworkWarning) {
+                        NetworkWarningBanner(
+                            onDismiss = { viewModel.dismissNetworkWarning() }
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -153,6 +199,60 @@ fun GureumPageApp() {
                 modifier = Modifier.padding(innerPadding),
                 snackbarHostState = snackbarHostState
             )
+        }
+    }
+}
+
+@Composable
+fun NetworkWarningBanner(
+    onDismiss: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(top = 40.dp)
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = GureumTheme.colors.systemRed
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = GureumTheme.colors.white
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column ( modifier = Modifier.weight(1f),
+            ){
+                Semi16Text(
+                    "앗, 네트워크 연결이 끊어졌어요!",
+                    color = GureumTheme.colors.white
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Medi14Text(
+                    "데이터를 불러오거나 저장할 수 없어요.",
+                    color = GureumTheme.colors.white
+                )
+                Medi14Text(
+                    "다시 연결하면 바로 불러올 수 있어요!",
+                    color = GureumTheme.colors.white
+                )
+            }
+
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    modifier = Modifier.size(16.dp),
+                    contentDescription = null,
+                    tint = GureumTheme.colors.white
+                )
+            }
         }
     }
 }
