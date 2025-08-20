@@ -61,7 +61,7 @@ fun StopReadingConfirmDialog(
                     text = if (willSave) "현재까지의 독서 기록이 저장됩니다."
                     else "현재까지의 독서 시간 기록이 저장되지 않습니다.",
                     style = typo.bodySmall,
-                    color = colors.gray500,
+                    color = if (willSave) colors.gray500 else colors.systemRed,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
