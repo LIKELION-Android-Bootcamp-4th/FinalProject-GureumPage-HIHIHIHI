@@ -74,7 +74,7 @@ fun MyPageMenuSection(
         }
 
         MyPageMenuSettingItem(
-            title = "버전 1.0.1",
+            title = "앱 버전: v1.0.0",
             textColor = colors.gray400,
             showArrow = false,
         ) {}
