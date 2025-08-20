@@ -3,7 +3,6 @@ package com.hihihihi.gureumpage.ui.search
 import android.app.Activity
 import android.content.res.Configuration
 import android.widget.Toast
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,8 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +32,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.luminance
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.hihihihi.domain.model.SearchBook
@@ -70,14 +71,17 @@ fun SearchScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val statusBarColor = GureumTheme.colors.card
-    val useDarkIcons = !isSystemInDarkTheme()
-    val view = LocalView.current
-    val window = (view.context as Activity).window
-    SideEffect {
-        window.statusBarColor = statusBarColor.toArgb()
-        WindowCompat.getInsetsController(window, view)
-            .isAppearanceLightStatusBars = useDarkIcons
+    val statusBarColor = GureumTheme.colors.card.toArgb()
+    val lightIcons = statusBarColor.luminance > 0.5f
+    val window = (LocalView.current.context as Activity).window
+    DisposableEffect(statusBarColor, lightIcons) {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = statusBarColor
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = lightIcons
+            isAppearanceLightNavigationBars = lightIcons
+        }
+        onDispose { }
     }
 
     //화면 진입 시 검색 자동 포커스
