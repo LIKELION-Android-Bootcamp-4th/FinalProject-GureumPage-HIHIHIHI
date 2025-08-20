@@ -27,8 +27,9 @@ import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
-import kotlin.math.exp
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import com.hihihihi.gureumpage.R
 
 @Composable
 fun QuotesTab(
