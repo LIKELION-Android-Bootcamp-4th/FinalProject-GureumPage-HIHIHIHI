@@ -67,7 +67,7 @@ fun BookDetailFab(
             ) { onEvent(BookDetailFabEvent.NavigateToMindmap) },
             MiniFabItem(
                 R.drawable.ic_alarm_filled,
-                "독서 타이머 시작"
+                "독서 스톱워치 시작"
             ) { onEvent(BookDetailFabEvent.NavigateToTimer) },
             MiniFabItem(
                 R.drawable.ic_edit_alt_filled,
