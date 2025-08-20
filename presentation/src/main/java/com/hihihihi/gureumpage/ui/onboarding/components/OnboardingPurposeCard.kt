@@ -85,7 +85,7 @@ fun OnboardingPurposeCard(
             Spacer(Modifier.weight(1f))
             Icon(
                 painter = painterResource(
-                    if (checked) R.drawable.ic_checked else R.drawable.ic_none_checked
+                    if (checked) R.drawable.ic_checked_dark else R.drawable.ic_none_checked
                 ),
                 contentDescription = if (checked) "선택됨" else "선택 안됨",
                 tint = Color.Unspecified,
