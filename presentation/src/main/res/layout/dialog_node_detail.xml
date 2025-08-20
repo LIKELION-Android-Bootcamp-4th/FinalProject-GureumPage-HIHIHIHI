@@ -84,7 +84,7 @@
             android:background="@drawable/node_background_shape"
             android:fontFamily="@font/pretendard_medium"
             android:gravity="top"
-            android:lines="4"
+            android:minLines="4"
             android:padding="16dp"
             android:textColor="@color/gray600"
             android:textColorHint="@color/gray400"
