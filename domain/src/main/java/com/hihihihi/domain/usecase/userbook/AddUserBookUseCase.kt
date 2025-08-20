@@ -15,12 +15,24 @@ class AddUserBookUseCase @Inject constructor(
     private val mindmapRepository: MindmapRepository,
     private val mindmapNodeRepository: MindmapNodeRepository,
 ) {
-    suspend operator fun invoke(userBook: UserBook, mindmap: Mindmap, rootNode: MindmapNode): Result<Unit> {
+    suspend operator fun invoke(
+        userId: String,
+        userBook: UserBook,
+        mindmap: Mindmap,
+        rootNode: MindmapNode
+    ): Result<Unit> {
         return try {
-            val userBookId = userBookRepository.addUserBook(userBook).getOrThrow()
+
+            // 중복 확인 (정규화된 ISBN 사용)
+            if (userBookRepository.checkUserBookExists(userId, userBook.isbn13!!)) {
+                return Result.failure(Exception("이미 추가된 책입니다"))
+            }
+
+            val userBookId =
+                userBookRepository.addUserBook(userId, userBook.isbn13, userBook).getOrThrow()
             val rootNodeId = "${userBookId}Root"
 
-            Log.e("TAG", "invoke: ${userBook.userId}", )
+            Log.e("TAG", "invoke: ${userBook.userId}")
             val operations = listOf(
                 NodeEditOperation.Add(
                     rootNode.copy(

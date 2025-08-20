@@ -1,6 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hihihihi.data.common.util.ISBNNormalizer
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.dto.UserBookDto
 import com.hihihihi.data.remote.mapper.toMap
@@ -15,9 +16,13 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : UserBookRemoteDataSource {
 
-    override fun getUserBooks(userId: String): Flow<List<UserBookDto>> = getUserBooksInternal(userId)
+    override fun getUserBooks(userId: String): Flow<List<UserBookDto>> =
+        getUserBooksInternal(userId)
 
-    override fun getUserBooksByStatus(userId: String, status: ReadingStatus): Flow<List<UserBookDto>> =
+    override fun getUserBooksByStatus(
+        userId: String,
+        status: ReadingStatus
+    ): Flow<List<UserBookDto>> =
         getUserBooksInternal(userId, status)
 
     // 🔁 공통 로직 추출
@@ -63,7 +68,8 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
                 return@addSnapshotListener
             }
 
-            val userBookDto = snapshot?.toObject(UserBookDto::class.java)?.copy(userBookId = snapshot.id)
+            val userBookDto =
+                snapshot?.toObject(UserBookDto::class.java)?.copy(userBookId = snapshot.id)
 
             if (userBookDto != null) {
                 trySend(userBookDto).isSuccess
@@ -85,12 +91,42 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun addUserBook(userBookDto: UserBookDto): Result<String> = try {
-        val documentReference = firestore.collection("user_books").document()
-        documentReference.set(userBookDto.toMap()).await()
+    override suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean {
+        return try {
+            val normalizedIsbn = ISBNNormalizer.normalize(rawIsbn) ?: return false
+            val documentId = "${userId}-${normalizedIsbn}"
 
-        Result.success(documentReference.id)
-    } catch (e: Exception) {
-        Result.failure(e)
+            val docRef = firestore.collection("user_books").document(documentId)
+            val snapshot = docRef.get().await()
+            snapshot.exists()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun addUserBook(
+        userId: String,
+        rawIsbn: String,
+        userBookDto: UserBookDto
+    ): Result<String> {
+        return try {
+            val normalizedIsbn = ISBNNormalizer.normalize(rawIsbn)
+                ?: return Result.failure(Exception("유효하지 않은 ISBN입니다"))
+
+            val documentId = "${userId}-${normalizedIsbn}"
+            val docRef = firestore.collection("user_books").document(documentId)
+
+            // 이미 존재하는지 확인
+            if (docRef.get().await().exists()) {
+                Result.failure(Exception("이미 추가된 책입니다"))
+            } else {
+                // DTO에 정규화된 ISBN 설정
+                val normalizedDto = userBookDto.copy(isbn13 = normalizedIsbn)
+                docRef.set(normalizedDto.toMap()).await()
+                Result.success(documentId)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -34,8 +34,16 @@ class UserBookRepositoryImpl @Inject constructor(
         return userBookRemoteDataSource.patchUserBook(userBookDto)
     }
 
-    override suspend fun addUserBook(userBook: UserBook): Result<String> {
+    override suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean {
+        return userBookRemoteDataSource.checkUserBookExists(userId, rawIsbn)
+    }
+
+    override suspend fun addUserBook(
+        userId: String,
+        rawIsbn: String,
+        userBook: UserBook
+    ): Result<String> {
         val userBookDto = userBook.toDto()
-        return userBookRemoteDataSource.addUserBook(userBookDto)
+        return userBookRemoteDataSource.addUserBook(userId, rawIsbn, userBookDto)
     }
 }

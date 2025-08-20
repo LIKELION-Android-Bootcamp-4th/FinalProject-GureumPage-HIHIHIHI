@@ -25,16 +25,28 @@ class SearchViewModel @Inject constructor(
     private val addUserBookUseCase: AddUserBookUseCase,
     private val searchRepository: SearchRepository,
 ) : ViewModel() {
-    private val _searchResults = MutableStateFlow<List<SearchBook>>(emptyList())
-    val searchResults: StateFlow<List<SearchBook>> = _searchResults.asStateFlow()
+    private val _uiState = MutableStateFlow(SearchUiState())
+    val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
+
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val currentUid: String
+        get() = auth.currentUser!!.uid
+
 
     fun search(query: String) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isSearching = true)
             try {
                 val results = searchBooksUseCase(query)
-                _searchResults.value = results
+                _uiState.value = _uiState.value.copy(
+                    searchResults = results,
+                    isSearching = false
+                )
             } catch (e: Exception) {
-                _searchResults.value = emptyList()
+                _uiState.value = _uiState.value.copy(
+                    searchResults = emptyList(),
+                    isSearching = false
+                )
             }
         }
     }
@@ -60,6 +72,8 @@ class SearchViewModel @Inject constructor(
         status: ReadingStatus,
     ) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isAddingBook = true)
+
             try {
                 val userBook = UserBook(
                     userBookId = "",
@@ -103,11 +117,39 @@ class SearchViewModel @Inject constructor(
                     bookImage = searchBook.coverImageUrl
                 )
 
-                addUserBookUseCase(userBook, mindmap, rootNode)
-                // TODO: 성공 실패 처리 하기
-            } catch (e: Exception) {
+                val result = addUserBookUseCase(currentUid, userBook, mindmap, rootNode)
 
+                if (result.isSuccess) {
+                    _uiState.value =
+                        _uiState.value.copy(
+                            isAddingBook = false,
+                            addBookMessage = "책이 추가되었습니다",
+                            isAddBookSuccess = true
+                        )
+                } else {
+                    val errorMessage = result.exceptionOrNull()?.message ?: "알 수 없는 오류가 발생했습니다."
+                    _uiState.value =
+                        _uiState.value.copy(
+                            isAddingBook = false,
+                            addBookMessage = errorMessage,
+                            isAddBookSuccess = false
+                        )
+                }
+            } catch (e: Exception) {
+                _uiState.value =
+                    _uiState.value.copy(
+                        isAddingBook = false,
+                        addBookMessage = e.message ?: "알 수 없는 오류가 발생했습니다.",
+                        isAddBookSuccess = false
+                    )
             }
         }
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(
+            addBookMessage = "",
+            isAddBookSuccess = false
+        )
     }
 }
