@@ -10,4 +10,11 @@ interface QuoteRepository {
     suspend fun addQuote(quote: Quote): Result<Unit>
     fun getQuotes(userId: String): Flow<List<Quote>>
     fun getQuotesByUserBookId(userBookId: String): Flow<List<Quote>>
+    suspend fun deleteQuote(quoteId: String): Result<Unit>
+
+    suspend fun updateQuote(
+        quoteId: String,
+        content: String,
+        pageNumber: Int?
+    ): Result<Unit>
 }
