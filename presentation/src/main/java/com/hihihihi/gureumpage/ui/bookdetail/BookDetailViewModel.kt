@@ -9,6 +9,8 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
+import com.hihihihi.domain.usecase.quote.DeleteQuoteUseCase
+import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTime
@@ -33,6 +35,8 @@ class BookDetailViewModel @Inject constructor(
     private val addHistoryUseCase: AddHistoryUseCase,
     private val patchUserBookUseCase: PatchUserBookUseCase,
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
+    private val deleteQuoteUseCase: DeleteQuoteUseCase,
+    private val updateQuoteUseCase: UpdateQuoteUseCase,
 ):ViewModel(){
 
     // UI 상태를 관리하는 StateFlow
@@ -181,6 +185,39 @@ class BookDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             patchUserBookUseCase(patchUserBook)
+        }
+    }
+
+    fun deleteQuote(quoteId: String) {
+        viewModelScope.launch {
+            val result = deleteQuoteUseCase(quoteId)
+            if (result.isSuccess) {
+                _uiState.update { state ->
+                    state.copy(quotes = state.quotes.filterNot { it.id == quoteId })
+                }
+            } else {
+                _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
+            }
+        }
+    }
+
+    fun updateQuote(quoteId: String, newContent: String, newPageNumber: Int?) {
+        val currentQuotes = uiState.value.quotes.toMutableList()
+        val index = currentQuotes.indexOfFirst { it.id == quoteId }
+        if (index != -1) {
+            val updatedQuote = currentQuotes[index].copy(
+                content = newContent,
+                pageNumber = newPageNumber
+            )
+            currentQuotes[index] = updatedQuote
+            _uiState.update { it.copy(quotes = currentQuotes) }
+
+            viewModelScope.launch {
+                val result = updateQuoteUseCase(quoteId, newContent, newPageNumber)
+                if (result.isFailure) {
+                    _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
+                }
+            }
         }
     }
 }
