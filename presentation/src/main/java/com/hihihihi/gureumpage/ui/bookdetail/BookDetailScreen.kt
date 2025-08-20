@@ -128,7 +128,8 @@ fun BookDetailScreen(
             onDismiss = { showAddQuoteDialog = false },
             onSave = { pageNumber, content ->
                 viewModel.addQuote(bookId, content, pageNumber?.toIntOrNull())
-            }
+            },
+            lastPage = uiState.userBook?.totalPage
         )
     }
 
