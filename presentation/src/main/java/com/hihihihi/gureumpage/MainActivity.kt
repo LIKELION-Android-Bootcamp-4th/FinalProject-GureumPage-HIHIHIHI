@@ -90,6 +90,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_GureumPage)
         enableEdgeToEdge()
         setContent {
             val viewModel = hiltViewModel<GureumThemeViewModel>()
