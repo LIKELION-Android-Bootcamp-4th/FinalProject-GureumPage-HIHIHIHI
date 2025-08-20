@@ -127,11 +127,11 @@ class MypageViewModel @Inject constructor(
     private fun loadUserBookStats(userId: String) = viewModelScope.launch {
         runCatching {
             val books = getUserBooksUseCase(userId).first()
-
+            val totalPages = getDailyReadPagesUseCase(userId)
+                .sumOf { it.totalReadPageCount }
             // 완료 도서(권수/페이지 집계 기준)
             val finished = books.filter { it.status.name.equals("FINISHED", true) || it.endDate != null }
             val finishedCount = finished.size
-            val totalPages = finished.sumOf { it.totalPage }
 
             //  총 독서 시간 초' → 분으로 변환해서 합산
             val totalReadMinutes = books.sumOf { (it.totalReadTime / 60).coerceAtLeast(0) }
