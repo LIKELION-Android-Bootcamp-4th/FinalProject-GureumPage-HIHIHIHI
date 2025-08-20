@@ -69,15 +69,20 @@ fun LoginScreen(
         }
     }
 
-    GureumPageTheme(
-        darkTheme = true,
-    ) {
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(GureumTheme.colors.background, Color(0xFF00153F))
+                        colors = if (GureumTheme.isDarkTheme) listOf(
+                            GureumTheme.colors.background,
+                            Color(0xFF00153F)
+                        ) else listOf(
+                            Color(0xFF51C1F6),
+                            Color(0xFFB3E3F8),
+                            Color(0xFFFFFDE7)
+                        )
                     )
                 )
         ) {
@@ -98,7 +103,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Medi16Text(
+                Semi16Text(
                     "한 장 한 장 쌓이는",
                     color = GureumTheme.colors.gray700,
                 )
@@ -107,7 +112,7 @@ fun LoginScreen(
 
                 Semi16Text(
                     "나의 소중한 독서 기록",
-                    color = GureumTheme.colors.primary,
+                    color = GureumTheme.colors.point,
                 )
 
                 Spacer(modifier = Modifier.height(120.dp))
@@ -204,5 +209,5 @@ fun LoginScreen(
                 contentColor = Color.White
             )
         }
-    }
+
 }
