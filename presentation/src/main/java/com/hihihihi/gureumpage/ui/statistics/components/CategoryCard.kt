@@ -17,7 +17,6 @@ import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.hihihihi.gureumpage.common.utils.SimplePercentFormatter
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -29,6 +28,14 @@ fun CategoryCard(
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
     entries: List<PieEntry>,
 ) {
+    val sliceColors = listOf(
+        androidx.compose.ui.graphics.Color(0xFFFEED8E).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFFFB37B).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFF58D8D).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFD0E8B8).toArgb(),
+        androidx.compose.ui.graphics.Color(0xFFA8B1E5).toArgb(),
+    )
+
     GureumCard(modifier = modifier.heightIn(210.dp, 250.dp)) {
         AndroidView(
             modifier = Modifier
@@ -48,13 +55,16 @@ fun CategoryCard(
                         horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER // 중앙 정렬
                         form = Legend.LegendForm.CIRCLE // 범례 컬러 모양
                         textColor = labelColor          // 텍스트 컬러
+                        isWordWrapEnabled = true        // 범례 줄바꿈 허용
                     }
                 }
             },
             update = { chart ->
-                val dataSet = PieDataSet(entries, "").apply {
-                    colors = ColorTemplate.LIBERTY_COLORS.toList() // 보이는 컬러 목록
-                    sliceSpace = 0f // 조각 간 간격
+                val limited = limitSlices(entries = entries, maxSlices = 5)
+
+                val dataSet = PieDataSet(limited, "").apply {
+                    colors = sliceColors // 보이는 컬러 목록
+                    sliceSpace = 0f      // 조각 간 간격
 
                     valueTextSize = 12f                 // 숫자 크기
                     valueTextColor = labelColor         // 숫자 컬러
@@ -71,7 +81,7 @@ fun CategoryCard(
                 }
 
                 chart.apply {
-                    setExtraOffsets(10f, 10f, 10f, 8f)
+                    setExtraOffsets(10f, 10f, 10f, 10f)
                     setUsePercentValues(true)           // 퍼센트로 표시
                     data = PieData(dataSet)
                     animateY(1200, Easing.EaseInOutQuad)
@@ -81,6 +91,18 @@ fun CategoryCard(
             }
         )
     }
+}
+
+private fun limitSlices(
+    entries: List<PieEntry>,
+    maxSlices: Int,
+    otherLabel: String = "기타"
+): List<PieEntry> {
+    if (entries.size <= maxSlices) return entries
+    val sorted = entries.sortedByDescending { it.value }    // 내림차순
+    val head = sorted.take(maxSlices - 1)              // 최대 개수만큼 가져오기
+    val others = sorted.drop(maxSlices - 1).sumOf { it.value.toDouble() }.toFloat() // 가져온 개수 제외 합친 퍼센트
+    return head + PieEntry(others, otherLabel)
 }
 
 @Preview(name = "LightMode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)

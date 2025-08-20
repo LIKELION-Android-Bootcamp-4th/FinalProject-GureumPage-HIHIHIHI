@@ -4,10 +4,6 @@ import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.domain.model.Book
-import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.UserBook
 
 @Keep  // Proguard 등 난독화 도구에서 제거되지 않도록 유지
 data class UserBookDto(

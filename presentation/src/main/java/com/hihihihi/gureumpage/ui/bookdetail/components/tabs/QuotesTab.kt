@@ -6,20 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.Quote
-import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.designsystem.components.ExpandableText
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -40,7 +34,7 @@ fun QuotesTab(
         quotes.forEach { quote ->
             QuoteCard(
                 id = quote.id,
-                date = quote.createdAt?.toLocalDate().toString(), //TODO !!처리..
+                date = quote.createdAt?.toLocalDate().toString(),
                 page = quote.pageNumber,
                 quote = quote.content,
                 onMenuClick = onMenuClick

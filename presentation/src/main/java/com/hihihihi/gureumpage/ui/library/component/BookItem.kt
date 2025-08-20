@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.library.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -31,30 +32,21 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.ui.library.model.Book
 
 fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
 
 //한 권의 책정보
 @Composable
 fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
-    Log.d("BookItem", "BookItem 실행됨: ${book.title}")
     val context = LocalContext.current
     val imageRequest = ImageRequest.Builder(context)
         .data(book.imageUrl)
         .crossfade(true)
         .listener(
-            onStart = {
-                Log.d("bookItem", "이미지 로딩 시작 : ${book.imageUrl}")
-            },
-            onSuccess = { _, _ ->
-                Log.d("bookItem", "이미지 로딩 성공 : ${book.imageUrl}")
-            },
-            onError = { _, result ->
-                Log.e("bookItem", "이미지 로딩 실패 : ${book.imageUrl}", result.throwable)
-            }
+            onStart = {},
+            onSuccess = { _, _ -> },
+            onError = { _, result -> }
         ).build()
-
 
     Box(
         modifier = Modifier
@@ -62,7 +54,7 @@ fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
             .padding(8.dp)
             .clickable { onClicked(book.userBookId) }
     ) {
-        val iconSize = 20.dp
+        val iconSize = 16.dp
         val offsetX = iconSize / 2 // 오른쪽으로 아이콘 크기의 절반 만큼 이동
         val offsetY = -iconSize / 2 // 위쪽으로 아이콘 크기의 절반 만큼 이동
 
@@ -111,12 +103,13 @@ fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
         //다 읽은 책 아이콘
         if (book.isRead()) {
             Image(
-                painter = painterResource(id = R.drawable.ic_bookmark),
+                painter = painterResource(id = R.drawable.ic_finish_stamp),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = offsetX, y = offsetY) // 살짝 겹쳐 보이게 끔 위치 조정
-                    .size(20.dp)
+                    .size(36.dp),
+                colorFilter = ColorFilter.tint(GureumTheme.colors.primary, blendMode = BlendMode.SrcIn)
             )
         }
     }

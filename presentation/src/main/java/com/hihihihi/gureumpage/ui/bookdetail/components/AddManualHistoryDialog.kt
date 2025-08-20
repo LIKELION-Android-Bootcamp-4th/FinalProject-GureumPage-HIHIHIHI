@@ -65,7 +65,8 @@ fun AddManualHistoryDialog(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         readTime: Int,
-        readPageCount: Int
+        readPageCount: Int,
+            currentPage: Int
     ) -> Unit,
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -166,10 +167,11 @@ fun AddManualHistoryDialog(
                             GureumTextField(
                                 value = startPage,
                                 onValueChange = {
-                                    startPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
+                                    startPage = it.filter(Char::isDigit)
+                                        .toIntOrNull()
+                                        ?.coerceAtMost(lastPage)
+                                        ?.toString()
+                                        ?: ""
                                 },
                                 hint = "시작 페이지",
                                 isError = hasPageError,
@@ -192,10 +194,11 @@ fun AddManualHistoryDialog(
                             GureumTextField(
                                 value = endPage,
                                 onValueChange = {
-                                    endPage = it.toInt()
-                                        .coerceAtMost(lastPage)
-                                        .toString()
-                                        .filter(Char::isDigit)
+                                    endPage = it.filter(Char::isDigit)
+                                        .toIntOrNull()
+                                        ?.coerceAtMost(lastPage)
+                                        ?.toString()
+                                        ?: ""
                                 },
                                 hint = "끝 페이지",
                                 isError = hasPageError,
@@ -293,7 +296,8 @@ fun AddManualHistoryDialog(
                             startTime!!,
                             endTime!!,
                             readTime ?: 0,
-                            readPageCount
+                            readPageCount,
+                            endPage.toInt()
                         )
                         onDismiss()
                     }
@@ -332,7 +336,7 @@ fun AddManualHistoryDialog(
 
                             val availableHours = (startHour..23).toList()
                             val availableMinutes = if (tempHour == startHour) {
-                                (startMinute + 1..59).toList()
+                                (startMinute + 0..59).toList()
                             } else {
                                 (0..59).toList()
                             }

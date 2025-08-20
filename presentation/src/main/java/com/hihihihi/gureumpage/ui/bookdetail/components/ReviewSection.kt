@@ -1,6 +1,6 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components
 
-import android.util.Log
+import android.widget.RatingBar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarStyle
@@ -40,7 +40,8 @@ fun ReviewSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp).padding(bottom =40.dp)
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 40.dp)
     ) {
         Semi14Text(
             text = "감상문",
@@ -66,9 +67,7 @@ fun ReviewSection(
                         rating = newRating
                     }
                 },
-                onRatingChanged = {
-                    Log.d("TAG", "onRatingChanged: $it")
-                }
+                onRatingChanged = {}
             )
 
             IconButton(
@@ -105,6 +104,7 @@ fun ReviewSection(
             hint = "감상문을 작성해보세요!",
             minLines = 6,
             maxLines = 6,
+            imeAction = ImeAction.Done
         )
     }
 }

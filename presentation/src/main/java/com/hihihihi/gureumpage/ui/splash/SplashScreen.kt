@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.splash
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,34 +9,46 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 
 @Composable
-fun SplashView(navController: NavHostController) {
-    LaunchedEffect(Unit) {
-//        FirebaseAuth.getInstance().signOut()
+fun SplashView(
+    navController: NavHostController,
+    viewModel: SplashViewModel = hiltViewModel()
+) {
+    val target by viewModel.nav.collectAsState()
 
-        val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
-        Log.e("TAG", "SplashView: 여기 진입 $isLoggedIn", )
-        //Log.e("TAG", "SplashView: ${FirebaseAuth.getInstance().currentUser!!.uid}", )
+    LaunchedEffect(target) {
+        when (target) {
+            SplashViewModel.NavTarget.Loading -> Unit
+            SplashViewModel.NavTarget.Login -> {
+                navController.navigate(NavigationRoute.Login.route) {
+                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
 
-        navController.navigate(
-            if (isLoggedIn) {
-                Log.e("TAG", "SplashView: 로그인 되어있음 $isLoggedIn")
-                NavigationRoute.Home.route
+            SplashViewModel.NavTarget.Onboarding -> {
+                navController.navigate(NavigationRoute.OnBoarding.route) {
+                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
-            else {
-                Log.e("TAG", "SplashView: 로그인 안되있음 $isLoggedIn")
-                NavigationRoute.Login.route
+
+            SplashViewModel.NavTarget.Home -> {
+                navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
-        ) {
-            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
         }
     }
 

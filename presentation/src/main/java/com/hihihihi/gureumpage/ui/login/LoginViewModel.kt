@@ -3,7 +3,6 @@ package com.hihihihi.gureumpage.ui.login
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,10 +44,8 @@ class LoginViewModel @Inject constructor(
             setError("로그인 정보를 찾을 수 없습니다")
             return
         }
-        Log.d(TAG, "유저 정보: ${currentUser.uid}")
 
         val isOnboardingComplete = getOnboardingCompleteUseCase(currentUser.uid).firstOrNull() ?: false
-        Log.d(TAG, "온보딩 완료 상태: $isOnboardingComplete")
 
         val destination = if (isOnboardingComplete) {
             NavigationRoute.Home.route
@@ -103,10 +100,8 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "구글 로그인 처리 중...")
                 signInWithGoogleUseCase(data)
-                Log.d(TAG, "구글 로그인 성공")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
-                Log.e(TAG, "구글 로그인 실패", e)
                 setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
@@ -119,10 +114,8 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "카카오 로그인 중...")
                 signInWithKakaoUseCase()
-                Log.d(TAG, "카카오 로그인 성공")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
-                Log.d(TAG, "카카오 로그인 성공")
                 setError("카카오 로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
@@ -134,10 +127,8 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "네이버 로그인 중...")
                 signInWithNaverUseCase(activity)
-                Log.d(TAG, "네이버 로그인 성공")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
-                Log.e(TAG, "네이버 로그인 실패", e)
                 setError("네이버 로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }

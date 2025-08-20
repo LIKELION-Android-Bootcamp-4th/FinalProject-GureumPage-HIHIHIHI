@@ -3,8 +3,6 @@ package com.hihihihi.data.remote.dto
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.domain.model.History
 
 @Keep
 data class HistoryDto(

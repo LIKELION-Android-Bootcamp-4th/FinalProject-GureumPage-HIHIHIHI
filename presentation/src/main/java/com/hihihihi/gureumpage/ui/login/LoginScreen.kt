@@ -2,7 +2,6 @@ package com.hihihihi.gureumpage.ui.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -53,7 +52,6 @@ fun LoginScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -149,9 +147,7 @@ fun LoginScreen(
                     backgroundColor = Color(0xFF03C75A),
                     enabled = !uiState.isLoading,
                     onClick = {
-                        activity?.let {
-                            viewModel.naverLogin(it, navController)
-                        } ?: Log.e("LoginScreen", "Activity가 null입니다.")
+                        activity?.let { viewModel.naverLogin(it, navController) }
                     }
                 )
 

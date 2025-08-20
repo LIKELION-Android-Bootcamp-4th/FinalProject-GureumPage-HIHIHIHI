@@ -1,13 +1,12 @@
 package com.hihihihi.domain.usecase.statistics
 
-import android.util.Log.e
-import android.util.Log.i
 import com.hihihihi.domain.model.CategorySlice
 import com.hihihihi.domain.model.DailyReadPage
 import com.hihihihi.domain.model.DateRange
 import com.hihihihi.domain.model.DateRangePreset
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Page
+import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.Statistics
 import com.hihihihi.domain.model.TimeSlice
 import com.hihihihi.domain.model.UserBook
@@ -15,12 +14,9 @@ import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
@@ -44,36 +40,30 @@ class GetStatisticsUseCase @Inject constructor(
 
         return combine(booksFlow, historiesFlow, dailiesFlow) { books, histories, dailies ->
             try {
-
                 // 카테고리 계산
                 val category = try {
-                    categoryFromUserBooks(books, range).also { e("STAT", "category 계산 완료: $it") }
+                    categoryFromUserBooks(books, range)
                 } catch (ex: Exception) {
-                    e("STAT", "category 계산 에러", ex)
                     emptyList<CategorySlice>()
                 }
 
                 // 독서 시간 계산
                 val time = try {
-                    readingTime(histories, range).also { e("STAT", "readingTime 계산 완료: $it") }
+                    readingTime(histories, range)
                 } catch (ex: Exception) {
-                    e("STAT", "readingTime 에러", ex)
                     emptyList<TimeSlice>()
                 }
 
                 // 페이지 계산
                 val (pages, xLabels) = try {
-                    readingPages(dailies, preset, range).also { e("STAT", "readingPages 계산 완료: $it") }
+                    readingPages(dailies, preset, range)
                 } catch (ex: Exception) {
-                    e("STAT", "readingPages 에러", ex)
                     emptyList<Page>() to emptyList<String>()
                 }
 
                 // 최종 통계
-                e("STAT", "Statistics 생성 완료: category=$category, time=$time, pages=$pages, xLabels=$xLabels")
                 Statistics(category, time, pages, xLabels)
             } catch (e: Exception) {
-                e("STAT", "combine 전체 에러:", e)
                 Statistics(emptyList(), emptyList(), emptyList(), emptyList())
             }
         }.distinctUntilChanged()
@@ -102,8 +92,11 @@ private fun categoryFromUserBooks(books: List<UserBook>, range: DateRange): List
         val pivot = book.endDate ?: book.startDate ?: return false // 비교할 값의 기준
         return !pivot.isBefore(range.start) && !pivot.isAfter(range.end)
     }
-    return books.filter(::inRange)
-        .groupBy { it.category ?: "기타" } // 카테고리 이름으로 그룹
+    return books
+        .asSequence()
+        .filter { it.status != ReadingStatus.PLANNED }  // 읽기 전 제외
+        .filter(::inRange)
+        .groupBy { it.category ?: "기타" }               // 카테고리 이름으로 그룹
         .map { (category, books) -> CategorySlice(category, books.size.toFloat()) }
         .sortedByDescending { it.value }
 }
@@ -122,34 +115,33 @@ private fun readingTime(histories: List<History>, range: DateRange): List<TimeSl
     val acc = LongArray(buckets.size)
 
     histories.forEach { hist ->
-        val s0 = hist.startTime ?: return@forEach
-        val e0 = hist.endTime ?: return@forEach
-        var s = if (s0.isBefore(range.start)) range.start else s0
-        val e = if (e0.isAfter(range.end)) range.end else e0
+        val baseStartDay = hist.startTime ?: return@forEach
+        val baseEndDay = hist.endTime ?: return@forEach
+        var startDay = if (baseStartDay.isBefore(range.start)) range.start else baseStartDay
+        val endDay = if (baseEndDay.isAfter(range.end)) range.end else baseEndDay
 
-        if (!s.isBefore(e)) return@forEach
+        if (!startDay.isBefore(endDay)) return@forEach
 
-        while (!s.toLocalDate().isAfter(e.toLocalDate())) {
-            val day = s.toLocalDate()
-            val segEnd = minOf(e, day.atTime(LocalTime.MAX))
+        while (!startDay.toLocalDate().isAfter(endDay.toLocalDate())) {
+            val day = startDay.toLocalDate()
+            val segEnd = minOf(endDay, day.atTime(LocalTime.MAX))
 
             buckets.forEachIndexed { index, bucket ->
-                val bs = day.atTime(bucket.start)
-                val be =
+                val bucketStart = day.atTime(bucket.start)
+                val bucketEnd =
                     if (bucket.end == LocalTime.MIDNIGHT) day.plusDays(1).atStartOfDay() else day.atTime(bucket.end)
-                val startMax = maxOf(s, bs)
-                val endMin = minOf(segEnd, be)
+                val startMax = maxOf(startDay, bucketStart)
+                val endMin = minOf(segEnd, bucketEnd)
 
                 if (startMax.isBefore(endMin)) {
                     val minutes = ChronoUnit.MINUTES.between(startMax, endMin)
                     acc[index] += minutes
-                    e("STAT", "history=${hist.userBookId}, bucket=${bucket.label}, minutes=$minutes")
                 }
             }
 
             // 안전하게 하루 단위로 이동
-            s = day.plusDays(1).atStartOfDay()
-            if (!s.isBefore(e) && s != e) break // 혹시 무한루프 방지
+            startDay = day.plusDays(1).atStartOfDay()
+            if (!startDay.isBefore(endDay) && startDay != endDay) break // 혹시 무한루프 방지
         }
     }
 
@@ -164,61 +156,117 @@ private fun readingPages(
     preset: DateRangePreset,
     range: DateRange
 ): Pair<List<Page>, List<String>> {
-    val byDate = dailies.filter { readPage ->
-        val dt = readPage.date.atStartOfDay()
-        !dt.isBefore(range.start) && !dt.isAfter(range.end)
-    }
+    val byDate = dailies
+        .filter { it.date.atStartOfDay() in range.start..range.end }
         .groupBy { it.date }
         .mapValues { (_, daily) -> daily.sumOf { it.totalReadPageCount }.toFloat() }
-
-    e("STAT", "filtered dailies: $byDate")
-
-    fun label(date: LocalDate) = when (date.dayOfWeek) {
-        DayOfWeek.SUNDAY -> "일"
-        DayOfWeek.MONDAY -> "월"
-        DayOfWeek.TUESDAY -> "화"
-        DayOfWeek.WEDNESDAY -> "수"
-        DayOfWeek.THURSDAY -> "목"
-        DayOfWeek.FRIDAY -> "금"
-        DayOfWeek.SATURDAY -> "토"
-    }
 
     val startDay = range.start.toLocalDate()
     val endDay = range.end.toLocalDate()
 
+    fun dowIndex(d: DayOfWeek) = when (d) {
+        DayOfWeek.SUNDAY -> 0
+        DayOfWeek.MONDAY -> 1
+        DayOfWeek.TUESDAY -> 2
+        DayOfWeek.WEDNESDAY -> 3
+        DayOfWeek.THURSDAY -> 4
+        DayOfWeek.FRIDAY -> 5
+        DayOfWeek.SATURDAY -> 6
+    }
+
     return when (preset) {
-        DateRangePreset.WEEK, DateRangePreset.MONTH -> {
-            val days = generateSequence(startDay) { it.plusDays(1) }.takeWhile { !it.isAfter(endDay) }.toList()
-            val pts = days.mapIndexed { index, date ->
-                val count = byDate[date] ?: 0f
-                e("STAT", "date=$date, pages=$count")
-                Page(
-                    if (preset == DateRangePreset.WEEK) label(date) else date.dayOfMonth.toString(),
-                    index.toFloat(),
-                    count
-                )
+        // 일 ~ 토 요일 고정
+        DateRangePreset.WEEK -> {
+            val labels = listOf("일", "월", "화", "수", "목", "금", "토")
+            val week = FloatArray(7)
+            var currentDay = startDay
+            while (!currentDay.isAfter(endDay)) {
+                week[dowIndex(currentDay.dayOfWeek)] += byDate[currentDay] ?: 0f
+                currentDay = currentDay.plusDays(1)
             }
-            pts to days.map { if (preset == DateRangePreset.WEEK) label(it) else it.dayOfMonth.toString() }
+            val pts = (0..6).map { Page(labels[it], it.toFloat(), week[it]) }
+            pts to labels
         }
 
-        DateRangePreset.THREE_MONTH, DateRangePreset.SIX_MONTH, DateRangePreset.YEAR -> {
+        // 1개월 20칸 등분
+        DateRangePreset.MONTH -> {
+            val part = 20
+            val total = (ChronoUnit.DAYS.between(startDay, endDay) + 1).toInt()
+            val pts = (0 until part).map {
+                val startIndex = (it * total) / part
+                val endIndex = ((it + 1) * total) / part - 1
+                var sum = 0f
+                for (dayIndex in startIndex..endIndex) {
+                    val day = startDay.plusDays(dayIndex.toLong())
+                    sum += byDate[day] ?: 0f
+                }
+                val label = "${startDay.plusDays(startIndex.toLong()).dayOfMonth}일"
+                Page(label, it.toFloat(), sum)
+            }
+            pts to pts.map { it.label }
+        }
+
+        // 3개월 10일 단위
+        DateRangePreset.THREE_MONTH -> {
+            val windows = buildList {
+                var end = endDay
+                while (!end.isBefore(startDay)) {
+                    val start = end.minusDays(9)
+                    add(maxOf(startDay, start) to end)
+                    end = start.minusDays(1)
+                }
+            }.asReversed()
+
+            val pts = windows.mapIndexed { index, (start, end) ->
+                var sum = 0f
+                var date = start
+                while (!date.isAfter(end)) {
+                    sum += byDate[date] ?: 0f
+                    date = date.plusDays(1)
+                }
+                Page("${end.dayOfMonth}일", index.toFloat(), sum)
+            }
+            pts to pts.map { it.label }
+        }
+
+        // 6개월 월별 합계
+        DateRangePreset.SIX_MONTH -> {
             val months = buildList {
-                var ym = YearMonth.from(startDay)
+                var yearMonth = YearMonth.from(startDay)
                 val last = YearMonth.from(endDay)
-                while (!ym.isAfter(last)) {
-                    add(ym)
-                    ym = ym.plusMonths(1)
+                while (!yearMonth.isAfter(last)) {
+                    add(yearMonth)
+                    yearMonth = yearMonth.plusMonths(1)
                 }
             }
-            val byMonth = byDate.entries.groupBy({ YearMonth.from(it.key) }, { it.value })
+            val byMonth = byDate.entries
+                .groupBy({ YearMonth.from(it.key) }, { it.value })
                 .mapValues { it.value.sum() }
 
             val pts = months.mapIndexed { index, month ->
-                val count = byMonth[month] ?: 0f
-                e("STAT", "month=$month, pages=$count")
-                Page("${month.monthValue}월", index.toFloat(), count)
+                Page("${month.monthValue}월", index.toFloat(), byMonth[month] ?: 0f)
             }
-            pts to months.map { it.monthValue.toString() }
+            pts to months.map { "${it.monthValue}월" }
+        }
+
+        // 1년 월별 합계
+        DateRangePreset.YEAR -> {
+            val months = buildList {
+                var yearMonth = YearMonth.from(startDay)
+                val last = YearMonth.from(endDay)
+                while (!yearMonth.isAfter(last)) {
+                    add(yearMonth); yearMonth = yearMonth.plusMonths(1)
+                }
+            }
+            val byMonth = byDate.entries
+                .groupBy({ YearMonth.from(it.key) }, { it.value })
+                .mapValues { it.value.sum() }
+
+            val pts = months.mapIndexed { index, month ->
+                Page("${month.monthValue}월", index.toFloat(), byMonth[month] ?: 0f)
+            }
+            val labels = months.map { "${it.monthValue}월" }
+            pts to labels
         }
     }
 }

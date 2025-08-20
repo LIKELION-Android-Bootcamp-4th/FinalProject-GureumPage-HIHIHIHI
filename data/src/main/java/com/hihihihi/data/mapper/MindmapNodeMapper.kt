@@ -4,6 +4,7 @@ import com.hihihihi.data.remote.dto.MindmapNodeDto
 import com.hihihihi.domain.model.MindmapNode
 
 fun MindmapNodeDto.toDomain() = MindmapNode(
+    userId = userId,
     mindmapNodeId = mindmapNodeId,
     mindmapId = mindmapId,
     nodeTitle = nodeTitle,
@@ -16,6 +17,7 @@ fun MindmapNodeDto.toDomain() = MindmapNode(
 )
 
 fun MindmapNode.toDto() = MindmapNodeDto(
+    userId = userId,
     mindmapNodeId = mindmapNodeId,
     mindmapId = mindmapId,
     nodeTitle = nodeTitle,

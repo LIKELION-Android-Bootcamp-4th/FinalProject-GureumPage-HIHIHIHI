@@ -1,6 +1,5 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.hihihihi.domain.operation.NodeEditOperation
@@ -23,16 +22,12 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
             .whereEqualTo("deleted", false)
             .addSnapshotListener { snap, err ->
                 if (err != null) {
-                    Log.e("MindmapNodeRemoteDataSourceImpl", "OBS error", err)
                     close(err)
                     return@addSnapshotListener
                 }
                 val items = snap?.documents
                     ?.mapNotNull { it.toObject(MindmapNodeDto::class.java) }
                     ?: emptyList()
-
-                Log.d("MindmapNodeRemoteDataSourceImpl", "OBS size=${items.size}")
-                items.forEach { Log.d("MindmapNodeRemoteDataSourceImpl", "OBS id=${it.mindmapNodeId} parent=${it.parentNodeId} title=${it.nodeTitle} bookImage=${it.bookImage}") }
                 trySend(items)
             }
         awaitClose { collection.remove() }
@@ -43,9 +38,6 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
             .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .get().await()
-        Log.d("MindmapNodeRemoteDataSourceImpl", "LOAD size=${snap.documents.size}")
-        snap.documents.forEach { Log.d("MindmapNodeRemoteDataSourceImpl", "LOAD id=${it.id} parent=${it.get("parent_node_id")} title=${it.get("node_title")}") }
-
         return snap.documents.mapNotNull { it.toObject(MindmapNodeDto::class.java) }
     }
 
@@ -63,13 +55,26 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                             else nodesCollection().document(operation.node.mindmapNodeId)
 
                             val dto = operation.node.copy(
+                                userId = operation.node.userId,
                                 mindmapId = mindmapId,
                                 mindmapNodeId = document.id,
                                 deleted = false
                             )
-                            Log.d("MindmapNodeRemoteDataSourceImpl", "ADD[$chunk] id=${dto.mindmapNodeId} parent=${dto.parentNodeId} title=${dto.nodeTitle}")
 
-                            batch.set(document, dto)
+                            val dataMap = mapOf(
+                                "user_id" to dto.userId,
+                                "mindmapNodeId" to dto.mindmapNodeId,
+                                "mindmapId" to dto.mindmapId,
+                                "nodeTitle" to dto.nodeTitle,
+                                "nodeEx" to dto.nodeEx,
+                                "parentNodeId" to dto.parentNodeId,
+                                "color" to dto.color,
+                                "icon" to dto.icon,
+                                "deleted" to dto.deleted,
+                                "bookImage" to dto.bookImage
+                            )
+
+                            batch.set(document, dataMap)
                         }
 
                         is NodeEditOperation.Update -> {
@@ -90,7 +95,6 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                     }
                 }
             }.await()
-            Log.d("MindmapNodeRemoteDataSourceImpl", "chunk[$chunk] committed")
         }
     }
 }

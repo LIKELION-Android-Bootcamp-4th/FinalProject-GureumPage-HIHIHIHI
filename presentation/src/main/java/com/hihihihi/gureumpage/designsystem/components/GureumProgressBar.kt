@@ -57,7 +57,7 @@ private fun GureumProgressBar6Preview() {
     val currentPage = 121
     val totalPage = 270
     GureumPageTheme {
-        GureumLinearProgressBar(height = 6, progress = currentPage.toFloat()/totalPage)
+        GureumLinearProgressBar(height = 6, progress = currentPage.toFloat() / totalPage)
     }
 }
 
@@ -69,7 +69,7 @@ private fun GureumProgressBar12Preview() {
     val currentPage = 121
     val totalPage = 270
     GureumPageTheme {
-        GureumLinearProgressBar(height = 12, progress = currentPage.toFloat()/totalPage)
+        GureumLinearProgressBar(height = 12, progress = currentPage.toFloat() / totalPage)
     }
 }
 

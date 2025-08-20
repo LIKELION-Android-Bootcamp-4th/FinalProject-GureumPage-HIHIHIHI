@@ -1,6 +1,5 @@
 package com.hihihihi.domain.usecase.auth
 
-
 import com.hihihihi.domain.repository.AuthRepository
 import javax.inject.Inject
 

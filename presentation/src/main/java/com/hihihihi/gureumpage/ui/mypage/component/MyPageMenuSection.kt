@@ -16,14 +16,12 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.hihihihi.gureumpage.common.utils.openAppOnPlayStore
 import com.hihihihi.gureumpage.common.utils.openSupportEmail
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.mypage.MypageViewModel
 
 @Composable
 fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onLogoutClick: () ->Unit ,onWithDrawClick: () -> Unit) {
     val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
-    val typography = GureumTypography
     val context = LocalContext.current
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -38,8 +36,7 @@ fun MyPageMenuSection(viewModel: MypageViewModel = hiltViewModel(),onLogoutClick
                 OssLicensesMenuActivity.setActivityTitle("오픈소스 라이선스")
                 context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
             } catch (t: Throwable) {
-                Toast.makeText(context, "라이선스 화면을 열 수 없습니다: ${t.message}", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(context, "라이선스 화면을 열 수 없습니다: ${t.message}", Toast.LENGTH_SHORT).show()
             }
 
         }

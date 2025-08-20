@@ -1,14 +1,8 @@
 package com.hihihihi.gureumpage.ui.mypage
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.functions
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -16,9 +10,6 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
-import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.oauth.NidOAuthLogin
-import com.navercorp.nid.oauth.OAuthLoginCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,20 +21,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
-    private val setThemeUseCase: SetThemeUseCase, // 다크모드 저장용 Usecase
+    private val setThemeUseCase: SetThemeUseCase,                   // 다크모드 저장용 Usecase
     private val getDailyReadPagesUseCase: GetDailyReadPagesUseCase, // 잔디
-    private val getUserUseCase: GetUserUseCase, // 사용자 정보 조회
-    private val updateNicknameUseCase: UpdateNicknameUseCase, // 닉네임 변경
-    private val getUserBooksUseCase: GetUserBooksUseCase, //총 권수 계산용
+    private val getUserUseCase: GetUserUseCase,                     // 사용자 정보 조회
+    private val updateNicknameUseCase: UpdateNicknameUseCase,       // 닉네임 변경
+    private val getUserBooksUseCase: GetUserBooksUseCase,           //총 권수 계산용
     getTheme: GetThemeFlowUseCase,
 ) : ViewModel() {
 
@@ -64,7 +51,7 @@ class MypageViewModel @Inject constructor(
 
     //잔디 통계
     private val _readingStats = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
-    val readingStats: StateFlow<Map<LocalDate,Int>> = _readingStats
+    val readingStats: StateFlow<Map<LocalDate, Int>> = _readingStats
 
     // 마이페이지 사용자 정보
     private val _uiState = MutableStateFlow(MyPageUiState())
@@ -103,8 +90,8 @@ class MypageViewModel @Inject constructor(
                     if (user == null) MyPageUiState(loading = false)
                     else it.copy(
                         loading = false,
-                        nickname = user.nickname.orEmpty(),
-                        appellation = user.appellation.orEmpty(),
+                        nickname = user.nickname,
+                        appellation = user.appellation,
                         error = null
                     )
                 }
@@ -126,7 +113,6 @@ class MypageViewModel @Inject constructor(
     private fun loadReadingStats(userId: String) = viewModelScope.launch {
         runCatching { getDailyReadPagesUseCase(userId) }
             .onSuccess { dailies ->
-                Log.d("DAILY", "가져온 문서 개수 : ${dailies.size}")
                 val grouped: Map<LocalDate, Int> = dailies
                     .groupBy { it.date } // LocalDate
                     .mapValues { (_, items) -> items.sumOf { it.totalReadPageCount } }
@@ -139,17 +125,10 @@ class MypageViewModel @Inject constructor(
             }
     }
 
-
     // 독서 통계
     private fun loadUserBookStats(userId: String) = viewModelScope.launch {
         runCatching {
-            val books = getUserBooksUseCase(userId).first().also { list ->
-                // 진단 로그(원하면 주석 처리)
-                Log.d("MYPAGE", "uid=$userId, books.size=${list.size}")
-                list.firstOrNull()?.let { b ->
-                    Log.d("MYPAGE", "sample title=${b.title}, status=${b.status}, totalReadTime=${b.totalReadTime}, totalPage=${b.totalPage}")
-                }
-            }
+            val books = getUserBooksUseCase(userId).first()
 
             // 완료 도서(권수/페이지 집계 기준)
             val finished = books.filter { it.status.name.equals("FINISHED", true) || it.endDate != null }
@@ -169,7 +148,6 @@ class MypageViewModel @Inject constructor(
                         totalReadMinutes = totalReadMinutes
                     )
                 }
-                Log.d("MYPAGE", "UI 업데이트: books=$finishedCount, pages=$totalPages, minutes=$totalReadMinutes")
             }
             .onFailure { e ->
                 _uiState.update { it.copy(error = e.message) }
@@ -185,7 +163,4 @@ class MypageViewModel @Inject constructor(
             }
             .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
     }
-
-
-
 }

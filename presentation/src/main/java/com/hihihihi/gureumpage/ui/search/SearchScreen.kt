@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.search
 
 import android.app.Activity
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
@@ -34,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -67,6 +68,7 @@ fun SearchScreen(
         skipPartiallyExpanded = true
     )
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val statusBarColor = GureumTheme.colors.card
     val useDarkIcons = !isSystemInDarkTheme()
@@ -165,6 +167,7 @@ fun SearchScreen(
                         book.status
                     )
                 }
+                Toast.makeText(context, "책이 추가되었습니다", Toast.LENGTH_SHORT).show()
             },
             onGetBookPageCount = { isbn, onResult ->
                 viewModel.getBookPageCount(isbn, onResult)
@@ -179,8 +182,8 @@ fun SearchScreen(
 @Composable
 private fun SearchPreView() {
     GureumPageTheme {
-        SearchScreen(
-            navController = rememberNavController()
-        )
+//        SearchScreen(
+//            navController = rememberNavController(),
+//        )
     }
 }

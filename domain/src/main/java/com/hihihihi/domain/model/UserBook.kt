@@ -2,7 +2,7 @@ package com.hihihihi.domain.model
 
 import java.time.LocalDateTime
 
-data class UserBook (
+data class UserBook(
     val userBookId: String = "",
     val userId: String = "",
     val isbn10: String? = null,

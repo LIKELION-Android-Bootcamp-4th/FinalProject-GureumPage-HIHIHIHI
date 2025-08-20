@@ -6,11 +6,7 @@ import com.hihihihi.domain.model.User
 import com.hihihihi.domain.model.UserBook
 import java.time.LocalDateTime
 
-
-
-
-val mockUser = User("","히히히히", "새벽독서가",0,"",LocalDateTime.now())
-
+val mockUser = User("", "히히히히", "새벽독서가", 0, "", LocalDateTime.now())
 
 val mockUserBooks = listOf(
     UserBook(

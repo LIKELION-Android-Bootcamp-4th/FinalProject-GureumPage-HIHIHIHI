@@ -14,7 +14,7 @@ class SearchRepositoryImpl @Inject constructor(
         return searchRemoteDataSource.searchBooks(query)
             .map { it.toDomain() }
     }
-    
+
     override suspend fun getBookPageCount(isbn: String): Int? {
         return try {
             val bookDetail = searchRemoteDataSource.getBookDetail(isbn)

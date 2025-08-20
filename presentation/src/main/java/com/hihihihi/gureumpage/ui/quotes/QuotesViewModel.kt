@@ -30,14 +30,6 @@ class QuotesViewModel @Inject constructor(
         getQuotes(currentUid)
     }
 
-    /*fun getQuotes(userId: String) {
-        viewModelScope.launch {
-            getQuoteUseCase(userId).collect {
-                _quotes.value = it
-            }
-        }
-    }*/
-
     fun getQuotes(userId: String) {
         viewModelScope.launch {
             try {

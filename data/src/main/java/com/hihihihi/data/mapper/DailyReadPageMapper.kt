@@ -12,7 +12,7 @@ fun DailyReadPageDto.toDomain(): DailyReadPage =
     DailyReadPage(
         date = runCatching { LocalDate.parse(date, isoDate) }.getOrElse { LocalDate.MIN },
         totalReadPageCount = totalReadPageCount.toInt(),
-        uid = uid,
+        userId = userId,
         updatedAt = updatedAt?.toDate()
             ?.toInstant()
             ?.atZone(ZoneId.systemDefault())

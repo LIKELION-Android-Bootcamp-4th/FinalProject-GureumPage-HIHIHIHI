@@ -7,10 +7,9 @@ import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.domain.repository.AuthRepository
 import javax.inject.Inject
 
-
 class AuthRepositoryImpl @Inject constructor(
-    private val authDataSource : AuthDataSource,
-): AuthRepository {
+    private val authDataSource: AuthDataSource,
+) : AuthRepository {
 
     override suspend fun handleGoogleSignInResult(data: Intent?) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -36,6 +35,4 @@ class AuthRepositoryImpl @Inject constructor(
         val customToken = (result.data as Map<*, *>)["token"] as String
         authDataSource.signInWithCustomToken(customToken).await()
     }
-
-
 }

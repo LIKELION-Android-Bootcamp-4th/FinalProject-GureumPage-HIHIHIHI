@@ -39,6 +39,7 @@ fun rememberPickerState() = remember { PickerState() }
 
 class PickerState {
     var selectedItem by mutableStateOf("")
+    var selectedIndex by mutableStateOf(0)
 }
 
 @Composable
@@ -50,7 +51,6 @@ fun Picker(
     visibleItemsCount: Int = 3,
     textModifier: Modifier = Modifier,
 ) {
-
     val visibleItemsMiddle = visibleItemsCount / 2
     val listScrollCount = Integer.MAX_VALUE
     val listScrollMiddle = listScrollCount / 2
@@ -73,11 +73,22 @@ fun Picker(
         )
     }
 
+    // 피커가 열릴 때 초기 인덱스로 스크롤
+    LaunchedEffect(items, startIndex) {
+        listState.scrollToItem(listStartIndex)
+        state.selectedIndex = startIndex
+        state.selectedItem = getItem(listStartIndex + visibleItemsMiddle)
+    }
+
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .map { index -> getItem(index + visibleItemsMiddle) }
+            .map { index -> index + visibleItemsMiddle }
             .distinctUntilChanged()
-            .collect { item -> state.selectedItem = item }
+            .collect { center ->
+                val itemIndex = (center % items.size + items.size) % items.size
+                state.selectedIndex = itemIndex
+                state.selectedItem = items[itemIndex]
+            }
     }
 
     Box(modifier = modifier) {

@@ -25,7 +25,7 @@ import com.hihihihi.gureumpage.ui.home.components.rememberPickerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GureumStatisticsPicker(
+fun StatisticsPicker(
     initialIndex: Int,
     items: List<String>,
     onDismiss: () -> Unit,
@@ -58,6 +58,7 @@ fun GureumStatisticsPicker(
                     visibleItemsCount = 3,
                     modifier = Modifier.weight(1f),
                     textModifier = Modifier.padding(4.dp),
+                    startIndex = initialIndex,
                 )
                 Spacer(Modifier.width(72.dp))
             }
@@ -76,6 +77,6 @@ fun GureumStatisticsPicker(
 @Composable
 private fun GureumStatisticsPickerPreview() {
     GureumPageTheme {
-        GureumStatisticsPicker(0, listOf("1주", "1개월", "3개월", "6개월", "1년"), {},{})
+        StatisticsPicker(0, listOf("1주", "1개월", "3개월", "6개월", "1년"), {}, {})
     }
 }

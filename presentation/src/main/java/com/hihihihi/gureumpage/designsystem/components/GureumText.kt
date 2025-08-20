@@ -325,6 +325,7 @@ fun BodyMediumText(
         overflow = TextOverflow.Ellipsis
     )
 }
+
 @Composable
 fun BodySubText(
     text: String,
@@ -412,7 +413,6 @@ private fun GureumTextPreview() {
             BodyText("네가 4시에 온다면 난 3시부터 행복할거야")
             Spacer(modifier = Modifier.height(10.dp))
             ExpandableText("네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야 네가 4시에 온다면 난 3시부터 행복할거야네가 4시에 온다면 난 3시부터 행복할거야")
-
         }
     }
 }

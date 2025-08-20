@@ -66,7 +66,6 @@ fun MyPageScreen(
                     inclusive = true
                     saveState = false
                 }
-
                 launchSingleTop = true
                 restoreState = false
             }
@@ -135,7 +134,7 @@ fun MyPageScreen(
         )
     }
 
-    //닉네임 벼경 다이얼로그
+    //닉네임 변경 다이얼로그
     if (showNicknameDialog) {
         NicknameChangeDialog(
             currentNickname = state.nickname,

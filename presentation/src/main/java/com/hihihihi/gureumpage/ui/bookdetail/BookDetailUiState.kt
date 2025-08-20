@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
-import com.hihihihi.domain.model.Book
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.UserBook
