@@ -163,50 +163,41 @@ fun AddManualHistoryDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            GureumTextField(
-                                value = startPage,
-                                onValueChange = {
-                                    startPage = it.filter(Char::isDigit)
-                                        .toIntOrNull()
-                                        ?.coerceAtMost(lastPage)
-                                        ?.toString()
-                                        ?: ""
-                                },
-                                hint = "시작 페이지",
-                                isError = hasPageError,
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardType = KeyboardType.Number,
-                            )
-                        }
+                        GureumTextField(
+                            value = startPage,
+                            onValueChange = {
+                                startPage = it.filter(Char::isDigit)
+                                    .toIntOrNull()
+                                    ?.coerceAtMost(lastPage)
+                                    ?.toString()
+                                    ?: ""
+                            },
+                            hint = "시작 페이지",
+                            isError = hasPageError,
+                            modifier = Modifier.weight(1f),
+                            keyboardType = KeyboardType.Number,
+                        )
 
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.Top)
-                        ) {
-                            Medi16Text(
-                                "~",
-                                color = GureumTheme.colors.gray600
-                            )
-                        }
+                        Medi16Text(
+                            text = "~",
+                            color = GureumTheme.colors.gray600,
+                        )
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            GureumTextField(
-                                value = endPage,
-                                onValueChange = {
-                                    endPage = it.filter(Char::isDigit)
-                                        .toIntOrNull()
-                                        ?.coerceAtMost(lastPage)
-                                        ?.toString()
-                                        ?: ""
-                                },
-                                hint = "끝 페이지",
-                                isError = hasPageError,
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done
-                            )
-                        }
+                        GureumTextField(
+                            value = endPage,
+                            onValueChange = {
+                                endPage = it.filter(Char::isDigit)
+                                    .toIntOrNull()
+                                    ?.coerceAtMost(lastPage)
+                                    ?.toString()
+                                    ?: ""
+                            },
+                            hint = "끝 페이지",
+                            isError = hasPageError,
+                            modifier = Modifier.weight(1f),
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        )
                     }
 
                     AnimatedVisibility(
@@ -365,8 +356,7 @@ fun AddManualHistoryDialog(
                             date?.let { d ->
                                 val selectedTime = LocalTime.of(tempHour, tempMinute)
                                 if (editingStartTime) {
-                                    val newStartTime =
-                                        LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    val newStartTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
                                     startTime = newStartTime
 
                                     // 종료 시간이 시작 시간보다 이전이면 조정
