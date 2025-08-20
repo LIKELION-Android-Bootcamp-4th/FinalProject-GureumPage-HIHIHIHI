@@ -49,6 +49,7 @@
         android:layout_gravity="center"
         android:ellipsize="end"
         android:maxLines="2"
+        android:textAlignment="center"
         android:text="Node"
         android:textColor="@color/gray600"
         android:textSize="18sp"
