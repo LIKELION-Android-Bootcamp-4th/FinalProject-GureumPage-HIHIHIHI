@@ -20,10 +20,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.gureumpage.R
@@ -36,11 +36,10 @@ import kotlin.system.measureTimeMillis
 fun MyPageMenuSettingItem(
     title: String,
     showSwitch: Boolean = false, // 스위치 노출 여부
+    showArrow: Boolean = true,
     switchChecked: Boolean = false, // 스위치 on/off 상태
     onSwitchToggle: (GureumThemeType) -> Unit = {}, //스위치 변경 시 콜백
     textColor: Color = GureumTheme.colors.gray700,
-    topSpaceFromDivider: Dp = 12.dp,
-    pressedOverlayAlpha: Float = 0.06f,
     minFeedbackMs: Long = 120L,
     onClick: () -> Unit, //항목 클릭 시 액션
 ) {
@@ -51,20 +50,18 @@ fun MyPageMenuSettingItem(
 
     Surface(
         // Surface는 컨테이너만 담당 (onClick 주지 않음 = 기본 리플 차단)
-        color = if (pressed) colors.primary.copy(alpha = pressedOverlayAlpha) else Color.Transparent,
+        color = Color.Transparent,
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .padding(top = topSpaceFromDivider)
             .heightIn(min = 56.dp) // 접근성 여유
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
                         // 눌림 시작
-                        pressed = true
                         var consumed = false
                         val elapsed = measureTimeMillis {
                             // 손가락을 뗄 때까지 대기(취소/이동 포함)
@@ -72,7 +69,6 @@ fun MyPageMenuSettingItem(
                         }
                         // 아주 빠른 탭도 최소 표시 시간 보장
                         if (elapsed < minFeedbackMs) delay(minFeedbackMs - elapsed)
-                        pressed = false
                         if (consumed) onClick()
                     }
                 )
@@ -98,9 +94,12 @@ fun MyPageMenuSettingItem(
                         checkedTrackColor = colors.primary50,
                         uncheckedTrackColor = colors.gray300,
                         uncheckedThumbColor = colors.gray150
-                    )
+                    ),
+                    modifier = Modifier.scale(0.8f)
                 )
-            } else {
+            }
+
+            if (showArrow) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_right),
                     contentDescription = null,

@@ -73,7 +73,7 @@ fun MyPageUserProfileCard(
                         Text(
                             text = badge,
                             style = typography.titleLarge,
-                            color = colors.point,
+                            color = colors.primaryDeep,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
