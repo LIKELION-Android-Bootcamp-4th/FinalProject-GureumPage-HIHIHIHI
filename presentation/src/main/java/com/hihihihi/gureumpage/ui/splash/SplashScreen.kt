@@ -1,6 +1,11 @@
 package com.hihihihi.gureumpage.ui.splash
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -14,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,31 +27,42 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
-import com.hihihihi.gureumpage.designsystem.components.Semi14Text
-import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
-import kotlinx.coroutines.delay
 
 @Composable
 fun SplashView(
     navController: NavHostController,
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+
+    var askedOnce by rememberSaveable { mutableStateOf(false) }
+
+    var proceed by rememberSaveable { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+
+    }
 
     var showProgress by remember { mutableStateOf(false) }
 
@@ -67,7 +82,6 @@ fun SplashView(
         animationSpec = tween(durationMillis = 1200), label = ""
     )
 
-
     LaunchedEffect(Unit) {
         startAnimation = true
     }
@@ -77,30 +91,46 @@ fun SplashView(
         animationSpec = tween(durationMillis = 300), label = ""
     )
 
+    val granted = if (Build.VERSION.SDK_INT >= 33) {
+        ContextCompat.checkSelfPermission(
+            context, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    } else true
 
-    LaunchedEffect(uiState.navTarget) {
-        if (!uiState.isLoading) {
-            when (uiState.navTarget) {
-                SplashViewModel.NavTarget.Loading -> Unit
-                SplashViewModel.NavTarget.NoNetwork -> Unit
-                SplashViewModel.NavTarget.Login -> {
-                    navController.navigate(NavigationRoute.Login.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
+    LaunchedEffect(granted, askedOnce) {
+        if (!granted && !askedOnce) {
+            askedOnce = true
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            proceed = true
+        }
+    }
+
+    LaunchedEffect(proceed, uiState.navTarget) {
+        if (proceed) {
+            if (!uiState.isLoading) {
+                when (uiState.navTarget) {
+                    SplashViewModel.NavTarget.Loading -> Unit
+                    SplashViewModel.NavTarget.NoNetwork -> Unit
+                    SplashViewModel.NavTarget.Login -> {
+                        navController.navigate(NavigationRoute.Login.route) {
+                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
-                }
 
-                SplashViewModel.NavTarget.Onboarding -> {
-                    navController.navigate(NavigationRoute.OnBoarding.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
+                    SplashViewModel.NavTarget.Onboarding -> {
+                        navController.navigate(NavigationRoute.OnBoarding.route) {
+                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
-                }
 
-                SplashViewModel.NavTarget.Home -> {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
+                    SplashViewModel.NavTarget.Home -> {
+                        navController.navigate(NavigationRoute.Home.route) {
+                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
                 }
             }
