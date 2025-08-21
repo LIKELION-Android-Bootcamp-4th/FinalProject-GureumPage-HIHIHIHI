@@ -9,8 +9,8 @@ object DeepLink {
     const val HOME_PATTERN = "$SCHEME://home"
     const val BOOK_DETAIL_PATTERN = "$SCHEME://bookDetail/{bookId}"
 
-    // 알림 진입용 패턴
-    fun home() = HOME_PATTERN.toUri()
-    fun bookDetail(bookId: String) = "$SCHEME://bookDetail/$bookId".toUri()
 
+    // 알림 진입용 패턴
+    fun home() = "$SCHEME://home".toUri()
+    fun bookDetail(bookId: String) = "$SCHEME://bookDetail/$bookId".toUri()
 }
