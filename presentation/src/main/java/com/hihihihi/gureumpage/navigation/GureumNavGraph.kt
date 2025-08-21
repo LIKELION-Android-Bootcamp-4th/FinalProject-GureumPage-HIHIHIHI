@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.hihihihi.gureumpage.ui.bookdetail.BookDetailScreen
 import com.hihihihi.gureumpage.ui.home.HomeScreen
 import com.hihihihi.gureumpage.ui.library.LibraryScreen
@@ -35,7 +36,10 @@ fun GureumNavGraph(
         modifier = modifier
     ) {
         composable(NavigationRoute.Splash.route) { SplashView(navController) }
-        composable(NavigationRoute.Home.route) { HomeScreen(navController = navController) }
+        composable(
+            route = NavigationRoute.Home.route,
+            deepLinks = listOf(navDeepLink { uriPattern = DeepLink.HOME_PATTERN })
+        ) { HomeScreen(navController = navController) }
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
         composable(
@@ -77,7 +81,8 @@ fun GureumNavGraph(
         composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+            arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = DeepLink.BOOK_DETAIL_PATTERN })
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
             bookId?.let {
@@ -92,7 +97,7 @@ fun GureumNavGraph(
         composable(
             route = NavigationRoute.Withdraw.route,
             arguments = listOf(navArgument("userName") { type = NavType.StringType })
-            ) { backStackEntry ->
+        ) { backStackEntry ->
             val userName = backStackEntry.arguments?.getString("userName")
             userName?.let {
                 WithdrawScreen(userName = it, navController = navController)
