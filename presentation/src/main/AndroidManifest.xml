@@ -21,11 +21,20 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.GureumPage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- 스킴/호스트 매핑 -->
+                <data android:scheme="gureumpage" android:host="app" />
             </intent-filter>
         </activity>
         <activity
@@ -47,6 +56,59 @@
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+
+        <receiver
+            android:name=".widgets.reading.CurrentReadingBookReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.USER_UNLOCKED"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/current_reading_book_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.reading.CurrentReadingBooksReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.USER_UNLOCKED"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/current_reading_books_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widgets.heatmap.HistoryHeatMapReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.USER_UNLOCKED"/>
+                <action android:name="android.intent.action.DATE_CHANGED"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/history_heatmap_widget_info" />
+        </receiver>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+        <meta-data
+            android:name="androidx.work.WorkManagerInitializer"
+            android:value="disabled" />
 
     </application>
 

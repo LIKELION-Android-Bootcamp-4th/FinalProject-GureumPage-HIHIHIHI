@@ -53,12 +53,21 @@ fun ReadingRecordTab(histories: List<History>) {
                         style = GureumTypography.bodySmall
                     )
                     Spacer(modifier = Modifier.weight(1f))
+
                     Semi16Text(
                         text = formatSecondsToReadableTime(
                             dailyRecords.sumOf { it.readTime }
                         ),
                         isUnderline = true
                     )
+
+//                    TitleText(
+//                        text = formatSecondsToReadableTime(
+//                            dailyRecords.sumOf { it.readTime }
+//                        ),
+//                        isUnderline = true
+//                    )
+
                 }
                 dailyRecords.forEach { record ->
                     RecordCard(
