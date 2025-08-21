@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,15 +71,20 @@ fun LoginScreen(
         }
     }
 
-    GureumPageTheme(
-        darkTheme = true,
-    ) {
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
-                        colors = listOf(GureumTheme.colors.background, Color(0xFF00153F))
+                        colors = if (GureumTheme.isDarkTheme) listOf(
+                            GureumTheme.colors.background,
+                            Color(0xFF00153F)
+                        ) else listOf(
+                            Color(0xFF51C1F6),
+                            Color(0xFFB3E3F8),
+                            Color(0xFFFFFDE7)
+                        )
                     )
                 )
         ) {
@@ -88,6 +95,13 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_cloud_icon),
+                    contentDescription = "logo",
+                    modifier = Modifier.size(52 .dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
                     "구름한장",
                     style = GureumTypography.displayMedium.copy(
@@ -98,7 +112,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Medi16Text(
+                Semi16Text(
                     "한 장 한 장 쌓이는",
                     color = GureumTheme.colors.gray700,
                 )
@@ -107,7 +121,7 @@ fun LoginScreen(
 
                 Semi16Text(
                     "나의 소중한 독서 기록",
-                    color = GureumTheme.colors.primary,
+                    color = GureumTheme.colors.point,
                 )
 
                 Spacer(modifier = Modifier.height(120.dp))
@@ -204,5 +218,5 @@ fun LoginScreen(
                 contentColor = Color.White
             )
         }
-    }
+
 }

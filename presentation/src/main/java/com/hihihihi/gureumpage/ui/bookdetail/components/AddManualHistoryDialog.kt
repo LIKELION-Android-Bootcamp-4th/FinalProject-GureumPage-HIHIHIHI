@@ -21,9 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,9 +83,6 @@ fun AddManualHistoryDialog(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var editingStartTime by remember { mutableStateOf(true) }
-
-    var tempHour by remember { mutableStateOf(0) }
-    var tempMinute by remember { mutableStateOf(0) }
 
     val readTime = remember(startTime, endTime) {
         if (startTime != null && endTime != null) {
@@ -239,8 +237,6 @@ fun AddManualHistoryDialog(
                         modifier = Modifier.weight(1f),
                         onClick = {
                             editingStartTime = true
-                            tempHour = startTime?.hour ?: 0
-                            tempMinute = startTime?.minute ?: 0
                             showTimePicker = true
                         }
                     )
@@ -255,8 +251,6 @@ fun AddManualHistoryDialog(
                         modifier = Modifier.weight(1f),
                         onClick = {
                             editingStartTime = false
-                            tempHour = endTime?.hour ?: 0
-                            tempMinute = endTime?.minute ?: 0
                             showTimePicker = true
                         }
                     )
@@ -315,65 +309,58 @@ fun AddManualHistoryDialog(
             ) {
                 GureumCard {
                     Column(modifier = Modifier.padding(20.dp)) {
+                        val startHour = startTime?.hour ?: 0
+                        val startMinute = startTime?.minute ?: 0
 
                         // 종료 시간 선택 시 제약 조건 계산
-                        val (hourValues, minuteValues) = if (editingStartTime) {
-                            Pair((0..23).toList(), (0..59).toList())
-                        } else {
-                            val startHour = startTime?.hour ?: 0
-                            val startMinute = startTime?.minute ?: 0
+                        val hourValues = if (editingStartTime) (0..23).toList() else (startHour..23).toList()
 
-                            val availableHours = (startHour..23).toList()
-                            val availableMinutes = if (tempHour == startHour) {
-                                (startMinute + 0..59).toList()
-                            } else {
-                                (0..59).toList()
+                        val minuteValues = remember { (0..59).toList() }
+
+                        key(editingStartTime) {
+                            var tempHour by remember {
+                                mutableIntStateOf(
+                                    if (editingStartTime) (startTime?.hour ?: 0) else (endTime?.hour ?: startHour)
+                                )
+                            }
+                            var tempMinute by remember {
+                                mutableIntStateOf(
+                                    if (editingStartTime) (startTime?.minute ?: 0) else (endTime?.minute ?: startMinute)
+                                )
                             }
 
-                            Pair(availableHours, availableMinutes)
-                        }
-
-                        val validTempHour =
-                            if (hourValues.contains(tempHour)) tempHour else hourValues.first()
-                        val validTempMinute =
-                            if (minuteValues.contains(tempMinute)) tempMinute else minuteValues.first()
-
-
-                        GureumNumberPicker(
-                            initialHour = validTempHour,
-                            initialMinute = validTempMinute,
-                            hourValues = hourValues,
-                            minuteValues = minuteValues,
-                            visibleItemsCount = 5,
-                            unitLabel = "시",
-
-                            ) { h, m ->
-                            tempHour = h
-                            tempMinute = m
-                        }
-                        Spacer(Modifier.height(24.dp))
-                        GureumButton(text = "확인", onClick = {
-                            date?.let { d ->
-                                val selectedTime = LocalTime.of(tempHour, tempMinute)
+                            GureumNumberPicker(
+                                initialHour = tempHour,
+                                initialMinute = tempMinute,
+                                hourValues = hourValues,
+                                minuteValues = minuteValues,
+                                visibleItemsCount = 5,
+                                unitLabel = "시",
+                            ) { hour, minute ->
+                                tempHour = hour
+                                tempMinute =
+                                    if (!editingStartTime && hour == startHour && minute < startMinute) startMinute else minute
+                            }
+                            Spacer(Modifier.height(24.dp))
+                            GureumButton(text = "확인", onClick = {
                                 if (editingStartTime) {
-                                    val newStartTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
+                                    val newStartTime = LocalDateTime.of(date.toLocalDate(), LocalTime.of(tempHour, tempMinute))
                                     startTime = newStartTime
 
                                     // 종료 시간이 시작 시간보다 이전이면 조정
-                                    if (endTime != null && endTime!!.isBefore(newStartTime)) {
-                                        endTime = newStartTime
-                                    }
+                                    if (endTime != null && endTime!!.isBefore(newStartTime)) endTime = newStartTime
                                 } else {
                                     // 종료 시간 설정
-                                    val newEndTime = LocalDateTime.of(d.toLocalDate(), selectedTime)
-                                    // 시작 시간 이후인지 다시 한번 확인
-                                    if (startTime == null || !newEndTime.isBefore(startTime!!)) {
-                                        endTime = newEndTime
-                                    }
+                                    var endHour = tempHour
+                                    var endMinute = tempMinute
+
+                                    if (endHour < startHour) endHour = startHour
+                                    if (endHour == startHour && endMinute < startMinute) endMinute = startMinute
+                                    endTime = LocalDateTime.of(date.toLocalDate(), LocalTime.of(endHour, endMinute))
                                 }
-                            }
-                            showTimePicker = false
-                        })
+                                showTimePicker = false
+                            })
+                        }
                     }
                 }
             }

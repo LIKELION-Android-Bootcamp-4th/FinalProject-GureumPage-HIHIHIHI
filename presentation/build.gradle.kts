@@ -30,8 +30,8 @@ android {
         applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -41,6 +41,7 @@ android {
         manifestPlaceholders["NAVER_CLIENT_ID"] = localProperties["NAVER_CLIENT_ID"] ?: ""
         buildConfigField ("String", "NAVER_CLIENT_SECRET", "\"${localProperties["NAVER_CLIENT_SECRET"] ?: ""}\"")
         manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
+        buildConfigField ("String", "VERSION_NAME", "\"${versionName}\"")
 
     }
 
@@ -147,5 +148,7 @@ dependencies {
     implementation(libs.play.services.oss.licenses)
 
     implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 
 }

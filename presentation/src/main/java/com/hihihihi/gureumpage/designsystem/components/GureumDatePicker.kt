@@ -52,13 +52,9 @@ fun GureumPastToTodayDatePicker(
         dismissButton = {
             TextButton(
                 onClick = onDismiss
-            ) {
-                Text("취소")
-            }
+            ) { Text("취소") }
         }
-    ) {
-        DatePicker(state = state)
-    }
+    ) { DatePicker(state = state) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,13 +114,9 @@ fun GureumBetweenDatePicker(
         dismissButton = {
             TextButton(
                 onClick = onDismiss
-            ) {
-                Text("취소")
-            }
+            ) { Text("취소") }
         }
-    ) {
-        DatePicker(state = state)
-    }
+    ) { DatePicker(state = state) }
 }
 
 

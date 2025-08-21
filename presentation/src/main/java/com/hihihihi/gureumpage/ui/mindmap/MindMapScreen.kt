@@ -88,7 +88,7 @@ fun MindMapScreen(
         adapter.onNodeAction = { node, action ->
             when (action) {
                 MindMapAdapter.NodeAction.EDIT -> {
-                    adapter.showAddNodeDialog(rootFrame.context, node) { newNode ->
+                    adapter.showAddNodeDialog("노드 수정", rootFrame.context, node) { newNode ->
 
                         node.value = newNode
                         adapter.notifyDataSetChange()

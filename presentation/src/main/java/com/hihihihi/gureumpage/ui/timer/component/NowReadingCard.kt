@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
 import com.hihihihi.gureumpage.designsystem.components.BodyText
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -48,10 +49,8 @@ fun NowReadingCard(
                         .background(colors.dividerShallow)
                 )
             } else {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "책 표지",
-                    contentScale = ContentScale.Crop,
+                BookCoverImage(
+                    imageUrl = imageUrl,
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(8.dp))
