@@ -13,13 +13,14 @@ import javax.inject.Inject
 class GureumMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var factory: NotificationFactory
+
     @Inject
     lateinit var tokenRegistrar: PushTokenRegistrar
 
     // 서비스 시작 시 채널 활성화
     override fun onCreate() {
         super.onCreate()
-        Channels.ensureChannel(this)
+        Channels.ensureAll(this)
     }
 
     // 최신 FCM 토큰 서버에 업로드
@@ -30,13 +31,18 @@ class GureumMessagingService : FirebaseMessagingService() {
     // 메시지 수신
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
+        if (message.data.isEmpty()) return
+
+        val channelId = Channels.idOf(message.data["ch"])
         val title = message.data["title"] ?: "구름한장"
-        val body = message.data["body"] ?: "알림"
-        val bookId = message.data["bookId"]
+        val body = message.data["body"] ?: ""
+        val uri = message.data["uri"]
+        val collapseKey = message.data["ck"]
 
-        val pendingIntent = if (bookId != null) factory.bookDetail(bookId)
-        else factory.bookDetail("recent")
 
-        factory.notify(message.hashCode(), factory.simpleAlarm(title, body, pendingIntent))
+        val pendingIntent = factory.pendingFromUri(uri)
+        val notification = factory.simpleAlarm(channelId, title, body, pendingIntent)
+
+        factory.notify(collapseKey, message.hashCode(), notification)
     }
 }
