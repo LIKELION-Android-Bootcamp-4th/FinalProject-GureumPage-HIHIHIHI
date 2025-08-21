@@ -26,9 +26,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <!-- 알림 기본 설정  -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="reading_updates" />
+            android:value="activity" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_cloud_reading" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
