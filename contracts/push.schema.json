@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gureum push data-only payload",
+  "type": "object",
+  "required": ["ch", "title", "uri"],
+  "properties": {
+    "v":     { "type": "string", "enum": ["1"], "default": "1", "description": "schema version" },
+    "ch":    { "type": "string", "enum": ["reminder", "progress", "summary", "activity"] },
+    "title": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "body":  { "type": "string", "maxLength": 140 },
+    "uri":   { "type": "string", "pattern": "^(app|gureum)://.+$" },
+    "ck":    { "type": "string", "description": "collapse key: 동일 키는 덮어쓰기" },
+    "tz":    { "type": "string", "description": "IANA timezone for scheduling" }
+  },
+  "additionalProperties": true
+}
