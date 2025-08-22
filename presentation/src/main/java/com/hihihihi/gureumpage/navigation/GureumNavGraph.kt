@@ -38,7 +38,10 @@ fun GureumNavGraph(
         composable(NavigationRoute.Splash.route) { SplashView(navController) }
         composable(
             route = NavigationRoute.Home.route,
-            deepLinks = listOf(navDeepLink { uriPattern = DeepLink.HOME_PATTERN })
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://home" },
+                navDeepLink { uriPattern = "app://home" }
+            )
         ) { HomeScreen(navController = navController) }
         composable(NavigationRoute.Login.route) { LoginScreen(navController) }
         composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
@@ -82,7 +85,10 @@ fun GureumNavGraph(
         composable(
             route = NavigationRoute.BookDetail.route,
             arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
-            deepLinks = listOf(navDeepLink { uriPattern = DeepLink.BOOK_DETAIL_PATTERN })
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://bookdetail/{bookId}" },
+                navDeepLink { uriPattern = "app://bookdetail/{bookId}" }
+            )
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
             bookId?.let {
