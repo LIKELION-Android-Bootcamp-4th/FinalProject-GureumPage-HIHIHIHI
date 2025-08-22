@@ -21,11 +21,6 @@ android {
     namespace = "com.hihihihi.gureumpage"
     compileSdk = 35
 
-
-    buildFeatures {
-        buildConfig = true
-    }
-
     defaultConfig {
         applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
@@ -52,15 +47,22 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+//            signingConfig = signingConfigs.getByName("debug")
+//        }
+//        debug {
+//            applicationIdSuffix = ".debug"
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         viewBinding = true
         compose = true
