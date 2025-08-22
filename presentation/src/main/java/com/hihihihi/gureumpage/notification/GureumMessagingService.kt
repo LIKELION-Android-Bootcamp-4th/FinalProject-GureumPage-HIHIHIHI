@@ -2,10 +2,13 @@ package com.hihihihi.gureumpage.notification
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.hihihihi.domain.notification.PushTokenRegistrar
+import com.hihihihi.gureumpage.notification.schema.PushPayload
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalTime
 import javax.inject.Inject
 
 // 서비스의 엔트리 포인트
@@ -31,18 +34,30 @@ class GureumMessagingService : FirebaseMessagingService() {
     // 메시지 수신
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
-        if (message.data.isEmpty()) return
+//        if (!Quiet.allow()) return
 
-        val channelId = Channels.idOf(message.data["ch"])
-        val title = message.data["title"] ?: "구름한장"
-        val body = message.data["body"] ?: ""
-        val uri = message.data["uri"]
-        val collapseKey = message.data["ck"]
+        PushPayload.from(message.data)?.let { payload ->
+            val notification = factory.simpleAlarm(
+                Channels.idOf(payload.channelId),
+                payload.title,
+                payload.body,
+                factory.pendingIntentTo(payload.uri)
+            )
+            factory.notify(payload.collapseKey, message.hashCode(), notification)
+            return
+        }
 
-
-        val pendingIntent = factory.pendingFromUri(uri)
-        val notification = factory.simpleAlarm(channelId, title, body, pendingIntent)
-
-        factory.notify(collapseKey, message.hashCode(), notification)
+        message.notification?.let { noti ->
+            val title = noti.title ?: return
+            val body = noti.body ?: ""
+            val n = factory.simpleAlarm(Channels.ACTIVITY, title, body, factory.pendingIntentTo("gureum://home".toUri()))
+            factory.notify(null, message.hashCode(), n)
+        }
     }
+}
+
+// 야간 알림 시간 여부
+object Quiet {
+    fun allow(start: Int = 22, end: Int = 7, now: Int = LocalTime.now().hour): Boolean =
+        if (start <= end) now !in start until end else !(now >= start || now < end)
 }
