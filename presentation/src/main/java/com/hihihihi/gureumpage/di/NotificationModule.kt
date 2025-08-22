@@ -1,6 +1,7 @@
-package com.hihihihi.gureumpage.notification
+package com.hihihihi.gureumpage.di
 
 import android.content.Context
+import com.hihihihi.gureumpage.notification.NotificationFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
