@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -58,10 +59,14 @@ fun SplashView(
 
     var proceed by rememberSaveable { mutableStateOf(false) }
 
+    var kicked by rememberSaveable { mutableStateOf(false) }
+
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-
+        proceed = true
+        if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
+        else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
     }
 
     var showProgress by remember { mutableStateOf(false) }
@@ -91,46 +96,52 @@ fun SplashView(
         animationSpec = tween(durationMillis = 300), label = ""
     )
 
-    val granted = if (Build.VERSION.SDK_INT >= 33) {
-        ContextCompat.checkSelfPermission(
-            context, Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-    } else true
+    LaunchedEffect(askedOnce) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            val granted = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted && !askedOnce) {
+                askedOnce = true
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return@LaunchedEffect
+            }
+        }
+        proceed = true
+    }
 
-    LaunchedEffect(granted, askedOnce) {
-        if (!granted && !askedOnce) {
-            askedOnce = true
-            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            proceed = true
+    // 권한 허용 후 네트워크 상태 확인
+    LaunchedEffect(proceed) {
+        if (proceed && !kicked) {
+            kicked = true
+            showProgress = true
+            viewModel.checkNetworkAndProceed()
         }
     }
 
-    LaunchedEffect(proceed, uiState.navTarget) {
-        if (proceed) {
-            if (!uiState.isLoading) {
-                when (uiState.navTarget) {
-                    SplashViewModel.NavTarget.Loading -> Unit
-                    SplashViewModel.NavTarget.NoNetwork -> Unit
-                    SplashViewModel.NavTarget.Login -> {
-                        navController.navigate(NavigationRoute.Login.route) {
-                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
+    LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
+        if (proceed && !uiState.isLoading) {
+            when (uiState.navTarget) {
+                SplashViewModel.NavTarget.Loading -> Unit
+                SplashViewModel.NavTarget.NoNetwork -> Unit
+                SplashViewModel.NavTarget.Login -> {
+                    navController.navigate(NavigationRoute.Login.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
                     }
+                }
 
-                    SplashViewModel.NavTarget.Onboarding -> {
-                        navController.navigate(NavigationRoute.OnBoarding.route) {
-                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                SplashViewModel.NavTarget.Onboarding -> {
+                    navController.navigate(NavigationRoute.OnBoarding.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
                     }
+                }
 
-                    SplashViewModel.NavTarget.Home -> {
-                        navController.navigate(NavigationRoute.Home.route) {
-                            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                SplashViewModel.NavTarget.Home -> {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             }
@@ -174,15 +185,11 @@ fun SplashView(
             AlertDialog(
                 onDismissRequest = { },
                 title = { Text("네트워크 오류") },
-                text = {
-                    Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.")
-                },
+                text = { Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.") },
                 confirmButton = {
                     TextButton(onClick = {
                         (navController.context as? Activity)?.finish()
-                    }) {
-                        Text("앱 종료")
-                    }
+                    }) { Text("앱 종료") }
                 }
             )
         }
