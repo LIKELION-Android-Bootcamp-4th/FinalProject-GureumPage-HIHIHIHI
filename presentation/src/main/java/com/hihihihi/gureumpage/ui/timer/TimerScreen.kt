@@ -1,8 +1,14 @@
 package com.hihihihi.gureumpage.ui.timer
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -11,8 +17,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.gureumpage.ui.timer.component.MemoList
@@ -28,23 +38,23 @@ val LocalAppBarUpClick = compositionLocalOf { 0L }
 @Composable
 fun TimerScreen(
     userBookId: String,
-    onEditMemo: () -> Unit = {},
     onExit: () -> Unit = {},
     viewModel: TimerViewModel = hiltViewModel(),
     memoViewModel: MemoViewModel = hiltViewModel(),
 ) {
     val colors = GureumTheme.colors
+    val context = LocalContext.current
 
     // UI 상태 수집
     val state by viewModel.uiState.collectAsState()
     val memoState by memoViewModel.ui.collectAsState()
+    val sharedTimerState by viewModel.sharedTimerState.collectAsState()
 
     // 정지 확인 다이얼로그 상태
     var showStopDialog by rememberSaveable { mutableStateOf(false) }
     var wasRunningBeforeDialog by rememberSaveable { mutableStateOf(false) }
-    //필사 다이얼로그
-    var showAddQuoteDialog by remember { mutableStateOf(false) }
 
+    // 필사 다이얼로그 - showMemoDialog 상태 사용
     var showBackExitScreen by rememberSaveable { mutableStateOf(false) }
     var wasRunningBeforeBack by rememberSaveable { mutableStateOf(false) }
 
@@ -64,19 +74,28 @@ fun TimerScreen(
         )
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.ensureFloatingWindowClosed(context)
+    }
+
+    LaunchedEffect(state.showMemoDialog) {
+        if (state.showMemoDialog) {
+            kotlinx.coroutines.delay(500)
+        }
+    }
+
     LaunchedEffect(userBookId) {
         viewModel.bind(userBookId)
         memoViewModel.clear()
         showBackExitScreen = false
         showStopDialog = false
-        showAddQuoteDialog = false
     }
 
     val appBarUp = LocalAppBarUpClick.current
     var lastHandledUpTs by remember { mutableStateOf(0L) }
 
     LaunchedEffect(appBarUp, state.countdown) {
-        if (state.countdown != null) return@LaunchedEffect  // 카운트다운 중엔 무시
+        if (state.countdown != null) return@LaunchedEffect
         if (appBarUp != 0L && appBarUp != lastHandledUpTs) {
             lastHandledUpTs = appBarUp
             wasRunningBeforeBack = state.isRunning
@@ -84,15 +103,15 @@ fun TimerScreen(
             showBackExitScreen = true
         }
     }
-    //하드웨어 뒤로가기
+
+    // 하드웨어 뒤로가기
     BackHandler(
-        enabled = state.countdown == null && !showStopDialog && !showAddQuoteDialog && !showBackExitScreen
+        enabled = state.countdown == null && !showStopDialog && !state.showMemoDialog && !showBackExitScreen
     ) {
         wasRunningBeforeBack = state.isRunning
         if (state.isRunning) viewModel.pause()
         showBackExitScreen = true
     }
-
 
     Box(
         modifier = Modifier
@@ -108,7 +127,6 @@ fun TimerScreen(
         ) {
             Spacer(Modifier.height(24.dp))
 
-
             // 현재 읽는 책 카드
             NowReadingCard(
                 title = state.bookTitle,
@@ -123,6 +141,34 @@ fun TimerScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            IconButton(
+                onClick = {
+                    if (state.countdown != null) return@IconButton
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (!Settings.canDrawOverlays(context)) {
+                            val intent = Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                "package:${context.packageName}".toUri()
+                            )
+                            context.startActivity(intent)
+                            return@IconButton
+                        }
+                    }
+
+                    viewModel.startFloatingWindowMode(context)
+                    (context as? Activity)?.moveTaskToBack(true)
+                },
+                modifier = Modifier.size(42.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_stop),
+                    contentDescription = "플로팅 모드",
+                    tint = colors.gray300,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
             // 원형 타이머
             TimerRing(
                 modifier = Modifier
@@ -135,7 +181,7 @@ fun TimerScreen(
             Spacer(Modifier.height(40.dp))
 
             // 메모 영역
-            val lines = remember(memoState.items, userBookId) {
+            val lines = rememberSaveable (memoState.items, userBookId) {
                 memoState.items
                     .filter { q -> q.userBookId == userBookId }
                     .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
@@ -165,14 +211,12 @@ fun TimerScreen(
                 },
                 onEdit = {
                     if (state.countdown != null) return@TimerControlsRow
-                    showAddQuoteDialog = true
-                    onEditMemo()
+                    viewModel.showMemoDialog()
                 }
             )
 
             Spacer(Modifier.height(24.dp))
         }
-
 
         if (state.countdown != null) {
             CountdownOverlayWithHole(
@@ -203,14 +247,13 @@ fun TimerScreen(
                 }
             )
         }
-        //필사 다이얼로그
-        if (showAddQuoteDialog) {
+
+        if (state.showMemoDialog) {
             AddQuoteDialog(
                 onDismiss = {
-                    showAddQuoteDialog = false
+                    viewModel.dismissMemoDialog()
                 },
                 onSave = { page, content ->
-
                     memoViewModel.add(
                         userBookId = userBookId,
                         pageNumber = page?.toIntOrNull(),
@@ -219,14 +262,15 @@ fun TimerScreen(
                         author = state.author,
                         imageUrl = state.bookImageUrl,
                     ) {
-                        // 저장 성공 후 다이얼로그 닫고 타이머 재개
-                        showAddQuoteDialog = false
+                        // 저장 성공 후 다이얼로그 닫기
+                        viewModel.dismissMemoDialog()
                     }
                 },
                 lastPage = state.totalPage
             )
         }
-        //뒤로가기 다이얼로그
+
+        // 뒤로가기 다이얼로그
         if (showBackExitScreen) {
             StopReadingConfirmDialog(
                 displayTime = state.displayTimeMMSS,
@@ -240,7 +284,7 @@ fun TimerScreen(
                 onStop = {
                     viewModel.stop()
                     showBackExitScreen = false
-                    onExit() // popBackStack 등 전달된 동작 수행
+                    onExit()
                 }
             )
         }

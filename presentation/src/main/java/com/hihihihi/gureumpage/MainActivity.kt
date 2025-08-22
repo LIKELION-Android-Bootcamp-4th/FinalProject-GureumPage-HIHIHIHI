@@ -2,7 +2,9 @@ package com.hihihihi.gureumpage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -66,6 +68,7 @@ import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.ui.timer.FloatingTimerService
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -128,6 +131,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val intent = Intent(this, FloatingTimerService::class.java)
+        stopService(intent)
     }
 }
 
