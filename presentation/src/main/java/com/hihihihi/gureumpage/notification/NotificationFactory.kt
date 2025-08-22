@@ -10,21 +10,11 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.navigation.DeepLink
-import androidx.core.net.toUri
 
 class NotificationFactory(private val context: Context) {
 
-    private fun normalize(raw: String?): Uri {
-        if (raw.isNullOrBlank()) return DeepLink.home()
-
-        val uri = raw.toUri()
-        // buildUpon: URI의 속성을 복사해 새 빌더를 구성
-        return if (uri.scheme == "app") uri.buildUpon().scheme("gureum").build() else uri
-    }
-
     // URI 딥 링크를 Activity로 전달할 PendingIntent 생성
-    private fun pendingIntentTo(uri: Uri): PendingIntent {
+    fun pendingIntentTo(uri: Uri): PendingIntent {
         val intent = Intent(Intent.ACTION_VIEW, uri)
             .setPackage(context.packageName) // 앱 내에서만 라우팅
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -33,9 +23,6 @@ class NotificationFactory(private val context: Context) {
 
         return PendingIntent.getActivity(context, uri.toString().hashCode(), intent, flags)
     }
-
-    // 상세 라우팅
-    fun pendingFromUri(raw: String?) = pendingIntentTo(normalize(raw))
 
     // 기본 알림
     fun simpleAlarm(channelId: String, title: String, text: String, content: PendingIntent): Notification =
