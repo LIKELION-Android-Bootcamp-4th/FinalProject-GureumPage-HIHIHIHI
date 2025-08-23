@@ -26,9 +26,14 @@ googleGmsGoogleServices = "4.4.3"
 uiViewbinding = "1.8.3"
 datastore = "1.1.1"
 calendarCompose = "2.4.0"
+
 playReview = "2.0.2"
 ossLicensesPlugin = "0.10.6"
 playServicesOssLicenses = "17.2.1"
+
+glance = "1.1.1"
+workVersion = "2.10.3"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -67,6 +72,11 @@ calendar-compose = { module = "com.kizitonwose.calendar:compose", version.ref = 
 google-play-review = { module = "com.google.android.play:review", version.ref = "playReview" }
 google-play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
+
+androidx-glance = { module = "androidx.glance:glance", version.ref = "glance" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workVersion" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
