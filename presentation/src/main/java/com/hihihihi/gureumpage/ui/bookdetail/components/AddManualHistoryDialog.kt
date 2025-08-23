@@ -101,9 +101,9 @@ fun AddManualHistoryDialog(
 
 
     val canSave = startTime != null && endTime != null &&
-            (endTime!!.isAfter(startTime) || endTime == startTime) &&
+            endTime!!.isAfter(startTime)  &&
             startPageNum != null && endPageNum != null &&
-            startPageNum > 0 && endPageNum > 0 &&
+            startPageNum >= 0 && endPageNum > 0 &&
             endPageNum >= startPageNum
 
     Dialog(onDismissRequest = onDismiss) {
