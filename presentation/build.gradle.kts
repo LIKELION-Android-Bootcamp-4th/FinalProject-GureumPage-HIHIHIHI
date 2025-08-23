@@ -17,9 +17,15 @@ plugins {
     alias(libs.plugins.google.oss.licenses)
 }
 
+
 android {
     namespace = "com.hihihihi.gureumpage"
     compileSdk = 35
+
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.hihihihi.gureumpage"
@@ -38,6 +44,7 @@ android {
         manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
         buildConfigField ("String", "VERSION_NAME", "\"${versionName}\"")
 
+
     }
 
     buildTypes {
@@ -47,26 +54,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-//            signingConfig = signingConfigs.getByName("debug")
-//        }
-//        debug {
-//            applicationIdSuffix = ".debug"
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
         jvmTarget = "11"
     }
-
     buildFeatures {
         viewBinding = true
         compose = true
-        buildConfig = true
     }
 }
 
@@ -124,8 +123,6 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-messaging")
-
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
