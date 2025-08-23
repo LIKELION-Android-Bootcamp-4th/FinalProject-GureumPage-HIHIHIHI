@@ -29,6 +29,7 @@ import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -46,13 +47,11 @@ fun SearchItem(
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
             //책 이미지
-            AsyncImage(
+            BookCoverImage(
                 modifier = Modifier
                     .size(width = 60.dp, height = 80.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop,
-                model = result.coverImageUrl,
-                contentDescription = "책",
+                imageUrl = result.coverImageUrl,
             )
             Spacer(modifier = Modifier.width(14.dp))
             Column(

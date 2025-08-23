@@ -57,7 +57,13 @@ fun CategoryRow(
         ) {
             if (isSelected) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_checked),
+                    painter = painterResource(
+                        if (GureumTheme.isDarkTheme) {
+                            R.drawable.ic_checked_dark
+                        } else {
+                            R.drawable.ic_checked_light
+                        }
+                    ),
                     contentDescription = "선택 됨",
                     tint = Color.Unspecified,
                     modifier = Modifier

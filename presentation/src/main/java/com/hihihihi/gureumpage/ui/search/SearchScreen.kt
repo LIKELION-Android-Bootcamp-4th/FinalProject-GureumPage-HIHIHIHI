@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.ui.search
 
 import android.app.Activity
-import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -91,8 +90,6 @@ fun SearchScreen(
             }
         }
     }
-
-
 
     val statusBarColor = GureumTheme.colors.card.toArgb()
     val lightIcons = statusBarColor.luminance > 0.5f
@@ -184,7 +181,6 @@ fun SearchScreen(
                 }
             }
         }
-
     }
     //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
     if (bookToAdd != null) {

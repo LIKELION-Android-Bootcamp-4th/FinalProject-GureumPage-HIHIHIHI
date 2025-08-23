@@ -107,7 +107,7 @@ fun StopReadingDialog(
                     style = typo.bodySmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    color = colors.gray500
+                    color = if(willSave) colors.gray500 else colors.systemRed
                 )
 
                 Spacer(Modifier.height(16.dp))

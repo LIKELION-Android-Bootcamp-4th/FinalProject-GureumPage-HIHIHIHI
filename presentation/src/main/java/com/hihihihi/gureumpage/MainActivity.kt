@@ -6,26 +6,45 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,8 +55,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
+import com.hihihihi.gureumpage.designsystem.components.Medi14Text
+import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
+import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
@@ -54,8 +77,17 @@ import kotlinx.coroutines.delay
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @HiltViewModel
-    class GureumThemeViewModel @Inject constructor(getTheme: GetThemeFlowUseCase) : ViewModel() {
+    class GureumThemeViewModel @Inject constructor(
+        getTheme: GetThemeFlowUseCase,
+        private val networkManager: NetworkManager
+    ) : ViewModel() {
         val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
+
+        val showNetworkWarning = networkManager.showNetworkWarning
+
+        fun dismissNetworkWarning() {
+            networkManager.dismissNetworkWarning()
+        }
     }
 
     // 딥링크 처리를 위한 상태 변수
@@ -72,6 +104,7 @@ class MainActivity : ComponentActivity() {
             Log.d("DeepLink", "onCreate uri: $uri")
         }
 
+        setTheme(R.style.Theme_GureumPage)
         enableEdgeToEdge()
         setContent {
             val viewModel = hiltViewModel<GureumThemeViewModel>()
@@ -88,33 +121,46 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
 
+            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
             // 모드 상태에 따라 GureumPageTheme 에 반영
 
-            GureumPageTheme(darkTheme = when (currentTheme) {
-                GureumThemeType.LIGHT -> false
-                else -> true
-            }) {
+            GureumPageTheme(
+                darkTheme = when (currentTheme) {
+                    GureumThemeType.LIGHT -> false
+                    else -> true
+                }
+            ) {
 
-                val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
+                val navController =
+                    rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
                 LaunchedEffect(navController) {
                     this@MainActivity._navController = navController
                 }
 
-                GureumPageApp(navController)
-                Log.d("DeepLink", "onCreate - initialized App")
+                Box(modifier = Modifier.fillMaxSize()) {
+                    GureumPageApp(navController)
 
-                // 딥링크 처리를 위한 LaunchedEffect
-                LaunchedEffect(deepLinkUri) {
-                    delay(100)  //Navigation 초기화 후에 라우팅 실행 가능하여 대기
-                    deepLinkUri?.let { uri ->
-                        routeDeepLink(uri)  // 라우팅 처리
-                        deepLinkUri = null  // 처리 완료 후 초기화
+                    if (showNetworkWarning) {
+                        NetworkWarningBanner(
+                            onDismiss = { viewModel.dismissNetworkWarning() }
+                        )
+                    }
+
+                    Log.d("DeepLink", "onCreate - initialized App")
+
+                    // 딥링크 처리를 위한 LaunchedEffect
+                    LaunchedEffect(deepLinkUri) {
+                        delay(100)  //Navigation 초기화 후에 라우팅 실행 가능하여 대기
+                        deepLinkUri?.let { uri ->
+                            routeDeepLink(uri)  // 라우팅 처리
+                            deepLinkUri = null  // 처리 완료 후 초기화
+                        }
                     }
                 }
-
             }
         }
     }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
@@ -173,8 +219,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GureumPageApp(navController: NavHostController) {
-
-
     Log.d("APP", "GureumPageApp init")
 
 //    val navController = rememberNavController()
@@ -182,6 +226,7 @@ fun GureumPageApp(navController: NavHostController) {
 
     val context = LocalContext.current
 
+    var lastBackMillis by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -193,6 +238,7 @@ fun GureumPageApp(navController: NavHostController) {
         NavigationRoute.MindMap.route,
         NavigationRoute.Withdraw.route,
         NavigationRoute.Search.route,
+        NavigationRoute.Splash.route
     )
 
     var timerAppbarUp by remember { mutableStateOf(0L) }
@@ -209,7 +255,14 @@ fun GureumPageApp(navController: NavHostController) {
         when {
             // 현재 루트가 홈이면 앱 종료
             currentRoute == NavigationRoute.Home.route -> {
-                (context as? Activity)?.finish()
+                val currentTime = System.currentTimeMillis()
+
+                if (currentTime - lastBackMillis < 2000L) {
+                    (context as? Activity)?.finish()
+                } else {
+                    lastBackMillis = currentTime
+                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
+                }
             }
 
             // 현재 루트가 바텀 내비 아이템이면 홈으로 이동
@@ -266,4 +319,59 @@ fun GureumPageApp(navController: NavHostController) {
         }
     }
     Log.d("APP", "GureumPageApp init - end")
+}
+
+@Composable
+fun NetworkWarningBanner(
+    onDismiss: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(top = 40.dp)
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = GureumTheme.colors.systemRed
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = GureumTheme.colors.white
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Semi16Text(
+                    "앗, 네트워크 연결이 끊어졌어요!",
+                    color = GureumTheme.colors.white
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Medi14Text(
+                    "데이터를 불러오거나 저장할 수 없어요.",
+                    color = GureumTheme.colors.white
+                )
+                Medi14Text(
+                    "다시 연결하면 바로 불러올 수 있어요!",
+                    color = GureumTheme.colors.white
+                )
+            }
+
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    modifier = Modifier.size(16.dp),
+                    contentDescription = null,
+                    tint = GureumTheme.colors.white
+                )
+            }
+        }
+    }
 }
