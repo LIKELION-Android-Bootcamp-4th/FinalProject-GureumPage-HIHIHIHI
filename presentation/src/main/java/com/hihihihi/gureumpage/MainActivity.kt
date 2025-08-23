@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.collection.isNotEmpty
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.GureumThemeType
@@ -65,13 +68,13 @@ import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.notification.Channels
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
@@ -93,6 +96,7 @@ class MainActivity : ComponentActivity() {
     // 딥링크 처리를 위한 상태 변수
     private var deepLinkUri: Uri? = null
     private var _navController: NavHostController? = null
+    private var pendingDeepLink: Intent? = null
 
     @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,13 +109,18 @@ class MainActivity : ComponentActivity() {
         }
 
         setTheme(R.style.Theme_GureumPage)
+        Channels.ensureAll(this)
         enableEdgeToEdge()
         setContent {
             val viewModel = hiltViewModel<GureumThemeViewModel>()
-            val currentTheme by viewModel.theme.collectAsState()
-            val isDark = currentTheme != GureumThemeType.LIGHT
+            val initIntent = remember { intent }
 
+            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
+            val currentTheme by viewModel.theme.collectAsState()
+
+            val isDark = currentTheme != GureumThemeType.LIGHT
             val window = (LocalContext.current as Activity).window
+
             DisposableEffect(isDark) {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -121,9 +130,20 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
 
-            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
-            // 모드 상태에 따라 GureumPageTheme 에 반영
+            val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
+            LaunchedEffect(navController) {
+                this@MainActivity._navController = navController
+            }
 
+            DisposableEffect(Unit) {
+                if (pendingDeepLink != null) {
+                    navController.handleDeepLink(pendingDeepLink!!)
+                    pendingDeepLink = null
+                }
+                onDispose { }
+            }
+
+            // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(
                 darkTheme = when (currentTheme) {
                     GureumThemeType.LIGHT -> false
@@ -131,14 +151,9 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
 
-                val navController =
-                    rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
-                LaunchedEffect(navController) {
-                    this@MainActivity._navController = navController
-                }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    GureumPageApp(navController)
+                    GureumPageApp(navController, initIntent)
 
                     if (showNetworkWarning) {
                         NetworkWarningBanner(
@@ -169,6 +184,17 @@ class MainActivity : ComponentActivity() {
             routeDeepLink(uri)
         }
     }
+//    // 백그라운드에서 알림으로 들어올 시 딥링크 처리
+//    @SuppressLint("RestrictedApi")
+//    override fun onNewIntent(intent: Intent) {
+//        super.onNewIntent(intent)
+//        if (::navController.isInitialized && navController.graph.nodes.isNotEmpty()) {
+//            navController.handleDeepLink(intent)
+//        } else {
+//            // 그래프 준비 전이면 보류
+//            pendingDeepLink = intent
+//        }
+//    }
 
     private fun routeDeepLink(uri: Uri) {
 
@@ -218,10 +244,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GureumPageApp(navController: NavHostController) {
-    Log.d("APP", "GureumPageApp init")
-
-//    val navController = rememberNavController()
+fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -240,6 +263,14 @@ fun GureumPageApp(navController: NavHostController) {
         NavigationRoute.Search.route,
         NavigationRoute.Splash.route
     )
+
+    var initialHandle by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(initialHandle) {
+        if (!initialHandle) {
+            navController.handleDeepLink(initIntent)
+            initialHandle = true
+        }
+    }
 
     var timerAppbarUp by remember { mutableStateOf(0L) }
 
@@ -309,7 +340,6 @@ fun GureumPageApp(navController: NavHostController) {
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
-
         CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
             GureumNavGraph(
                 navController = navController,
