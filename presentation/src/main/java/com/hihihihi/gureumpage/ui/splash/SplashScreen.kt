@@ -46,6 +46,7 @@ import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
+import com.hihihihi.gureumpage.notification.ReminderScheduler
 
 @Composable
 fun SplashView(
@@ -115,8 +116,24 @@ fun SplashView(
         if (proceed && !kicked) {
             kicked = true
             showProgress = true
-            viewModel.checkNetworkAndProceed()
         }
+
+        // 디버깅용 - 알림 테스트 모두 완료 후 삭제 예정
+//        if (proceed) {
+//            WorkManager.getInstance(context).enqueue(
+//                OneTimeWorkRequestBuilder<DailyReminderWorker>()
+//                    .setInitialDelay(10, TimeUnit.SECONDS)
+//                    .build()
+//            )
+//
+//            WorkManager.getInstance(context)
+//                .getWorkInfosByTag("daily-reminder-test")
+//                .get()
+//                .forEach { Log.d("WM", "id=${it.id} state=${it.state}") }
+//        }
+
+        // TODO 읽은 기록 추가 후 알림 오는지 테스트 필요
+        if (proceed) ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
     }
 
     LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
