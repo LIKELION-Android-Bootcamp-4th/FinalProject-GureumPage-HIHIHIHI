@@ -181,7 +181,7 @@ fun TimerScreen(
             Spacer(Modifier.height(40.dp))
 
             // 메모 영역
-            val lines = rememberSaveable (memoState.items, userBookId) {
+            val lines = remember (memoState.items, userBookId) {
                 memoState.items
                     .filter { q -> q.userBookId == userBookId }
                     .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
