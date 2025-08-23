@@ -2,14 +2,12 @@ package com.hihihihi.gureumpage
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.collection.isNotEmpty
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,14 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -38,10 +39,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.GureumThemeType
@@ -66,7 +66,6 @@ import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
-import com.hihihihi.gureumpage.notification.Channels
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,9 +75,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private lateinit var navController: NavHostController
-    private var pendingDeepLink: Intent? = null
-
     @HiltViewModel
     class GureumThemeViewModel @Inject constructor(
         getTheme: GetThemeFlowUseCase,
@@ -97,19 +93,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_GureumPage)
-        Channels.ensureAll(this)
         enableEdgeToEdge()
         setContent {
-            navController = rememberNavController()
             val viewModel = hiltViewModel<GureumThemeViewModel>()
-            val initIntent = remember { intent }
-
-            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
             val currentTheme by viewModel.theme.collectAsState()
-
             val isDark = currentTheme != GureumThemeType.LIGHT
-            val window = (LocalContext.current as Activity).window
 
+            val window = (LocalContext.current as Activity).window
             DisposableEffect(isDark) {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -119,14 +109,7 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
 
-            DisposableEffect(Unit) {
-                if (pendingDeepLink != null) {
-                    navController.handleDeepLink(pendingDeepLink!!)
-                    pendingDeepLink = null
-                }
-                onDispose { }
-            }
-
+            val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(
                 darkTheme = when (currentTheme) {
@@ -135,7 +118,7 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    GureumPageApp(navController, initIntent)
+                    GureumPageApp()
 
                     if (showNetworkWarning) {
                         NetworkWarningBanner(
@@ -146,21 +129,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    // 백그라운드에서 알림으로 들어올 시 딥링크 처리
-    @SuppressLint("RestrictedApi")
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        if (::navController.isInitialized && navController.graph.nodes.isNotEmpty()) {
-            navController.handleDeepLink(intent)
-        } else {
-            // 그래프 준비 전이면 보류
-            pendingDeepLink = intent
-        }
-    }
 }
 
 @Composable
-fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
+fun GureumPageApp() {
+    val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -179,14 +152,6 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         NavigationRoute.Search.route,
         NavigationRoute.Splash.route
     )
-
-    var initialHandle by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(initialHandle) {
-        if (!initialHandle) {
-            navController.handleDeepLink(initIntent)
-            initialHandle = true
-        }
-    }
 
     var timerAppbarUp by remember { mutableStateOf(0L) }
 
