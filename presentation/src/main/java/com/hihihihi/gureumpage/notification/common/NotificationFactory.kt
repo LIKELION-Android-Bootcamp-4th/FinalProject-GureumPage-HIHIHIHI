@@ -34,6 +34,7 @@ class NotificationFactory(private val context: Context) {
             .setAutoCancel(true)
             .build()
 
+    // 무음 알림
     fun simpleAlarmSilent(channelId: String, title: String, text: String, content: PendingIntent): Notification =
         NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_cloud_reading)
@@ -43,6 +44,19 @@ class NotificationFactory(private val context: Context) {
             .setAutoCancel(true)
             .setSilent(true)    // 무음
             .setDefaults(0)     // 사운드/진동 x
+            .build()
+
+    // 통계 요약 알림
+    fun summary(title: String, text: String, content: PendingIntent): Notification =
+        NotificationCompat.Builder(context, Channels.SUMMARY)
+            .setSmallIcon(R.drawable.ic_cloud_reading)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(content)
+            .setAutoCancel(true)
+            .setSilent(true)
+            .setDefaults(0)
             .build()
 
     // 알람 표시
