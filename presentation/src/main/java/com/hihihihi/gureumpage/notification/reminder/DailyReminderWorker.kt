@@ -12,6 +12,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.hihihihi.gureumpage.notification.common.Channels
 import com.hihihihi.gureumpage.notification.common.NotificationFactory
+import com.hihihihi.gureumpage.notification.common.Quiet
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -32,6 +33,8 @@ class DailyReminderWorker @AssistedInject constructor(
         ) {
             return Result.success()
         }
+
+        if (!Quiet.allow()) return Result.success()
 
         val notReadToday = true
         if (notReadToday) {
