@@ -61,7 +61,15 @@ fun GureumNavGraph(
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
         composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
         composable(NavigationRoute.Search.route) { SearchScreen(navController) }
-        composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
+        composable(NavigationRoute.StatisticsWeekly.route) {
+            StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.WEEK)
+        }
+        composable(NavigationRoute.StatisticsMonthly.route) {
+            StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.MONTH)
+        }
+        composable(NavigationRoute.StatisticsYearly.route) {
+            StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.YEAR)
+        }
         composable(
             NavigationRoute.Timer.route,
             arguments = listOf(navArgument("userBookId") { type = NavType.StringType })

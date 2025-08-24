@@ -47,7 +47,7 @@ sealed class BottomNavItem(
     )
 
     object Statistics : BottomNavItem(
-        NavigationRoute.Statistics.route,
+        NavigationRoute.StatisticsWeekly.route,
         "통계",
         R.drawable.ic_chart_pie_outline,
         R.drawable.ic_chart_pie_filled
