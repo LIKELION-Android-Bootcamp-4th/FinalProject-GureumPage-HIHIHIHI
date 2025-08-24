@@ -46,7 +46,7 @@ import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
-import com.hihihihi.gureumpage.notification.ReminderScheduler
+import com.hihihihi.gureumpage.notification.reminder.ReminderScheduler
 
 @Composable
 fun SplashView(
