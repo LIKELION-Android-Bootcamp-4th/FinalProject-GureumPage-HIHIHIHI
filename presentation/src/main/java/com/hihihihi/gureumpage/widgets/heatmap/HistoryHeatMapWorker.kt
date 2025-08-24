@@ -51,11 +51,7 @@ class HistoryHeatMapWorker @AssistedInject constructor(
                 .groupBy { it.date } // it.date: LocalDate
                 .mapValues { (_, items) -> items.sumOf { it.totalReadPageCount } }
 
-            val payload: HeatPayload = if (grouped.isEmpty()) {
-                DummyData.buildDummyPayload()
-            } else {
-                buildPayloadFrom(grouped)
-            }
+            val payload: HeatPayload = buildPayloadFrom(grouped)
 
             val jsonData = Gson().toJson(payload)
 
