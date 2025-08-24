@@ -34,6 +34,17 @@ class NotificationFactory(private val context: Context) {
             .setAutoCancel(true)
             .build()
 
+    fun simpleAlarmSilent(channelId: String, title: String, text: String, content: PendingIntent): Notification =
+        NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_cloud_reading)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(content)
+            .setAutoCancel(true)
+            .setSilent(true)    // 무음
+            .setDefaults(0)     // 사운드/진동 x
+            .build()
+
     // 알람 표시
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun notify(tag: String?, id: Int, notification: Notification) {
