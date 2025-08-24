@@ -10,20 +10,13 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
-import com.hihihihi.domain.model.DailyReadPage
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesByUserIdAndDateUseCase
-import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.util.Calendar
-import java.util.Date
-import java.util.TimeZone
 
 @HiltWorker
 class HistoryHeatMapWorker @AssistedInject constructor(
@@ -46,18 +39,13 @@ class HistoryHeatMapWorker @AssistedInject constructor(
             val manager = GlanceAppWidgetManager(applicationContext)
             val glanceIds = manager.getGlanceIds(HistoryHeatMapWidget::class.java)
 
-            // 한달전 첫번째 날
-            val dayOfStart = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
+            // 6주 전부터 다음주까지의 데이터가 필요하므로 충분히 이전 날짜부터 조회
+            val today = LocalDate.now()
+            val dataStartDate =
+                today.minusWeeks(8).atStartOfDay().atZone(java.time.ZoneId.systemDefault())
+            val startDate = java.util.Date.from(dataStartDate.toInstant())
 
-                set(Calendar.DAY_OF_MONTH, 1)
-                add(Calendar.MONTH, -1)
-            }
-
-            val dailies = getDailyReadPagesByUserIdAndDateUseCase(currentUid,dayOfStart.time).first()
+            val dailies = getDailyReadPagesByUserIdAndDateUseCase(currentUid, startDate).first()
 
             val grouped: Map<LocalDate, Int> = dailies
                 .groupBy { it.date } // it.date: LocalDate
@@ -66,7 +54,7 @@ class HistoryHeatMapWorker @AssistedInject constructor(
             val payload: HeatPayload = if (grouped.isEmpty()) {
                 DummyData.buildDummyPayload()
             } else {
-                buildPayloadFrom(grouped,dayOfStart.time)
+                buildPayloadFrom(grouped)
             }
 
             val jsonData = Gson().toJson(payload)
@@ -80,7 +68,7 @@ class HistoryHeatMapWorker @AssistedInject constructor(
             }
             return Result.success()
         } catch (e: Exception) {
-            Log.e("Widget","HistoryHeatMapWorker.doWork()",e)
+            Log.e("Widget", "HistoryHeatMapWorker.doWork()", e)
         }
         return Result.failure()
 
@@ -102,59 +90,58 @@ class HistoryHeatMapWorker @AssistedInject constructor(
         t3: Int = 20,  // level 3 하한
         t4: Int = 30   // level 4 하한
     ): Int = when {
-        pages <= 0      -> 0
-        pages < t2      -> 1   // [t1, t2)
-        pages < t3      -> 2   // [t2, t3)
-        pages < t4      -> 3   // [t3, t4)
-        else            -> 4   // [t4, ∞)
+        pages <= 0 -> 0
+        pages < t2 -> 1   // [t1, t2)
+        pages < t3 -> 2   // [t2, t3)
+        pages < t4 -> 3   // [t3, t4)
+        else -> 4   // [t4, ∞)
     }
 
     private fun buildPayloadFrom(
         grouped: Map<LocalDate, Int>,
-        dayOfStart: Date
     ): HeatPayload {
-        // dayOfStart: "이전달 1일" (UTC로 계산해 왔으므로, 위젯 표시에 사용할 현지 TZ로 변환)
-        val zoneId = TimeZone.getDefault().toZoneId()
-        val prevMonthFirst = dayOfStart.toInstant().atZone(zoneId).toLocalDate()
+        val today = LocalDate.now()
 
-        // 이번달 1일 (split 기준)
-        val currentMonthFirst = prevMonthFirst.plusMonths(1).withDayOfMonth(1)
+        // 이번주를 7번째 열에 위치시키기 위해 6주 전부터 시작
+        val thisWeekSunday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        val start = thisWeekSunday.minusWeeks(6) // 6주 전부터 시작 (6주 전 + 이번주 + 다음주 = 8주)
 
-        // 좌측 4주(이전달 블록) 시작점을 '일요일'에 맞춤
-        val start = currentMonthFirst
-            .minusWeeks(4)
-            .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        // 56칸 그리드 (8열 × 7행)
+        val levels = ArrayList<HeatCell>(56).apply { repeat(56) { add(HeatCell()) } }
+        val monthHeaders = ArrayList<String>(8).apply { repeat(8) { add("") } }
 
-        // 9주(56일) 범위 끝 (토요일)
-        val end = start.plusDays(62)
+        // 각 열(주)에 대해 처리
+        for (col in 0 until 7) {
+            val weekStart = start.plusWeeks(col.toLong())
+            var hasFirstDay = false
+            var monthOfFirstDay: String? = null
 
-        // 월 라벨: 좌=이전달, 우=이번달
-        val monthLeft = "${prevMonthFirst.monthValue}월"
-        val monthRight = "${currentMonthFirst.monthValue}월"
+            // 해당 주의 7일 처리
+            for (row in 0 until 7) {
+                val date = weekStart.plusDays(row.toLong())
+                val idx = col * 7 + row
 
-        // 63칸 그리드 (9열 × 7행)
-        val levels = ArrayList<HeatCell>(63).apply { repeat(63) { add(HeatCell()) } }
+                // 1일인 날짜 찾기
+                if (date.dayOfMonth == 1) {
+                    hasFirstDay = true
+                    monthOfFirstDay = "${date.monthValue}월"
+                }
 
-        var offset = 0
-        var d = start
-        while (!d.isAfter(end)) {
-            val col = offset / 7                         // 0..7 (8열)
-            val row = if (d.dayOfWeek == DayOfWeek.SUNDAY) 0 else d.dayOfWeek.value // 0..6
-            val idx = row * 9 + col
+                val pages = grouped[date] ?: 0
+                levels[idx] = HeatCell(
+                    ymd = date.toString(),
+                    level = calcLevel(pages)
+                )
+            }
 
-            val pages = grouped[d] ?: 0
-            levels[idx] = HeatCell(
-                ymd = d.toString(),
-                level = calcLevel(pages)
-            )
-
-            d = d.plusDays(1)
-            offset++
+            // 해당 열에 1일이 있으면 월 헤더 설정
+            if (hasFirstDay && monthOfFirstDay != null) {
+                monthHeaders[col] = monthOfFirstDay
+            }
         }
 
         return HeatPayload(
-            monthLeft = monthLeft,
-            monthRight = monthRight,
+            monthHeaders = monthHeaders,
             levels = levels
         )
     }
