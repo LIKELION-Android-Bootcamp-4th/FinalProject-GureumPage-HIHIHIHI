@@ -11,9 +11,18 @@ class SearchRemoteDataSourceImpl @Inject constructor(
     private val apiKey: String
 ) : SearchRemoteDataSource {
 
-    override suspend fun searchBooks(query: String): List<SearchBookDto> {
+    override suspend fun searchBooks(
+        query: String,
+        startIndex: Int,
+        maxResults: Int
+        ): List<SearchBookDto> {
         return try {
-            val response = searchApiService.searchBooks(apiKey, query)
+            val response = searchApiService.searchBooks(
+                ttbkey = apiKey,
+                query = query,
+                startIndex = startIndex + 1,
+                maxResults = maxResults
+            )
             response.body()?.books ?: emptyList()
         } catch (e: Exception) {
             emptyList()
