@@ -48,6 +48,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.search.component.AddBookBottomSheet
 import com.hihihihi.gureumpage.ui.search.component.SearchItem
 import com.hihihihi.gureumpage.ui.search.component.SearchTopAppBar
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,7 +108,10 @@ fun SearchScreen(
         onDispose { }
     }
 
-    var endToastShown by remember(uiState.searchResults) { mutableStateOf(false) }
+    var endToastShown by remember { mutableStateOf(false) }
+    if (!uiState.hasMore) {
+        LaunchedEffect(uiState.query) { endToastShown = false }
+    }
 
     //화면 진입 시 검색 자동 포커스
     LaunchedEffect(Unit) {
@@ -116,32 +120,29 @@ fun SearchScreen(
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(uiState.visibleCount, uiState.searchResults.size) {
-        if (uiState.visibleCount == 0) return@LaunchedEffect
-        if (uiState.visibleCount < 1) return@LaunchedEffect
+
+    LaunchedEffect(uiState.searchResults.size, uiState.hasMore) {
+        if (uiState.searchResults.isNotEmpty() && uiState.hasMore && !uiState.isLoadingMore) {
+            // 레이아웃 반영 후 현재 스크롤 가능 여부를 한 번 읽어서
+            val canScroll = snapshotFlow { listState.canScrollForward }.first()
+            if (!canScroll) {
+                viewModel.loadMore()
+            }
+        }
     }
 
-    LaunchedEffect(listState, uiState.visibleCount, uiState.searchResults.size) {
+    LaunchedEffect(listState, uiState.searchResults.size, uiState.hasMore, uiState.isLoadingMore) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .collect { lastVisibleIndex ->
-                val totalShown = uiState.visibleCount
-                if (lastVisibleIndex == null || totalShown == 0) return@collect
-
-                val hasHiddenItems = uiState.visibleCount < uiState.searchResults.size
-                val reachedBottom = lastVisibleIndex >= (uiState.visibleCount - 1)
-
+                if (lastVisibleIndex == null) return@collect
+                val lastIndex = uiState.searchResults.lastIndex
+                val reachedBottom = lastIndex >= 0 && lastVisibleIndex >= lastIndex
                 if (reachedBottom) {
                     when {
-                        // 1) 이미 받아온 리스트 안에 '숨겨진' 아이템이 있으면 먼저 더 보여주기
-                        hasHiddenItems && !uiState.isLoadingMore -> {
-                            viewModel.showMoreWithinFetched()
-                        }
-                        // 2) 숨겨진 건 없지만 서버에 다음 페이지가 남아있으면 페이징 호출
-                        !hasHiddenItems && uiState.hasMore && !uiState.isLoadingMore -> {
+                        uiState.hasMore && !uiState.isLoadingMore -> {
                             viewModel.loadMore()
                         }
-                        // 3) 둘 다 아니면 끝 토스트
-                        !uiState.hasMore && !hasHiddenItems && !endToastShown -> {
+                        !uiState.hasMore && !uiState.isLoadingMore && !endToastShown -> {
                             Toast.makeText(context, "더 이상 표시할 책이 없습니다.", Toast.LENGTH_SHORT).show()
                             endToastShown = true
                         }
@@ -208,16 +209,12 @@ fun SearchScreen(
                 )
             }
             else -> {
-                val shown = remember(uiState.searchResults, uiState.visibleCount) {
-                    uiState.searchResults.take(uiState.visibleCount)
-                }
-
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                     state = listState
                 ) {
                     itemsIndexed(
-                        items = shown,
+                        items = uiState.searchResults,
                         key = { index, item -> "${item.isbn}-$index" }
                     ) { _, item ->
                         SearchItem(

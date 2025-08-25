@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -49,23 +50,20 @@ class SearchViewModel @Inject constructor(
                 isPaging = false,
                 isLoadingMore = false,
                 hasMore = true,
-                visibleCount = 0
             )
             try {
-                val results = searchBooksUseCase(query)
+                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE)
+                val dedup = results.distinctBy { it.isbn }
                 Log.d("SearchVM", "query=$query, results.size=${results.size}")
-                val initialShown = min(INITIAL_COUNT, results.size)
                 _uiState.value = _uiState.value.copy(
-                    searchResults = results,
-                    visibleCount = initialShown,
+                    searchResults = dedup,
                     isSearching = false,
-                    hasMore = results.size >= PAGE_SIZE,
+                    hasMore = dedup.size >= PAGE_SIZE,
                     page = 1
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
-                    visibleCount = 0,
                     isSearching = false,
                     hasMore = false
                 )
@@ -75,46 +73,37 @@ class SearchViewModel @Inject constructor(
 
     fun loadMore() {
         val state = _uiState.value
-        if (state.isLoadingMore || state.isPaging) return
-        if (!state.hasMore) return
+        if (state.isLoadingMore || state.isPaging || !state.hasMore) return
 
         viewModelScope.launch {
-            _uiState.value = state.copy(isLoadingMore = true)
+            _uiState.update { it.copy(isLoadingMore = true) }
             delay(120)
 
-            try {
+
                 val nextPage = state.page + 1
-                // 다음 페이지 호출
-                val newPage = searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
-                Log.d("SearchVM", "loadMore page=$nextPage size=${newPage.size}")
-
-                val merged = state.searchResults + newPage
-                // 기존 “나눠 보여주기” UX 유지: 한 번에 10개씩만 더 보이게
-                val nextVisible = min(merged.size, state.visibleCount + LOAD_COUNT)
-
-                _uiState.value = state.copy(
-                    searchResults = merged,
-                    visibleCount = nextVisible,
-                    page = nextPage,
-                    // 새 페이지가 꽉 찼으면 더 있을 가능성
-                    hasMore = newPage.size >= PAGE_SIZE,
-                    isLoadingMore = false,
-                    isPaging = false
-                )
-            } catch (e: Exception) {
-                _uiState.value = state.copy(
-                    isLoadingMore = false,
-                    isPaging = false
-                )
-            }
+                runCatching {
+                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+                }.onSuccess { newPage ->
+                    // 다음 페이지 호출
+                    val newPage = searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+                    Log.d("SearchVM", "page=$nextPage size=${newPage.size} isbns=${newPage.take(3).map { it.isbn }}")
+                    val before = state.searchResults
+                    val merged = (before + newPage).distinctBy { it.isbn }
+                    val grew = merged.size > before.size
+                    // 기존 “나눠 보여주기” UX 유지: 한 번에 10개씩만 더 보이게
+                    _uiState.value = state.copy(
+                        searchResults = merged,
+                        page = nextPage,
+                        isLoadingMore = false,
+                        isPaging = false,
+                        hasMore = grew,
+                    )
+                }.onFailure {
+                    _uiState.value = state.copy(isLoadingMore = false)
+                }
         }
     }
 
-    fun showMoreWithinFetched() {
-        val state = _uiState.value
-        val newVisible = min(state.searchResults.size, state.visibleCount + LOAD_COUNT)
-        _uiState.value = state.copy(visibleCount = newVisible)
-    }
 
     // TODO: usecase로 일관성 맞추기
     fun getBookPageCount(isbn: String, onResult: (Int?) -> Unit) {
