@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,25 +61,25 @@ fun FloatingTimer(
         targetState = isMinimized,
         transitionSpec = {
             if (targetState) {
-                // 최소화 애니메이션: 오른쪽으로 축소
-                scaleIn(
-                    animationSpec = tween(300),
-                    initialScale = 1f
-                ) + fadeIn(animationSpec = tween(300)) with
-                        scaleOut(
-                            animationSpec = tween(300),
-                            targetScale = 0.5f
-                        ) + fadeOut(animationSpec = tween(300))
+                (slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth / 2 },
+                    animationSpec = tween(300)
+                ) + fadeIn()).togetherWith(
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> fullWidth / 2 },
+                        animationSpec = tween(300)
+                    ) + fadeOut()
+                )
             } else {
-                // 확장 애니메이션: 왼쪽에서 확대
-                scaleIn(
-                    animationSpec = tween(300),
-                    initialScale = 0.5f
-                ) + fadeIn(animationSpec = tween(300)) with
-                        scaleOut(
-                            animationSpec = tween(300),
-                            targetScale = 1f
-                        ) + fadeOut(animationSpec = tween(300))
+                (slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth / 2 },
+                    animationSpec = tween(300)
+                ) + fadeIn()).togetherWith(
+                    slideOutHorizontally(
+                        targetOffsetX = { fullWidth -> -fullWidth / 2 },
+                        animationSpec = tween(300)
+                    ) + fadeOut()
+                )
             }
         }
     ) { minimized ->
@@ -112,13 +113,16 @@ fun FloatingTimer(
                 Row {
 
                     Column(
+                        modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         timerState.bookInfo?.title?.let {
                             Semi12Text(
                                 it,
-                                color = gray700Color
-                            )
+                                color = gray700Color,
+                                maxLine = 1,
+
+                                )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Semi12Text(
@@ -127,14 +131,12 @@ fun FloatingTimer(
                         )
                     }
 
-
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     // 버튼들
                     Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier.width(280.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
                             onClick = onOpenQuoteDialog,
@@ -158,18 +160,6 @@ fun FloatingTimer(
                                 ),
                                 tint = primaryColor,
                                 contentDescription = "타이머 시작/정지"
-                            )
-                        }
-
-                        IconButton(
-                            onClick = onMinimize,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = "최소화",
-                                tint = gray700Color,
-                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }

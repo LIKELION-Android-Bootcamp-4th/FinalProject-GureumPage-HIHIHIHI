@@ -7,6 +7,9 @@ import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
@@ -141,33 +144,41 @@ fun TimerScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            IconButton(
-                onClick = {
-                    if (state.countdown != null) return@IconButton
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (!Settings.canDrawOverlays(context)) {
-                            val intent = Intent(
-                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                "package:${context.packageName}".toUri()
-                            )
-                            context.startActivity(intent)
-                            return@IconButton
-                        }
-                    }
-
-                    viewModel.startFloatingWindowMode(context)
-                    (context as? Activity)?.moveTaskToBack(true)
-                },
-                modifier = Modifier.size(42.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_stop),
-                    contentDescription = "플로팅 모드",
-                    tint = colors.gray300,
+                IconButton(
+                    onClick = {
+                        if (state.countdown != null) return@IconButton
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            if (!Settings.canDrawOverlays(context)) {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri()
+                                )
+                                context.startActivity(intent)
+                                return@IconButton
+                            }
+                        }
+
+                        viewModel.startFloatingWindowMode(context)
+                        (context as? Activity)?.moveTaskToBack(true)
+                    },
                     modifier = Modifier.size(36.dp)
-                )
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = "플로팅 모드",
+                        tint = colors.gray300,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
+
+            Spacer(Modifier.height(8.dp))
 
             // 원형 타이머
             TimerRing(
@@ -181,7 +192,7 @@ fun TimerScreen(
             Spacer(Modifier.height(40.dp))
 
             // 메모 영역
-            val lines = remember (memoState.items, userBookId) {
+            val lines = remember(memoState.items, userBookId) {
                 memoState.items
                     .filter { q -> q.userBookId == userBookId }
                     .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }

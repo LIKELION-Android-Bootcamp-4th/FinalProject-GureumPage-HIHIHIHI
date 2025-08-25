@@ -146,6 +146,9 @@ dependencies {
 
     implementation(libs.play.services.oss.licenses)
 
+    implementation("androidx.compose.material:material-icons-extended")
+
+
     implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
 
     implementation ("androidx.core:core-splashscreen:1.0.1")
