@@ -35,7 +35,9 @@ import kotlinx.coroutines.launch
 fun BookDetailTabs(
     userBook: UserBook,
     quotes: List<Quote>,
-    histories: List<History>
+    histories: List<History>,
+    onQuoteEdit: (String) -> Unit,
+    onQuoteDelete: (String) -> Unit
 ) {
     val tabTitles = listOf("책 정보", "필사 목록", "독서 기록")
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
@@ -74,7 +76,11 @@ fun BookDetailTabs(
         ) { page ->
             when (page) {
                 0 -> BookInfoTab(userBook)
-                1 -> QuotesTab(quotes)
+                1 -> QuotesTab(
+                    quotes = quotes,
+                    onEdit = onQuoteEdit,
+                    onDelete = onQuoteDelete
+                )
                 2 -> ReadingRecordTab(histories)
             }
         }
@@ -86,6 +92,6 @@ fun BookDetailTabs(
 @Composable
 private fun BookDetailTabsPreview() {
     GureumPageTheme {
-        BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords)
+//        BookDetailTabs(dummyUserBook,dummyQuotes, dummyRecords)
     }
 }
