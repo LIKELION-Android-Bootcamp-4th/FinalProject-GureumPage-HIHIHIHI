@@ -12,6 +12,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
@@ -34,6 +35,7 @@ import androidx.glance.text.Text
 import androidx.glance.unit.ColorProvider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.hihihihi.gureumpage.MainActivity
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.widgets.common.WidgetBook
 import com.hihihihi.gureumpage.widgets.common.WidgetParams
@@ -81,7 +83,7 @@ class CurrentReadingBooksWidget : GlanceAppWidget() {
                         .padding(bottom = 12.dp, start = 16.dp)
                     // (선택) 헤더 전체 클릭해서 앱/서재 열기
                     // 1) 액티비티 직접 열기 (DeepLink가 있으면 그걸 사용)
-                    // .clickable(actionStartActivity(MainActivity::class.java))
+                     .clickable(actionStartActivity(MainActivity::class.java))
                     // 2) 콜백으로 처리
                     // .clickable(actionRunCallback<OpenLibraryAction>())
                 ) {
