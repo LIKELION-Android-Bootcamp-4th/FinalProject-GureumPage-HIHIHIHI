@@ -12,4 +12,12 @@ interface QuoteRemoteDataSource {
     fun getQuotes(userId: String): Flow<List<QuoteDto>>
 
     fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>>
+
+    suspend fun deleteQuote(quoteId: String): Result<Unit>
+
+    suspend fun updateQuote(
+        quoteId: String,
+        content: String,
+        pageNumber: Int?
+    ): Result<Unit>
 }

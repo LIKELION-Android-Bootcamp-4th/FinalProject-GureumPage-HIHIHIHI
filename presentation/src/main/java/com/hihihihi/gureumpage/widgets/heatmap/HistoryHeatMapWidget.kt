@@ -65,7 +65,7 @@ class HistoryHeatMapWidget : GlanceAppWidget() {
 
             payload.levels.sortedBy { it.ymd }
 
-            Log.d("HistoryHeatMapWidget","payload:$payload")
+            Log.d("HistoryHeatMapWidget", "payload:$payload")
 
             Column(
                 modifier = GlanceModifier
@@ -102,13 +102,21 @@ class HistoryHeatMapWidget : GlanceAppWidget() {
                             Spacer(GlanceModifier.width(16.dp))
                             Text(
                                 text = payload.monthLeft,
-                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium,color = ColorProvider(R.color.heat_label)),
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = ColorProvider(R.color.heat_label)
+                                ),
 
                                 modifier = GlanceModifier.defaultWeight()
                             )
                             Text(
                                 text = payload.monthRight,
-                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ColorProvider(R.color.heat_label)),
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = ColorProvider(R.color.heat_label)
+                                ),
 
                                 modifier = GlanceModifier.defaultWeight()
                             )
@@ -145,7 +153,6 @@ class HistoryHeatMapWidget : GlanceAppWidget() {
                         }
                     }
                 }
-
 
 
             }

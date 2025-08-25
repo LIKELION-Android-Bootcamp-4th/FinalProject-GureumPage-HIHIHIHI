@@ -65,4 +65,34 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
             }
         awaitClose { quotesCollection.remove() }
     }
+
+    override suspend fun deleteQuote(quoteId: String): Result<Unit> = try{
+        firestore.collection("quotes")
+            .document(quoteId)
+            .delete()
+            .await()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    override suspend fun updateQuote(
+        quoteId: String,
+        content: String,
+        pageNumber: Int?
+    ): Result<Unit> = try {
+        val updates = mutableMapOf<String, Any?>(
+            "content" to content,
+            "page_number" to pageNumber
+        ).filterValues { it != null }
+
+        firestore.collection("quotes")
+            .document(quoteId)
+            .update(updates)
+            .await()
+
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }

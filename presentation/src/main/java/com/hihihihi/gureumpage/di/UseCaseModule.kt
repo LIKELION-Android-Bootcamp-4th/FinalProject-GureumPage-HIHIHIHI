@@ -26,6 +26,7 @@ import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
@@ -304,4 +305,12 @@ object UseCaseModule {
     ): GetQuoteByUserBookIdUseCase {
         return GetQuoteByUserBookIdUseCase(repository)
     }
+
+    @Provides
+    fun provideUpdateQuoteUseCase(
+        repository: QuoteRepository
+    ): UpdateQuoteUseCase {
+        return UpdateQuoteUseCase(repository)
+    }
+
 }
