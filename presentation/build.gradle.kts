@@ -17,21 +17,15 @@ plugins {
     alias(libs.plugins.google.oss.licenses)
 }
 
-
 android {
     namespace = "com.hihihihi.gureumpage"
     compileSdk = 35
-
-
-    buildFeatures {
-        buildConfig = true
-    }
 
     defaultConfig {
         applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
+        versionCode = 4
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -44,7 +38,6 @@ android {
         manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
         buildConfigField ("String", "VERSION_NAME", "\"${versionName}\"")
 
-
     }
 
     buildTypes {
@@ -54,18 +47,26 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+//            signingConfig = signingConfigs.getByName("debug")
+//        }
+//        debug {
+//            applicationIdSuffix = ".debug"
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
 }
 
@@ -123,6 +124,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging")
+
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
@@ -141,12 +144,25 @@ dependencies {
 
     implementation(libs.calendar.compose)
 
+
     implementation(libs.google.play.review)
     implementation(libs.google.play.review.ktx)
 
     implementation(libs.play.services.oss.licenses)
 
     implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+
+    implementation(libs.androidx.work.runtime.ktx)
+//    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+
+    ksp("com.google.dagger:hilt-compiler:2.56.2")
+
+    implementation("com.google.code.gson:gson:2.10.1")
+
 
     implementation ("androidx.core:core-splashscreen:1.0.1")
 

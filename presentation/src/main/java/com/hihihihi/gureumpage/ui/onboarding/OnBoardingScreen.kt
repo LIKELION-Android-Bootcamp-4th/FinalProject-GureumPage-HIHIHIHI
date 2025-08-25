@@ -90,6 +90,7 @@ private fun OnboardingContents(
                 isNextEnabled = viewModel.isNextEnabled(currentStep),
                 onNext = {
                     scope.launch {
+                        if (step == OnboardingStep.Nickname) viewModel.saveNickname()
                         if (isLastPage) onFinish()
                         else pagerState.animateScrollToPage(page + 1)
                     }
