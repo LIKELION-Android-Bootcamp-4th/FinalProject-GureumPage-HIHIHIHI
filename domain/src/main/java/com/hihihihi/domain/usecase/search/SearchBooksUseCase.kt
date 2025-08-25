@@ -9,19 +9,18 @@ class SearchBooksUseCase @Inject constructor(
     private val searchRepository: SearchRepository
 ) {
     suspend operator fun invoke(query: String): List<SearchBook> {
-        val list = searchRepository.searchBooks(query)
-        // ✅ 여기! 레포가 실제로 몇 개를 돌려주는지
-        Log.d("SearchBooksUseCase", "query=$query, repository.size=${list.size}")
-        return list
+        return searchRepository.searchBooks(query)
     }
 
     suspend operator fun invoke(
         query: String,
-        page: Int,
-        pageSize: Int
+        page: Int = 1,
+        pageSize: Int = 10
     ): List<SearchBook> {
-        val list = searchRepository.searchBooks(query, page, pageSize)
-        Log.d("SearchBooksUseCase", "query=$query, page=$page, pageSize=$pageSize, size=${list.size}")
-        return list
+        return searchRepository.searchBooks(
+            query = query,
+            page = page,
+            pageSize = pageSize
+        )
     }
 } 
