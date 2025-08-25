@@ -30,6 +30,7 @@ fun BookInfoTab(
         InfoSection("카테고리") { InfoGenre(userBook.category) }
         InfoSection("책 소개") { InfoBody(userBook.description ?: "") }
         InfoSection("총 페이지") { InfoBody(userBook.totalPage.toString()) }
+        InfoSection("도서 DB 제공") { InfoBody("알라딘") }
     }
 }
 

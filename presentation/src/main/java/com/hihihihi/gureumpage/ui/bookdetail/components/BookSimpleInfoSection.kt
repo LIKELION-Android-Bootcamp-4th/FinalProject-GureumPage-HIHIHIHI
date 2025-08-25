@@ -27,6 +27,7 @@ import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.BodyText
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -52,9 +53,8 @@ fun BookSimpleInfoSection(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = userBook.imageUrl,
-            contentDescription = "",
+        BookCoverImage(
+            imageUrl = userBook.imageUrl,
             modifier = Modifier
                 .size(100.dp, 140.dp)
                 .clip(RoundedCornerShape(8.dp))

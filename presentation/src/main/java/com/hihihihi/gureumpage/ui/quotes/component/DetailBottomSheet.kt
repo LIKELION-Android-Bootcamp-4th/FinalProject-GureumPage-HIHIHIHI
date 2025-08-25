@@ -25,6 +25,7 @@ import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
 import com.hihihihi.gureumpage.designsystem.components.BodySubText
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -48,13 +49,11 @@ fun DetailBottomSheet(
                 verticalAlignment = Alignment.Top
             ) {
                 // 책 표지
-                AsyncImage(
+                BookCoverImage(
                     modifier = Modifier
                         .size(width = 60.dp, height = 80.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop,
-                    model = quote.imageUrl,
-                    contentDescription = "책 표지",
+                    imageUrl = quote.imageUrl,
                 )
                 Column(modifier = Modifier.padding(start = 15.dp)) {
                     Row(

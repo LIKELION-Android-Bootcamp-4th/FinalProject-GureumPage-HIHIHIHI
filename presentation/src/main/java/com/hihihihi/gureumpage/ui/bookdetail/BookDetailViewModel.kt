@@ -89,12 +89,6 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 addHistoryUseCase(history, currentPage = currentPage)
-
-                // 저장 후 UI 상태 업데이트
-                _uiState.update {
-                    it.copy(histories = it.histories + history)
-                }
-
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(errorMessage = e.message)

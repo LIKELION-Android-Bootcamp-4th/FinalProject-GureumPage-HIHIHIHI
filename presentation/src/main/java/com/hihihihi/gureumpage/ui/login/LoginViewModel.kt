@@ -16,12 +16,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.tasks.await
 
 
 @HiltViewModel
@@ -37,13 +40,22 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState
 
     private suspend fun navigateAfterLogin(navController: NavHostController) {
-        setLoading(true, "사용자 정보를 확인하는 중...")
+        setLoading(true, "사용자 정보를 설정하는 중...")
 
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
             setError("로그인 정보를 찾을 수 없습니다")
             return
         }
+
+        try {
+            waitForUserDocumentCreation(currentUser.uid)
+        } catch (e: Exception) {
+            setError("사용자 정보 설정에 실패했습니다. 다시 시도해주세요.")
+            return
+        }
+
+        setLoading(true, "사용자 정보를 확인하는 중...")
 
         val isOnboardingComplete = getOnboardingCompleteUseCase(currentUser.uid).firstOrNull() ?: false
 
@@ -53,9 +65,39 @@ class LoginViewModel @Inject constructor(
             NavigationRoute.OnBoarding.route
         }
 
+        setLoading(true, "사용자 정보를 확인하는 중...")
         navController.navigate(destination) {
             popUpTo(NavigationRoute.Login.route) { inclusive = true }
         }
+    }
+
+    private suspend fun waitForUserDocumentCreation(uid: String, maxRetries: Int = 10) {
+        val firestore = FirebaseFirestore.getInstance()
+        var retryCount = 0
+
+        while (retryCount < maxRetries) {
+            try {
+                val document = firestore.collection("users").document(uid)
+                    .get()
+                    .await()
+
+                if (document.exists()) {
+                    return
+                }
+
+                delay(1000)
+                retryCount++
+
+            } catch (e: Exception) {
+                if (retryCount == maxRetries - 1) {
+                    throw e
+                }
+                delay(1000)
+                retryCount++
+            }
+        }
+
+        throw Exception("사용자 문서 생성 시간이 초과되었습니다")
     }
 
     private fun setLoading(isLoading: Boolean, message: String = "") {

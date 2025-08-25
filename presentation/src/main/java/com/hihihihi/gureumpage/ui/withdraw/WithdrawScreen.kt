@@ -167,12 +167,12 @@ fun WithdrawScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    GureumTheme.colors.primary10,
+                    GureumTheme.colors.point.copy(alpha = 0.2f),
                     RoundedCornerShape(12.dp)
                 )
                 .border(
                     1.dp,
-                    GureumTheme.colors.primary50,
+                    GureumTheme.colors.point.copy(alpha = 0.5f),
                     RoundedCornerShape(12.dp)
                 )
                 .padding(20.dp)
@@ -315,7 +315,7 @@ fun WithdrawalReasonItem(
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isHighlighted) {
-            GureumTheme.colors.background50
+            GureumTheme.colors.primary10
         } else {
             GureumTheme.colors.background10
         },

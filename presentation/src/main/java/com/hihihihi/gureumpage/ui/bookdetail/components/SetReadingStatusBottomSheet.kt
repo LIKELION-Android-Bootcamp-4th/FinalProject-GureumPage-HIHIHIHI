@@ -261,10 +261,11 @@ fun ReadingStatusInputs(
                 value = pageInput,
                 onValueChange = {
                     onPageChange(
-                        it.toInt()
-                            .coerceAtMost(lastPage)
-                            .toString()
-                            .filter(Char::isDigit)
+                        it.filter(Char::isDigit)
+                            .toIntOrNull()
+                            ?.coerceAtMost(lastPage)
+                            ?.toString()
+                            ?: ""
                     )
                 },
                 hint = "예 : 157",

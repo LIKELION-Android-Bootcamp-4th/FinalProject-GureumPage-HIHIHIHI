@@ -31,6 +31,7 @@ import coil3.request.crossfade
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import com.hihihihi.gureumpage.R
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 
 fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
@@ -38,16 +39,6 @@ fun UserBook.isRead(): Boolean = this.status == ReadingStatus.FINISHED
 //한 권의 책정보
 @Composable
 fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
-    val context = LocalContext.current
-    val imageRequest = ImageRequest.Builder(context)
-        .data(book.imageUrl)
-        .crossfade(true)
-        .listener(
-            onStart = {},
-            onSuccess = { _, _ -> },
-            onError = { _, result -> }
-        ).build()
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -65,14 +56,12 @@ fun BookItem(book: UserBook, onClicked: (String) -> Unit) {
             horizontalAlignment = Alignment.Start
         ) {
             //이미지
-            AsyncImage(
-                model = imageRequest,
-                contentDescription = book.title,
+            BookCoverImage(
+                imageUrl = book.imageUrl,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(2f / 3f)
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
