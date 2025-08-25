@@ -9,6 +9,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
@@ -32,10 +34,12 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.hihihihi.gureumpage.MainActivity
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.ui.mindmap.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.graphics.toColorInt
 
 @AndroidEntryPoint
 class FloatingTimerService : Service(), LifecycleOwner, SavedStateRegistryOwner {
@@ -211,28 +215,32 @@ class FloatingTimerService : Service(), LifecycleOwner, SavedStateRegistryOwner 
                 channelName,
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "독서 타이머가 실행 중입니다"
+                description = "독서 스톱워치가 실행 중입니다"
                 setShowBadge(false)
             }
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
 
+        val largeIcon = BitmapFactory.decodeResource(resources, R.drawable.ic_cloud_icon_backround)
+
         val notification =
             Notification.Builder(this, channelId)
                 .apply {
-            setContentTitle("독서 타이머 실행 중")
-            setContentText("탭하여 돌아가기")
-            setSmallIcon(android.R.drawable.ic_media_play)
-            setContentIntent(
-                PendingIntent.getActivity(
-                    this@FloatingTimerService,
-                    0,
-                    Intent(this@FloatingTimerService, MainActivity::class.java),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            )
-        }.build()
+                    setContentTitle("독서 스톱워치 실행 중")
+                    setContentText("탭하여 돌아가기")
+                    setSmallIcon(R.drawable.ic_alarm_filled)
+                    setLargeIcon(largeIcon)
+                    setColor("#152044".toColorInt())
+                    setContentIntent(
+                        PendingIntent.getActivity(
+                            this@FloatingTimerService,
+                            0,
+                            Intent(this@FloatingTimerService, MainActivity::class.java),
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                    )
+                }.build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
