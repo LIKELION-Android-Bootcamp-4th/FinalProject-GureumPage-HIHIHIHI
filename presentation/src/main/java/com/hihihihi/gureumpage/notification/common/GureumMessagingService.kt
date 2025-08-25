@@ -1,4 +1,4 @@
-package com.hihihihi.gureumpage.notification
+package com.hihihihi.gureumpage.notification.common
 
 import android.Manifest
 import androidx.annotation.RequiresPermission

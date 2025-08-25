@@ -30,4 +30,16 @@ class QuoteRepositoryImpl @Inject constructor(
         return quoteRemoteDataSource.getQuotesByUserBookId(userBookId)
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
+
+    override suspend fun deleteQuote(quoteId: String): Result<Unit> {
+        return quoteRemoteDataSource.deleteQuote(quoteId)
+    }
+
+    override suspend fun updateQuote(
+        quoteId: String,
+        content: String,
+        pageNumber: Int?
+    ): Result<Unit> {
+        return quoteRemoteDataSource.updateQuote(quoteId, content, pageNumber)
+    }
 }

@@ -68,14 +68,13 @@ import com.hihihihi.gureumpage.navigation.BottomNavItem
 import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
-import com.hihihihi.gureumpage.notification.Channels
+import com.hihihihi.gureumpage.notification.common.Channels
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -93,20 +92,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // 딥링크 처리를 위한 상태 변수
-    private var deepLinkUri: Uri? = null
     private var _navController: NavHostController? = null
     private var pendingDeepLink: Intent? = null
 
     @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        intent.data?.let { uri ->
-            deepLinkUri = uri
-
-            Log.d("DeepLink", "onCreate uri: $uri")
-        }
 
         setTheme(R.style.Theme_GureumPage)
         Channels.ensureAll(this)
@@ -131,27 +122,22 @@ class MainActivity : ComponentActivity() {
             }
 
             val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
-            LaunchedEffect(navController) {
-                this@MainActivity._navController = navController
-            }
+            LaunchedEffect(navController) { _navController = navController }
 
-            DisposableEffect(Unit) {
-                if (pendingDeepLink != null) {
-                    navController.handleDeepLink(pendingDeepLink!!)
+            LaunchedEffect(Unit) {
+                // 위젯 스킴이면 수동 라우팅, 아니면 NavController로 처리
+                if (!routeIfWidgetDeepLink(initIntent)) {
+                    navController.handleDeepLink(initIntent)
+                }
+                // 보류분 처리
+                pendingDeepLink?.let {
+                    if (!routeIfWidgetDeepLink(it)) navController.handleDeepLink(it)
                     pendingDeepLink = null
                 }
-                onDispose { }
             }
 
             // 모드 상태에 따라 GureumPageTheme 에 반영
-            GureumPageTheme(
-                darkTheme = when (currentTheme) {
-                    GureumThemeType.LIGHT -> false
-                    else -> true
-                }
-            ) {
-
-
+            GureumPageTheme(darkTheme = isDark) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     GureumPageApp(navController, initIntent)
 
@@ -162,48 +148,36 @@ class MainActivity : ComponentActivity() {
                     }
 
                     Log.d("DeepLink", "onCreate - initialized App")
-
-                    // 딥링크 처리를 위한 LaunchedEffect
-                    LaunchedEffect(deepLinkUri) {
-                        delay(100)  //Navigation 초기화 후에 라우팅 실행 가능하여 대기
-                        deepLinkUri?.let { uri ->
-                            routeDeepLink(uri)  // 라우팅 처리
-                            deepLinkUri = null  // 처리 완료 후 초기화
-                        }
-                    }
                 }
             }
         }
     }
 
+    // 백그라운드에서 알림으로 들어올 시 딥링크 처리
+    @SuppressLint("RestrictedApi")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-
-        // 새로운 딥링크가 있으면 라우팅 처리
-        intent.data?.let { uri ->
-            routeDeepLink(uri)
+        if (_navController != null && _navController!!.graph.nodes.isNotEmpty()) {
+            _navController!!.handleDeepLink(intent)
+        } else {
+            // 그래프 준비 전이면 보류
+            pendingDeepLink = intent
         }
     }
-//    // 백그라운드에서 알림으로 들어올 시 딥링크 처리
-//    @SuppressLint("RestrictedApi")
-//    override fun onNewIntent(intent: Intent) {
-//        super.onNewIntent(intent)
-//        if (::navController.isInitialized && navController.graph.nodes.isNotEmpty()) {
-//            navController.handleDeepLink(intent)
-//        } else {
-//            // 그래프 준비 전이면 보류
-//            pendingDeepLink = intent
-//        }
-//    }
 
-    private fun routeDeepLink(uri: Uri) {
+    // 위젯 스킴(gureumpage://app/…)이면 수동 라우팅
+    private fun routeIfWidgetDeepLink(intent: Intent): Boolean {
+        val uri = intent.data ?: return false
+        return routeWidgetUri(uri)
+    }
+
+    private fun routeWidgetUri(uri: Uri): Boolean {
 
         Log.d("DeepLink", "routeDeepLink - uri : $uri")
         when {
             // 책 상세: gureumpage://app/book/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/[^/?]+.*")) -> {
                 val bookId = uri.pathSegments.lastOrNull()
-
 
                 bookId?.let {
                     Log.d("DeepLink", "Route BookDetail: bookId=$bookId")
@@ -212,6 +186,7 @@ class MainActivity : ComponentActivity() {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
                     }
                 }
+                return true
             }
 
             // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
@@ -222,22 +197,26 @@ class MainActivity : ComponentActivity() {
                 bookId?.let {
                     _navController?.navigate(NavigationRoute.BookDetail.createRoute(it))
                 }
+                return true
             }
 
             // 타이머: gureumpage://app/book/timer/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/timer/[^/?]+.*")) -> {
                 Log.d("DeepLink", "Timer")
                 _navController?.navigate(NavigationRoute.Timer.route)
+                return true
             }
 
             // 필사 추가: gureumpage://app/book/addQuote/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/addQuote/[^/?]+.*")) -> {
                 Log.d("DeepLink", "Add quote")
                 _navController?.navigate(NavigationRoute.Quotes.route)
+                return true
             }
 
             else -> {
                 Log.d("DeepLink", "No matching pattern: $uri")
+                return false
             }
         }
     }

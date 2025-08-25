@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
@@ -34,6 +35,7 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
+import com.hihihihi.gureumpage.ui.bookdetail.components.EditQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReviewSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.SetReadingStatusBottomSheet
@@ -55,6 +57,8 @@ fun BookDetailScreen(
     var showAddQuoteDialog by remember { mutableStateOf(false) }
     var showAddManualHistoryDialog by remember { mutableStateOf(false) }
     var showReadingStatusSheet by remember { mutableStateOf(false) }
+
+    var showEditQuoteDialog by remember { mutableStateOf<Pair<String, Quote>?>(null) }
 
     LaunchedEffect(bookId) {
         viewModel.loadUserBookDetails(bookId)
@@ -101,6 +105,13 @@ fun BookDetailScreen(
                 onReviewSave = { rating, review ->
                     viewModel.patchReview(rating, review)
                 },
+                onQuoteEdit = { quoteId ->
+                    val quote = uiState.quotes.find { it.id == quoteId }
+                    if (quote != null) {
+                        showEditQuoteDialog = quoteId to quote
+                    }
+                },
+                onQuoteDelete = { id -> viewModel.deleteQuote(id)},
                 onEvent = { event ->
                     when (event) {
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
@@ -121,6 +132,22 @@ fun BookDetailScreen(
         else -> {
             // TODO 빈 화면 또는 초기 화면
         }
+    }
+
+    showEditQuoteDialog?.let { (quoteId, quote) ->
+        EditQuoteDialog(
+            initialContent = quote.content,
+            initialPageNumber = quote.pageNumber,
+            onDismiss = { showEditQuoteDialog = null },
+            onSave = { newContent, newPageNumber ->
+                viewModel.updateQuote(
+                    quoteId = quoteId,
+                    newContent = newContent,
+                    newPageNumber = newPageNumber
+                )
+                showEditQuoteDialog = null
+            }
+        )
     }
 
     if (showAddQuoteDialog) {
@@ -176,7 +203,10 @@ fun BookDetailContent(
     bookStatistic: BookStatistic,
     onReadingStatusClick: () -> Unit,
     onEvent: (BookDetailFabEvent) -> Unit = {},
-    onReviewSave: (Double, String) -> Unit = { _, _ -> }
+    onReviewSave: (Double, String) -> Unit = { _, _ -> },
+    onQuoteEdit: (String) -> Unit = {},
+    onQuoteDelete: (String) -> Unit = {}
+
 ) {
     val scrollState = rememberLazyListState()
 
@@ -203,7 +233,15 @@ fun BookDetailContent(
                     )
                 }
             }
-            item { BookDetailTabs(userBook, quotes, histories) }
+            item {
+                BookDetailTabs(
+                    userBook = userBook,
+                    quotes = quotes,
+                    histories = histories,
+                    onQuoteEdit = onQuoteEdit,
+                    onQuoteDelete = onQuoteDelete
+                )
+            }
         }
 
         // FAB
@@ -238,7 +276,7 @@ private fun BookDetailPreview() {
                 item { BookSimpleInfoSection(dummyUserBook, {}) }
                 item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard(BookStatistic("", "", "")) }
-                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
+//                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
             }
         }
     }

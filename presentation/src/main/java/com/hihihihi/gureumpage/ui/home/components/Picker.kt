@@ -82,12 +82,11 @@ fun Picker(
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .map { index -> index + visibleItemsMiddle }
+            .map { index -> (index + visibleItemsMiddle) % items.size }
             .distinctUntilChanged()
-            .collect { center ->
-                val itemIndex = (center % items.size + items.size) % items.size
-                state.selectedIndex = itemIndex
-                state.selectedItem = items[itemIndex]
+            .collect { index ->
+                state.selectedIndex = index
+                state.selectedItem = items[index]
             }
     }
 
