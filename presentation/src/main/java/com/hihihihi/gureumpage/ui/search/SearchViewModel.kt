@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,12 +13,19 @@ import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.math.min
+
+
+private const val INITIAL_COUNT = 10
+private const val LOAD_COUNT = 10
+private const val PAGE_SIZE = 10
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -32,23 +40,80 @@ class SearchViewModel @Inject constructor(
     private val currentUid: String
         get() = auth.currentUser!!.uid
 
-
     fun search(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSearching = true)
+            _uiState.value = _uiState.value.copy(
+                query = query,
+                page = 1,
+                isSearching = true,
+                isPaging = false,
+                isLoadingMore = false,
+                hasMore = true,
+                visibleCount = 0
+            )
             try {
                 val results = searchBooksUseCase(query)
+                Log.d("SearchVM", "query=$query, results.size=${results.size}")
+                val initialShown = min(INITIAL_COUNT, results.size)
                 _uiState.value = _uiState.value.copy(
                     searchResults = results,
-                    isSearching = false
+                    visibleCount = initialShown,
+                    isSearching = false,
+                    hasMore = results.size >= PAGE_SIZE,
+                    page = 1
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
-                    isSearching = false
+                    visibleCount = 0,
+                    isSearching = false,
+                    hasMore = false
                 )
             }
         }
+    }
+
+    fun loadMore() {
+        val state = _uiState.value
+        if (state.isLoadingMore || state.isPaging) return
+        if (!state.hasMore) return
+
+        viewModelScope.launch {
+            _uiState.value = state.copy(isLoadingMore = true)
+            delay(120)
+
+            try {
+                val nextPage = state.page + 1
+                // 다음 페이지 호출
+                val newPage = searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+                Log.d("SearchVM", "loadMore page=$nextPage size=${newPage.size}")
+
+                val merged = state.searchResults + newPage
+                // 기존 “나눠 보여주기” UX 유지: 한 번에 10개씩만 더 보이게
+                val nextVisible = min(merged.size, state.visibleCount + LOAD_COUNT)
+
+                _uiState.value = state.copy(
+                    searchResults = merged,
+                    visibleCount = nextVisible,
+                    page = nextPage,
+                    // 새 페이지가 꽉 찼으면 더 있을 가능성
+                    hasMore = newPage.size >= PAGE_SIZE,
+                    isLoadingMore = false,
+                    isPaging = false
+                )
+            } catch (e: Exception) {
+                _uiState.value = state.copy(
+                    isLoadingMore = false,
+                    isPaging = false
+                )
+            }
+        }
+    }
+
+    fun showMoreWithinFetched() {
+        val state = _uiState.value
+        val newVisible = min(state.searchResults.size, state.visibleCount + LOAD_COUNT)
+        _uiState.value = state.copy(visibleCount = newVisible)
     }
 
     // TODO: usecase로 일관성 맞추기

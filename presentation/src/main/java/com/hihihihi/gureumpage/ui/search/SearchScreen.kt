@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -104,9 +107,47 @@ fun SearchScreen(
         onDispose { }
     }
 
+    var endToastShown by remember(uiState.searchResults) { mutableStateOf(false) }
+
     //화면 진입 시 검색 자동 포커스
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(uiState.visibleCount, uiState.searchResults.size) {
+        if (uiState.visibleCount == 0) return@LaunchedEffect
+        if (uiState.visibleCount < 1) return@LaunchedEffect
+    }
+
+    LaunchedEffect(listState, uiState.visibleCount, uiState.searchResults.size) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisibleIndex ->
+                val totalShown = uiState.visibleCount
+                if (lastVisibleIndex == null || totalShown == 0) return@collect
+
+                val hasHiddenItems = uiState.visibleCount < uiState.searchResults.size
+                val reachedBottom = lastVisibleIndex >= (uiState.visibleCount - 1)
+
+                if (reachedBottom) {
+                    when {
+                        // 1) 이미 받아온 리스트 안에 '숨겨진' 아이템이 있으면 먼저 더 보여주기
+                        hasHiddenItems && !uiState.isLoadingMore -> {
+                            viewModel.showMoreWithinFetched()
+                        }
+                        // 2) 숨겨진 건 없지만 서버에 다음 페이지가 남아있으면 페이징 호출
+                        !hasHiddenItems && uiState.hasMore && !uiState.isLoadingMore -> {
+                            viewModel.loadMore()
+                        }
+                        // 3) 둘 다 아니면 끝 토스트
+                        !uiState.hasMore && !hasHiddenItems && !endToastShown -> {
+                            Toast.makeText(context, "더 이상 표시할 책이 없습니다.", Toast.LENGTH_SHORT).show()
+                            endToastShown = true
+                        }
+                    }
+                }
+            }
     }
 
     Column(
@@ -130,6 +171,7 @@ fun SearchScreen(
                 //키보드 내리고 포커스 해제
                 keyboardController?.hide()
                 focusManager.clearFocus()
+                endToastShown = false
                 //검색 로직
                 viewModel.search(currentQuery)
                 hasSearched = true
@@ -166,17 +208,41 @@ fun SearchScreen(
                 )
             }
             else -> {
+                val shown = remember(uiState.searchResults, uiState.visibleCount) {
+                    uiState.searchResults.take(uiState.visibleCount)
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
+                    state = listState
                 ) {
-                    items(uiState.searchResults) { item ->
+                    itemsIndexed(
+                        items = shown,
+                        key = { index, item -> "${item.isbn}-$index" }
+                    ) { _, item ->
                         SearchItem(
                             result = item,
                             onItemClick = { selectedBook ->
                                 bookToAdd = selectedBook
                                 scope.launch { sheetState.show() }
-                            },
+                            }
                         )
+                    }
+
+                    item(key = "footer") {
+                        if (uiState.isLoadingMore) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(color = GureumTheme.colors.primary)
+                            }
+                        } else {
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 }
             }
