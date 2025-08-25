@@ -98,7 +98,7 @@ class MindMapAdapter(
         // 노드 클릭 시 이벤트
         holder.view.setOnClickListener {
             if (editMode) { // 편집 모드면 노드 추가 다이얼로그
-                showAddNodeDialog(holder.view.context, null) { newNode ->
+                showAddNodeDialog("노드 추가", holder.view.context, null) { newNode ->
                     val child = NodeModel(newNode)
                     performAdd(holder.node, child)
                 }
@@ -245,7 +245,7 @@ class MindMapAdapter(
     }
 
     // 노드 추가 수정 다이얼로그
-    fun showAddNodeDialog(context: Context, existingNode: TreeNode? = null, onSave: (MindMapNodeData) -> Unit) {
+    fun showAddNodeDialog(title: String, context: Context, existingNode: TreeNode? = null, onSave: (MindMapNodeData) -> Unit) {
         // AndroidViewBinding 경유할 때 테마를 못 찾을 수 있음
         val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
         val binding = DialogAddNodeBinding.inflate(themedInflater)
@@ -253,6 +253,7 @@ class MindMapAdapter(
             .setView(binding.root)
             .create()
         dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        binding.dialogTitle.text = title
 
         var selectedIcon: String? = existingNode?.value?.icon
         var selectedColor: Long? = existingNode?.value?.color

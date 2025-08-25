@@ -1,0 +1,31 @@
+package com.hihihihi.gureumpage.widgets.heatmap
+
+import android.appwidget.AppWidgetManager
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import com.hihihihi.gureumpage.widgets.common.WidgetUpdateDispatcher
+
+class HistoryHeatMapReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = HistoryHeatMapWidget()
+
+    override fun onEnabled(context: Context?) {
+        super.onEnabled(context)
+        context?.let { WidgetUpdateDispatcher.getDispatcher(it).updateHistoryHeatMap() }
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when(intent.action) {
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE,
+            AppWidgetManager.ACTION_APPWIDGET_ENABLED,
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+            Intent.ACTION_USER_UNLOCKED-> {
+                Log.d("RECEIVER","onReceive:${intent.action}")
+                WidgetUpdateDispatcher.getDispatcher(context).updateHistoryHeatMap()
+            }
+        }
+    }
+}

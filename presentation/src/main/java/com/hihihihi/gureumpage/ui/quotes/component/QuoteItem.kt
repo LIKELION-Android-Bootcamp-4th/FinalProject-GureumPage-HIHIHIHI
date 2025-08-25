@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.common.utils.formatDateToSimpleString
+import com.hihihihi.gureumpage.designsystem.components.BookCoverImage
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
@@ -31,13 +32,11 @@ fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             //책 이미지
-            AsyncImage(
+            BookCoverImage(
                 modifier = Modifier
                     .size(width = 60.dp, height = 80.dp)
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-                model = item.imageUrl,
-                contentDescription = "책",
+                imageUrl = item.imageUrl,
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(
