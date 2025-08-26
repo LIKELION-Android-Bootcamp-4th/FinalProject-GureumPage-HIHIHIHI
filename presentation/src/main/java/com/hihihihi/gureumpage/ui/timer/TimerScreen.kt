@@ -226,7 +226,7 @@ fun TimerScreen(
                 }
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
         }
 
         if (state.countdown != null) {

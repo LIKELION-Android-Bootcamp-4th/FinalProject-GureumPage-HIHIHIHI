@@ -34,7 +34,7 @@ fun TimerRing(
     val ringColor = if (isRunning) {
         runningColor ?: colors.primary
     } else {
-        pausedColor ?: colors.gray300
+        pausedColor ?: colors.gray200
     }
     val textC = centerTextColor ?: colors.gray800
     val strokePx = with(LocalDensity.current) { ringWidth.toPx() }
