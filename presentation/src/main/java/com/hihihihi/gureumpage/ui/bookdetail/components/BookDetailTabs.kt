@@ -39,7 +39,7 @@ fun BookDetailTabs(
     onQuoteEdit: (String) -> Unit,
     onQuoteDelete: (String) -> Unit
 ) {
-    val tabTitles = listOf("책 정보", "필사 목록", "독서 기록")
+    val tabTitles = listOf("독서 기록", "필사 목록", "책 정보")
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val scope = rememberCoroutineScope()
 
@@ -75,13 +75,13 @@ fun BookDetailTabs(
             modifier = Modifier.fillMaxWidth(),
         ) { page ->
             when (page) {
-                0 -> BookInfoTab(userBook)
+                0 -> ReadingRecordTab(histories)
                 1 -> QuotesTab(
                     quotes = quotes,
                     onEdit = onQuoteEdit,
                     onDelete = onQuoteDelete
                 )
-                2 -> ReadingRecordTab(histories)
+                2 -> BookInfoTab(userBook)
             }
         }
     }
