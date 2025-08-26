@@ -12,10 +12,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.collection.isNotEmpty
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -139,7 +142,7 @@ class MainActivity : ComponentActivity() {
 
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(darkTheme = isDark) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier.fillMaxSize(), color = GureumTheme.colors.background) {
                     GureumPageApp(navController, initIntent)
 
                     if (showNetworkWarning) {
@@ -370,6 +373,8 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     }
 
     Scaffold(
+        containerColor = GureumTheme.colors.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             when (currentRoute) {
                 NavigationRoute.Library.route -> GureumAppBar(title = "서재")
@@ -396,12 +401,19 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
-        CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
-            GureumNavGraph(
-                navController = navController,
-                modifier = Modifier.padding(innerPadding),
-                snackbarHostState = snackbarHostState
-            )
+        Box(
+            Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(GureumTheme.colors.background)
+        ) {
+            CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
+                GureumNavGraph(
+                    navController = navController,
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHostState = snackbarHostState
+                )
+            }
         }
     }
     Log.d("APP", "GureumPageApp init - end")
