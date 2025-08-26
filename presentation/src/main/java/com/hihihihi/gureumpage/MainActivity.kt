@@ -250,6 +250,9 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         NavigationRoute.Splash.route
     )
 
+    val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
+    val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
+
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
         if (!initialHandle) {
@@ -266,35 +269,42 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         }
     }
 
-    BackHandler {
-        val currentRoute = navController.currentBackStackEntry?.destination?.route
-
+    BackHandler(enabled = currentRoute !in authRoutes) {
         when {
-            // 현재 루트가 홈이면 앱 종료
-            currentRoute == NavigationRoute.Home.route -> {
-                val currentTime = System.currentTimeMillis()
-
-                if (currentTime - lastBackMillis < 2000L) {
-                    (context as? Activity)?.finish()
-                } else {
-                    lastBackMillis = currentTime
-                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            // 현재 루트가 바텀 내비 아이템이면 홈으로 이동
-            BottomNavItem.items.any { it.route == currentRoute } -> {
+            // 바텀 내비 아이템 중 홈이 아닐 때 -> 홈으로 스위칭
+            currentRoute in bottomRoutes && currentRoute != NavigationRoute.Home.route -> {
                 navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
                 }
             }
 
+            // 홈이면 → 종료
+            currentRoute == NavigationRoute.Home.route -> {
+                val now = System.currentTimeMillis()
+                if (now - lastBackMillis < 2000L) (context as? Activity)?.finish()
+                else {
+                    lastBackMillis = now
+                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // 그 외 화면
             else -> {
-                navController.popBackStack()
+                val popped = navController.popBackStack()
+                if (!popped) {
+                    // 항상 홈을 거쳐 종료하기
+                    if (currentRoute != NavigationRoute.Home.route) {
+                        navController.navigate(NavigationRoute.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        (context as? Activity)?.finish()
+                    }
+                }
             }
         }
     }
