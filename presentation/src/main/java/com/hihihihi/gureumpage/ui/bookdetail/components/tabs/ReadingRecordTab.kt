@@ -117,6 +117,7 @@ fun ReadingRecordTab(histories: List<History>) {
                     )
                     Spacer(modifier = Modifier.weight(1f))
 
+
                     Semi16Text(
                         text = formatSecondsToReadableTime(
                             dailyRecords.sumOf { it.readTime }

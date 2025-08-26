@@ -1,6 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.common.util.ISBNNormalizer
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource

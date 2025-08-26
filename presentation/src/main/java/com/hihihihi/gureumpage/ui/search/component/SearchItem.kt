@@ -71,8 +71,15 @@ fun SearchItem(
                 //출판사
                 BodySubText(result.publisher, modifier = Modifier.padding(top = 4.dp))
                 //카테고리
+                val category = result.categoryName.split(">").let { categories ->
+                    when {
+                        categories.size >= 2 -> categories[1]
+                        categories.size >= 1 -> categories[0]
+                        else -> "기타"
+                    }
+                }
                 BodySubText(
-                    result.categoryName.split(">")[1],
+                    category,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }

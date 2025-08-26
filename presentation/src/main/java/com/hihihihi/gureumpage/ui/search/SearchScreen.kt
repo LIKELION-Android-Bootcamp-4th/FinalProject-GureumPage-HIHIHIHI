@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -22,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -39,12 +43,16 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.hihihihi.domain.model.SearchBook
+import com.hihihihi.gureumpage.designsystem.components.GureumCard
+import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
+import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.search.component.AddBookBottomSheet
 import com.hihihihi.gureumpage.ui.search.component.SearchItem
 import com.hihihihi.gureumpage.ui.search.component.SearchTopAppBar
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +99,7 @@ fun SearchScreen(
         }
     }
 
+
     val statusBarColor = GureumTheme.colors.card.toArgb()
     val lightIcons = statusBarColor.luminance > 0.5f
     val window = (LocalView.current.context as Activity).window
@@ -104,10 +113,73 @@ fun SearchScreen(
         onDispose { }
     }
 
+    var endToastShown by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.query) {
+        endToastShown = false
+    }
+
+    LaunchedEffect(uiState.hasMore, uiState.searchResults.size) {
+        if (!uiState.hasMore &&
+            uiState.searchResults.isNotEmpty() &&
+            !endToastShown &&
+            !uiState.isLoadingMore
+        ) {
+
+            Toast.makeText(context, "모든 검색 결과를 불러왔습니다.", Toast.LENGTH_SHORT).show()
+            endToastShown = true
+        }
+    }
+
     //화면 진입 시 검색 자동 포커스
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        }.collect { lastVisibleIndex ->
+            // 여기서는 스크롤 위치만 감지하고, 실제 로딩 조건은 별도로 체크
+            if (lastVisibleIndex != null) {
+                val currentState = viewModel.uiState.value // viewModel에서 직접 가져오기
+                val totalItems = currentState.searchResults.size
+
+                if (totalItems > 0) {
+                    val reachedBottom = lastVisibleIndex >= totalItems - 2
+
+                    if (reachedBottom && currentState.hasMore && !currentState.isLoadingMore) {
+                        viewModel.loadMore()
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            val totalItems = layoutInfo.totalItemsCount
+
+            lastVisibleIndex != null && lastVisibleIndex >= totalItems - 3
+        }.collect { shouldLoadMore ->
+            if (shouldLoadMore) {
+                val currentState = viewModel.uiState.value
+
+                val canLoad = currentState.hasMore &&
+                        !currentState.isLoadingMore &&
+                        !currentState.isSearching &&
+                        currentState.searchResults.isNotEmpty()
+
+                if (canLoad) {
+                    viewModel.loadMore()
+                }
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -130,13 +202,14 @@ fun SearchScreen(
                 //키보드 내리고 포커스 해제
                 keyboardController?.hide()
                 focusManager.clearFocus()
+                endToastShown = false
                 //검색 로직
                 viewModel.search(currentQuery)
                 hasSearched = true
             }
         )
         //검색이 되지 않았을 경우 보여주는 안내 문구
-        when{
+        when {
             !hasSearched -> {
                 Spacer(Modifier.height(74.dp))
                 Medi16Text(
@@ -145,7 +218,8 @@ fun SearchScreen(
                     textAlign = TextAlign.Center
                 )
             }
-            uiState.isSearching ->{
+
+            uiState.isSearching -> {
                 Spacer(Modifier.height(74.dp))
                 CircularProgressIndicator(
                     color = GureumTheme.colors.primary
@@ -157,6 +231,7 @@ fun SearchScreen(
                     textAlign = TextAlign.Center
                 )
             }
+
             uiState.searchResults.isEmpty() -> {
                 Spacer(Modifier.height(74.dp))
                 Medi16Text(
@@ -165,51 +240,106 @@ fun SearchScreen(
                     textAlign = TextAlign.Center
                 )
             }
+
             else -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
+                    state = listState
                 ) {
-                    items(uiState.searchResults) { item ->
+                    itemsIndexed(
+                        items = uiState.searchResults,
+                        key = { index, item -> "${item.isbn}-$index" }
+                    ) { _, item ->
                         SearchItem(
                             result = item,
                             onItemClick = { selectedBook ->
                                 bookToAdd = selectedBook
                                 scope.launch { sheetState.show() }
-                            },
+                            }
                         )
+                    }
+
+                    if (uiState.isLoadingMore) {
+                        item(key = "footer") {
+                            if (uiState.isLoadingMore) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    CircularProgressIndicator(color = GureumTheme.colors.primary)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Medi14Text(
+                                        text = "더 많은 결과를 불러오는 중...",
+                                        color = GureumTheme.colors.gray400,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            } else {
+                                Spacer(Modifier.height(8.dp))
+                            }
+                        }
+                    }
+
+                    if (!uiState.hasMore && uiState.searchResults.isNotEmpty() && !uiState.isLoadingMore) {
+                        item(key = "end_notice") {
+                            GureumCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Semi14Text(
+                                        text = "총 ${uiState.searchResults.size}개의 검색 결과",
+                                        color = GureumTheme.colors.gray500
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Medi14Text(
+                                        text = "더 정확한 검색을 위해 구체적인 키워드를 사용해보세요",
+                                        color = GureumTheme.colors.gray400,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-    //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
-    if (bookToAdd != null) {
-        AddBookBottomSheet(
-            book = bookToAdd!!,
-            sheetState = sheetState,
-            isLoading = uiState.isAddingBook,
-            onDismiss = {
-                scope.launch {
-                    sheetState.hide()
-                    bookToAdd = null
+        //bookToAdd의 상태에 따라 모달시트를 보여주거나 숨김
+        if (bookToAdd != null) {
+            AddBookBottomSheet(
+                book = bookToAdd!!,
+                sheetState = sheetState,
+                isLoading = uiState.isAddingBook,
+                onDismiss = {
+                    scope.launch {
+                        sheetState.hide()
+                        bookToAdd = null
+                    }
+                },
+                onConfirm = { book ->
+                    scope.launch {
+                        viewModel.addUserBook(
+                            book.searchBook,
+                            book.startDate,
+                            book.endDate,
+                            book.currentPage,
+                            book.totalPage,
+                            book.status
+                        )
+                    }
+                },
+                onGetBookPageCount = { isbn, onResult ->
+                    viewModel.getBookPageCount(isbn, onResult)
                 }
-            },
-            onConfirm = { book ->
-                scope.launch {
-                    viewModel.addUserBook(
-                        book.searchBook,
-                        book.startDate,
-                        book.endDate,
-                        book.currentPage,
-                        book.totalPage,
-                        book.status
-                    )
-                }
-            },
-            onGetBookPageCount = { isbn, onResult ->
-                viewModel.getBookPageCount(isbn, onResult)
-            }
-        )
+            )
+        }
     }
 }
 

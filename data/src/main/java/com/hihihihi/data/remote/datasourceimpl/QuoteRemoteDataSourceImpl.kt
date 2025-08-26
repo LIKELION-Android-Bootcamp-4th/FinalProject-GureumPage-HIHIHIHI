@@ -1,5 +1,6 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.mapper.toMap
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
@@ -49,6 +50,7 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
 
     override fun getQuotesByUserBookId(userBookId: String): Flow<List<QuoteDto>> = callbackFlow {
         val quotesCollection = firestore.collection("quotes")
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("userbook_id", userBookId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
