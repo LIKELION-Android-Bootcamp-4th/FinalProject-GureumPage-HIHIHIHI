@@ -20,7 +20,7 @@ class SearchRepositoryImpl @Inject constructor(
         page: Int,
         pageSize: Int
     ): List<SearchBook> {
-        val startIndex = (page - 1) * pageSize
+        val startIndex = page
         Log.d("Repo", "page=$page pageSize=$pageSize -> startIndex=$startIndex")
         // ↓ Remote에 startIndex/maxResults 기준으로 추가
         return searchRemoteDataSource.searchBooks(

@@ -1,5 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.common.util.ISBNNormalizer
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
@@ -32,6 +34,7 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
     ): Flow<List<UserBookDto>> = callbackFlow {
         var query = firestore.collection("user_books")
             .whereEqualTo("user_id", userId)   // user_id 를 포함하고 있는 문서만 가져옴
+
 
         if (status != null) {
             query = query.whereEqualTo("status", status.name.lowercase()) // 입력한 상태의 userbook만 가져옴
@@ -97,9 +100,11 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
             val documentId = "${userId}-${normalizedIsbn}"
 
             val docRef = firestore.collection("user_books").document(documentId)
+            Log.d("UserBookRemoteDataSource", "checkUserBookExists documentId: $documentId")
             val snapshot = docRef.get().await()
             snapshot.exists()
         } catch (e: Exception) {
+            Log.e("UserBookRemoteDataSource", "checkUserBookExists error: ${e.message}")
             false
         }
     }
