@@ -12,7 +12,9 @@ sealed class NavigationRoute(val route: String) {
     object Quotes : NavigationRoute("quotes")
     object Library : NavigationRoute("library")
     object Search : NavigationRoute("search")
-    object Statistics : NavigationRoute("statistics")
+    object StatisticsWeekly : NavigationRoute("statistics/weekly")
+    object StatisticsMonthly : NavigationRoute("statistics/monthly")
+    object StatisticsYearly : NavigationRoute("statistics/yearly")
     object Timer : NavigationRoute("timer/{userBookId}") {
         fun createRoute(userBookId: String): String = "timer/$userBookId"
     }

@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,14 +48,17 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
+    initialPreset: DateRangePreset = DateRangePreset.WEEK
 ) {
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPicker by remember { mutableStateOf(false) }
-    var presetIndex by rememberSaveable { mutableStateOf(0) }
+    var presetIndex by rememberSaveable { mutableIntStateOf(initialPreset.ordinal) }
     val preset = presetFromIndex(presetIndex)
     val rangeText = remember(presetIndex) { formatRange(preset) }
     val title = remember(presetIndex) { pagesTitle(preset) }
+
+    LaunchedEffect(initialPreset) { viewModel.loadStatistics(initialPreset) }
 
     if (showPicker) {
         StatisticsPicker(
@@ -126,7 +131,7 @@ fun StatisticsScreen(
     }
 }
 
-fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String {
+private fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String {
     val range: DateRange = presetToRange(preset, now)
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     return "${range.start.toLocalDate().format(formatter)}~${range.end.toLocalDate().format(formatter)}"
@@ -140,7 +145,15 @@ private fun pagesTitle(preset: DateRangePreset) = when (preset) {
     DateRangePreset.YEAR -> "연간 독서 페이지"
 }
 
-val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
+private fun presetFromIndex(index: Int) = when (index) {
+    0 -> DateRangePreset.WEEK
+    1 -> DateRangePreset.MONTH
+    2 -> DateRangePreset.THREE_MONTH
+    3 -> DateRangePreset.SIX_MONTH
+    else -> DateRangePreset.YEAR
+}
+
+private val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -149,12 +162,4 @@ private fun StatisticsPreview() {
     GureumPageTheme {
         StatisticsScreen()
     }
-}
-
-fun presetFromIndex(index: Int) = when (index) {
-    0 -> DateRangePreset.WEEK
-    1 -> DateRangePreset.MONTH
-    2 -> DateRangePreset.THREE_MONTH
-    3 -> DateRangePreset.SIX_MONTH
-    else -> DateRangePreset.YEAR
 }

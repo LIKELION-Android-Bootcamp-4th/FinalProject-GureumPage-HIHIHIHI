@@ -58,6 +58,6 @@ class GureumMessagingService : FirebaseMessagingService() {
 
 // 야간 알림 시간 여부
 object Quiet {
-    fun allow(start: Int = 22, end: Int = 7, now: Int = LocalTime.now().hour): Boolean =
+    fun allow(start: Int = 21, end: Int = 8, now: Int = LocalTime.now().hour): Boolean =
         if (start <= end) now !in start until end else !(now >= start || now < end)
 }

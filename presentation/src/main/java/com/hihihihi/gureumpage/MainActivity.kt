@@ -304,7 +304,7 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
             when (currentRoute) {
                 NavigationRoute.Library.route -> GureumAppBar(title = "서재")
                 NavigationRoute.Quotes.route -> GureumAppBar(title = "필사 목록")
-                NavigationRoute.Statistics.route -> GureumAppBar(title = "통계")
+                NavigationRoute.StatisticsWeekly.route -> GureumAppBar(title = "통계")
                 NavigationRoute.MyPage.route -> GureumAppBar(title = "마이페이지")
                 NavigationRoute.MindMap.route -> GureumAppBar(navController, "마인드맵", true)
                 NavigationRoute.Timer.route -> GureumAppBar(

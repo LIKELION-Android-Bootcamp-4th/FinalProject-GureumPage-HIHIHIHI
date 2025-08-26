@@ -46,7 +46,8 @@ import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
-import com.hihihihi.gureumpage.notification.ReminderScheduler
+import com.hihihihi.gureumpage.notification.reminder.ReminderScheduler
+import com.hihihihi.gureumpage.notification.summary.SummaryScheduler
 
 @Composable
 fun SplashView(
@@ -118,22 +119,16 @@ fun SplashView(
             showProgress = true
         }
 
-        // 디버깅용 - 알림 테스트 모두 완료 후 삭제 예정
-//        if (proceed) {
-//            WorkManager.getInstance(context).enqueue(
-//                OneTimeWorkRequestBuilder<DailyReminderWorker>()
-//                    .setInitialDelay(10, TimeUnit.SECONDS)
-//                    .build()
-//            )
-//
-//            WorkManager.getInstance(context)
-//                .getWorkInfosByTag("daily-reminder-test")
-//                .get()
-//                .forEach { Log.d("WM", "id=${it.id} state=${it.state}") }
-//        }
+        if (proceed) {
+            ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
 
-        // TODO 읽은 기록 추가 후 알림 오는지 테스트 필요
-        if (proceed) ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
+            SummaryScheduler.scheduleWeekly(context)   // 월 09:00
+            SummaryScheduler.scheduleMonthly(context)  // 1일 09:00
+            SummaryScheduler.scheduleYearly(context)   // 1월 1일 09:00
+
+            // 주, 월, 년 알림 테스트
+//            SummaryScheduler.scheduleAllIn(context, 5)
+        }
     }
 
     LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {

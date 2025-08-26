@@ -61,9 +61,29 @@ fun GureumNavGraph(
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
         composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
         composable(NavigationRoute.Search.route) { SearchScreen(navController) }
-        composable(NavigationRoute.Statistics.route) { StatisticsScreen() }
         composable(
-            NavigationRoute.Timer.route,
+            route = NavigationRoute.StatisticsWeekly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/weekly" },
+                navDeepLink { uriPattern = "app://statistics/weekly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.WEEK) }
+        composable(
+            route = NavigationRoute.StatisticsMonthly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/monthly" },
+                navDeepLink { uriPattern = "app://statistics/monthly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.MONTH) }
+        composable(
+            route = NavigationRoute.StatisticsYearly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/yearly" },
+                navDeepLink { uriPattern = "app://statistics/yearly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.YEAR) }
+        composable(
+            route = NavigationRoute.Timer.route,
             arguments = listOf(navArgument("userBookId") { type = NavType.StringType })
         ) { backStackEntry ->
             val userBookId = requireNotNull(backStackEntry.arguments?.getString("userBookId")) {
