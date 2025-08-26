@@ -102,7 +102,7 @@ private fun OnboardingContents(
                 onNext = {
                     scope.launch {
                         if (step == OnboardingStep.Nickname) viewModel.saveNickname()
-                        if (isLastPage) onFinish()
+                        if (step == OnboardingStep.Theme) onFinish()
                         else pagerState.animateScrollToPage(page + 1)
                     }
                 },

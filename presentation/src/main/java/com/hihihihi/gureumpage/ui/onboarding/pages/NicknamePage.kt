@@ -54,7 +54,6 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                 textAlign = TextAlign.Center,
                 imeAction = ImeAction.Done,
                 isError = !viewModel.nickname.validateNickname(),
-                onSubmit = { viewModel.saveNickname() }
             ) {
                 Text(
                     text = buildAnnotatedString {
