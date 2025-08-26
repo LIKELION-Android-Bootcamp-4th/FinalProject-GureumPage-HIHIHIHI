@@ -4,6 +4,6 @@
     android:minWidth="250dp"
     android:minHeight="30dp"
     android:updatePeriodMillis="0"
-    android:resizeMode="none"
+    android:resizeMode="horizontal"
     android:description="@string/widget_current_book_description"
     android:widgetCategory="home_screen" />

@@ -69,6 +69,7 @@ import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.notification.common.Channels
+import com.hihihihi.gureumpage.ui.timer.FloatingTimerService
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -151,6 +152,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val intent = Intent(this, FloatingTimerService::class.java)
+        stopService(intent)
     }
 
     // 백그라운드에서 알림으로 들어올 시 딥링크 처리

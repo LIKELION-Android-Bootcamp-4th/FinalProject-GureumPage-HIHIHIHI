@@ -150,6 +150,9 @@ dependencies {
 
     implementation(libs.play.services.oss.licenses)
 
+    implementation("androidx.compose.material:material-icons-extended")
+
+
     implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
