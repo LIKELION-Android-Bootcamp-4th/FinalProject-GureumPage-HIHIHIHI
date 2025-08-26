@@ -37,7 +37,7 @@ fun SearchTopAppBar(
     focusRequester: FocusRequester
 ) {
     Column(
-        modifier = Modifier.background(GureumTheme.colors.gray150)
+        modifier = Modifier.background(GureumTheme.colors.card)
     ) {
         Row(
             modifier = Modifier
@@ -85,7 +85,10 @@ fun SearchTopAppBar(
             }
             IconButton(onClick = onCloseClick) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_text_clear),
+                    painter = painterResource(
+                        if (GureumTheme.isDarkTheme) R.drawable.ic_text_clear_dark
+                        else R.drawable.ic_text_clear_light
+                    ),
                     contentDescription = "검색 취소",
                     tint = Color.Unspecified
                 )
