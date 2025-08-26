@@ -28,8 +28,7 @@ object DummyData {
         }
 
         return HeatPayload(
-            monthLeft = monthLeft,
-            monthRight = monthRight,
+            monthHeaders = listOf(monthLeft,monthRight),
             levels = levels
         )
     }
