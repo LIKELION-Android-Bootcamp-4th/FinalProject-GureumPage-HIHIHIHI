@@ -42,6 +42,7 @@ import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBookByIdUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
@@ -67,6 +68,13 @@ object UseCaseModule {
         repository: UserBookRepository // Repository가 자동 주입됨
     ): GetUserBooksByStatusUseCase {
         return GetUserBooksByStatusUseCase(repository) // UseCase 생성 후 반환
+    }
+
+    @Provides
+    fun provideGetUserBookByIdUseCase(
+        repository: UserBookRepository
+    ): GetUserBookByIdUseCase {
+        return GetUserBookByIdUseCase(repository)
     }
 
     @Provides

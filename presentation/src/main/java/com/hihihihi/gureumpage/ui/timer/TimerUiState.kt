@@ -4,15 +4,15 @@ data class TimerUiState(
     val bookTitle: String = "",
     val author: String = "",
     val bookImageUrl: String = "",
-    val elapsedSec: Int = 0, // 스톱워치 사용 x
+    val elapsedSec: Int = 0,
     val targetSec: Int = 60 * 30,
     val isRunning: Boolean = false,
     val memoLines: List<String> = emptyList(),
-    //30분 마다 프로그래스바 갱신
     val ringPeriodSec: Int = 1800,
     val startPage: Int? = null,
     val totalPage: Int? = null,
-    val countdown: Int? = null
+    val countdown: Int? = null,
+    val showMemoDialog: Boolean = false
 ) {
     val progress: Float
         get() {
