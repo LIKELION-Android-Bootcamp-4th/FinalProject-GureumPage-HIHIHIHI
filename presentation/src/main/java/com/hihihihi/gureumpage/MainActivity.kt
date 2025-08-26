@@ -126,14 +126,14 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(navController) { _navController = navController }
 
             LaunchedEffect(Unit) {
-                // 위젯 스킴이면 수동 라우팅, 아니면 NavController로 처리
-                if (!routeIfWidgetDeepLink(initIntent)) {
-                    navController.handleDeepLink(initIntent)
-                }
-                // 보류분 처리
-                pendingDeepLink?.let {
-                    if (!routeIfWidgetDeepLink(it)) navController.handleDeepLink(it)
+                if (routeIfWidgetDeepLink(initIntent)) return@LaunchedEffect
+                if (routeIfNotificationDeepLink(initIntent)) return@LaunchedEffect
+
+                // 보류분 처리도 동일 정책
+                pendingDeepLink?.let { pending ->
+                    val handled = routeIfWidgetDeepLink(pending) || routeIfNotificationDeepLink(pending)
                     pendingDeepLink = null
+                    if (handled) return@LaunchedEffect
                 }
             }
 
@@ -164,8 +164,11 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+
         if (_navController != null && _navController!!.graph.nodes.isNotEmpty()) {
-            _navController!!.handleDeepLink(intent)
+            if (routeIfWidgetDeepLink(intent)) return
+            if (routeIfNotificationDeepLink(intent)) return
         } else {
             // 그래프 준비 전이면 보류
             pendingDeepLink = intent
@@ -227,6 +230,63 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun routeIfNotificationDeepLink(intent: Intent): Boolean {
+        val uri = intent.data ?: return false
+        // 위젯 스킴은 제외
+        if (uri.scheme == "gureumpage" && uri.host == "app") return false
+
+        return routeNotificationUri(uri).also { handled ->
+            if (handled) {
+                // 재진입 방지
+                intent.data = null
+                setIntent(intent)
+            }
+        }
+    }
+
+    private fun routeNotificationUri(uri: Uri): Boolean {
+        val nc = _navController ?: return false
+        val target = when {
+            uri.host == "home" || uri.pathSegments.firstOrNull() == "home" ->
+                NavigationRoute.Home.route
+
+            uri.host == "bookdetail" || uri.pathSegments.firstOrNull() == "bookdetail" ->
+                uri.lastPathSegment?.let { NavigationRoute.BookDetail.createRoute(it) }
+
+            uri.host in setOf("statistics", "stats") ||
+                    uri.pathSegments.firstOrNull() in setOf("statistics", "stats") ->
+                when (uri.pathSegments.getOrNull(1)) {
+                    "weekly" -> NavigationRoute.StatisticsWeekly.route
+                    "monthly" -> NavigationRoute.StatisticsMonthly.route
+                    "yearly" -> NavigationRoute.StatisticsYearly.route
+                    else -> NavigationRoute.StatisticsWeekly.route
+                }
+
+            else -> null
+        } ?: return false
+
+        if (target == NavigationRoute.Home.route) {
+            nc.navigate(NavigationRoute.Home.route) {
+                popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            return true
+        }
+
+        // Home 보이지 않게 쌓고 → Target
+        nc.navigate(NavigationRoute.Home.route) {
+            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+        nc.navigate(target) {
+            launchSingleTop = true
+            restoreState = true
+        }
+        return true
+    }
 }
 
 @Composable
@@ -256,7 +316,7 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
         if (!initialHandle) {
-            navController.handleDeepLink(initIntent)
+//            navController.handleDeepLink(initIntent)
             initialHandle = true
         }
     }
