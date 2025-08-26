@@ -48,7 +48,7 @@ fun NicknameChangeDialog(
     val typo = GureumTypography
 
     var nickname by remember { mutableStateOf("") } // 처음 진입 시 빈 값
-    val rule = validate(nickname)  // 긴단 검증
+    val rule = validate(nickname, currentNickname)  // 긴단 검증
 
     Dialog(
         onDismissRequest = onDismiss,
