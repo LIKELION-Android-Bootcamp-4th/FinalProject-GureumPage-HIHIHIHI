@@ -54,7 +54,7 @@ data class GureumColors(
             gray700 = Color(0xFF3A392E),
             gray800 = Color(0xFF272420),
             gray900 = Color(0xFF1F1E18),
-            card = Color(0xFFF5F3EF),
+            card = Color(0xFFF9F8F5),
             background = Color(0xFFFCFBF6),
             background50 = Color(0x807D965C),
             background10 = Color(0x0F7D965C),
