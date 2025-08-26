@@ -107,6 +107,7 @@ fun MyPageScreen(
                     title = "안녕하세요!",
                     badge = state.appellation.ifBlank { "칭호 없음" },
                     nickname = "${state.nickname.ifBlank { "닉네임 없음" }}님",
+                    provider = state.provider,
                     totalPages = "${state.totalPages}쪽",
                     totalBooks = "${state.totalBooks}권",
                     totalTime = timeText,

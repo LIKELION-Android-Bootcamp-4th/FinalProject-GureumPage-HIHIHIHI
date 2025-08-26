@@ -93,6 +93,7 @@ class MypageViewModel @Inject constructor(
                         loading = false,
                         nickname = user.nickname,
                         appellation = user.appellation,
+                        provider = user.provider,
                         error = null
                     )
                 }
