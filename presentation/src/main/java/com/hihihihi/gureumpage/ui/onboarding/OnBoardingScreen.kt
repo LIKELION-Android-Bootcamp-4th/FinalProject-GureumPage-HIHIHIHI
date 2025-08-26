@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ fun OnBoardingScreen(
         OnboardingContents(
             steps = steps,
             viewModel = viewModel,
+            navController = navController,
             onFinish = {
                 viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
@@ -47,12 +49,21 @@ fun OnBoardingScreen(
 private fun OnboardingContents(
     steps: List<OnboardingStep>,
     viewModel: OnBoardingViewModel,
+    navController: NavHostController,
     onFinish: () -> Unit
 ) {
     val pagerState = rememberPagerState { steps.size }
     val scope = rememberCoroutineScope()
 
     val currentStep = steps.getOrNull(pagerState.currentPage) ?: OnboardingStep.Welcome
+
+    BackHandler {
+        if (pagerState.currentPage > 0) {
+            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+        } else {
+            navController.popBackStack()
+        }
+    }
 
     OnboardingScaffold(
         pagerState = pagerState,
