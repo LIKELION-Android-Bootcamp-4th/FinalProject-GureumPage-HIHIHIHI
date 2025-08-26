@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
+import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ class LoginViewModel @Inject constructor(
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signInWithKakaoUseCase: SignInWithKakaoUseCase,
     private val signInWithNaverUseCase: SignInWithNaverUseCase,
+    private val setLastProviderUseCase: SetLastProviderUseCase,
     private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase
 ) : ViewModel() {
     private val TAG = "AuthViewModel"
@@ -142,6 +144,7 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "구글 로그인 처리 중...")
                 signInWithGoogleUseCase(data)
+                setLastProviderUseCase("google")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
                 setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
@@ -156,6 +159,7 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "카카오 로그인 중...")
                 signInWithKakaoUseCase()
+                setLastProviderUseCase("kakao")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
                 setError("카카오 로그인에 실패했습니다. 다시 시도해주세요.")
@@ -169,6 +173,7 @@ class LoginViewModel @Inject constructor(
             try {
                 setLoading(true, "네이버 로그인 중...")
                 signInWithNaverUseCase(activity)
+                setLastProviderUseCase("naver")
                 navigateAfterLogin(navController)
             } catch (e: Exception) {
                 setError("네이버 로그인에 실패했습니다. 다시 시도해주세요.")

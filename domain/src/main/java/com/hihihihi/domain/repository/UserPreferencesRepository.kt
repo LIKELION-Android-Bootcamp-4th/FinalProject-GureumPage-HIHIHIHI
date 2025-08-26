@@ -12,5 +12,6 @@ interface UserPreferencesRepository {
     suspend fun setOnboardingComplete(userId: String, complete: Boolean)
     suspend fun setNickname(userId: String, nickname: String)
     suspend fun setTheme(theme: GureumThemeType)
+    suspend fun setLastProvider(provider: String)
     suspend fun clearAll()
 }

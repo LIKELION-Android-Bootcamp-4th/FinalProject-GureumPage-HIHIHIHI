@@ -30,6 +30,10 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         localDatasource.setTheme(theme)
     }
 
+    override suspend fun setLastProvider(provider: String) {
+        localDatasource.setLastProvider(provider)
+    }
+
     override suspend fun clearAll() {
         localDatasource.clearAll()
     }

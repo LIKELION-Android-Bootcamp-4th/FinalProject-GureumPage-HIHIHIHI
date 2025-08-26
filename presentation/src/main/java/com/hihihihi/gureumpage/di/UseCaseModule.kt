@@ -35,6 +35,7 @@ import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
@@ -274,6 +275,13 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): GetThemeFlowUseCase {
         return GetThemeFlowUseCase(repository)
+    }
+
+    @Provides
+    fun provideSetLastProviderUseCase(
+        repository: UserPreferencesRepository
+    ): SetLastProviderUseCase {
+        return SetLastProviderUseCase(repository)
     }
 
 
