@@ -5,6 +5,7 @@ import java.util.Locale
 sealed interface NicknameRule {
     data object Empty : NicknameRule
     data object Length : NicknameRule
+    data object Equal: NicknameRule
     data object IllegalChar : NicknameRule   // 허용 문자 외(공백, 특수문자, 이모지 등)
     data object InnerSpace : NicknameRule    // 글자 사이 공백
     data object ForbiddenWord : NicknameRule // 금칙어 포함
@@ -25,11 +26,12 @@ object NicknameValidator {
     private val reserved = setOf("guest", "anonymous", "unknown", "null", "undefined", "user", "member")
 
     // 검증 후 NicknameRule 반환
-    fun validate(raw: String): NicknameRule {
+    fun validate(raw: String, oldNickname: String = ""): NicknameRule {
         val nickname = raw.nicknameNormalize()
 
         if (nickname.isEmpty()) return NicknameRule.Empty
         if (nickname.length !in 2..8) return NicknameRule.Length
+        if (nickname == oldNickname) return NicknameRule.Equal
         if (innerWhitespace.containsMatchIn(nickname)) return NicknameRule.InnerSpace
         if (!allowed.matches(nickname)) return NicknameRule.IllegalChar
 
@@ -47,5 +49,5 @@ object NicknameValidator {
             .let { java.text.Normalizer.normalize(it, java.text.Normalizer.Form.NFKC) } // 유니코드 정규화
 
     // 검증 Boolean 값 반환
-    fun String.validateNickname(): Boolean = NicknameValidator.validate(this) is NicknameRule.Ok
+    fun String.validateNickname(): Boolean = validate(this) is NicknameRule.Ok
 }
