@@ -3,25 +3,29 @@ package com.hihihihi.gureumpage.widgets.reading
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
@@ -31,13 +35,14 @@ import androidx.glance.text.Text
 import androidx.glance.unit.ColorProvider
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.hihihihi.gureumpage.MainActivity
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.widgets.common.WidgetBook
 import com.hihihihi.gureumpage.widgets.common.WidgetParams
 import com.hihihihi.gureumpage.widgets.common.actions.OpenBookDetailAction
 import java.io.File
 
-class CurrentReadingBooksWidget : GlanceAppWidget()  {
+class CurrentReadingBooksWidget : GlanceAppWidget() {
 
     companion object {
         const val WIDGET_DATA_KEY = "current_books_widget_data"
@@ -68,27 +73,34 @@ class CurrentReadingBooksWidget : GlanceAppWidget()  {
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(12.dp)
+                    .padding(vertical = 12.dp)
+                    .padding(top = 8.dp)
                     .background(ColorProvider(R.color.background))
             ) {
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = GlanceModifier
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 12.dp, start = 16.dp)
                     // (선택) 헤더 전체 클릭해서 앱/서재 열기
                     // 1) 액티비티 직접 열기 (DeepLink가 있으면 그걸 사용)
-                    // .clickable(actionStartActivity(MainActivity::class.java))
+                     .clickable(actionStartActivity(MainActivity::class.java))
                     // 2) 콜백으로 처리
                     // .clickable(actionRunCallback<OpenLibraryAction>())
                 ) {
                     Image(
-                        provider = ImageProvider(R.drawable.ic_launcher_foreground), // 적절한 앱 아이콘으로 교체
+                        provider = ImageProvider(R.drawable.ic_cloud_icon),
                         contentDescription = "앱 아이콘",
-                        modifier = GlanceModifier.size(24.dp)
+                        modifier = GlanceModifier.size(20.dp)
                     )
                     Spacer(GlanceModifier.width(8.dp))
-                    Text(text = "구름한장과 책 읽기")
+                    Text(
+                        text = "구름한장과 책 읽기",
+                        style = androidx.glance.text.TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = androidx.glance.text.FontWeight.Bold,
+                            color = ColorProvider(R.color.gray700),
+                        ),
+                    )
                 }
 
                 Row(
@@ -96,7 +108,7 @@ class CurrentReadingBooksWidget : GlanceAppWidget()  {
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     // 4칸 고정 슬롯
                     for (slot in 0 until 4) {
@@ -114,7 +126,7 @@ class CurrentReadingBooksWidget : GlanceAppWidget()  {
                                     provider = provider,
                                     contentDescription = book.title,
                                     modifier = GlanceModifier
-                                        .size(60.dp)
+                                        .size(75.dp, 100.dp)
                                         .clickable(
                                             onClick = actionRunCallback<OpenBookDetailAction>(
                                                 parameters = actionParametersOf(
@@ -125,11 +137,22 @@ class CurrentReadingBooksWidget : GlanceAppWidget()  {
                                 )
                             } else {
                                 // 비어있는 슬롯: 플레이스홀더(클릭 없음)
-                                Image(
-                                    provider = ImageProvider(R.drawable.ic_book_outline),
-                                    contentDescription = "빈 슬롯",
-                                    modifier = GlanceModifier.size(60.dp)
-                                )
+                                Box(
+                                    modifier = GlanceModifier
+                                        .size(75.dp, 100.dp)
+                                        .background(ColorProvider(R.color.bookBackground))
+                                        .cornerRadius(8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        provider = ImageProvider(R.drawable.ic_plus),
+                                        contentDescription = "plus",
+                                        colorFilter = ColorFilter.tint(
+                                            colorProvider = ColorProvider(R.color.gray300),
+                                        ),
+                                        modifier = GlanceModifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                     }
