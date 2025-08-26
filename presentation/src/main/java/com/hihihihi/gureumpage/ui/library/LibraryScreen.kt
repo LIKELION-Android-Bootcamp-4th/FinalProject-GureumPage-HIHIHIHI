@@ -56,7 +56,7 @@ fun LibraryScreen(
     navController: NavHostController,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
-    val tabTitles = listOf("읽기 전", "읽은 후")
+    val tabTitles = listOf("읽기 전", "읽는 중", "읽은 후")
 
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val scope = rememberCoroutineScope()
@@ -64,6 +64,7 @@ fun LibraryScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val plannedBooks = uiState.books.filter { it.status == ReadingStatus.PLANNED }
+    val readingBooks = uiState.books.filter { it.status == ReadingStatus.READING }
     val finishedBooks = uiState.books.filter { it.status == ReadingStatus.FINISHED }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -107,8 +108,11 @@ fun LibraryScreen(
                         ) {
                             Icon(
                                 painter = painterResource(
-                                    id = if (index == 0) R.drawable.ic_library_planned
-                                    else R.drawable.ic_library_finished
+                                    id = when (index) {
+                                        0 -> R.drawable.ic_library_planned
+                                        1 -> R.drawable.ic_library_reading
+                                        else -> R.drawable.ic_library_finished
+                                    }
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
@@ -172,6 +176,45 @@ fun LibraryScreen(
                         }
 
                         1 -> {
+                            if (readingBooks.isEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Semi18Text("읽고 있는 책이 없어요")
+                                    Spacer(Modifier.height(16.dp))
+                                    Medi16Text("책을 찾아 추가하고 새로운 독서를 시작해 보세요.")
+                                }
+                            } else {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(3),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(top = 18.dp)
+                                ) {
+                                    items(readingBooks) { book ->
+                                        BookItem(
+                                            book = book,
+                                            onClicked = {
+                                                navController.navigate(
+                                                    NavigationRoute.BookDetail.createRoute(
+                                                        it
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        2 -> {
                             if (finishedBooks.isEmpty()) {
                                 Column(
                                     modifier = Modifier
