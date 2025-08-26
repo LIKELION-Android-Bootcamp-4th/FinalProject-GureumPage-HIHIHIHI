@@ -74,7 +74,7 @@ fun AddManualHistoryDialog(
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     var date by remember { mutableStateOf(LocalDateTime.now()) }
-    var startTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var startTime by remember { mutableStateOf(LocalDateTime.now()) }
     var endTime by remember { mutableStateOf<LocalDateTime?>(null) }
 
     var startPage by remember { mutableStateOf(currentPage.toString()) }
