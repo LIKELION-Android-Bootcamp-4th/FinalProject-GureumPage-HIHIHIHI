@@ -19,11 +19,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
+import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.tasks.await
 
@@ -34,12 +36,26 @@ class LoginViewModel @Inject constructor(
     private val signInWithKakaoUseCase: SignInWithKakaoUseCase,
     private val signInWithNaverUseCase: SignInWithNaverUseCase,
     private val setLastProviderUseCase: SetLastProviderUseCase,
+    private val getLastProviderUseCase: GetLastProviderUseCase,
     private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase
 ) : ViewModel() {
     private val TAG = "AuthViewModel"
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
+
+    init {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                lastProvider = getLastProvider(),
+                errorMessage = null
+            )
+        }
+    }
+
+    suspend fun getLastProvider(): String{
+        return getLastProviderUseCase().first()
+    }
 
     private suspend fun navigateAfterLogin(navController: NavHostController) {
         setLoading(true, "사용자 정보를 설정하는 중...")

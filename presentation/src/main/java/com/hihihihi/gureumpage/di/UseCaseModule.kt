@@ -31,6 +31,7 @@ import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
+import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -282,6 +283,13 @@ object UseCaseModule {
         repository: UserPreferencesRepository
     ): SetLastProviderUseCase {
         return SetLastProviderUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetLastProviderUseCase(
+        repository: UserPreferencesRepository
+    ): GetLastProviderUseCase {
+        return GetLastProviderUseCase(repository)
     }
 
 

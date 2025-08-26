@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesRepository {
     val nickname: Flow<String>
     val theme: Flow<GureumThemeType>
+    val lastProvider: Flow<String>
 
     fun getOnboardingComplete(userId: String): Flow<Boolean>
 
