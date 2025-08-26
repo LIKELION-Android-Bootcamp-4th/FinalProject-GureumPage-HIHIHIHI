@@ -32,6 +32,7 @@ import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
+import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
@@ -92,6 +93,15 @@ object UseCaseModule {
             historyRepository,
             userRepository
         )
+    }
+
+    @Provides
+    fun provideGetMyPageDataUseCase(
+        userRepository: UserRepository,
+        dailyRepository: DailyReadPageRepository,
+        userBookRepository: UserBookRepository
+    ): GetMyPageDataUseCase {
+        return GetMyPageDataUseCase(userRepository, dailyRepository, userBookRepository)
     }
 
     @Provides

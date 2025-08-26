@@ -7,11 +7,7 @@ import kotlinx.coroutines.flow.flow
 import java.util.Date
 
 interface DailyReadPageRepository {
-    suspend fun getDailyReadPages(userId: String): List<DailyReadPage>
-
-    fun getDailyReadPagesFlow(userId: String): Flow<List<DailyReadPage>> = flow {
-        emit(getDailyReadPages(userId))
-    }
+    fun getDailyReadPages(userId: String): Flow<List<DailyReadPage>>
 
     fun getDailyReadPagesByUserIdAndDate(userId: String,dayOfStart: Date): Flow<List<DailyReadPage>>
 }
