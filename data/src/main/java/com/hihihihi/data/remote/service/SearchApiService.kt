@@ -11,7 +11,7 @@ interface SearchApiService {
     suspend fun searchBooks(
         @Query("TTBKey") ttbkey: String,
         @Query("Query") query: String,
-        @Query("start") start: Int,
+        @Query("Start") start: Int,
         @Query("MaxResults") maxResults: Int,
         @Query("SearchTarget") searchTarget: String = "Book",
         @Query("QueryType") queryType: String = "Keyword",

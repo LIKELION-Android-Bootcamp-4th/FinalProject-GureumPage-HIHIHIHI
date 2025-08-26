@@ -18,7 +18,7 @@ class SearchRemoteDataSourceImpl @Inject constructor(
         maxResults: Int
         ): List<SearchBookDto> {
         return try {
-            val start = startIndex + 1
+            val start = startIndex
             Log.d("Remote", "Start=$start MaxResults=$maxResults q=$query")
 
             val response = searchApiService.searchBooks(
