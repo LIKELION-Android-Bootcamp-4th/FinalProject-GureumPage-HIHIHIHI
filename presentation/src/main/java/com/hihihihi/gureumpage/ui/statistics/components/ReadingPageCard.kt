@@ -28,7 +28,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 fun ReadingPageCard(
     modifier: Modifier = Modifier,
     labelColor: Int = GureumTheme.colors.gray600.toArgb(),
-    lineFillColor: Int = GureumTheme.colors.primary50.toArgb(),
+    lineFillColor: Int = GureumTheme.colors.primary30.toArgb(),
     entries: List<Entry>,
     xLabels: List<String>
 ) {

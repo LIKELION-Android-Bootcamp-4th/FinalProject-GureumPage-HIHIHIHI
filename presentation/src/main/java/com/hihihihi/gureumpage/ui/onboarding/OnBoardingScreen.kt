@@ -34,8 +34,8 @@ fun OnBoardingScreen(
             steps = steps,
             viewModel = viewModel,
             navController = navController,
+            onSave = { viewModel.saveOnboardingComplete() },
             onFinish = {
-                viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
                     launchSingleTop = true
@@ -50,6 +50,7 @@ private fun OnboardingContents(
     steps: List<OnboardingStep>,
     viewModel: OnBoardingViewModel,
     navController: NavHostController,
+    onSave: () -> Unit,
     onFinish: () -> Unit
 ) {
     val pagerState = rememberPagerState { steps.size }
@@ -101,8 +102,8 @@ private fun OnboardingContents(
                 isNextEnabled = viewModel.isNextEnabled(currentStep),
                 onNext = {
                     scope.launch {
-                        if (step == OnboardingStep.Nickname) viewModel.saveNickname()
-                        if (step == OnboardingStep.Theme) onFinish()
+                        if (step == OnboardingStep.Theme) onSave()
+                        if (step == OnboardingStep.Finish) onFinish()
                         else pagerState.animateScrollToPage(page + 1)
                     }
                 },

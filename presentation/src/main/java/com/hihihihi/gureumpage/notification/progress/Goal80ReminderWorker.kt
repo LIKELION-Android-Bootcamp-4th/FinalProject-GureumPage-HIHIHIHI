@@ -35,13 +35,18 @@ class Goal80ReminderWorker @AssistedInject constructor(
 
         val preference = appContext.getSharedPreferences("goal_progress", Context.MODE_PRIVATE)
         val today = LocalDate.now().toString()
-
+        val goalEnabled = preference.getBoolean("goal_enabled", false)
         val lastDay = preference.getString("day", null)
         val lastRatio = preference.getFloat("last_ratio", 0f)
 
-        if (today == lastDay && lastRatio >= 0.8f) {
+        if (goalEnabled && today == lastDay && lastRatio != 0f && lastRatio >= 0.8f) {
             val pendingIntent = factory.pendingIntentTo("gureum://goals/today".toUri())
-            val notification = factory.simpleAlarm(Channels.PROGRESS, "오늘 목표 80% 달성", "", pendingIntent)
+            val notification = factory.simpleAlarm(
+                Channels.PROGRESS,
+                "오늘 목표 80% 달성 \uD83C\uDFAF",
+                "조금만 더 읽으면 목표를 채워요.",
+                pendingIntent
+            )
             factory.notify("goals:today", 12000, notification)
         }
 

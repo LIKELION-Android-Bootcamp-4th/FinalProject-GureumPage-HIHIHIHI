@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -16,11 +15,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.*
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-
 
 @Composable
 fun EditQuoteDialog(
@@ -33,11 +32,15 @@ fun EditQuoteDialog(
     var quote by remember { mutableStateOf(initialContent) }
     val maxLen = 500
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         GureumCard(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(20.dp)
+            Column(
+                modifier = Modifier.padding(20.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -74,7 +77,11 @@ fun EditQuoteDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // 페이지 번호
-                Semi12Text("페이지 번호(선택사항)", modifier = Modifier.padding(start = 4.dp), color = GureumTheme.colors.gray800)
+                Semi12Text(
+                    "페이지 번호(선택사항)",
+                    modifier = Modifier.padding(start = 4.dp),
+                    color = GureumTheme.colors.gray800
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 GureumTextField(
                     value = pageNumber,
@@ -133,7 +140,6 @@ fun EditQuoteDialog(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-
 
                 // 저장 버튼
                 GureumButton(

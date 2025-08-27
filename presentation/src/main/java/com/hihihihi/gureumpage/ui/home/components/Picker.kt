@@ -50,14 +50,34 @@ fun Picker(
     startIndex: Int = 0,
     visibleItemsCount: Int = 3,
     textModifier: Modifier = Modifier,
+    infiniteScroll: Boolean = true,
 ) {
     val visibleItemsMiddle = visibleItemsCount / 2
-    val listScrollCount = Integer.MAX_VALUE
+    val (listScrollCount, paddingItemsCount) = if (infiniteScroll) {
+        Integer.MAX_VALUE to 0
+    } else {
+        // 제한된 스크롤일 때는 앞뒤에 패딩 아이템 추가
+        // visibleItemsCount = 3 때문에 앞 뒤 있을 때 중간 값이 선택 됨
+        items.size + (visibleItemsMiddle * 2) to visibleItemsMiddle
+    }
     val listScrollMiddle = listScrollCount / 2
-    val listStartIndex =
+    val listStartIndex = if (infiniteScroll) {
         listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+    } else {
+        // 제한 스크롤일 땐 첫 번째 인덱스로
+        startIndex
+    }
 
-    fun getItem(index: Int) = items[index % items.size]
+    fun getItem(index: Int): String? = if (infiniteScroll) {
+        items[index % items.size]
+    } else {
+        // 패딩 영역이면 null, 아니면 실제 아이템 반환
+        val adjustedIndex = index - paddingItemsCount
+        if (adjustedIndex in 0 until items.size) items[adjustedIndex]
+        else null
+
+    }
+
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
@@ -77,12 +97,20 @@ fun Picker(
     LaunchedEffect(items, startIndex) {
         listState.scrollToItem(listStartIndex)
         state.selectedIndex = startIndex
-        state.selectedItem = getItem(listStartIndex + visibleItemsMiddle)
+        state.selectedItem = getItem(listStartIndex + visibleItemsMiddle) ?: ""
     }
 
-    LaunchedEffect(listState) {
+    LaunchedEffect(listState, infiniteScroll) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .map { index -> (index + visibleItemsMiddle) % items.size }
+            .map { index ->
+                if (infiniteScroll) {
+                    (index + visibleItemsMiddle) % items.size
+                } else {
+                    val centerIndex = index + visibleItemsMiddle
+                    val adjustedIndex = centerIndex - paddingItemsCount
+                    adjustedIndex.coerceIn(0, items.size - 1)
+                }
+            }
             .distinctUntilChanged()
             .collect { index ->
                 state.selectedIndex = index
@@ -102,7 +130,7 @@ fun Picker(
         ) {
             items(listScrollCount) { index ->
                 Text(
-                    text = getItem(index),
+                    text = getItem(index) ?: "",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = GureumTypography.headlineLarge,

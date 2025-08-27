@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
@@ -37,10 +38,14 @@ fun AddQuoteDialog(
     var pageNumber by remember { mutableStateOf("") }
     var quote by remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         GureumCard(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(20.dp)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp)

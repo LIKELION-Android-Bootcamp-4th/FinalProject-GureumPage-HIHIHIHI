@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.search
 
-import android.app.Activity
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,17 +27,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.luminance
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.hihihihi.domain.model.SearchBook
@@ -96,20 +89,6 @@ fun SearchScreen(
                 bookToAdd = null
             }
         }
-    }
-
-
-    val statusBarColor = GureumTheme.colors.card.toArgb()
-    val lightIcons = statusBarColor.luminance > 0.5f
-    val window = (LocalView.current.context as Activity).window
-    DisposableEffect(statusBarColor, lightIcons) {
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        window.statusBarColor = statusBarColor
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = lightIcons
-            isAppearanceLightNavigationBars = lightIcons
-        }
-        onDispose { }
     }
 
     var endToastShown by remember { mutableStateOf(false) }
@@ -307,6 +286,8 @@ fun SearchScreen(
                                     )
                                 }
                             }
+
+                            Spacer(Modifier.height(50.dp))
                         }
                     }
                 }

@@ -356,8 +356,7 @@ fun GureumPageApp(
     )
 
     val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
-    val authRoutes =
-        remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
+    val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
 
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
@@ -442,7 +441,7 @@ fun GureumPageApp(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            if (currentRoute != null && hideBottomBarRoutes.none { currentRoute.startsWith(it) })
+            if (currentRoute != null && BottomNavItem.items.any { currentRoute.startsWith(it.route) })
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->

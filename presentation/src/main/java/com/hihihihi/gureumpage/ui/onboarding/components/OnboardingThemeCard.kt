@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.gureumpage.designsystem.components.Medi10Text
+import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Semi12Text
+import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -74,17 +76,17 @@ private fun LightThemeCard() {
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Semi12Text("라이트 테마")
+                Semi14Text("라이트 테마")
                 Spacer(Modifier.height(2.dp))
-                Medi10Text("라이트 테마입니다")
+                Medi12Text("라이트 테마입니다")
                 Spacer(Modifier.height(10.dp))
                 GureumLinearProgressBar(height = 6, progress = 0.7f)
             }
         }
         Spacer(Modifier.height(14.dp))
-        Semi12Text("라이트 테마", color = GureumColors.defaultDarkColors().gray800)
+        Semi14Text("라이트 테마", color = GureumColors.defaultDarkColors().gray800)
         Spacer(Modifier.height(8.dp))
-        Medi10Text(
+        Medi12Text(
             "밝고 깔끔한 인터페이스로\n편안한 독서 환경 제공",
             textAlign = TextAlign.Center,
             color = GureumColors.defaultDarkColors().gray500
@@ -98,17 +100,17 @@ private fun DarkThemeCard() {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Semi12Text("다크 테마")
+            Semi14Text("다크 테마")
             Spacer(Modifier.height(2.dp))
-            Medi10Text("다크 테마입니다")
+            Medi12Text("다크 테마입니다")
             Spacer(Modifier.height(10.dp))
             GureumLinearProgressBar(height = 6, progress = 0.7f)
         }
     }
     Spacer(Modifier.height(14.dp))
-    Semi12Text("다크 테마", color = GureumColors.defaultDarkColors().gray800)
+    Semi14Text("다크 테마", color = GureumColors.defaultDarkColors().gray800)
     Spacer(Modifier.height(8.dp))
-    Medi10Text(
+    Medi12Text(
         "눈의 피로를 줄이고 집중력을 높여주는\n어둠 속에서 빛나는 독서 경험",
         textAlign = TextAlign.Center,
         color = GureumColors.defaultDarkColors().gray500

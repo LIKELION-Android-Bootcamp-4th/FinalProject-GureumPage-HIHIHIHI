@@ -69,7 +69,8 @@ fun StatisticsScreen(
                 presetIndex = index
                 showPicker = false
                 viewModel.loadStatistics(presetFromIndex(index))
-            }
+            },
+            infiniteScroll = false
         )
     }
 
