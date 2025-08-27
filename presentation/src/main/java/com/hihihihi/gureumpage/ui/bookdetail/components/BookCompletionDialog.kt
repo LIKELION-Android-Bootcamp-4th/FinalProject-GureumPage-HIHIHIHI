@@ -59,6 +59,9 @@ fun BookCompletionDialog(
         iterations = 1
     )
 
+    val isConfettiFinished = confettiProgress == 1f
+
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -67,7 +70,7 @@ fun BookCompletionDialog(
         )
     ) {
         Box {
-            GureumCard (
+            GureumCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -88,7 +91,7 @@ fun BookCompletionDialog(
 
                     Medi14Text(
                         text = "책을 모두 읽으셨네요!",
-                        color =GureumTheme.colors.gray800,
+                        color = GureumTheme.colors.gray800,
                         textAlign = TextAlign.Center
                     )
 
@@ -102,18 +105,18 @@ fun BookCompletionDialog(
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Medi12Text(
                         text = userBook.title,
-                        color =GureumTheme.colors.gray800,
+                        color = GureumTheme.colors.gray800,
                         maxLine = 2,
                         textAlign = TextAlign.Center
                     )
 
                     Medi12Text(
                         text = userBook.author,
-                        color =GureumTheme.colors.gray700,
+                        color = GureumTheme.colors.gray700,
                         maxLine = 1,
                         textAlign = TextAlign.Center
                     )
@@ -122,7 +125,7 @@ fun BookCompletionDialog(
 
                     Medi12Text(
                         text = "${userBook.currentPage} / ${userBook.totalPage} 페이지 완독",
-                        color =GureumTheme.colors.primary,
+                        color = GureumTheme.colors.primary,
                         textAlign = TextAlign.Center
                     )
 
@@ -130,7 +133,7 @@ fun BookCompletionDialog(
 
                     Medi14Text(
                         text = "책 상태를 '읽은 책'으로 변경하시겠습니까?",
-                        color =GureumTheme.colors.gray800,
+                        color = GureumTheme.colors.gray800,
                         textAlign = TextAlign.Center
                     )
 
@@ -157,14 +160,16 @@ fun BookCompletionDialog(
                 }
             }
 
-            LottieAnimation(
-                composition = confettiComposition,
-                progress = { confettiProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .align(Alignment.TopCenter)
-            )
+            if (!isConfettiFinished) {
+                LottieAnimation(
+                    composition = confettiComposition,
+                    progress = { confettiProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .align(Alignment.TopCenter)
+                )
+            }
         }
     }
 }
