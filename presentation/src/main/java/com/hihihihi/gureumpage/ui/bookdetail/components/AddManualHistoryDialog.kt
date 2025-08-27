@@ -298,7 +298,7 @@ fun AddManualHistoryDialog(
         if (showDatePicker) {
             GureumBetweenDatePicker(
                 isSelectingStart = false,
-                startDate = startDate, // TODO 책 읽기 시작 날짜 입력
+                startDate = startDate,
                 endDate = null,
                 onDismiss = { showDatePicker = false },
                 onConfirm = { millis ->
