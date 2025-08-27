@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(darkTheme = isDark) {
                 Surface(modifier = Modifier.fillMaxSize(), color = GureumTheme.colors.background) {
-                    GureumPageApp(navController, initIntent)
+                    GureumPageApp(navController)
 
                     if (showNetworkWarning) {
                         NetworkWarningBanner(
@@ -293,7 +293,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
+fun GureumPageApp(navController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -302,34 +302,15 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val hideBottomBarRoutes = listOf(
-        NavigationRoute.Login.route,
-        NavigationRoute.OnBoarding.route,
-        NavigationRoute.BookDetail.route,
-        NavigationRoute.Timer.route,
-        NavigationRoute.MindMap.route,
-        NavigationRoute.Withdraw.route,
-        NavigationRoute.Search.route,
-        NavigationRoute.Splash.route
-    )
-
     val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
     val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
 
     var initialHandle by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(initialHandle) {
-        if (!initialHandle) {
-//            navController.handleDeepLink(initIntent)
-            initialHandle = true
-        }
-    }
+    LaunchedEffect(initialHandle) { if (!initialHandle) initialHandle = true }
 
     var timerAppbarUp by remember { mutableStateOf(0L) }
-
     LaunchedEffect(currentRoute) {
-        if (currentRoute != NavigationRoute.Timer.route) {
-            timerAppbarUp = 0L
-        }
+        if (currentRoute != NavigationRoute.Timer.route) timerAppbarUp = 0L
     }
 
     BackHandler(enabled = currentRoute !in authRoutes) {
@@ -397,7 +378,7 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            if (currentRoute != null && hideBottomBarRoutes.none { currentRoute.startsWith(it) })
+            if (currentRoute != null && BottomNavItem.items.any { currentRoute.startsWith(it.route) })
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
