@@ -12,10 +12,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.collection.isNotEmpty
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -126,20 +129,20 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(navController) { _navController = navController }
 
             LaunchedEffect(Unit) {
-                // 위젯 스킴이면 수동 라우팅, 아니면 NavController로 처리
-                if (!routeIfWidgetDeepLink(initIntent)) {
-                    navController.handleDeepLink(initIntent)
-                }
-                // 보류분 처리
-                pendingDeepLink?.let {
-                    if (!routeIfWidgetDeepLink(it)) navController.handleDeepLink(it)
+                if (routeIfWidgetDeepLink(initIntent)) return@LaunchedEffect
+                if (routeIfNotificationDeepLink(initIntent)) return@LaunchedEffect
+
+                // 보류분 처리도 동일 정책
+                pendingDeepLink?.let { pending ->
+                    val handled = routeIfWidgetDeepLink(pending) || routeIfNotificationDeepLink(pending)
                     pendingDeepLink = null
+                    if (handled) return@LaunchedEffect
                 }
             }
 
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(darkTheme = isDark) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier.fillMaxSize(), color = GureumTheme.colors.background) {
                     GureumPageApp(navController, initIntent)
 
                     if (showNetworkWarning) {
@@ -164,8 +167,11 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+
         if (_navController != null && _navController!!.graph.nodes.isNotEmpty()) {
-            _navController!!.handleDeepLink(intent)
+            if (routeIfWidgetDeepLink(intent)) return
+            if (routeIfNotificationDeepLink(intent)) return
         } else {
             // 그래프 준비 전이면 보류
             pendingDeepLink = intent
@@ -227,6 +233,63 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun routeIfNotificationDeepLink(intent: Intent): Boolean {
+        val uri = intent.data ?: return false
+        // 위젯 스킴은 제외
+        if (uri.scheme == "gureumpage" && uri.host == "app") return false
+
+        return routeNotificationUri(uri).also { handled ->
+            if (handled) {
+                // 재진입 방지
+                intent.data = null
+                setIntent(intent)
+            }
+        }
+    }
+
+    private fun routeNotificationUri(uri: Uri): Boolean {
+        val nc = _navController ?: return false
+        val target = when {
+            uri.host == "home" || uri.pathSegments.firstOrNull() == "home" ->
+                NavigationRoute.Home.route
+
+            uri.host == "bookdetail" || uri.pathSegments.firstOrNull() == "bookdetail" ->
+                uri.lastPathSegment?.let { NavigationRoute.BookDetail.createRoute(it) }
+
+            uri.host in setOf("statistics", "stats") ||
+                    uri.pathSegments.firstOrNull() in setOf("statistics", "stats") ->
+                when (uri.pathSegments.getOrNull(1)) {
+                    "weekly" -> NavigationRoute.StatisticsWeekly.route
+                    "monthly" -> NavigationRoute.StatisticsMonthly.route
+                    "yearly" -> NavigationRoute.StatisticsYearly.route
+                    else -> NavigationRoute.StatisticsWeekly.route
+                }
+
+            else -> null
+        } ?: return false
+
+        if (target == NavigationRoute.Home.route) {
+            nc.navigate(NavigationRoute.Home.route) {
+                popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            return true
+        }
+
+        // Home 보이지 않게 쌓고 → Target
+        nc.navigate(NavigationRoute.Home.route) {
+            popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+        nc.navigate(target) {
+            launchSingleTop = true
+            restoreState = true
+        }
+        return true
+    }
 }
 
 @Composable
@@ -250,10 +313,13 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         NavigationRoute.Splash.route
     )
 
+    val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
+    val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
+
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
         if (!initialHandle) {
-            navController.handleDeepLink(initIntent)
+//            navController.handleDeepLink(initIntent)
             initialHandle = true
         }
     }
@@ -266,40 +332,49 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
         }
     }
 
-    BackHandler {
-        val currentRoute = navController.currentBackStackEntry?.destination?.route
-
+    BackHandler(enabled = currentRoute !in authRoutes) {
         when {
-            // 현재 루트가 홈이면 앱 종료
-            currentRoute == NavigationRoute.Home.route -> {
-                val currentTime = System.currentTimeMillis()
-
-                if (currentTime - lastBackMillis < 2000L) {
-                    (context as? Activity)?.finish()
-                } else {
-                    lastBackMillis = currentTime
-                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            // 현재 루트가 바텀 내비 아이템이면 홈으로 이동
-            BottomNavItem.items.any { it.route == currentRoute } -> {
+            // 바텀 내비 아이템 중 홈이 아닐 때 -> 홈으로 스위칭
+            currentRoute in bottomRoutes && currentRoute != NavigationRoute.Home.route -> {
                 navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
                 }
             }
 
+            // 홈이면 → 종료
+            currentRoute == NavigationRoute.Home.route -> {
+                val now = System.currentTimeMillis()
+                if (now - lastBackMillis < 2000L) (context as? Activity)?.finish()
+                else {
+                    lastBackMillis = now
+                    Toast.makeText(context, "한 번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // 그 외 화면
             else -> {
-                navController.popBackStack()
+                val popped = navController.popBackStack()
+                if (!popped) {
+                    // 항상 홈을 거쳐 종료하기
+                    if (currentRoute != NavigationRoute.Home.route) {
+                        navController.navigate(NavigationRoute.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        (context as? Activity)?.finish()
+                    }
+                }
             }
         }
     }
 
     Scaffold(
+        containerColor = GureumTheme.colors.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             when (currentRoute) {
                 NavigationRoute.Library.route -> GureumAppBar(title = "서재")
@@ -326,12 +401,19 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
                 GureumBottomNavBar(navController = navController)
         }
     ) { innerPadding ->
-        CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
-            GureumNavGraph(
-                navController = navController,
-                modifier = Modifier.padding(innerPadding),
-                snackbarHostState = snackbarHostState
-            )
+        Box(
+            Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(GureumTheme.colors.background)
+        ) {
+            CompositionLocalProvider(LocalAppBarUpClick provides timerAppbarUp) {
+                GureumNavGraph(
+                    navController = navController,
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHostState = snackbarHostState
+                )
+            }
         }
     }
     Log.d("APP", "GureumPageApp init - end")

@@ -58,10 +58,10 @@ fun SplashView(
     val uiState by viewModel.uiState.collectAsState()
 
     var askedOnce by rememberSaveable { mutableStateOf(false) }
-
     var proceed by rememberSaveable { mutableStateOf(false) }
-
     var kicked by rememberSaveable { mutableStateOf(false) }
+    var showProgress by remember { mutableStateOf(false) }
+    var startAnimation by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -70,10 +70,6 @@ fun SplashView(
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
         else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
     }
-
-    var showProgress by remember { mutableStateOf(false) }
-
-    var startAnimation by remember { mutableStateOf(false) }
 
     val alpha by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
@@ -134,8 +130,6 @@ fun SplashView(
     LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
         if (proceed && !uiState.isLoading) {
             when (uiState.navTarget) {
-                SplashViewModel.NavTarget.Loading -> Unit
-                SplashViewModel.NavTarget.NoNetwork -> Unit
                 SplashViewModel.NavTarget.Login -> {
                     navController.navigate(NavigationRoute.Login.route) {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
@@ -156,6 +150,8 @@ fun SplashView(
                         launchSingleTop = true
                     }
                 }
+
+                else -> Unit
             }
         }
     }

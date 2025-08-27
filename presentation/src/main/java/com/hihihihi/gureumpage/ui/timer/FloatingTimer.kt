@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -106,14 +107,13 @@ fun FloatingTimer(
             // 확장 상태
             Box(
                 modifier = Modifier
-                    .width(280.dp)
+                    .widthIn(50.dp, 280.dp)
                     .background(cardColor, RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
                 Row {
-
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f, false),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         timerState.bookInfo?.title?.let {
@@ -121,8 +121,7 @@ fun FloatingTimer(
                                 it,
                                 color = gray700Color,
                                 maxLine = 1,
-
-                                )
+                            )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Semi12Text(

@@ -17,7 +17,12 @@ class NotificationFactory(private val context: Context) {
     fun pendingIntentTo(uri: Uri): PendingIntent {
         val intent = Intent(Intent.ACTION_VIEW, uri)
             .setPackage(context.packageName) // 앱 내에서만 라우팅
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            )
 
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
