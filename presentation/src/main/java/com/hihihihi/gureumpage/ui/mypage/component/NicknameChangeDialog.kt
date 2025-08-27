@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -29,11 +27,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hihihihi.gureumpage.common.utils.NicknameRule
+import com.hihihihi.gureumpage.common.utils.NicknameValidator.validate
+import com.hihihihi.gureumpage.common.utils.NicknameValidator.validateNickname
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
+import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -46,28 +47,25 @@ fun NicknameChangeDialog(
     val colors = GureumTheme.colors
     val typo = GureumTypography
 
-    var text by remember { mutableStateOf(TextFieldValue("")) } // 처음 진입 시 빈 값
-    val rule = remember(text) { validateNickname(text.text) } // 긴단 검증
-    val canSave = rule is NicknameRule.Ok // 저장 가능 여부
+    var nickname by remember { mutableStateOf("") } // 처음 진입 시 빈 값
+    val rule = validate(nickname, currentNickname)  // 긴단 검증
 
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false) // 기본 크기가 작아서 폭 해제
     ) {
-        Surface(
+        GureumCard(
             modifier = Modifier
                 .fillMaxWidth() //가로 크게
-                .padding(horizontal = 20.dp) // 좌우 여백
+                .padding(horizontal = 20.dp)
                 .widthIn(max = 560.dp)
                 .shadow(18.dp, RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
-            color = colors.gray0
         ) {
             Column(
                 modifier = Modifier
-                    .background(colors.gray0)
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
-                    .heightIn(min = 260.dp), // 최소 높이
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
+                    .padding(bottom = 12.dp)
+                    .heightIn(min = 200.dp), // 최소 높이
                 verticalArrangement = Arrangement.Top
             ) {
                 // 타이틀 + 닫기
@@ -93,20 +91,20 @@ fun NicknameChangeDialog(
                 Text(
                     text = "변경할 닉네임을 입력해주세요",
                     style = typo.bodySmall,
-                    color = colors.gray400
+                    color = colors.gray800
                 )
 
                 Spacer(Modifier.height(12.dp))
 
                 // 입력 필드
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
+                    value = nickname,
+                    onValueChange = { nickname = it },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
-                        if (text.text.isNotEmpty()) {
-                            IconButton(onClick = { text = TextFieldValue("") }) {
+                        if (nickname.isNotEmpty()) {
+                            IconButton(onClick = { nickname = "" }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Close,
                                     contentDescription = "지우기",
@@ -120,14 +118,18 @@ fun NicknameChangeDialog(
                         .heightIn(min = 56.dp), //2줄 힌트 대비
                     textStyle = typo.bodyMedium.copy(color = colors.gray800),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colors.gray0,
-                        unfocusedContainerColor = colors.gray0,
-                        disabledContainerColor = colors.gray0,
+                        focusedContainerColor = colors.card,
+                        unfocusedContainerColor = colors.card,
+                        disabledContainerColor = colors.card,
+
                         focusedIndicatorColor = colors.textFieldOutline,   // 아웃라인 색
                         unfocusedIndicatorColor = colors.textFieldOutline,
+
                         cursorColor = colors.gray600,
+
                         focusedTextColor = colors.gray800,
                         unfocusedTextColor = colors.gray800,
+
                         focusedPlaceholderColor = colors.gray300,
                         unfocusedPlaceholderColor = colors.gray300,
                     ),
@@ -135,56 +137,34 @@ fun NicknameChangeDialog(
                     placeholder = {
                         Text("닉네임으로 나만의 개성을 표현해 보세요", style = typo.bodyMedium, color = colors.gray300)
                     },
-                    isError = rule is NicknameRule.Length ||
-                            rule is NicknameRule.IllegalChar ||
-                            rule is NicknameRule.ForbiddenWord
+                    isError = rule !is NicknameRule.Ok
                 )
 
                 Spacer(Modifier.height(12.dp))
 
                 // 검증 메세지 (rule 상태에 따라 색상/문구 변경)
                 val (msg, msgColor) = when (rule) {
-                    is NicknameRule.Empty -> "2~8글자 이내로 설정해주세요." to colors.gray400
-                    is NicknameRule.Length -> "2~8글자 이내로 설정해주세요." to colors.systemRed
-                    is NicknameRule.IllegalChar -> "특수문자나 공백은 사용할 수 없어요." to colors.systemRed
-                    is NicknameRule.ForbiddenWord -> "부적절한 단어는 포함할 수 없어요." to colors.systemRed
-                    is NicknameRule.Ok -> "사용 가능한 닉네임입니다." to colors.systemGreen
+                    NicknameRule.Empty -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.gray400
+                    NicknameRule.Length -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.systemRed
+                    NicknameRule.Equal -> "이전 닉네임과 동일합니다." to GureumTheme.colors.systemRed
+                    NicknameRule.InnerSpace -> "글자 사이 공백은 사용할 수 없어요." to GureumTheme.colors.systemRed
+                    NicknameRule.IllegalChar -> "한글/영문/숫자만 사용할 수 있어요." to GureumTheme.colors.systemRed
+                    NicknameRule.ForbiddenWord -> "부적절한 단어는 포함할 수 없어요." to GureumTheme.colors.systemRed
+                    NicknameRule.Reserved -> "사용할 수 없는 닉네임이에요." to GureumTheme.colors.systemRed
+                    NicknameRule.Ok -> "사용 가능한 닉네임입니다." to GureumTheme.colors.systemGreen
                 }
+
                 Text(text = msg, style = typo.bodySmall, color = msgColor)
 
-                Spacer(Modifier.height(36.dp))
+                Spacer(Modifier.height(18.dp))
 
                 // 저장 버튼
                 GureumButton(
                     text = "저장하기",
-                    enabled = canSave,
-                    onClick = { onSave(text.text) }
+                    enabled = nickname.validateNickname(),
+                    onClick = { onSave(nickname.trim()) }
                 )
             }
         }
     }
-}
-
-// ===== 검증 로직 =====
-private val forbiddenWords = listOf("운영자", "관리자", "admin", "시발", "shit", "fuck", "병신") // 필요시 확장
-private val nicknameRegex = Regex("^[가-힣a-zA-Z0-9]{2,8}$")
-
-private fun validateNickname(text: String): NicknameRule {
-    if (text.isBlank()) return NicknameRule.Empty
-    if (!nicknameRegex.matches(text)) {
-        if (text.length !in 2..8) return NicknameRule.Length
-        return NicknameRule.IllegalChar
-    }
-    if (forbiddenWords.any { text.contains(it, ignoreCase = true) }) {
-        return NicknameRule.ForbiddenWord
-    }
-    return NicknameRule.Ok
-}
-
-private sealed interface NicknameRule {
-    data object Empty : NicknameRule
-    data object Length : NicknameRule
-    data object IllegalChar : NicknameRule
-    data object ForbiddenWord : NicknameRule
-    data object Ok : NicknameRule
 }

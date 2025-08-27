@@ -34,7 +34,7 @@ class GureumMessagingService : FirebaseMessagingService() {
     // 메시지 수신
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onMessageReceived(message: RemoteMessage) {
-//        if (!Quiet.allow()) return
+        if (!Quiet.allow()) return
 
         PushPayload.from(message.data)?.let { payload ->
             val notification = factory.simpleAlarm(

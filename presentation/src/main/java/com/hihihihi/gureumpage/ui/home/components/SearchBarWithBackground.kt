@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -34,7 +35,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.hihihihi.domain.model.User
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Floating
@@ -55,7 +55,7 @@ fun SearchBarWithBackground(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .height(290.dp),
     ) {
         val maxWidth: Dp = maxWidth
         val maxHeight: Dp = maxHeight
@@ -64,7 +64,7 @@ fun SearchBarWithBackground(
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp), // 배경이 겹쳐질 만큼만 높이
+                .height(290.dp), // 배경이 겹쳐질 만큼만 높이
             contentScale = ContentScale.Crop
         )
 
@@ -72,6 +72,7 @@ fun SearchBarWithBackground(
             Modifier
                 .fillMaxSize()
                 .padding(20.dp)
+                .statusBarsPadding()
         ) {
             Box(
                 modifier = Modifier
@@ -154,8 +155,9 @@ fun SearchBarWithBackground(
             modifier = Modifier
                 .offset(
                     x = maxWidth * 0.6f, // 오른쪽 비율 위치
-                    y = maxHeight * 0.3f // 아래 비율 위치
+                    y = maxHeight * 0.25f // 아래 비율 위치
                 )
+                .statusBarsPadding()
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_cloud_reading),

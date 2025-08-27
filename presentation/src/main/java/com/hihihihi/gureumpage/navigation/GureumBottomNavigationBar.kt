@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -85,7 +86,24 @@ fun GureumBottomNavBar(navController: NavHostController) {
                 selected = isSelected,
                 label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
                 onClick = {
-                    if (currentRoute != item.route) {
+
+                    if (currentRoute == item.route) return@NavigationBarItem
+
+                    if (item.route == NavigationRoute.Home.route) {
+                        val popped = navController.popBackStack(
+                            NavigationRoute.Home.route,
+                            inclusive = false
+                        )
+                        if (!popped) {
+                            navController.navigate(NavigationRoute.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    } else {
                         navController.navigate(item.route) {
                             popUpTo(NavigationRoute.Home.route) {
                                 saveState = true
