@@ -182,7 +182,7 @@ fun SplashView(
                 style = GureumTypography.displayMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = GureumTheme.colors.gray900,
+                color = GureumTheme.colors.white,
                 modifier = Modifier
                     .offset(y = offsetY)
                     .graphicsLayer { this.alpha = alpha }

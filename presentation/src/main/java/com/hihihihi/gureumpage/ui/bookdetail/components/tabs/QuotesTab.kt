@@ -52,10 +52,14 @@ fun QuotesTab(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Semi16Text("아직 등록한 필사가 없어요.")
+            Semi16Text(
+                "아직 등록한 필사가 없어요.",
+                color = GureumTheme.colors.gray500,
+            )
             Spacer(Modifier.height(16.dp))
             Medi14Text(
                 "필사 추가를 통해\n마음에 드는 문장을 남겨보세요!",
+                color = GureumTheme.colors.gray400,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
