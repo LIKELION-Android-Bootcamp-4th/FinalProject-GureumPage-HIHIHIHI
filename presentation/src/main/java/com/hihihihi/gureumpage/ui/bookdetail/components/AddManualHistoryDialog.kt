@@ -38,10 +38,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
+import com.hihihihi.gureumpage.designsystem.components.GureumBetweenDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumClickEventTextField
-import com.hihihihi.gureumpage.designsystem.components.GureumPastToTodayDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
@@ -61,6 +61,7 @@ import java.time.format.DateTimeFormatter
 fun AddManualHistoryDialog(
     currentPage: Int,
     lastPage: Int,
+    startDate: LocalDateTime?,
     onDismiss: () -> Unit,
     onSave: (
         date: LocalDateTime,
@@ -295,7 +296,10 @@ fun AddManualHistoryDialog(
         }
 
         if (showDatePicker) {
-            GureumPastToTodayDatePicker(
+            GureumBetweenDatePicker(
+                isSelectingStart = false,
+                startDate = startDate, // TODO 책 읽기 시작 날짜 입력
+                endDate = null,
                 onDismiss = { showDatePicker = false },
                 onConfirm = { millis ->
                     val localDate = Instant.ofEpochMilli(millis)
