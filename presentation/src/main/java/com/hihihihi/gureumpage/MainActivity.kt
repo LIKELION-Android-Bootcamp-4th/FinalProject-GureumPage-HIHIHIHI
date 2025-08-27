@@ -195,7 +195,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun routeWidgetUri(uri: Uri): Boolean {
-        if(FirebaseAuth.getInstance().currentUser == null) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
             _navController?.navigate(NavigationRoute.Splash.route) {
                 popUpTo(0) { inclusive = true }
             }
@@ -212,10 +212,7 @@ class MainActivity : ComponentActivity() {
                         bookId = it,
                         showAddManualRecord = true
                     )
-
-                    _navController?.navigate(route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                    }
+                    navigateFromWidget(route)
                 }
                 return true
             }
@@ -224,9 +221,13 @@ class MainActivity : ComponentActivity() {
             uri.toString().matches(Regex("gureumpage://app/book/timer/[^/?]+.*")) -> {
                 val bookId = uri.pathSegments.lastOrNull()
 
-                _navController?.navigate(NavigationRoute.Timer.createRoute(
-                    bookId.toString()
-                ))
+                bookId?.let {
+                    val route = NavigationRoute.Timer.createRoute(
+                        userBookId = it,
+                    )
+                    navigateFromWidget(route)
+                }
+
                 return true
             }
 
@@ -234,12 +235,11 @@ class MainActivity : ComponentActivity() {
             uri.toString().matches(Regex("gureumpage://app/book/addQuote/[^/?]+.*")) -> {
                 val bookId = uri.pathSegments.lastOrNull()
                 bookId?.let {
-                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(
+                    val route = NavigationRoute.BookDetail.createRoute(
                         bookId = it,
                         showAddQuote = true
-                    )) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                    }
+                    )
+                    navigateFromWidget(route)
                 }
                 return true
             }
@@ -249,15 +249,45 @@ class MainActivity : ComponentActivity() {
                 val bookId = uri.pathSegments.lastOrNull()
 
                 bookId?.let {
-                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(it)) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                    }
+                    val route = NavigationRoute.BookDetail.createRoute(
+                        bookId = it,
+                    )
+                    navigateFromWidget(route)
                 }
                 return true
             }
 
             else -> {
                 return false
+            }
+        }
+    }
+
+    private fun navigateFromWidget(route: String) {
+        val navController = _navController ?: return
+        val currentRoute = navController.currentBackStackEntry?.destination?.route
+
+        when {
+            currentRoute == NavigationRoute.Splash.route ||
+                    currentRoute == NavigationRoute.Login.route
+                -> {
+                navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                navController.navigate(route){
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                return
+            }
+
+            else -> {
+                navController.navigate(route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
         }
     }
@@ -348,7 +378,7 @@ fun GureumPageApp(
             currentRoute != NavigationRoute.Login.route &&
             currentRoute != NavigationRoute.OnBoarding.route
         ) {
-            val userBookId =  timerRepository.getTimerBookId()
+            val userBookId = timerRepository.getTimerBookId()
 
             navController.navigate(NavigationRoute.Timer.createRoute(userBookId)) {
                 popUpTo(NavigationRoute.Home.route) {
@@ -372,7 +402,8 @@ fun GureumPageApp(
     )
 
     val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
-    val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
+    val authRoutes =
+        remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
 
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
