@@ -52,11 +52,8 @@ fun GureumNavGraph(
                 navArgument("bookId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val bookId = backStackEntry.arguments?.getString("bookId")
             val mindmapId = backStackEntry.arguments?.getString("mindmapId")
-            if (bookId != null && mindmapId != null) {
-                MindMapScreen(bookId = bookId, mindmapId = mindmapId)
-            }
+            mindmapId?.let { MindMapScreen(mindmapId = it) }
         }
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
         composable(NavigationRoute.Library.route) { LibraryScreen(navController) }

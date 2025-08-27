@@ -26,7 +26,6 @@ import kotlin.collections.sortedBy
 
 @Composable
 fun MindMapScreen(
-    bookId: String,
     mindmapId: String,
     viewModel: MindMapViewModel = hiltViewModel(),
 ) {
