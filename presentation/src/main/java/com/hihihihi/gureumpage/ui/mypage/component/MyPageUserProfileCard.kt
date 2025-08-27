@@ -119,12 +119,12 @@ fun MyPageUserProfileCard(
 
             //독서 통계
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatColumn("총 페이지", totalPages)
-                StatColumn("총 권수", totalBooks)
-                StatColumn("총 독서 시간", totalTime)
+                StatColumn("읽은 페이지", totalPages)
+                StatColumn("읽은 책", totalBooks)
+                StatColumn("독서 시간", totalTime)
             }
         }
     }
