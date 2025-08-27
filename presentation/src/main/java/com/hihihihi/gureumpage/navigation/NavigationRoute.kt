@@ -1,5 +1,7 @@
 package com.hihihihi.gureumpage.navigation
 
+import android.util.Log
+
 sealed class NavigationRoute(val route: String) {
     object Splash : NavigationRoute("splash")
     object Home : NavigationRoute("home")
@@ -20,8 +22,16 @@ sealed class NavigationRoute(val route: String) {
     }
 
     object MyPage : NavigationRoute("mypage")
-    object BookDetail : NavigationRoute("bookdetail/{bookId}") {
-        fun createRoute(bookId: String): String = "bookdetail/$bookId"
+    object BookDetail : NavigationRoute("bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}") {
+        fun createRoute(
+            bookId: String,
+            showAddQuote: Boolean = false,
+            showAddManualRecord: Boolean = false
+        ): String {
+            val route = "bookdetail/$bookId?showAddQuote=$showAddQuote&showAddManualRecord=$showAddManualRecord"
+            Log.e("TAG", "createRoute: $route", )
+            return route
+        }
     }
 
     object Withdraw : NavigationRoute("withdraw/{userName}") {

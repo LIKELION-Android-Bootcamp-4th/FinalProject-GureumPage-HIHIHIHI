@@ -197,45 +197,58 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun routeWidgetUri(uri: Uri): Boolean {
-
         Log.d("DeepLink", "routeDeepLink - uri : $uri")
         when {
-            // 책 상세: gureumpage://app/book/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/[^/?]+.*")) -> {
+            // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
+            uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
                 val bookId = uri.pathSegments.lastOrNull()
 
                 bookId?.let {
-                    Log.d("DeepLink", "Route BookDetail: bookId=$bookId")
-                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(it)) {
-                        Log.d("DeepLink", "Routeed BookDetail: bookId=$bookId")
+                    val route = NavigationRoute.BookDetail.createRoute(
+                        bookId = it,
+                        showAddManualRecord = true
+                    )
+
+                    _navController?.navigate(route) {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
                     }
                 }
                 return true
             }
 
-            // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
-                val bookId = uri.pathSegments.lastOrNull()
-                Log.d("DeepLink", "Missed record: bookId=$bookId")
-
-                bookId?.let {
-                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(it))
-                }
-                return true
-            }
-
             // 타이머: gureumpage://app/book/timer/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/timer/[^/?]+.*")) -> {
-                Log.d("DeepLink", "Timer")
-                _navController?.navigate(NavigationRoute.Timer.route)
+                val bookId = uri.pathSegments.lastOrNull()
+
+                _navController?.navigate(NavigationRoute.Timer.createRoute(
+                    bookId.toString()
+                ))
                 return true
             }
 
             // 필사 추가: gureumpage://app/book/addQuote/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/addQuote/[^/?]+.*")) -> {
-                Log.d("DeepLink", "Add quote")
-                _navController?.navigate(NavigationRoute.Quotes.route)
+                val bookId = uri.pathSegments.lastOrNull()
+                bookId?.let {
+                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(
+                        bookId = it,
+                        showAddQuote = true
+                    )) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    }
+                }
+                return true
+            }
+
+            // 책 상세: gureumpage://app/book/{bookId}?from=widget
+            uri.toString().matches(Regex("gureumpage://app/book/[^/?]+.*")) -> {
+                val bookId = uri.pathSegments.lastOrNull()
+
+                bookId?.let {
+                    _navController?.navigate(NavigationRoute.BookDetail.createRoute(it)) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    }
+                }
                 return true
             }
 

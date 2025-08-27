@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
@@ -44,12 +43,9 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.EditQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReviewSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.SetReadingStatusBottomSheet
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
-import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,15 +54,17 @@ fun BookDetailScreen(
     bookId: String,  // 상세 화면에 보여줄 책 ID
     navController: NavHostController,  // 네비게이션 컨트롤러
     snackbarHostState: SnackbarHostState,  // 스낵바 표시 상태
-    viewModel: BookDetailViewModel = hiltViewModel() // Hilt로 주입된 ViewModel
+    viewModel: BookDetailViewModel = hiltViewModel(), // Hilt로 주입된 ViewModel
+    initialShowAddQuote: Boolean = false,
+    initialShowAddManualRecord: Boolean = false
 ) {
     // ViewModel에서 관리하는 UI 상태를 Compose State로 수집
     val uiState by viewModel.uiState.collectAsState()
 
     val context = LocalContext.current
 
-    var showAddQuoteDialog by remember { mutableStateOf(false) }
-    var showAddManualHistoryDialog by remember { mutableStateOf(false) }
+    var showAddQuoteDialog by remember { mutableStateOf(initialShowAddQuote) }
+    var showAddManualHistoryDialog by remember { mutableStateOf(initialShowAddManualRecord) }
     var showReadingStatusSheet by remember { mutableStateOf(false) }
 
     var showEditQuoteDialog by remember { mutableStateOf<Pair<String, Quote>?>(null) }
@@ -83,7 +81,8 @@ fun BookDetailScreen(
             userBook.status == ReadingStatus.READING &&
             userBook.currentPage >= userBook.totalPage &&
             userBook.currentPage > 0 &&
-            userBook.totalPage > 0) {
+            userBook.totalPage > 0
+        ) {
             showCompletionDialog = true
         }
     }
@@ -147,7 +146,8 @@ fun BookDetailScreen(
                         )
 
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
-                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog = true
+                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog =
+                            true
                     }
                 }
             )
