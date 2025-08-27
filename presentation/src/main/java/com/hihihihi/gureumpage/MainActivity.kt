@@ -65,6 +65,7 @@ import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
+import com.hihihihi.gureumpage.designsystem.components.TimerRunningDialog
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.navigation.BottomNavItem
@@ -74,6 +75,8 @@ import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.notification.common.Channels
 import com.hihihihi.gureumpage.ui.timer.FloatingTimerService
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
+import com.hihihihi.gureumpage.ui.timer.TimerRepository
+import com.hihihihi.gureumpage.ui.timer.TimerSharedState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,6 +99,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Inject
+    lateinit var timerRepository: TimerRepository
+
     private var _navController: NavHostController? = null
     private var pendingDeepLink: Intent? = null
 
@@ -112,6 +118,8 @@ class MainActivity : ComponentActivity() {
 
             val showNetworkWarning by viewModel.showNetworkWarning.collectAsState()
             val currentTheme by viewModel.theme.collectAsState()
+
+            val isTimerRunning by timerRepository.isTimerRunning.collectAsState()
 
             val isDark = currentTheme != GureumThemeType.LIGHT
             val window = (LocalContext.current as Activity).window
@@ -134,7 +142,8 @@ class MainActivity : ComponentActivity() {
 
                 // 보류분 처리도 동일 정책
                 pendingDeepLink?.let { pending ->
-                    val handled = routeIfWidgetDeepLink(pending) || routeIfNotificationDeepLink(pending)
+                    val handled =
+                        routeIfWidgetDeepLink(pending) || routeIfNotificationDeepLink(pending)
                     pendingDeepLink = null
                     if (handled) return@LaunchedEffect
                 }
@@ -143,7 +152,12 @@ class MainActivity : ComponentActivity() {
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(darkTheme = isDark) {
                 Surface(modifier = Modifier.fillMaxSize(), color = GureumTheme.colors.background) {
-                    GureumPageApp(navController, initIntent)
+                    GureumPageApp(
+                        navController,
+                        initIntent,
+                        isTimerRunning,
+                        timerRepository
+                    )
 
                     if (showNetworkWarning) {
                         NetworkWarningBanner(
@@ -293,7 +307,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
+fun GureumPageApp(
+    navController: NavHostController,
+    initIntent: Intent,
+    isTimerRunning: Boolean,
+    timerRepository: TimerRepository
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
@@ -301,6 +320,26 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     var lastBackMillis by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    LaunchedEffect(currentRoute, isTimerRunning) {
+        if (isTimerRunning &&
+            currentRoute != null &&
+            !currentRoute.startsWith(NavigationRoute.Timer.route) &&
+            currentRoute != NavigationRoute.Splash.route &&
+            currentRoute != NavigationRoute.Login.route &&
+            currentRoute != NavigationRoute.OnBoarding.route
+        ) {
+            val userBookId =  timerRepository.getTimerBookId()
+
+            navController.navigate(NavigationRoute.Timer.createRoute(userBookId)) {
+                popUpTo(NavigationRoute.Home.route) {
+                    inclusive = false
+                    saveState = false
+                }
+                launchSingleTop = true
+            }
+        }
+    }
 
     val hideBottomBarRoutes = listOf(
         NavigationRoute.Login.route,
@@ -314,7 +353,8 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
     )
 
     val bottomRoutes = remember { BottomNavItem.items.map { it.route }.toSet() }
-    val authRoutes = remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
+    val authRoutes =
+        remember { setOf(NavigationRoute.Login.route, NavigationRoute.OnBoarding.route) }
 
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
@@ -360,7 +400,9 @@ fun GureumPageApp(navController: NavHostController, initIntent: Intent) {
                     // 항상 홈을 거쳐 종료하기
                     if (currentRoute != NavigationRoute.Home.route) {
                         navController.navigate(NavigationRoute.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
                             launchSingleTop = true
                             restoreState = true
                         }
