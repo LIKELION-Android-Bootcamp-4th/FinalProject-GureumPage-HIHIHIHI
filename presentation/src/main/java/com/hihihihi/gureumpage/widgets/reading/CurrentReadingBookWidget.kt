@@ -180,14 +180,14 @@ private fun loadWidgetImageOrFallback(context: Context, url: String?): ImageProv
             if (imageFile.exists()) {
                 val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
                 if (bitmap != null) ImageProvider(bitmap)
-                else ImageProvider(R.drawable.ic_book_outline)
+                else ImageProvider(R.drawable.ic_holder_book)
             } else {
-                ImageProvider(R.drawable.ic_book_outline)
+                ImageProvider(R.drawable.ic_holder_book)
             }
         } catch (_: Exception) {
-            ImageProvider(R.drawable.ic_book_outline)
+            ImageProvider(R.drawable.ic_holder_book)
         }
     } else {
-        ImageProvider(R.drawable.ic_book_outline)
+        ImageProvider(R.drawable.ic_holder_book)
     }
 }
