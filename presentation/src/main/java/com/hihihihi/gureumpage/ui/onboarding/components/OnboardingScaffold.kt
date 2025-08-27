@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ fun OnboardingScaffold(
                     colors = listOf(GureumTheme.colors.background, Color(0xFF00153F))
                 )
             )
+            .statusBarsPadding()
     ) {
         Box(
             modifier = Modifier
