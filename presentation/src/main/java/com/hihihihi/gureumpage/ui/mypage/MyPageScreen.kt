@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -35,14 +34,12 @@ import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSe
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageMenuSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.gureumpage.ui.mypage.component.NicknameChangeDialog
 import kotlinx.coroutines.flow.collectLatest
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +48,6 @@ fun MyPageScreen(
     viewModel: MypageViewModel = hiltViewModel()
 ) {
     val colors = GureumTheme.colors
-    val typography = GureumTypography
-    val readingStats by viewModel.readingStats.collectAsState()
     val state by viewModel.uiState.collectAsState()
 
     var showNicknameDialog by rememberSaveable { mutableStateOf(false) } // 다이얼로그 상태
@@ -72,10 +67,6 @@ fun MyPageScreen(
         }
     }
 
-    val timeText = remember(state.totalReadMinutes) {
-        formatSecondsToReadableTimeWithoutSecond(state.totalReadMinutes * 60)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,7 +76,7 @@ fun MyPageScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         when {
-            state.loading -> Box(
+            state.isLoading -> Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 32.dp),
@@ -94,21 +85,26 @@ fun MyPageScreen(
                 CircularProgressIndicator()
             }
 
-            state.error != null -> Text(
-                text = "오류: ${state.error}",
+            state.errorMessage != null -> Text(
+                text = "오류: ${state.errorMessage}",
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            else -> {
+            state.myPageData != null -> {
+                val data = state.myPageData!!
+                val timeText = remember(data.totalReadMinutes) {
+                    formatSecondsToReadableTimeWithoutSecond(data.totalReadMinutes * 60)
+                }
                 //프로필 카드 ( 연필 아이콘 클릭 -> 다이얼로그 오픈)
                 MyPageUserProfileCard(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     title = "안녕하세요!",
-                    badge = state.appellation.ifBlank { "칭호 없음" },
-                    nickname = "${state.nickname.ifBlank { "닉네임 없음" }}님",
-                    totalPages = "${state.totalPages}쪽",
-                    totalBooks = "${state.totalBooks}권",
+                    badge = data.user?.appellation?.ifBlank { "칭호 없음" } ?: "칭호 없음",
+                    nickname = "${data.user?.nickname?.ifBlank { "닉네임 없음" } ?: "닉네임 없음"}님",
+                    provider = data.user?.provider ?: "",
+                    totalPages = "${data.totalPages}쪽",
+                    totalBooks = "${data.totalBooks}권",
                     totalTime = timeText,
                     onEditNicknameClick = { showNicknameDialog = true }
                 )
@@ -117,7 +113,7 @@ fun MyPageScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        MyPageCalenderSection(stats = readingStats)
+        MyPageCalenderSection(stats = state.myPageData?.readingStats ?: emptyMap())
 
         Spacer(modifier = Modifier.height(28.dp))
 
@@ -129,7 +125,11 @@ fun MyPageScreen(
         MyPageMenuSection(
             onLogoutClick = { showLogoutDialog = true },
             onWithDrawClick = {
-                navController.navigate(NavigationRoute.Withdraw.createRoute(state.nickname))
+                navController.navigate(
+                    NavigationRoute.Withdraw.createRoute(
+                        state.myPageData?.user?.nickname ?: ""
+                    )
+                )
             }
         )
     }
@@ -137,7 +137,7 @@ fun MyPageScreen(
     //닉네임 변경 다이얼로그
     if (showNicknameDialog) {
         NicknameChangeDialog(
-            currentNickname = state.nickname,
+            currentNickname = state.myPageData?.user?.nickname ?: "",
             onDismiss = { showNicknameDialog = false },
             onSave = { new ->
                 viewModel.changeNickname(new)
@@ -146,15 +146,12 @@ fun MyPageScreen(
         )
     }
 
-    if(showLogoutDialog){
+    if (showLogoutDialog) {
         AlertDialog(
-            onDismissRequest = { showLogoutDialog  = false},
-            title = {
-                Semi16Text("로그아웃")
-            },
-            text = {
-                Medi14Text("정말 로그아웃 하실건가요?")
-            },
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Semi16Text("로그아웃") },
+            text = { Medi14Text("정말 로그아웃 하실건가요?") },
+            containerColor = GureumTheme.colors.card,
             confirmButton = {
                 Medi14Text(
                     text = "로그아웃",

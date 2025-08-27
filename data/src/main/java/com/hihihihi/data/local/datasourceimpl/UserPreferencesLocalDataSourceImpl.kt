@@ -16,6 +16,7 @@ private val Context.userPrefsDataStore by preferencesDataStore(name = "user_pref
 object PrefKeys {
     val NICKNAME = stringPreferencesKey("nickname")
     val THEME = stringPreferencesKey("theme")
+    val LAST_PROVIDER = stringPreferencesKey("last_provider")
 
     fun getOnboardingCompleteKey(userId: String) = booleanPreferencesKey("onboarding_complete_$userId")
 }
@@ -35,6 +36,9 @@ class UserPreferencesLocalDataSourceImpl @Inject constructor(
             }
         }
 
+    override val lastProvider: Flow<String> =
+        context.userPrefsDataStore.data.map { it[PrefKeys.LAST_PROVIDER] ?: "" }
+
     override fun getOnboardingComplete(userId: String): Flow<Boolean> =
         context.userPrefsDataStore.data.map {
             it[PrefKeys.getOnboardingCompleteKey(userId)] ?: false
@@ -50,6 +54,10 @@ class UserPreferencesLocalDataSourceImpl @Inject constructor(
 
     override suspend fun setTheme(theme: GureumThemeType) {
         context.userPrefsDataStore.edit { it[PrefKeys.THEME] = theme.name }
+    }
+
+    override suspend fun setLastProvider(provider: String) {
+        context.userPrefsDataStore.edit { it[PrefKeys.LAST_PROVIDER] = provider }
     }
 
     override suspend fun clearAll() {

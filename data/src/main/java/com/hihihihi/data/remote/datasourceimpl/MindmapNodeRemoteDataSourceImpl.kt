@@ -1,5 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.hihihihi.domain.operation.NodeEditOperation
@@ -18,6 +20,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override fun observe(mindmapId: String): Flow<List<MindmapNodeDto>> = callbackFlow {
         val collection = nodesCollection()
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .addSnapshotListener { snap, err ->
@@ -35,6 +38,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun loadNodes(mindmapId: String): List<MindmapNodeDto> {
         val snap = nodesCollection()
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .get().await()
@@ -45,6 +49,9 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
         mindmapId: String,
         operations: List<NodeEditOperation>
     ): Result<Unit> = runCatching {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("사용자가 로그인되지 않았습니다")
+
         // 파이어스토어 배치가 500 쓰기 제한있음
         operations.chunked(450).forEach { chunk ->
             firebase.runBatch { batch ->
@@ -55,7 +62,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                             else nodesCollection().document(operation.node.mindmapNodeId)
 
                             val dto = operation.node.copy(
-                                userId = operation.node.userId,
+                                userId = currentUserId,
                                 mindmapId = mindmapId,
                                 mindmapNodeId = document.id,
                                 deleted = false
@@ -81,7 +88,10 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                             requireNotNull(operation.node.mindmapNodeId.takeIf { it.isNotBlank() }) { "노드 아이디가 필요합니다" }
                             batch.set(
                                 nodesCollection().document(operation.node.mindmapNodeId),
-                                operation.node.copy(mindmapId = mindmapId),
+                                operation.node.copy(
+                                    mindmapId = mindmapId,
+                                    userId = currentUserId
+                                ),
                                 SetOptions.merge()
                             )
                         }

@@ -1,8 +1,11 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,16 +34,19 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddManualHistoryDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookCompletionDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookStatisticsCard
+import com.hihihihi.gureumpage.ui.bookdetail.components.EditQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReviewSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.SetReadingStatusBottomSheet
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
-import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
+import com.hihihihi.gureumpage.ui.home.components.ErrorView
+import com.hihihihi.gureumpage.ui.home.components.LoadingView
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,17 +54,37 @@ fun BookDetailScreen(
     bookId: String,  // 상세 화면에 보여줄 책 ID
     navController: NavHostController,  // 네비게이션 컨트롤러
     snackbarHostState: SnackbarHostState,  // 스낵바 표시 상태
-    viewModel: BookDetailViewModel = hiltViewModel() // Hilt로 주입된 ViewModel
+    viewModel: BookDetailViewModel = hiltViewModel(), // Hilt로 주입된 ViewModel
+    initialShowAddQuote: Boolean = false,
+    initialShowAddManualRecord: Boolean = false
 ) {
     // ViewModel에서 관리하는 UI 상태를 Compose State로 수집
     val uiState by viewModel.uiState.collectAsState()
 
-    var showAddQuoteDialog by remember { mutableStateOf(false) }
-    var showAddManualHistoryDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    var showAddQuoteDialog by remember { mutableStateOf(initialShowAddQuote) }
+    var showAddManualHistoryDialog by remember { mutableStateOf(initialShowAddManualRecord) }
     var showReadingStatusSheet by remember { mutableStateOf(false) }
+
+    var showEditQuoteDialog by remember { mutableStateOf<Pair<String, Quote>?>(null) }
+
+    var showCompletionDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(bookId) {
         viewModel.loadUserBookDetails(bookId)
+    }
+
+    LaunchedEffect(uiState.userBook) {
+        val userBook = uiState.userBook
+        if (userBook != null &&
+            userBook.status == ReadingStatus.READING &&
+            userBook.currentPage >= userBook.totalPage &&
+            userBook.currentPage > 0 &&
+            userBook.totalPage > 0
+        ) {
+            showCompletionDialog = true
+        }
     }
 
     // addQuoteState가 변할 때마다 실행되는 효과
@@ -66,7 +93,7 @@ fun BookDetailScreen(
         when {
             state.isSuccess -> {
                 // 성공 스낵바 표시
-                snackbarHostState.showSnackbar("필사 추가 성공!")
+                Toast.makeText(context, "필사가 추가되었습니다!", Toast.LENGTH_SHORT).show()
 
                 // 상태 초기화 (중복 알림 방지)
                 viewModel.resetAddQuoteState()
@@ -74,7 +101,7 @@ fun BookDetailScreen(
 
             state.error != null -> {
                 // 에러 메시지 스낵바 표시
-                snackbarHostState.showSnackbar("에러: ${state.error}")
+                Toast.makeText(context, "에러: ${state.error}", Toast.LENGTH_SHORT).show()
 
                 // 상태 초기화
                 viewModel.resetAddQuoteState()
@@ -84,11 +111,11 @@ fun BookDetailScreen(
 
     when {
         uiState.isLoading -> {
-            // TODO 로딩 UI
+            LoadingView()
         }
 
         uiState.errorMessage != null -> {
-            // TODO 에러 UI
+            ErrorView(message = uiState.errorMessage!!)
         }
 
         uiState.userBook != null -> {
@@ -101,6 +128,13 @@ fun BookDetailScreen(
                 onReviewSave = { rating, review ->
                     viewModel.patchReview(rating, review)
                 },
+                onQuoteEdit = { quoteId ->
+                    val quote = uiState.quotes.find { it.id == quoteId }
+                    if (quote != null) {
+                        showEditQuoteDialog = quoteId to quote
+                    }
+                },
+                onQuoteDelete = { id -> viewModel.deleteQuote(id) },
                 onEvent = { event ->
                     when (event) {
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
@@ -112,7 +146,8 @@ fun BookDetailScreen(
                         )
 
                         BookDetailFabEvent.ShowAddQuoteDialog -> showAddQuoteDialog = true
-                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog = true
+                        BookDetailFabEvent.ShowAddManualHistoryDialog -> showAddManualHistoryDialog =
+                            true
                     }
                 }
             )
@@ -121,6 +156,22 @@ fun BookDetailScreen(
         else -> {
             // TODO 빈 화면 또는 초기 화면
         }
+    }
+
+    showEditQuoteDialog?.let { (quoteId, quote) ->
+        EditQuoteDialog(
+            initialContent = quote.content,
+            initialPageNumber = quote.pageNumber,
+            onDismiss = { showEditQuoteDialog = null },
+            onSave = { newContent, newPageNumber ->
+                viewModel.updateQuote(
+                    quoteId = quoteId,
+                    newContent = newContent,
+                    newPageNumber = newPageNumber
+                )
+                showEditQuoteDialog = null
+            }
+        )
     }
 
     if (showAddQuoteDialog) {
@@ -166,6 +217,33 @@ fun BookDetailScreen(
             }
         )
     }
+
+    if (showCompletionDialog && uiState.userBook != null) {
+        BookCompletionDialog(
+            userBook = uiState.userBook!!,
+            onConfirm = {
+                val userBook = uiState.userBook!!
+
+                val endDate: LocalDateTime = uiState.histories
+                    .mapNotNull { it.endTime }
+                    .maxOrNull()
+                    ?: LocalDateTime.now()
+
+                viewModel.patchUserBook(
+                    status = ReadingStatus.FINISHED,
+                    page = userBook.totalPage,
+                    startDate = userBook.startDate,
+                    endDate = endDate
+                )
+                showCompletionDialog = false
+
+                Toast.makeText(context, "🎉 완독을 축하드립니다!", Toast.LENGTH_LONG).show()
+            },
+            onDismiss = {
+                showCompletionDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -176,7 +254,10 @@ fun BookDetailContent(
     bookStatistic: BookStatistic,
     onReadingStatusClick: () -> Unit,
     onEvent: (BookDetailFabEvent) -> Unit = {},
-    onReviewSave: (Double, String) -> Unit = { _, _ -> }
+    onReviewSave: (Double, String) -> Unit = { _, _ -> },
+    onQuoteEdit: (String) -> Unit = {},
+    onQuoteDelete: (String) -> Unit = {}
+
 ) {
     val scrollState = rememberLazyListState()
 
@@ -203,7 +284,16 @@ fun BookDetailContent(
                     )
                 }
             }
-            item { BookDetailTabs(userBook, quotes, histories) }
+            item {
+                BookDetailTabs(
+                    userBook = userBook,
+                    quotes = quotes,
+                    histories = histories,
+                    onQuoteEdit = onQuoteEdit,
+                    onQuoteDelete = onQuoteDelete
+                )
+                Spacer(Modifier.height(50.dp))
+            }
         }
 
         // FAB
@@ -212,6 +302,7 @@ fun BookDetailContent(
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .padding(bottom = 48.dp)
         )
     }
 }
@@ -238,7 +329,7 @@ private fun BookDetailPreview() {
                 item { BookSimpleInfoSection(dummyUserBook, {}) }
                 item { ReadingProgressSection(dummyUserBook) }
                 item { BookStatisticsCard(BookStatistic("", "", "")) }
-                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
+//                item { BookDetailTabs(dummyUserBook, dummyQuotes, dummyRecords) }
             }
         }
     }

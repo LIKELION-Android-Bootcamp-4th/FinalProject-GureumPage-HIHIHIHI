@@ -132,7 +132,7 @@ fun LoginScreen(
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_google,
                     backgroundColor = Color.White,
-                    enabled = !uiState.isLoading,
+                    isLastProvider = uiState.lastProvider == "google",
                     onClick = {
                         viewModel.googleLogin(context, googleLauncher)
                     }
@@ -145,8 +145,7 @@ fun LoginScreen(
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_kakao,
                     backgroundColor = Color(0xFFFEE500),
-                    enabled = !uiState.isLoading,
-
+                    isLastProvider = uiState.lastProvider == "kakao",
                     onClick = {
                         viewModel.kakaoLogin(navController)
                     }
@@ -159,7 +158,7 @@ fun LoginScreen(
                     textColor = Color.White,
                     iconResId = R.drawable.ic_naver,
                     backgroundColor = Color(0xFF03C75A),
-                    enabled = !uiState.isLoading,
+                    isLastProvider = uiState.lastProvider == "naver",
                     onClick = {
                         activity?.let { viewModel.naverLogin(it, navController) }
                     }

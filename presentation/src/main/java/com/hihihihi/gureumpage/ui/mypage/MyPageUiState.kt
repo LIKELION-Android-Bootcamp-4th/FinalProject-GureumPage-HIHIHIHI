@@ -1,11 +1,9 @@
 package com.hihihihi.gureumpage.ui.mypage
 
+import com.hihihihi.domain.usecase.user.MyPageData
+
 data class MyPageUiState(
-    val loading: Boolean = true,
-    val error: String? = null,
-    val nickname: String = "",
-    val appellation: String = "",
-    val totalPages: Int = 0,
-    val totalBooks: Int = 0,
-    val totalReadMinutes: Int = 0,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+    val myPageData: MyPageData? = null
 )

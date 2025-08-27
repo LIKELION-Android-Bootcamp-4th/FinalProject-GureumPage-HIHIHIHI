@@ -1,7 +1,9 @@
 package com.hihihihi.gureumpage.ui.mindmap
 
+import android.content.res.ColorStateList
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,8 +18,11 @@ import com.gyso.treeview.line.DashLine
 import com.gyso.treeview.model.NodeModel
 import com.gyso.treeview.model.TreeModel
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hihihihi.domain.model.MindmapNode
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.ActivityMindmapBinding
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.mindmap.mapper.toUi
@@ -25,7 +30,6 @@ import kotlin.collections.sortedBy
 
 @Composable
 fun MindMapScreen(
-    bookId: String,
     mindmapId: String,
     viewModel: MindMapViewModel = hiltViewModel(),
 ) {
@@ -33,6 +37,16 @@ fun MindMapScreen(
     val adapter = remember { MindMapAdapter(context) }
     val nodes by viewModel.nodes.collectAsState() // 스냅샷
     val lineColor = GureumTheme.colors.gray200.toArgb()
+
+    val thumbColors = ColorStateList(
+        arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
+        intArrayOf(ContextCompat.getColor(context, R.color.primary), ContextCompat.getColor(context, R.color.gray300))
+    )
+
+    val trackColors = ColorStateList(
+        arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
+        intArrayOf(ContextCompat.getColor(context, R.color.primary50), ContextCompat.getColor(context, R.color.gray200))
+    )
 
     LaunchedEffect(mindmapId) {
         viewModel.load(mindmapId)
@@ -49,7 +63,9 @@ fun MindMapScreen(
 
     AndroidViewBinding(
         factory = ActivityMindmapBinding::inflate,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
     ) {
         if (baseTreeView.adapter !is MindMapAdapter) {
             baseTreeView.adapter = adapter
@@ -64,6 +80,14 @@ fun MindMapScreen(
             adapter.setEditor(baseTreeView.editor) // 에디터 탑재
         }
         adapter.mindmapId = mindmapId
+
+        adapter.onHistoryChanged = { canUndo, canRedo ->
+            val enabled = ContextCompat.getColor(context, R.color.primary)
+            val disabled = ContextCompat.getColor(context, R.color.gray300)
+
+            ImageViewCompat.setImageTintList(btnUndo, ColorStateList.valueOf(if (canUndo) enabled else disabled))
+            ImageViewCompat.setImageTintList(btnRedo, ColorStateList.valueOf(if (canRedo) enabled else disabled))
+        }
 
         // 편집 중이 아닐 때만 원격 스냅샷으로 트리 구성
         if (!viewModel.editing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
@@ -81,7 +105,8 @@ fun MindMapScreen(
                 }
             }
             attach(root.mindmapNodeId)
-            adapter.setTreeModel(model)
+            adapter.setTreeModelAndReset(model)
+            adapter.onHistoryChanged?.invoke(false, false)
         }
 
         // 편집 모드일 때 수정, 삭제 버튼 이벤트 처리
@@ -89,9 +114,7 @@ fun MindMapScreen(
             when (action) {
                 MindMapAdapter.NodeAction.EDIT -> {
                     adapter.showAddNodeDialog("노드 수정", rootFrame.context, node) { newNode ->
-
-                        node.value = newNode
-                        adapter.notifyDataSetChange()
+                        adapter.performUpdate(node, newNode)
                     }
                 }
 
@@ -104,15 +127,19 @@ fun MindMapScreen(
         btnUndo.setOnClickListener { adapter.undo() }
         btnRedo.setOnClickListener { adapter.redo() }
 
-        switchEditMode.setOnCheckedChangeListener { buttonView, isChecked ->
+        switchEditMode.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) viewModel.startEdit() else viewModel.endEdit(
                 adapter.asDomainList(mindmapId),
                 autoSave = true
             )
+
             adapter.changeEditMode(isChecked)
             btnRedo.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
             btnUndo.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
         }
+
+        switchEditMode.thumbTintList = thumbColors
+        switchEditMode.trackTintList = trackColors
     }
 }
 

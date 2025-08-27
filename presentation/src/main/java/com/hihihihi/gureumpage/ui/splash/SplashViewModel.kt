@@ -1,22 +1,22 @@
 package com.hihihihi.gureumpage.ui.splash
 
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
+import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.gureumpage.common.utils.NetworkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase,
+    private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
+    private val getUserUseCase: GetUserUseCase,
     private val networkManager: NetworkManager
 ) : ViewModel() {
 
@@ -39,13 +39,13 @@ class SplashViewModel @Inject constructor(
                 loadingMessage = "구름한장을 시작하는 중...",
                 progress = 0.2f
             )
-            delay(1000)
+            delay(400)
 
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름이가 네트워크 연결을 확인하는중...",
                 progress = 0.4f
             )
-            delay(500)
+            delay(400)
 
             if (!networkManager.checkCurrentNetwork()) {
                 _uiState.value = _uiState.value.copy(
@@ -56,30 +56,35 @@ class SplashViewModel @Inject constructor(
                 return@launch
             }
 
+            val user = auth.currentUser
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름이가 사용자 정보를 확인하는중...",
                 progress = 0.7f
             )
-            delay(500)
+            delay(400)
 
-            val user = auth.currentUser
             if (user == null) {
                 _uiState.value = _uiState.value.copy(
                     loadingMessage = "로그인이 필요해요",
                     navTarget = NavTarget.Login,
-                    progress = 1f,
+                    progress = 0.99f,
                     isLoading = false
                 )
             } else {
-                val done = getOnboardingCompleteUseCase(user.uid).firstOrNull() ?: false
+                val profile = getUserUseCase(user.uid)
+                val hasNickname = !profile?.nickname.isNullOrBlank()
+                if (hasNickname) setOnboardingCompleteUseCase(user.uid, true)
                 _uiState.value = _uiState.value.copy(
-                    loadingMessage = if (done) "구름이와 홈으로 이동중" else "처음 오셨네요! 구름한장을 소개해드릴게요",
+                    loadingMessage = if (hasNickname) "구름이와 홈으로 이동중" else "처음 오셨네요! 구름한장을 소개해드릴게요",
+                    progress = 0.99f,
+                )
+                delay(500)
+                _uiState.value = _uiState.value.copy(
                     progress = 1f,
                     isLoading = false,
-                    navTarget = if (done) NavTarget.Home else NavTarget.Onboarding
+                    navTarget = if (hasNickname) NavTarget.Home else NavTarget.Onboarding
                 )
             }
-            delay(500)
         }
     }
 }

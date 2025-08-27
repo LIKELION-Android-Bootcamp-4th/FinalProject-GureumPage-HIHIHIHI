@@ -1,13 +1,15 @@
 package com.hihihihi.gureumpage.ui.timer
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.History
-import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
-import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBookByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -15,6 +17,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -22,56 +25,104 @@ import java.time.LocalDateTime
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
-    private val getUserBooksByStatus: GetUserBooksByStatusUseCase,
+    private val getUserBook: GetUserBookByIdUseCase,
     private val addHistory: AddHistoryUseCase,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val timerRepository: TimerRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState
 
-    //스톱워치
+    val sharedTimerState = timerRepository.timerState
+
     private var stopwatchJob: Job? = null
-
     private var booksJob: Job? = null
-
-    private val currentUid: String?
-        get() = auth.currentUser?.uid
 
     private var didShowCountdown: Boolean = false
 
-    fun bind(userBookId: String) {
-        val uid = currentUid ?: return
-        booksJob?.cancel()
-        didShowCountdown = false
-
-        booksJob = viewModelScope.launch {
-            // status == READING 전체를 구독하되, 해당 ID 한 권만 반영
-            getUserBooksByStatus(uid, ReadingStatus.READING).collectLatest { books ->
-                val pick = books.firstOrNull { it.userBookId == userBookId }
-
-                if (pick != null) {
-                    _uiState.update {
-                        it.copy(
-                            bookTitle = pick.title,
-                            author = pick.author,
-                            bookImageUrl = pick.imageUrl,
-                            startPage = pick.currentPage,
-                            totalPage = pick.totalPage
-                        )
-                    }
-                } else {
-                    // 선택한 책을 찾지 못한 경우(상태 변경/삭제 등) 안전 초기화
-                    _uiState.update {
-                        it.copy(
-                            bookTitle = "",
-                            author = "",
-                            bookImageUrl = "",
-                            startPage = null,
-                            totalPage = null
-                        )
-                    }
+    init {
+        viewModelScope.launch {
+            timerRepository.timerState.collectLatest { shared ->
+                _uiState.update {
+                    it.copy(
+                        elapsedSec = shared.elapsedSec,
+                        isRunning = shared.isRunning,
+                        bookTitle = shared.bookInfo?.title ?: "",
+                        author = shared.bookInfo?.author ?: "",
+                        bookImageUrl = shared.bookInfo?.imageUrl ?: "",
+                    )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            timerRepository.floatingActions.collectLatest { action ->
+                handleFloatingAction(action)
+            }
+        }
+    }
+
+    private fun handleFloatingAction(action: FloatingAction) {
+        when (action) {
+            is FloatingAction.ToggleTimer -> {
+                toggleRun()
+            }
+
+            is FloatingAction.OpenMemoDialog -> {
+                _uiState.update { it.copy(showMemoDialog = true) }
+            }
+
+            is FloatingAction.ReturnToApp -> {
+            }
+        }
+    }
+
+    fun resumeIfNeeded() {
+        val state = _uiState.value
+        if (state.isRunning && (stopwatchJob?.isActive != true)) {
+            startStopwatch()
+        }
+    }
+
+    fun ensureFloatingWindowClosed(context: Context) {
+        val intent = Intent(context, FloatingTimerService::class.java)
+        context.stopService(intent)
+    }
+
+    fun showMemoDialog() {
+        _uiState.update { it.copy(showMemoDialog = true) }
+    }
+
+    fun dismissMemoDialog() {
+        _uiState.update { it.copy(showMemoDialog = false) }
+    }
+
+    fun bind(userBookId: String) {
+        booksJob = viewModelScope.launch {
+            val userBook = getUserBook(userBookId).first()
+
+            _uiState.update {
+                it.copy(
+                    bookTitle = userBook.title,
+                    author = userBook.author,
+                    bookImageUrl = userBook.imageUrl,
+                    startPage = userBook.currentPage,
+                    totalPage = userBook.totalPage
+                )
+            }
+
+            timerRepository.updateTimerState { shared ->
+                shared.copy(
+                    bookInfo = BookInfo(
+                        title = userBook.title,
+                        author = userBook.author,
+                        imageUrl = userBook.imageUrl
+                    ),
+                    userBookId = userBook.userBookId,
+                    startPage = userBook.currentPage,
+                    totalPage = userBook.totalPage
+                )
             }
         }
     }
@@ -93,7 +144,7 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    fun startWithCountdown() {
+    private fun startWithCountdown() {
         if (stopwatchJob?.isActive == true) return
 
         viewModelScope.launch {
@@ -110,21 +161,26 @@ class TimerViewModel @Inject constructor(
     fun pause() = pauseStopwatch()
 
     private fun startStopwatch() {
-        // 이미 실행 중이면 무시
         if (stopwatchJob?.isActive == true) return
 
         _uiState.update { it.copy(isRunning = true) }
+        timerRepository.updateTimerState { it.copy(isRunning = true) }
 
         stopwatchJob = viewModelScope.launch {
             while (isActive) {
                 delay(1_000L)
-                _uiState.update { it.copy(elapsedSec = it.elapsedSec + 1) }
+                val newSec = _uiState.value.elapsedSec + 1
+
+                _uiState.update { it.copy(elapsedSec = newSec) }
+                timerRepository.updateTimerState { it.copy(elapsedSec = newSec) }
             }
         }
     }
 
     private fun pauseStopwatch() {
         _uiState.update { it.copy(isRunning = false) }
+        timerRepository.updateTimerState { it.copy(isRunning = false) }
+
         stopwatchJob?.cancel()
         stopwatchJob = null
     }
@@ -132,8 +188,23 @@ class TimerViewModel @Inject constructor(
     fun stop() {
         stopwatchJob?.cancel()
         stopwatchJob = null
-        _uiState.update { it.copy(isRunning = false, elapsedSec = 0) }
 
+        _uiState.update { it.copy(isRunning = false, elapsedSec = 0) }
+        timerRepository.updateTimerState { it.copy(isRunning = false, elapsedSec = 0) }
+    }
+
+    fun startFloatingWindowMode(context: Context) {
+        val intent = Intent(context, FloatingTimerService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+    }
+
+    fun stopFloatingWindowMode(context: Context) {
+        val intent = Intent(context, FloatingTimerService::class.java)
+        context.stopService(intent)
     }
 
     fun finishAndSave(userBookId: String?, startPage: Int, endPage: Int) {
@@ -158,16 +229,32 @@ class TimerViewModel @Inject constructor(
             addHistory(history, endPage)
                 .onSuccess {
                     _uiState.update { it.copy(elapsedSec = 0, isRunning = false) }
+                    timerRepository.updateTimerState { it.copy(elapsedSec = 0, isRunning = false) }
                 }
         }
     }
 
     override fun onCleared() {
-//        timerJob?.cancel()
         stopwatchJob?.cancel()
         booksJob?.cancel()
         super.onCleared()
     }
+
+    fun syncWithFloatingWindow() {
+        val currentState = _uiState.value
+        timerRepository.updateTimerState { shared ->
+            shared.copy(
+                isRunning = currentState.isRunning,
+                elapsedSec = currentState.elapsedSec,
+                bookInfo = BookInfo(
+                    title = currentState.bookTitle,
+                    author = currentState.author,
+                    imageUrl = currentState.bookImageUrl
+                )
+            )
+        }
+    }
+}
 
 //    private fun startTimer() {
 //        // 이미 돌고 있으면 무시
@@ -211,4 +298,3 @@ class TimerViewModel @Inject constructor(
 //        timerJob = null
 //        // cancelJobOnly=false일 땐 추가 동작이 필요하면 여기에
 //    }
-}

@@ -1,6 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
@@ -19,6 +20,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
 ) : HistoryRemoteDataSource {
     override fun getHistoriesByUserBookId(userBookId: String): Flow<List<HistoryDto>> = callbackFlow {
         val historiesCollection = firestore.collection("histories")
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("userbook_id", userBookId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -141,6 +143,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
         }
 
         val userBookSnapshot = firestore.collection("user_books")
+            .whereEqualTo("user_id", uid)
             .whereEqualTo(FieldPath.documentId(), historyDto.userBookId)
             .get()
             .await()

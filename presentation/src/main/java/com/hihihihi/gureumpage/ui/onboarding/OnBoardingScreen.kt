@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -32,8 +33,9 @@ fun OnBoardingScreen(
         OnboardingContents(
             steps = steps,
             viewModel = viewModel,
+            navController = navController,
+            onSave = { viewModel.saveOnboardingComplete() },
             onFinish = {
-                viewModel.saveOnboardingComplete()
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
                     launchSingleTop = true
@@ -47,12 +49,22 @@ fun OnBoardingScreen(
 private fun OnboardingContents(
     steps: List<OnboardingStep>,
     viewModel: OnBoardingViewModel,
+    navController: NavHostController,
+    onSave: () -> Unit,
     onFinish: () -> Unit
 ) {
     val pagerState = rememberPagerState { steps.size }
     val scope = rememberCoroutineScope()
 
     val currentStep = steps.getOrNull(pagerState.currentPage) ?: OnboardingStep.Welcome
+
+    BackHandler {
+        if (pagerState.currentPage > 0) {
+            scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+        } else {
+            navController.popBackStack()
+        }
+    }
 
     OnboardingScaffold(
         pagerState = pagerState,
@@ -90,7 +102,8 @@ private fun OnboardingContents(
                 isNextEnabled = viewModel.isNextEnabled(currentStep),
                 onNext = {
                     scope.launch {
-                        if (isLastPage) onFinish()
+                        if (step == OnboardingStep.Theme) onSave()
+                        if (step == OnboardingStep.Finish) onFinish()
                         else pagerState.animateScrollToPage(page + 1)
                     }
                 },

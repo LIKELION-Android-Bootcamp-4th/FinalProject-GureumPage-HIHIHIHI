@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -15,9 +16,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
+
+private const val PAGE_SIZE = 10
+private const val MAX_TOTAL_RESULTS = 200
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -32,23 +37,78 @@ class SearchViewModel @Inject constructor(
     private val currentUid: String
         get() = auth.currentUser!!.uid
 
-
     fun search(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSearching = true)
+            _uiState.value = _uiState.value.copy(
+                query = query,
+                isSearching = true,
+                searchResults = emptyList(),
+                page = 1
+            )
             try {
-                val results = searchBooksUseCase(query)
+                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE)
+                val dedup = results.distinctBy { it.isbn }
+
+                Log.d("SearchVM", "query=$query, results.size=${results.size}")
+
                 _uiState.value = _uiState.value.copy(
-                    searchResults = results,
-                    isSearching = false
+                    searchResults = dedup,
+                    isSearching = false,
+                    hasMore = canLoadMore(dedup.size, 1),
+                    page = 1
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
-                    isSearching = false
+                    isSearching = false,
+                    hasMore = false,
+                    page = 0
                 )
             }
         }
+    }
+
+    fun loadMore() {
+        val state = _uiState.value
+        if (state.isLoadingMore || state.isPaging || !state.hasMore) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingMore = true) }
+
+            try {
+                val nextPage = state.page + 1
+                val newResults =
+                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+
+                val before = state.searchResults
+                val merged = (before + newResults).distinctBy { it.isbn }
+
+                val actuallyGrew = merged.size > before.size
+
+                _uiState.value = state.copy(
+                    searchResults = merged,
+                    page = nextPage,
+                    isLoadingMore = false,
+                    hasMore = canLoadMore(merged.size, nextPage) && actuallyGrew && newResults.isNotEmpty()
+                )
+            } catch (e: Exception) {
+                Log.e("SearchVM", "LoadMore failed", e)
+                _uiState.value = state.copy(
+                    isLoadingMore = false,
+                    hasMore = false
+                )
+            }
+        }
+    }
+
+    private fun canLoadMore(currentResultSize: Int, currentPage: Int): Boolean {
+        if (currentResultSize >= MAX_TOTAL_RESULTS) return false
+
+        if (currentPage >= 20) return false
+
+        if (currentResultSize % PAGE_SIZE != 0 && currentPage > 1) return false
+
+        return true
     }
 
     // TODO: usecase로 일관성 맞추기
