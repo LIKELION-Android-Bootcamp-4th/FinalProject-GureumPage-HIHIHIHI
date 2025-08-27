@@ -72,6 +72,7 @@ fun GureumNumberPicker(
                 startIndex = initialHourIndex,
                 modifier = Modifier.weight(1f),
                 textModifier = Modifier.padding(4.dp),
+                infiniteScroll = false,
             )
             Text(
                 unitLabel,
