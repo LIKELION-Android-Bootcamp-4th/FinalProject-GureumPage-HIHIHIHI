@@ -20,6 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.domain.usecase.auth.SignInWithKakaoUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithNaverUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
+import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +34,9 @@ class LoginViewModel @Inject constructor(
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signInWithKakaoUseCase: SignInWithKakaoUseCase,
     private val signInWithNaverUseCase: SignInWithNaverUseCase,
-    private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase
+    private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase,
+    private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
+    private val getUserUseCase: GetUserUseCase,
 ) : ViewModel() {
     private val TAG = "AuthViewModel"
 
@@ -57,9 +61,13 @@ class LoginViewModel @Inject constructor(
 
         setLoading(true, "사용자 정보를 확인하는 중...")
 
+        val profile = getUserUseCase(currentUser.uid)
+        val hasNickname = !profile?.nickname.isNullOrBlank()
+        if (hasNickname) setOnboardingCompleteUseCase(currentUser.uid, true)
+
         val isOnboardingComplete = getOnboardingCompleteUseCase(currentUser.uid).firstOrNull() ?: false
 
-        val destination = if (isOnboardingComplete) {
+        val destination = if (isOnboardingComplete && hasNickname) {
             NavigationRoute.Home.route
         } else {
             NavigationRoute.OnBoarding.route
