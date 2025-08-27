@@ -20,6 +20,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override fun observe(mindmapId: String): Flow<List<MindmapNodeDto>> = callbackFlow {
         val collection = nodesCollection()
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .addSnapshotListener { snap, err ->
@@ -37,6 +38,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun loadNodes(mindmapId: String): List<MindmapNodeDto> {
         val snap = nodesCollection()
+            .whereEqualTo("user_id", FirebaseAuth.getInstance().currentUser?.uid)
             .whereEqualTo("mindmapId", mindmapId)
             .whereEqualTo("deleted", false)
             .get().await()

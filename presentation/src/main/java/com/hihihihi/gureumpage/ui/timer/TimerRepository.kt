@@ -1,19 +1,38 @@
 package com.hihihihi.gureumpage.ui.timer
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TimerRepository @Inject constructor() {
+    private val repositoryScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
     private val _timerState = MutableStateFlow(TimerSharedState())
     val timerState: StateFlow<TimerSharedState> = _timerState.asStateFlow()
+
+    val isTimerRunning: StateFlow<Boolean> = timerState
+        .map { it.isRunning }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = repositoryScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     private val _floatingActions = MutableSharedFlow<FloatingAction>(
         replay = 0,
@@ -30,10 +49,10 @@ class TimerRepository @Inject constructor() {
         _floatingActions.emit(action)
     }
 
-    val isRunning: Boolean get() = _timerState.value.isRunning
-    val elapsedSec: Int get() = _timerState.value.elapsedSec
-    val bookInfo: BookInfo? get() = _timerState.value.bookInfo
-
+    fun getTimerBookId(): String {
+        val state = _timerState.value
+        return state.userBookId
+    }
 }
 
 data class TimerSharedState(
@@ -48,7 +67,7 @@ data class TimerSharedState(
 data class BookInfo(
     val title: String,
     val author: String,
-    val imageUrl: String
+    val imageUrl: String,
 )
 
 sealed class FloatingAction {

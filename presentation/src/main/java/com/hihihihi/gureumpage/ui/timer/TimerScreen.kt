@@ -79,6 +79,7 @@ fun TimerScreen(
 
     LaunchedEffect(Unit) {
         viewModel.ensureFloatingWindowClosed(context)
+        viewModel.resumeIfNeeded()
     }
 
     LaunchedEffect(state.showMemoDialog) {

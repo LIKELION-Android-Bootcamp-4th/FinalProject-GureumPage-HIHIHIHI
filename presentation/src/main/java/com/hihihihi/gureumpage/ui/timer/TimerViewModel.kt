@@ -78,6 +78,13 @@ class TimerViewModel @Inject constructor(
         }
     }
 
+    fun resumeIfNeeded() {
+        val state = _uiState.value
+        if (state.isRunning && (stopwatchJob?.isActive != true)) {
+            startStopwatch()
+        }
+    }
+
     fun ensureFloatingWindowClosed(context: Context) {
         val intent = Intent(context, FloatingTimerService::class.java)
         context.stopService(intent)
