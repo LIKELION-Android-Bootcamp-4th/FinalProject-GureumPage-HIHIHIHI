@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.widgets.heatmap
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -63,9 +62,7 @@ class HistoryHeatMapWorker @AssistedInject constructor(
                 HistoryHeatMapWidget().update(applicationContext, id)
             }
             return Result.success()
-        } catch (e: Exception) {
-            Log.e("Widget", "HistoryHeatMapWorker.doWork()", e)
-        }
+        } catch (e: Exception) { }
         return Result.failure()
 
     }

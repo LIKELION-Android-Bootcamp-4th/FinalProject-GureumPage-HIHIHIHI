@@ -3,7 +3,6 @@ package com.hihihihi.gureumpage.widgets.common
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -15,7 +14,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
-
 
 @HiltWorker
 class ImageDownloadWorker @AssistedInject constructor(
@@ -36,13 +34,11 @@ class ImageDownloadWorker @AssistedInject constructor(
 
             val bitmap = downloadImage(imageUrl)
             if (bitmap == null) {
-                Log.e("ImageDownloadWorker", "Failed to download image")
                 return@withContext Result.failure()
             }
 
             val cacheFile = saveBitmapToCache(bitmap, imageUrl)
             if (cacheFile == null) {
-                Log.e("ImageDownloadWorker", "Failed to save bitmap to cache")
                 return@withContext Result.failure()
             }
 
@@ -53,7 +49,6 @@ class ImageDownloadWorker @AssistedInject constructor(
 
             Result.success(outputData)
         } catch (e: Exception) {
-            Log.e("ImageDownloadWorker", "Error downloading image", e)
             Result.failure()
         }
     }
@@ -71,7 +66,6 @@ class ImageDownloadWorker @AssistedInject constructor(
 
             bitmap
         } catch (e: Exception) {
-            Log.e("ImageDownloadWorker", "Error downloading image", e)
             null
         }
     }
@@ -93,7 +87,6 @@ class ImageDownloadWorker @AssistedInject constructor(
 
             imageFile
         } catch (e: Exception) {
-            Log.e("ImageDownloadWorker", "Error saving bitmap", e)
             null
         }
     }

@@ -1,6 +1,5 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.remote.dto.UserDto
@@ -24,7 +23,6 @@ class UserRemoteDataSourceImpl @Inject constructor(
     }
 
     override fun getUserFlow(userId: String): Flow<UserDto> = callbackFlow {
-        Log.e("TAG", "getUserFlow: ${userId}")
         val docRef = firestore.collection("users").document(userId)
 
         val listenerRegistration = docRef.addSnapshotListener { snapshot, error ->
@@ -35,16 +33,14 @@ class UserRemoteDataSourceImpl @Inject constructor(
 
 
             if (snapshot?.exists() == true) {
-                val dto = snapshot?.toObject(UserDto::class.java)
+                val dto = snapshot.toObject(UserDto::class.java)
                 if (dto != null) {
                     dto.userId = snapshot.id
                     trySend(dto).isSuccess
                 } else {
                     close(Exception("User 파싱 실패"))
                 }
-            } else {
-                Log.e("TAG", "getUserFlow: 유저 없음")
-            }
+            } else { }
         }
         awaitClose { listenerRegistration.remove() }
     }

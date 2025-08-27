@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.navigation
 
-import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

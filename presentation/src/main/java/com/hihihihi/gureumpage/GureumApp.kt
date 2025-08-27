@@ -29,9 +29,6 @@ class GureumApp : Application() , Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-
-//        WorkManager.initialize(this, workManagerConfiguration)
-
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
 
         NaverIdLoginSDK.initialize(

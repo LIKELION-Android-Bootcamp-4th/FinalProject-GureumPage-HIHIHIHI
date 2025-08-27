@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.widgets.reading
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -50,7 +49,6 @@ class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
             val imageUrls = books.mapNotNull { it.imageUrl }.filter { it.isNotBlank() }
 
             scheduleImageDownloads(imageUrls, applicationContext)
-            Log.d("Widget","books:$books")
 
             glanceIds.forEach { id ->
                 val widgetBooks = books.map { book ->
@@ -63,7 +61,6 @@ class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
                 }
 
                 val jsonData = Gson().toJson(widgetBooks)
-                Log.d("Widget","CurrentReadingBooksWidgetWorker-jsonData:$jsonData")
                 updateAppWidgetState(applicationContext, id) { prefs ->
                     val dataKey = stringPreferencesKey(CurrentReadingBooksWidget.WIDGET_DATA_KEY)
 
@@ -72,9 +69,7 @@ class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
                 CurrentReadingBooksWidget().update(applicationContext,id)
             }
             return Result.success()
-        } catch (e: Exception) {
-            Log.e("Widget","CurrentReadingBooksWidgetWorker.doWork()",e)
-        }
+        } catch (e: Exception) { }
         return Result.failure()
     }
 }

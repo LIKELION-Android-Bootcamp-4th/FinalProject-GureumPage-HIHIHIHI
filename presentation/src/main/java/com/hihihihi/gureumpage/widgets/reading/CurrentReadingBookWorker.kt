@@ -1,7 +1,6 @@
 package com.hihihihi.gureumpage.widgets.reading
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -53,7 +52,6 @@ class CurrentReadingBookWidgetWorker @AssistedInject constructor(
                     scheduleImageDownload(imageUrl, applicationContext)
                 }
             }
-            Log.d("Widget","book:$book")
             glanceId.forEach { id ->
                 val widgetBook = WidgetBook(
                     title = book?.title ?: "읽고 있는 책 없음",
@@ -71,9 +69,7 @@ class CurrentReadingBookWidgetWorker @AssistedInject constructor(
                 CurrentReadingBookWidget().update(applicationContext,id)
             }
             return Result.success()
-        } catch (e: Exception) {
-            Log.e("Widget","CurrentReadingBookWidgetWorker.doWork()",e)
-        }
+        } catch (e: Exception) { }
         return Result.failure()
     }
 

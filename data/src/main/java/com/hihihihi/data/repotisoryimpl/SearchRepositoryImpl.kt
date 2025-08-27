@@ -1,6 +1,5 @@
 package com.hihihihi.data.repositoryimpl
 
-import android.util.Log
 import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.domain.model.SearchBook
@@ -21,7 +20,6 @@ class SearchRepositoryImpl @Inject constructor(
         pageSize: Int
     ): List<SearchBook> {
         val startIndex = page
-        Log.d("Repo", "page=$page pageSize=$pageSize -> startIndex=$startIndex")
         // ↓ Remote에 startIndex/maxResults 기준으로 추가
         return searchRemoteDataSource.searchBooks(
             query = query,

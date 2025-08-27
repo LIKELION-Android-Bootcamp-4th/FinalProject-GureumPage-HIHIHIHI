@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.search
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -49,8 +48,6 @@ class SearchViewModel @Inject constructor(
                 val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE)
                 val dedup = results.distinctBy { it.isbn }
 
-                Log.d("SearchVM", "query=$query, results.size=${results.size}")
-
                 _uiState.value = _uiState.value.copy(
                     searchResults = dedup,
                     isSearching = false,
@@ -92,7 +89,6 @@ class SearchViewModel @Inject constructor(
                     hasMore = canLoadMore(merged.size, nextPage) && actuallyGrew && newResults.isNotEmpty()
                 )
             } catch (e: Exception) {
-                Log.e("SearchVM", "LoadMore failed", e)
                 _uiState.value = state.copy(
                     isLoadingMore = false,
                     hasMore = false

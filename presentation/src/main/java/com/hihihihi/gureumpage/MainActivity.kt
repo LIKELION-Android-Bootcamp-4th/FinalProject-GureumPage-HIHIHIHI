@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -162,8 +161,6 @@ class MainActivity : ComponentActivity() {
                             onDismiss = { viewModel.dismissNetworkWarning() }
                         )
                     }
-
-                    Log.d("DeepLink", "onCreate - initialized App")
                 }
             }
         }
@@ -197,7 +194,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun routeWidgetUri(uri: Uri): Boolean {
-        Log.d("DeepLink", "routeDeepLink - uri : $uri")
         when {
             // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
@@ -253,7 +249,6 @@ class MainActivity : ComponentActivity() {
             }
 
             else -> {
-                Log.d("DeepLink", "No matching pattern: $uri")
                 return false
             }
         }
@@ -473,7 +468,6 @@ fun GureumPageApp(
             }
         }
     }
-    Log.d("APP", "GureumPageApp init - end")
 }
 
 @Composable

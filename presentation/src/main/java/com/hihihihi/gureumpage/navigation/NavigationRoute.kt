@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.navigation
 
-import android.util.Log
 
 sealed class NavigationRoute(val route: String) {
     object Splash : NavigationRoute("splash")
@@ -29,7 +28,6 @@ sealed class NavigationRoute(val route: String) {
             showAddManualRecord: Boolean = false
         ): String {
             val route = "bookdetail/$bookId?showAddQuote=$showAddQuote&showAddManualRecord=$showAddManualRecord"
-            Log.e("TAG", "createRoute: $route", )
             return route
         }
     }

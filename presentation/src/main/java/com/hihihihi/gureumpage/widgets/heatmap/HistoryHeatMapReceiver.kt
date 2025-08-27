@@ -3,7 +3,6 @@ package com.hihihihi.gureumpage.widgets.heatmap
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import com.hihihihi.gureumpage.widgets.common.WidgetUpdateDispatcher
@@ -23,7 +22,6 @@ class HistoryHeatMapReceiver : GlanceAppWidgetReceiver() {
             AppWidgetManager.ACTION_APPWIDGET_ENABLED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_USER_UNLOCKED-> {
-                Log.d("RECEIVER","onReceive:${intent.action}")
                 WidgetUpdateDispatcher.getDispatcher(context).updateHistoryHeatMap()
             }
         }

@@ -40,19 +40,12 @@ class DailyReadPageRemoteDataSourceImpl @Inject constructor(
         userId: String,
         dayOfStart: Date
     ): Flow<List<DailyReadPageDto>> {
-        Log.d("Widget","HistoryHeatMapWorker : getDailyReadPagesByUserIdAndDate - userId:$userId , dayOfStart:${dayOfStart.toString()} ")
-
         val startOfDay = Timestamp(dayOfStart)
         return callbackFlow {
             val listenerRegistration = firestore.collection("daily_read_pages")
                 .whereEqualTo("user_id", userId)
 //                .whereGreaterThanOrEqualTo("date", startOfDay)
                 .addSnapshotListener { snapshot, error ->
-                    if (snapshot != null) {
-                        snapshot.documents.forEach {
-                            Log.e("Debug", "HistoryHeatMapWorker - date field: ${it.get("date")}")
-                        }
-                    }
                     if (error != null) {
                         close(error)
                         return@addSnapshotListener

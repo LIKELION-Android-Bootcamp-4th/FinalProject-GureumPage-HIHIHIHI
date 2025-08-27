@@ -1,6 +1,5 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.dto.BookDetailDto
 import com.hihihihi.data.remote.dto.SearchBookDto
@@ -19,7 +18,6 @@ class SearchRemoteDataSourceImpl @Inject constructor(
         ): List<SearchBookDto> {
         return try {
             val start = startIndex
-            Log.d("Remote", "Start=$start MaxResults=$maxResults q=$query")
 
             val response = searchApiService.searchBooks(
                 ttbkey = apiKey,
