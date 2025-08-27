@@ -33,6 +33,7 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddManualHistoryDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.AddQuoteDialog
+import com.hihihihi.gureumpage.ui.bookdetail.components.BookCompletionDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailFab
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookDetailTabs
 import com.hihihihi.gureumpage.ui.bookdetail.components.BookSimpleInfoSection
@@ -46,6 +47,8 @@ import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
 import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,8 +69,21 @@ fun BookDetailScreen(
 
     var showEditQuoteDialog by remember { mutableStateOf<Pair<String, Quote>?>(null) }
 
+    var showCompletionDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(bookId) {
         viewModel.loadUserBookDetails(bookId)
+    }
+
+    LaunchedEffect(uiState.userBook) {
+        val userBook = uiState.userBook
+        if (userBook != null &&
+            userBook.status == ReadingStatus.READING &&
+            userBook.currentPage >= userBook.totalPage &&
+            userBook.currentPage > 0 &&
+            userBook.totalPage > 0) {
+            showCompletionDialog = true
+        }
     }
 
     // addQuoteState가 변할 때마다 실행되는 효과
@@ -196,6 +212,33 @@ fun BookDetailScreen(
                 // 상태 변경 로직 호출
                 viewModel.patchUserBook(status, page, startDate, endDate)
                 showReadingStatusSheet = false
+            }
+        )
+    }
+
+    if (showCompletionDialog && uiState.userBook != null) {
+        BookCompletionDialog(
+            userBook = uiState.userBook!!,
+            onConfirm = {
+                val userBook = uiState.userBook!!
+
+                val endDate: LocalDateTime = uiState.histories
+                    .mapNotNull { it.endTime }
+                    .maxOrNull()
+                    ?: LocalDateTime.now()
+
+                viewModel.patchUserBook(
+                    status = ReadingStatus.FINISHED,
+                    page = userBook.totalPage,
+                    startDate = userBook.startDate,
+                    endDate = endDate
+                )
+                showCompletionDialog = false
+
+                Toast.makeText(context, "🎉 완독을 축하드립니다!", Toast.LENGTH_LONG).show()
+            },
+            onDismiss = {
+                showCompletionDialog = false
             }
         )
     }
