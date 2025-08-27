@@ -60,7 +60,7 @@ fun GureumPastToTodayDatePicker(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GureumBetweenDatePicker(
-    isSelectingStart: Boolean,  // true: 시작 날짜 선택, false: 종료 날짜 선택
+    isSelectingStart: Boolean,  // true: 시작 날짜 선택, false: 종료 날짜 선택(당일 기입 포함)
     startDate: LocalDateTime?,  // null 이면 최소 날짜 없음
     endDate: LocalDateTime?,    // null 이면 최대 날짜 오늘
     onDismiss: () -> Unit,
