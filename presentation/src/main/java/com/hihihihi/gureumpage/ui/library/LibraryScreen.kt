@@ -145,9 +145,15 @@ fun LibraryScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Semi18Text("아직 담은 책이 없어요")
+                                    Semi18Text(
+                                        "아직 담은 책이 없어요",
+                                        color = GureumTheme.colors.gray500
+                                    )
                                     Spacer(Modifier.height(16.dp))
-                                    Medi16Text("읽고 싶은 책을 추가해 보세요.")
+                                    Medi16Text(
+                                        "읽고 싶은 책을 추가해 보세요.",
+                                        color = GureumTheme.colors.gray400
+                                    )
                                 }
                             } else {
                                 LazyVerticalGrid(
@@ -184,9 +190,16 @@ fun LibraryScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Semi18Text("읽고 있는 책이 없어요")
+                                    Semi18Text(
+                                        "읽고 있는 책이 없어요",
+                                        color = GureumTheme.colors.gray500
+                                    )
                                     Spacer(Modifier.height(16.dp))
-                                    Medi16Text("책을 찾아 추가하고 새로운 독서를 시작해 보세요.")
+                                    Medi16Text(
+                                        "책을 찾아 추가하고 새로운 독서를 시작해 보세요.",
+                                        color = GureumTheme.colors.gray400
+
+                                    )
                                 }
                             } else {
                                 LazyVerticalGrid(
@@ -223,9 +236,15 @@ fun LibraryScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Semi18Text("아직 완독한 책이 없어요")
+                                    Semi18Text(
+                                        "아직 완독한 책이 없어요",
+                                        color = GureumTheme.colors.gray500
+                                    )
                                     Spacer(Modifier.height(16.dp))
-                                    Medi16Text("첫 완독을 기록하면 서재가 채워져요.")
+                                    Medi16Text(
+                                        "첫 완독을 기록하면 서재가 채워져요.",
+                                        color = GureumTheme.colors.gray400
+                                    )
                                 }
                             } else {
 

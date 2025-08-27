@@ -57,9 +57,15 @@ fun QuotesScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Semi18Text("아직 필사가 없어요")
+                Semi18Text(
+                    "아직 필사가 없어요",
+                    color = GureumTheme.colors.gray500
+                )
                 Spacer(Modifier.height(16.dp))
-                Medi16Text("책에서 인상 깊은 한 줄을 남겨 보세요.")
+                Medi16Text(
+                    "책에서 인상 깊은 한 줄을 남겨 보세요.",
+                    color = GureumTheme.colors.gray400
+                )
             }
         }
 

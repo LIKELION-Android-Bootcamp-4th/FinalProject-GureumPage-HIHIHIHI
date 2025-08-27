@@ -58,6 +58,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.gureumpage.common.utils.NetworkManager
@@ -194,6 +195,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun routeWidgetUri(uri: Uri): Boolean {
+        if(FirebaseAuth.getInstance().currentUser == null) {
+            _navController?.navigate(NavigationRoute.Splash.route) {
+                popUpTo(0) { inclusive = true }
+            }
+            return true
+        }
+
         when {
             // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
             uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
