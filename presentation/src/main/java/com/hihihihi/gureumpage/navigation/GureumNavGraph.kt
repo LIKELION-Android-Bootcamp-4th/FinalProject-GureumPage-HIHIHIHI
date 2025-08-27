@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.navigation
 
+import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -101,18 +102,47 @@ fun GureumNavGraph(
         composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
         composable(
             route = NavigationRoute.BookDetail.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("showAddQuote") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "false"
+                },
+                navArgument("showAddManualRecord") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "false"
+                }
+            ),
             deepLinks = listOf(
                 navDeepLink { uriPattern = "gureum://bookdetail/{bookId}" },
-                navDeepLink { uriPattern = "app://bookdetail/{bookId}" }
+                navDeepLink { uriPattern = "app://bookdetail/{bookId}" },
+                navDeepLink {
+                    uriPattern =
+                        "gureum://bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}"
+                },
+                navDeepLink {
+                    uriPattern =
+                        "app://bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}"
+                }
             )
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId")
+            val showAddQuote =
+                backStackEntry.arguments?.getString("showAddQuote")?.toBooleanStrictOrNull()
+                    ?: false
+            val showAddManualRecord =
+                backStackEntry.arguments?.getString("showAddManualRecord")?.toBooleanStrictOrNull()
+                    ?: false
+
             bookId?.let {
                 BookDetailScreen(
                     bookId = it,
                     navController = navController,
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    initialShowAddQuote = showAddQuote,
+                    initialShowAddManualRecord = showAddManualRecord
                 )
             }
         }
