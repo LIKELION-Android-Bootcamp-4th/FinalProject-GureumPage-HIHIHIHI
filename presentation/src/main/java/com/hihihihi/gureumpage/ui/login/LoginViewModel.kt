@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.tasks.await
 
-
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
@@ -43,8 +42,6 @@ class LoginViewModel @Inject constructor(
     private val setLastProviderUseCase: SetLastProviderUseCase,
     private val getLastProviderUseCase: GetLastProviderUseCase,
 ) : ViewModel() {
-    private val TAG = "AuthViewModel"
-
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
 

@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -35,14 +34,12 @@ import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSe
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
-import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageMenuSection
 import com.hihihihi.gureumpage.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.gureumpage.ui.mypage.component.NicknameChangeDialog
 import kotlinx.coroutines.flow.collectLatest
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +48,6 @@ fun MyPageScreen(
     viewModel: MypageViewModel = hiltViewModel()
 ) {
     val colors = GureumTheme.colors
-    val typography = GureumTypography
     val state by viewModel.uiState.collectAsState()
 
     var showNicknameDialog by rememberSaveable { mutableStateOf(false) } // 다이얼로그 상태
@@ -69,10 +65,6 @@ fun MyPageScreen(
                 restoreState = false
             }
         }
-    }
-
-    val timeText = remember(state.myPageData?.totalReadMinutes) {
-        formatSecondsToReadableTimeWithoutSecond(state.myPageData?.totalReadMinutes?.times(60) ?: 0)
     }
 
     Column(
@@ -98,7 +90,6 @@ fun MyPageScreen(
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-
 
             state.myPageData != null -> {
                 val data = state.myPageData!!
