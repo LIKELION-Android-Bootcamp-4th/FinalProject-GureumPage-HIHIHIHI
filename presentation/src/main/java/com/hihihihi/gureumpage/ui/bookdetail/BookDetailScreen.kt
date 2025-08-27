@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -302,7 +303,7 @@ fun BookDetailContent(
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 48.dp)
+                .navigationBarsPadding()
         )
     }
 }
