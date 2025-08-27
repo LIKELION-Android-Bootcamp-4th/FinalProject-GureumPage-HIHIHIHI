@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Snackbar
@@ -38,9 +39,7 @@ import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
-import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
-import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.login.components.SocialLoginButton
@@ -70,8 +69,6 @@ fun LoginScreen(
             viewModel.clearError()
         }
     }
-
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -210,6 +207,7 @@ fun LoginScreen(
 
         SnackbarHost(
             hostState = snackbarHostState,
+            modifier = Modifier.statusBarsPadding()
         ) { data ->
             Snackbar(
                 snackbarData = data,
