@@ -17,15 +17,23 @@ class DailyReadPageRemoteDataSourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : DailyReadPageRemoteDataSource {
 
-    override suspend fun getDailyReadPages(userId: String): List<DailyReadPageDto> {
-        val snapshot = firestore.collection("daily_read_pages")
+    override fun getDailyReadPages(userId: String): Flow<List<DailyReadPageDto>> = callbackFlow {
+        val listener = firestore.collection("daily_read_pages")
             .whereEqualTo("user_id", userId)
-            .get()
-            .await()
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
 
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(DailyReadPageDto::class.java)?.apply { docId = doc.id }
-        }
+                val dailyReadPages = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(DailyReadPageDto::class.java)?.apply { docId = doc.id }
+                } ?: emptyList()
+
+                trySend(dailyReadPages)
+            }
+
+        awaitClose { listener.remove() }
     }
 
     override fun getDailyReadPagesByUserIdAndDate(

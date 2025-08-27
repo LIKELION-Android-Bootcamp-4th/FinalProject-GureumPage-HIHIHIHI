@@ -36,7 +36,7 @@ class GetStatisticsUseCase @Inject constructor(
 
         val booksFlow = userBookRepository.getUserBooks(userId)
         val historiesFlow = historyRepository.getHistoriesByUserId(userId)
-        val dailiesFlow = dailyReadPageRepository.getDailyReadPagesFlow(userId)
+        val dailiesFlow = dailyReadPageRepository.getDailyReadPages(userId)
 
         return combine(booksFlow, historiesFlow, dailiesFlow) { books, histories, dailies ->
             try {
