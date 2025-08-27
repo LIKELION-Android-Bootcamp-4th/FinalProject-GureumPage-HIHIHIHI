@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hihihihi.gureumpage.common.utils.parseDisplayTimeToSeconds
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -58,7 +59,10 @@ fun StopReadingDialog(
         start in 0..totalPage && end in 0..totalPage
     } else isPagesNotEmpty
 
-    val canConfirm = isPagesNotEmpty && isPageOrdered && isPageInRange
+    val totalSeconds = parseDisplayTimeToSeconds(displayTime)
+    val isOverOneMinute = totalSeconds >= 60
+
+    val canConfirm = isPagesNotEmpty && isPageOrdered && isPageInRange && isOverOneMinute
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -228,7 +232,7 @@ fun StopReadingDialog(
                 Spacer(Modifier.height(24.dp))
 
                 GureumButton(
-                    text = "종료하기",
+                    text = if(!isOverOneMinute) "1분 미만의 독서는 기록할 수 없어요." else "종료하기",
                     onClick = {
                         if (canConfirm) onConfirmStopPages(start, end)
                     },
