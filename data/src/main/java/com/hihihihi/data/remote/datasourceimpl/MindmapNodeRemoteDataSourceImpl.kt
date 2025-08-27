@@ -33,6 +33,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
                     ?: emptyList()
                 trySend(items)
             }
+        FirestoreListenerManager.add(collection)
         awaitClose { collection.remove() }
     }
 

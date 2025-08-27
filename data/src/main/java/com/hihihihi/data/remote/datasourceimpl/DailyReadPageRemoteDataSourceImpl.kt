@@ -33,6 +33,7 @@ class DailyReadPageRemoteDataSourceImpl @Inject constructor(
                 trySend(dailyReadPages)
             }
 
+        FirestoreListenerManager.add(listener)
         awaitClose { listener.remove() }
     }
 
@@ -57,6 +58,7 @@ class DailyReadPageRemoteDataSourceImpl @Inject constructor(
                     trySend(dtos)
                 }
 
+            FirestoreListenerManager.add(listenerRegistration)
             awaitClose {
                 listenerRegistration.remove()
             }

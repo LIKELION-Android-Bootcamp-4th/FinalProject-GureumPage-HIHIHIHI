@@ -42,6 +42,7 @@ class UserRemoteDataSourceImpl @Inject constructor(
                 }
             } else { }
         }
+        FirestoreListenerManager.add(listenerRegistration)
         awaitClose { listenerRegistration.remove() }
     }
 

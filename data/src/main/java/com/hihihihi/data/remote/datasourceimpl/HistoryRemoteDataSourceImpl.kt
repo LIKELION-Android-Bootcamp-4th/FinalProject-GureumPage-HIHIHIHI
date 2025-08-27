@@ -35,6 +35,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 } ?: emptyList()
                 trySend(histories)
             }
+        FirestoreListenerManager.add(historiesCollection)
         awaitClose { historiesCollection.remove() }
     }
 
@@ -53,6 +54,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 } ?: emptyList()
                 trySend(histories)
             }
+        FirestoreListenerManager.add(historiesCollection)
         awaitClose { historiesCollection.remove() }
     }
 
@@ -89,6 +91,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                     trySend(histories)
                 }
 
+            FirestoreListenerManager.add(listenerRegistration)
             awaitClose {
                 listenerRegistration.remove()
             }

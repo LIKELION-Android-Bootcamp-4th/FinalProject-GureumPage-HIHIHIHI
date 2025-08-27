@@ -3,12 +3,14 @@ package com.hihihihi.gureumpage.ui.mypage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.data.remote.datasourceimpl.FirestoreListenerManager
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -84,7 +86,11 @@ class MypageViewModel @Inject constructor(
 
     //로그아웃: firebase 세션 종료 후 이벤트 발생
     fun logout() = viewModelScope.launch {
-        runCatching { auth.signOut() }
+        runCatching {
+            FirestoreListenerManager.clearAll()
+
+            auth.signOut()
+        }
             .onSuccess {
                 _uiState.value = MyPageUiState(isLoading = false)
                 _logoutEvent.tryEmit(Unit)

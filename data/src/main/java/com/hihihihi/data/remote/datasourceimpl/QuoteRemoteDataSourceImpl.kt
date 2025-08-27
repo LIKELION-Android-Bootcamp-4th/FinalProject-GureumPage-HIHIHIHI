@@ -45,6 +45,7 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
                 } ?: emptyList()
                 trySend(quotes)
             }
+        FirestoreListenerManager.add(quotesCollection)
         awaitClose { quotesCollection.remove() }
     }
 
