@@ -74,7 +74,7 @@ class HistoryHeatMapWidget : GlanceAppWidget() {
                         .width(160.dp)
                         .padding(10.dp)
                         .background(
-                            ColorProvider(R.color.heat_bg)
+                            ColorProvider(R.color.background)
                         ).clickable(
                             onClick = actionRunCallback<OpenAppAction>(
                                 parameters = actionParametersOf()

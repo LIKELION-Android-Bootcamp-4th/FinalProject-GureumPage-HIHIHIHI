@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.bookdetail
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +43,8 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReviewSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.SetReadingStatusBottomSheet
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
+import com.hihihihi.gureumpage.ui.home.components.ErrorView
+import com.hihihihi.gureumpage.ui.home.components.LoadingView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +56,8 @@ fun BookDetailScreen(
 ) {
     // ViewModel에서 관리하는 UI 상태를 Compose State로 수집
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
 
     var showAddQuoteDialog by remember { mutableStateOf(false) }
     var showAddManualHistoryDialog by remember { mutableStateOf(false) }
@@ -69,7 +75,7 @@ fun BookDetailScreen(
         when {
             state.isSuccess -> {
                 // 성공 스낵바 표시
-                snackbarHostState.showSnackbar("필사 추가 성공!")
+                Toast.makeText(context, "필사가 추가되었습니다!", Toast.LENGTH_SHORT).show()
 
                 // 상태 초기화 (중복 알림 방지)
                 viewModel.resetAddQuoteState()
@@ -77,7 +83,7 @@ fun BookDetailScreen(
 
             state.error != null -> {
                 // 에러 메시지 스낵바 표시
-                snackbarHostState.showSnackbar("에러: ${state.error}")
+                Toast.makeText(context, "에러: ${state.error}", Toast.LENGTH_SHORT).show()
 
                 // 상태 초기화
                 viewModel.resetAddQuoteState()
@@ -87,11 +93,11 @@ fun BookDetailScreen(
 
     when {
         uiState.isLoading -> {
-            // TODO 로딩 UI
+            LoadingView()
         }
 
         uiState.errorMessage != null -> {
-            // TODO 에러 UI
+            ErrorView(message = uiState.errorMessage!!)
         }
 
         uiState.userBook != null -> {

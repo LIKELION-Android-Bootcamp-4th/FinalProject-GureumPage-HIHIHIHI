@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesLocalDataSource {
     val nickname: Flow<String>
     val theme: Flow<GureumThemeType>
+    val lastProvider: Flow<String>
 
     fun getOnboardingComplete(userId: String): Flow<Boolean>
 
     suspend fun setOnboardingComplete(userId: String, complete: Boolean)
     suspend fun setNickname(nickname: String)
     suspend fun setTheme(theme: GureumThemeType)
+    suspend fun setLastProvider(provider: String)
     suspend fun clearAll()
 }

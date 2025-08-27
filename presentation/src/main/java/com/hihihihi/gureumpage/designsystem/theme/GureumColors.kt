@@ -36,6 +36,11 @@ data class GureumColors(
     val bookBackground: Color,
     val dividerDeep: Color,
     val dividerShallow: Color,
+    val heatCell0: Color,
+    val heatCell1: Color,
+    val heatCell2: Color,
+    val heatCell3: Color,
+    val heatCell4: Color,
 ) {
     companion object {
         fun defaultLightColors(): GureumColors = GureumColors(
@@ -68,7 +73,12 @@ data class GureumColors(
             searchTextField = Color(0x80FFFFFF),
             bookBackground = Color(0x4DE3DECF),
             dividerDeep = Color(0xFFDADBCD),
-            dividerShallow = Color(0xFFF1F2E6)
+            dividerShallow = Color(0xFFF1F2E6),
+            heatCell0 = Color(0xFFCFD0C7),
+            heatCell1 = Color(0xFFB6BEA4),
+            heatCell2 = Color(0xFFA1AF8A),
+            heatCell3 = Color(0xFF8C9E76),
+            heatCell4 = Color(0xFF79884A),
         )
 
         fun defaultDarkColors(): GureumColors = GureumColors(
@@ -102,6 +112,11 @@ data class GureumColors(
             bookBackground = Color(0x1A828B99),
             dividerDeep = Color(0xFF41454F),
             dividerShallow = Color(0xFF2E333A),
+            heatCell0 = Color(0xFF2E333A),
+            heatCell1 = Color(0xFF544A26),
+            heatCell2 = Color(0xFF806E2C),
+            heatCell3 = Color(0xFFB48C33),
+            heatCell4 = Color(0xFFFFCB5B),
         )
     }
 }

@@ -109,11 +109,11 @@ fun DayCell(day: CalendarDay, today: LocalDate, level: Int) {
     val colors = GureumTheme.colors
 
     val color = when (level) {
-        0 -> colors.gray200
-        1 -> colors.primary10
-        2 -> colors.primary30
-        3 -> colors.primary50
-        else -> colors.primary
+        0 -> colors.heatCell0
+        1 -> colors.heatCell1
+        2 -> colors.heatCell2
+        3 -> colors.heatCell3
+        else -> colors.heatCell4
     }
 
     Box(
@@ -148,11 +148,11 @@ fun HeatLegendWithLabel() {
 
     // TODO 색은 수정이 필요하긴 함니다..
     val levels = listOf(
-        "0" to colors.gray200,
-        "10p" to colors.primary10,
-        "20p" to colors.primary30,
-        "30p" to colors.primary50,
-        "31p+" to colors.primary
+        "0" to colors.heatCell0,
+        "10p" to colors.heatCell1,
+        "20p" to colors.heatCell2,
+        "30p" to colors.heatCell3,
+        "31p+" to colors.heatCell4
     )
 
     Column(
