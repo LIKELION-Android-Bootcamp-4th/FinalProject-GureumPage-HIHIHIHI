@@ -146,15 +146,12 @@ fun MyPageScreen(
         )
     }
 
-    if(showLogoutDialog){
+    if (showLogoutDialog) {
         AlertDialog(
-            onDismissRequest = { showLogoutDialog  = false},
-            title = {
-                Semi16Text("로그아웃")
-            },
-            text = {
-                Medi14Text("정말 로그아웃 하실건가요?")
-            },
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Semi16Text("로그아웃") },
+            text = { Medi14Text("정말 로그아웃 하실건가요?") },
+            containerColor = GureumTheme.colors.card,
             confirmButton = {
                 Medi14Text(
                     text = "로그아웃",
