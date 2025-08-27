@@ -3,7 +3,9 @@ package com.hihihihi.gureumpage.ui.bookdetail
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
@@ -41,11 +42,9 @@ import com.hihihihi.gureumpage.ui.bookdetail.components.EditQuoteDialog
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReadingProgressSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.ReviewSection
 import com.hihihihi.gureumpage.ui.bookdetail.components.SetReadingStatusBottomSheet
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
 import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.home.components.LoadingView
-import com.hihihihi.gureumpage.ui.home.mock.dummyQuotes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,7 +116,7 @@ fun BookDetailScreen(
                         showEditQuoteDialog = quoteId to quote
                     }
                 },
-                onQuoteDelete = { id -> viewModel.deleteQuote(id)},
+                onQuoteDelete = { id -> viewModel.deleteQuote(id) },
                 onEvent = { event ->
                     when (event) {
                         BookDetailFabEvent.NavigateToMindmap -> navController.navigate(
@@ -247,6 +246,7 @@ fun BookDetailContent(
                     onQuoteEdit = onQuoteEdit,
                     onQuoteDelete = onQuoteDelete
                 )
+                Spacer(Modifier.height(50.dp))
             }
         }
 
@@ -256,6 +256,7 @@ fun BookDetailContent(
             onEvent = onEvent,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .padding(bottom = 48.dp)
         )
     }
 }

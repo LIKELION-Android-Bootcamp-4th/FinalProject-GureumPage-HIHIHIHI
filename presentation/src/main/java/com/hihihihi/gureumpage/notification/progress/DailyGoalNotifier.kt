@@ -8,13 +8,13 @@ import androidx.core.content.ContextCompat
 import com.hihihihi.gureumpage.notification.common.Quiet
 import java.time.LocalDate
 import androidx.core.content.edit
+import com.hihihihi.gureumpage.notification.reminder.ReminderScheduler
 
 object DailyGoalNotifier {
     private const val PREFERENCE = "goal_progress"
     private val day get() = LocalDate.now().toString()
 
     fun onProgress(context: Context, totalSecond: Int, goalSecond: Int) {
-        if (goalSecond <= 0 || totalSecond < 0) return
         if (!Quiet.allow()) return
 
         if (Build.VERSION.SDK_INT >= 33 &&
@@ -31,25 +31,47 @@ object DailyGoalNotifier {
         if (lastDay != day) {
             sharedPref.edit {
                 putString("day", today)
-                    .putFloat("last_ratio", 0f)
-                    .putBoolean("sent80", false)
+                putFloat("last_ratio", 0f)
+                putBoolean("sent80", false)
+                putBoolean("goal_enabled", false)
             }
             Goal80ReminderScheduler.cancelToday(context)
+
+            ReminderScheduler.cancel(context)
         }
+
+        // 목표 없으면 취소
+        if (goalSecond <= 0) {
+            sharedPref.edit {
+                putBoolean("goal_enabled", false)
+                putFloat("last_ratio", 0f)
+                putBoolean("sent80", false)
+            }
+            Goal80ReminderScheduler.cancelToday(context)
+
+            ReminderScheduler.scheduleDaily(context)
+
+            return
+        }
+
+        // 목표가 있으면 알림
+        sharedPref.edit { putBoolean("goal_enabled", true) }
+        if (totalSecond <= 0) return
 
         val prev = sharedPref.getFloat("last_ratio", 0f)
         var sent80 = sharedPref.getBoolean("sent80", false)
-
         val ratio = (totalSecond.toFloat() / goalSecond).coerceAtLeast(0f)
 
-        // 80% - 알림을 보내지 않고, 이전 값이 80보다 작으며 현재 값이 80보다 크거나 같을 때
         if (!sent80 && prev < 0.8f && ratio >= 0.8f) {
             Goal80ReminderScheduler.scheduleAt(context)
             sent80 = true
+
+            ReminderScheduler.cancel(context)
         }
 
         sharedPref.edit {
-            putFloat("last_ratio", ratio).putBoolean("sent80", sent80)
+            putFloat("last_ratio", ratio)
+            putBoolean("sent80", sent80)
         }
     }
 }

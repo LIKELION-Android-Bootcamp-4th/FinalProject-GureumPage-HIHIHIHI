@@ -194,6 +194,7 @@ fun SplashView(
                 onDismissRequest = { },
                 title = { Text("네트워크 오류") },
                 text = { Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.") },
+                containerColor = GureumTheme.colors.card,
                 confirmButton = {
                     TextButton(onClick = {
                         (navController.context as? Activity)?.finish()

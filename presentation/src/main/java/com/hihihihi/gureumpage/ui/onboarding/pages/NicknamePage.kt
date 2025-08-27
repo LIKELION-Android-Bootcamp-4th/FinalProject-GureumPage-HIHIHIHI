@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -56,6 +60,17 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                 textAlign = TextAlign.Center,
                 imeAction = ImeAction.Done,
                 isError = rule !is NicknameRule.Ok,
+                trailingIcon = {
+                    if (viewModel.nickname.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.updateNickname("") }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Close,
+                                contentDescription = "지우기",
+                                tint = GureumTheme.colors.gray300
+                            )
+                        }
+                    }
+                },
             ) {
                 Text(
                     text = buildAnnotatedString {

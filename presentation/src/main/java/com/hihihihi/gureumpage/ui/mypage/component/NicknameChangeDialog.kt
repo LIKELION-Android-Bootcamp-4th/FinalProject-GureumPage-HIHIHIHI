@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
+import android.R.attr.contentDescription
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,9 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,14 +26,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.NicknameRule
 import com.hihihihi.gureumpage.common.utils.NicknameValidator.validate
 import com.hihihihi.gureumpage.common.utils.NicknameValidator.validateNickname
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
+import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 
@@ -49,6 +55,18 @@ fun NicknameChangeDialog(
 
     var nickname by remember { mutableStateOf("") } // 처음 진입 시 빈 값
     val rule = validate(nickname, currentNickname)  // 긴단 검증
+
+    // 검증 메세지 (rule 상태에 따라 색상/문구 변경)
+    val (msg, msgColor) = when (rule) {
+        NicknameRule.Empty -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.gray400
+        NicknameRule.Length -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.systemRed
+        NicknameRule.Equal -> "이전 닉네임과 동일합니다." to GureumTheme.colors.systemRed
+        NicknameRule.InnerSpace -> "글자 사이 공백은 사용할 수 없어요." to GureumTheme.colors.systemRed
+        NicknameRule.IllegalChar -> "한글/영문/숫자만 사용할 수 있어요." to GureumTheme.colors.systemRed
+        NicknameRule.ForbiddenWord -> "부적절한 단어는 포함할 수 없어요." to GureumTheme.colors.systemRed
+        NicknameRule.Reserved -> "사용할 수 없는 닉네임이에요." to GureumTheme.colors.systemRed
+        NicknameRule.Ok -> "사용 가능한 닉네임입니다." to GureumTheme.colors.systemGreen
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -96,66 +114,43 @@ fun NicknameChangeDialog(
 
                 Spacer(Modifier.height(12.dp))
 
-                // 입력 필드
-                OutlinedTextField(
+                GureumTextField(
                     value = nickname,
                     onValueChange = { nickname = it },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
+                    hint = "닉네임으로 나만의 개성을 표현해 보세요",
+                    imeAction = ImeAction.Done,
+                    isError = rule !is NicknameRule.Ok,
                     trailingIcon = {
                         if (nickname.isNotEmpty()) {
                             IconButton(onClick = { nickname = "" }) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Close,
+                                    painter = painterResource(
+                                        if (GureumTheme.isDarkTheme) R.drawable.ic_text_clear_dark
+                                        else R.drawable.ic_text_clear_light
+                                    ),
                                     contentDescription = "지우기",
-                                    tint = colors.gray300
+                                    tint = Color.Unspecified
                                 )
                             }
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 56.dp), //2줄 힌트 대비
-                    textStyle = typo.bodyMedium.copy(color = colors.gray800),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colors.card,
-                        unfocusedContainerColor = colors.card,
-                        disabledContainerColor = colors.card,
-
-                        focusedIndicatorColor = colors.textFieldOutline,   // 아웃라인 색
-                        unfocusedIndicatorColor = colors.textFieldOutline,
-
-                        cursorColor = colors.gray600,
-
-                        focusedTextColor = colors.gray800,
-                        unfocusedTextColor = colors.gray800,
-
-                        focusedPlaceholderColor = colors.gray300,
-                        unfocusedPlaceholderColor = colors.gray300,
-                    ),
-                    //필드 안 힌트
-                    placeholder = {
-                        Text("닉네임으로 나만의 개성을 표현해 보세요", style = typo.bodyMedium, color = colors.gray300)
-                    },
-                    isError = rule !is NicknameRule.Ok
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                // 검증 메세지 (rule 상태에 따라 색상/문구 변경)
-                val (msg, msgColor) = when (rule) {
-                    NicknameRule.Empty -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.gray400
-                    NicknameRule.Length -> "2~8글자 이내로 설정해주세요." to GureumTheme.colors.systemRed
-                    NicknameRule.Equal -> "이전 닉네임과 동일합니다." to GureumTheme.colors.systemRed
-                    NicknameRule.InnerSpace -> "글자 사이 공백은 사용할 수 없어요." to GureumTheme.colors.systemRed
-                    NicknameRule.IllegalChar -> "한글/영문/숫자만 사용할 수 있어요." to GureumTheme.colors.systemRed
-                    NicknameRule.ForbiddenWord -> "부적절한 단어는 포함할 수 없어요." to GureumTheme.colors.systemRed
-                    NicknameRule.Reserved -> "사용할 수 없는 닉네임이에요." to GureumTheme.colors.systemRed
-                    NicknameRule.Ok -> "사용 가능한 닉네임입니다." to GureumTheme.colors.systemGreen
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(text = msg, style = typo.bodySmall, color = msgColor)
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = buildAnnotatedString {
+                                pushStyle(
+                                    GureumTypography.titleSmall.toSpanStyle()
+                                        .copy(colors.gray400)
+                                )
+                                append(nickname.length.toString())
+                                append("/8")
+                            },
+                            textAlign = TextAlign.End
+                        )
+                    }
                 }
-
-                Text(text = msg, style = typo.bodySmall, color = msgColor)
-
                 Spacer(Modifier.height(18.dp))
 
                 // 저장 버튼
