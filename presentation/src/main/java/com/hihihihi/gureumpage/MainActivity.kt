@@ -65,7 +65,6 @@ import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
-import com.hihihihi.gureumpage.designsystem.components.TimerRunningDialog
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.navigation.BottomNavItem
@@ -76,7 +75,6 @@ import com.hihihihi.gureumpage.notification.common.Channels
 import com.hihihihi.gureumpage.ui.timer.FloatingTimerService
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import com.hihihihi.gureumpage.ui.timer.TimerRepository
-import com.hihihihi.gureumpage.ui.timer.TimerSharedState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -303,6 +301,11 @@ class MainActivity : ComponentActivity() {
             restoreState = true
         }
         return true
+    }
+
+    override fun onDestroy() {
+        _navController = null
+        super.onDestroy()
     }
 }
 
