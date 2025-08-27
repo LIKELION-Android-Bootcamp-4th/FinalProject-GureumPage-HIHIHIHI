@@ -298,8 +298,8 @@ fun AddManualHistoryDialog(
 
         if (showDatePicker) {
             GureumBetweenDatePicker(
-                isSelectingStart = true,
-                startDate = startTime,
+                isSelectingStart = false,
+                startDate = startDate,
                 endDate = null,
                 onDismiss = { showDatePicker = false },
                 onConfirm = { millis ->
