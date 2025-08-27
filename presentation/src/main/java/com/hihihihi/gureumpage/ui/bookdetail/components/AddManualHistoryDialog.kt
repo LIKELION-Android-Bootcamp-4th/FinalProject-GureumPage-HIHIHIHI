@@ -55,6 +55,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,7 @@ fun AddManualHistoryDialog(
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     var date by remember { mutableStateOf(LocalDateTime.now()) }
-    var startTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var startTime by remember { mutableStateOf(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)) }
     var endTime by remember { mutableStateOf<LocalDateTime?>(null) }
 
     var startPage by remember { mutableStateOf(currentPage.toString()) }
@@ -236,7 +237,7 @@ fun AddManualHistoryDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     GureumClickEventTextField(
-                        value = startTime?.format(timeFormatter) ?: "",
+                        value = startTime.format(timeFormatter),
                         onValueChange = {},
                         hint = "시작 시간",
                         modifier = Modifier.weight(1f),
@@ -297,8 +298,8 @@ fun AddManualHistoryDialog(
 
         if (showDatePicker) {
             GureumBetweenDatePicker(
-                isSelectingStart = false,
-                startDate = startDate,
+                isSelectingStart = true,
+                startDate = startTime,
                 endDate = null,
                 onDismiss = { showDatePicker = false },
                 onConfirm = { millis ->
