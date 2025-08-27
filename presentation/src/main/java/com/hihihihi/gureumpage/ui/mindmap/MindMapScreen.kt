@@ -38,6 +38,16 @@ fun MindMapScreen(
     val nodes by viewModel.nodes.collectAsState() // 스냅샷
     val lineColor = GureumTheme.colors.gray200.toArgb()
 
+    val thumbColors = ColorStateList(
+        arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
+        intArrayOf(ContextCompat.getColor(context, R.color.primary), ContextCompat.getColor(context, R.color.gray300))
+    )
+
+    val trackColors = ColorStateList(
+        arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
+        intArrayOf(ContextCompat.getColor(context, R.color.primary50), ContextCompat.getColor(context, R.color.gray200))
+    )
+
     LaunchedEffect(mindmapId) {
         viewModel.load(mindmapId)
     }
@@ -122,10 +132,14 @@ fun MindMapScreen(
                 adapter.asDomainList(mindmapId),
                 autoSave = true
             )
+
             adapter.changeEditMode(isChecked)
             btnRedo.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
             btnUndo.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
         }
+
+        switchEditMode.thumbTintList = thumbColors
+        switchEditMode.trackTintList = trackColors
     }
 }
 
