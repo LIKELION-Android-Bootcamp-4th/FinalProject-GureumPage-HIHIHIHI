@@ -318,8 +318,8 @@ fun AddManualHistoryDialog(
             ) {
                 GureumCard {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        val startHour = startTime?.hour ?: 0
-                        val startMinute = startTime?.minute ?: 0
+                        val startHour = startTime.hour
+                        val startMinute = startTime.minute
 
                         // 종료 시간 선택 시 제약 조건 계산
                         val hourValues = if (editingStartTime) (0..23).toList() else (startHour..23).toList()
