@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
@@ -101,13 +102,16 @@ fun AddManualHistoryDialog(
 
 
     val canSave = startTime != null && endTime != null &&
-            endTime!!.isAfter(startTime)  &&
+            endTime!!.isAfter(startTime) &&
             startPageNum != null && endPageNum != null &&
             startPageNum >= 0 && endPageNum > 0 &&
             endPageNum >= startPageNum
 
-    Dialog(onDismissRequest = onDismiss) {
-        GureumCard(modifier = Modifier.fillMaxWidth()) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        GureumCard(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -344,7 +348,8 @@ fun AddManualHistoryDialog(
                             Spacer(Modifier.height(24.dp))
                             GureumButton(text = "확인", onClick = {
                                 if (editingStartTime) {
-                                    val newStartTime = LocalDateTime.of(date.toLocalDate(), LocalTime.of(tempHour, tempMinute))
+                                    val newStartTime =
+                                        LocalDateTime.of(date.toLocalDate(), LocalTime.of(tempHour, tempMinute))
                                     startTime = newStartTime
 
                                     // 종료 시간이 시작 시간보다 이전이면 조정
