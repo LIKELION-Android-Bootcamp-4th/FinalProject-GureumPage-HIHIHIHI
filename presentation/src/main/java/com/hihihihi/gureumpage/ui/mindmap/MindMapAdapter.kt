@@ -115,7 +115,6 @@ class MindMapAdapter(
                 holder.view,
                 onEdit = {
                     onNodeAction?.invoke(holder.node, NodeAction.EDIT)
-                    snapshotBeforeChange()
                 },
                 onDelete = {
                     onNodeAction?.invoke(holder.node, NodeAction.DELETE)
@@ -146,6 +145,12 @@ class MindMapAdapter(
         snapshotBeforeChange()
         editor.removeNode(node)
         notifyDataSetChange()
+    }
+
+    fun performUpdate(target: NodeModel<MindMapNodeData>, newValue: MindMapNodeData) {
+        snapshotBeforeChange()
+        target.value = newValue
+        notifyItemViewChange(target)
     }
 
     // 원본 TreeModel 전체를 끝까지 복제해서 반환
