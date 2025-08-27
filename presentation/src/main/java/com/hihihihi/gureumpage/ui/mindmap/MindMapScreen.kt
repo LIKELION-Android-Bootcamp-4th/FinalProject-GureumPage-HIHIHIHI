@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.mindmap
 
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +50,9 @@ fun MindMapScreen(
 
     AndroidViewBinding(
         factory = ActivityMindmapBinding::inflate,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
     ) {
         if (baseTreeView.adapter !is MindMapAdapter) {
             baseTreeView.adapter = adapter
