@@ -121,7 +121,7 @@ fun LoginScreen(
 
                 Semi16Text(
                     "나의 소중한 독서 기록",
-                    color = GureumTheme.colors.point,
+                    color = GureumTheme.colors.primaryDeep,
                 )
 
                 Spacer(modifier = Modifier.height(120.dp))
