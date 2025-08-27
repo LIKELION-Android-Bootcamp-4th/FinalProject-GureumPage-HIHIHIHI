@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.mindmap
 
+import android.content.res.ColorStateList
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -17,8 +18,11 @@ import com.gyso.treeview.line.DashLine
 import com.gyso.treeview.model.NodeModel
 import com.gyso.treeview.model.TreeModel
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hihihihi.domain.model.MindmapNode
+import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.databinding.ActivityMindmapBinding
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.mindmap.mapper.toUi
@@ -67,6 +71,14 @@ fun MindMapScreen(
         }
         adapter.mindmapId = mindmapId
 
+        adapter.onHistoryChanged = { canUndo, canRedo ->
+            val enabled = ContextCompat.getColor(context, R.color.primary)
+            val disabled = ContextCompat.getColor(context, R.color.gray300)
+
+            ImageViewCompat.setImageTintList(btnUndo, ColorStateList.valueOf(if (canUndo) enabled else disabled))
+            ImageViewCompat.setImageTintList(btnRedo, ColorStateList.valueOf(if (canRedo) enabled else disabled))
+        }
+
         // 편집 중이 아닐 때만 원격 스냅샷으로 트리 구성
         if (!viewModel.editing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
             val root = nodes.firstOrNull { it.parentNodeId == null } ?: return@AndroidViewBinding
@@ -83,7 +95,8 @@ fun MindMapScreen(
                 }
             }
             attach(root.mindmapNodeId)
-            adapter.setTreeModel(model)
+            adapter.setTreeModelAndReset(model)
+            adapter.onHistoryChanged?.invoke(false, false)
         }
 
         // 편집 모드일 때 수정, 삭제 버튼 이벤트 처리
@@ -104,7 +117,7 @@ fun MindMapScreen(
         btnUndo.setOnClickListener { adapter.undo() }
         btnRedo.setOnClickListener { adapter.redo() }
 
-        switchEditMode.setOnCheckedChangeListener { buttonView, isChecked ->
+        switchEditMode.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) viewModel.startEdit() else viewModel.endEdit(
                 adapter.asDomainList(mindmapId),
                 autoSave = true

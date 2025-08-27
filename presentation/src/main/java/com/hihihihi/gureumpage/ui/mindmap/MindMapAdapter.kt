@@ -49,6 +49,13 @@ class MindMapAdapter(
     private val undoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
     private val redoTreeStack = ArrayDeque<TreeModel<MindMapNodeData>>()
 
+    var onHistoryChanged: ((canUndo: Boolean, canRedo: Boolean) -> Unit)? = null
+
+    private fun notifyHistory() = onHistoryChanged?.invoke(
+        undoTreeStack.isNotEmpty(),
+        redoTreeStack.isNotEmpty()
+    )
+
     // Editor 설정
     fun setEditor(treeViewEditor: TreeViewEditor) {
         editor = treeViewEditor
@@ -126,11 +133,20 @@ class MindMapAdapter(
 
     override fun onDrawLine(drawInfo: DrawInfo?): BaseLine? = null
 
+    fun setTreeModelAndReset(model: TreeModel<MindMapNodeData>) {
+        setTreeModel(model)
+        undoTreeStack.clear()
+        redoTreeStack.clear()
+        onHistoryChanged?.invoke(false, false)
+//        notifyHistory()
+    }
+
     // 현재 보고있는 트리 복제
     private fun snapshotBeforeChange() {
         (treeModel)?.let {
             undoTreeStack.addLast(cloneTreeModel(it))
             redoTreeStack.clear()
+            notifyHistory()
         }
     }
 
@@ -139,18 +155,21 @@ class MindMapAdapter(
         snapshotBeforeChange()
         editor.addChildNodes(parent, child)
         notifyDataSetChange()
+        notifyHistory()
     }
 
     fun performDelete(node: NodeModel<MindMapNodeData>) {
         snapshotBeforeChange()
         editor.removeNode(node)
         notifyDataSetChange()
+        notifyHistory()
     }
 
     fun performUpdate(target: NodeModel<MindMapNodeData>, newValue: MindMapNodeData) {
         snapshotBeforeChange()
         target.value = newValue
         notifyItemViewChange(target)
+        notifyHistory()
     }
 
     // 원본 TreeModel 전체를 끝까지 복제해서 반환
@@ -186,6 +205,7 @@ class MindMapAdapter(
             val prevModel = undoTreeStack.removeLast()
             treeModel?.let { redoTreeStack.addLast(cloneTreeModel(it)) } // 현재 모델도 redo용으로 저장
             setTreeModel(prevModel)
+            notifyHistory()
         }
     }
 
@@ -194,6 +214,7 @@ class MindMapAdapter(
             val nextModel = redoTreeStack.removeLast()
             treeModel?.let { undoTreeStack.addLast(cloneTreeModel(it)) } // 현재 모델을 undo용으로 복제
             setTreeModel(nextModel)
+            notifyHistory()
         }
     }
 
@@ -250,7 +271,12 @@ class MindMapAdapter(
     }
 
     // 노드 추가 수정 다이얼로그
-    fun showAddNodeDialog(title: String, context: Context, existingNode: TreeNode? = null, onSave: (MindMapNodeData) -> Unit) {
+    fun showAddNodeDialog(
+        title: String,
+        context: Context,
+        existingNode: TreeNode? = null,
+        onSave: (MindMapNodeData) -> Unit
+    ) {
         // AndroidViewBinding 경유할 때 테마를 못 찾을 수 있음
         val themedInflater = LayoutInflater.from(ContextThemeWrapper(context, R.style.Theme_GureumPage))
         val binding = DialogAddNodeBinding.inflate(themedInflater)
@@ -425,7 +451,7 @@ fun MindMapAdapter.asDomainList(mindmapId: String): List<MindmapNode> {
     fun dfs(node: TreeNode, parentId: String?) {
         val value = node.value
         nodes += MindmapNode(
-            userId =value.userId,
+            userId = value.userId,
             mindmapNodeId = value.id,
             mindmapId = mindmapId,
             nodeTitle = value.title,
