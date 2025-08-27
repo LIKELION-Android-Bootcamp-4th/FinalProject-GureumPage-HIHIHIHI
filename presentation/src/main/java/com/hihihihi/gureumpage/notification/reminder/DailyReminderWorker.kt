@@ -39,8 +39,12 @@ class DailyReminderWorker @AssistedInject constructor(
         val notReadToday = true
         if (notReadToday) {
             val pendingIntent = factory.pendingIntentTo("gureum://read/start".toUri())
-            // TODO 알림 메시지 설정하기
-            val notification = factory.simpleAlarm(Channels.REMINDER, "오늘 읽기를 시작할까요?", "", pendingIntent)
+            val notification = factory.simpleAlarm(
+                Channels.REMINDER,
+                "구름이의 독서 알림 ☁\uFE0F",
+                "10분만 읽어도 충분해요.",
+                pendingIntent
+            )
             factory.notify("reminder:daily", 10001, notification)
         }
         return Result.success()

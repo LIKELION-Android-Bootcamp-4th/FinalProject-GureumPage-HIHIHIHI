@@ -24,4 +24,8 @@ object ReminderScheduler {
             "daily-reminder", ExistingWorkPolicy.REPLACE, request
         )
     }
+
+    fun cancel(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("daily-reminder")
+    }
 }
