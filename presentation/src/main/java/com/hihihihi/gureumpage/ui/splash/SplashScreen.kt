@@ -172,10 +172,8 @@ fun SplashView(
                     }
                 }
 
-                else -> navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                    launchSingleTop = true
-                }
+                else -> {
+                  }
             }
         }
     }
