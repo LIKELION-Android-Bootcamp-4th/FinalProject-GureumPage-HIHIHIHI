@@ -116,7 +116,7 @@ fun BookDetailScreen(
         }
 
         uiState.errorMessage != null -> {
-            ErrorView(message = uiState.errorMessage!!)
+            ErrorView(message = "책 정보를 가져오는데 실패했어요")
         }
 
         uiState.userBook != null -> {

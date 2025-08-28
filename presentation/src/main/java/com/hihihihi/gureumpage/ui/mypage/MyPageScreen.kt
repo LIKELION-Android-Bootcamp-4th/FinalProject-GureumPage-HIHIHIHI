@@ -2,6 +2,7 @@ package com.hihihihi.gureumpage.ui.mypage
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -85,11 +87,27 @@ fun MyPageScreen(
                 CircularProgressIndicator()
             }
 
-            state.errorMessage != null -> Text(
-                text = "오류: ${state.errorMessage}",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+            state.errorMessage != null -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Semi16Text(
+                        text = "사용자 정보를 불러오는데 실패했어요!",
+                        color = GureumTheme.colors.gray600,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Medi14Text(
+                        text = "잠시 후 다시 시도해주세요",
+                        color = GureumTheme.colors.gray500,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
             state.myPageData != null -> {
                 val data = state.myPageData!!

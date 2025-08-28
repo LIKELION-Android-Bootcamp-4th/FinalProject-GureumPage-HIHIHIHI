@@ -46,6 +46,7 @@ fun Semi16Text(
     style: TextStyle = GureumTypography.titleLarge,
     maxLine: Int = 2,
     isUnderline: Boolean = false,
+    textAlign: TextAlign = TextAlign.Justify
 ) {
     val underlineColor: Color = GureumTheme.colors.primary50
     val underlineModifier = if (isUnderline) {
@@ -66,7 +67,7 @@ fun Semi16Text(
         style = style,
         maxLines = maxLine,
         overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Justify,
+        textAlign = textAlign,
         modifier = underlineModifier.then(modifier),
     )
 }

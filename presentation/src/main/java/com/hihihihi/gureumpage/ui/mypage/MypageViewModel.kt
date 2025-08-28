@@ -60,18 +60,24 @@ class MypageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getMyPageDataUseCase(currentUid ?: return@launch)
-                .catch { e ->
-                    _uiState.update {
-                        it.copy(errorMessage = e.message, isLoading = false)
+            try {
+                getMyPageDataUseCase(currentUid ?: return@launch)
+                    .catch { e ->
+                        _uiState.update {
+                            it.copy(errorMessage = e.message, isLoading = false)
+                        }
                     }
-                }
-                .collect { myPageData ->
-                    _uiState.update {
-                        it.copy(myPageData = myPageData, isLoading = false)
-                    }
+                    .collect { myPageData ->
+                        _uiState.update {
+                            it.copy(myPageData = myPageData, isLoading = false)
+                        }
 
+                    }
+            }catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message, isLoading = false)
                 }
+            }
         }
     }
 

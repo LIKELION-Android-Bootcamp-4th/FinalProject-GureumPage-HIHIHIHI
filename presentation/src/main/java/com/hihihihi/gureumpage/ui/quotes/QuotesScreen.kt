@@ -25,6 +25,7 @@ import com.hihihihi.domain.model.Quote
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi18Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
+import com.hihihihi.gureumpage.ui.home.components.ErrorView
 import com.hihihihi.gureumpage.ui.quotes.component.QuoteContent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,9 +47,7 @@ fun QuotesScreen(
         }
 
         uiState.errorMessage != null -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "에러 발생", color = GureumTheme.colors.systemRed)
-            }
+            ErrorView(message = "필사 데이터를 가져오는데 실패했어요") // 에러 발생 시 표시될 뷰
         }
 
         !uiState.isLoading && uiState.quotes.isEmpty() -> {

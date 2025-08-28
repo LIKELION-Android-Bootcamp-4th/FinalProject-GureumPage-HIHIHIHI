@@ -137,157 +137,175 @@ fun LibraryScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    when (page) {
-                        0 -> {
-                            if (plannedBooks.isEmpty()) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Semi18Text(
-                                        "아직 담은 책이 없어요",
-                                        color = GureumTheme.colors.gray500
-                                    )
-                                    Spacer(Modifier.height(16.dp))
-                                    Medi16Text(
-                                        "읽고 싶은 책을 추가해 보세요.",
-                                        color = GureumTheme.colors.gray400
-                                    )
-                                }
-                            } else {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(3),
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(top = 18.dp)
-                                ) {
-                                    items(plannedBooks) { book ->
-                                        BookItem(
-                                            book = book,
-                                            onClicked = {
-                                                navController.navigate(
-                                                    NavigationRoute.BookDetail.createRoute(
-                                                        it
-                                                    )
-                                                )
-                                            }
+                    if (uiState.errorMessage != null) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Semi18Text(
+                                "불러올 수 없습니다",
+                                color = GureumTheme.colors.gray500
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Medi16Text(
+                                "잠시 후 다시 시도해주세요.",
+                                color = GureumTheme.colors.gray400
+                            )
+                        }
+                    } else {
+                        when (page) {
+                            0 -> {
+                                if (plannedBooks.isEmpty()) {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Semi18Text(
+                                            "아직 담은 책이 없어요",
+                                            color = GureumTheme.colors.gray500
                                         )
+                                        Spacer(Modifier.height(16.dp))
+                                        Medi16Text(
+                                            "읽고 싶은 책을 추가해 보세요.",
+                                            color = GureumTheme.colors.gray400
+                                        )
+                                    }
+                                } else {
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(3),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(top = 18.dp)
+                                    ) {
+                                        items(plannedBooks) { book ->
+                                            BookItem(
+                                                book = book,
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        1 -> {
-                            if (readingBooks.isEmpty()) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Semi18Text(
-                                        "읽고 있는 책이 없어요",
-                                        color = GureumTheme.colors.gray500
-                                    )
-                                    Spacer(Modifier.height(16.dp))
-                                    Medi16Text(
-                                        "책을 찾아 추가하고 새로운 독서를 시작해 보세요.",
-                                        color = GureumTheme.colors.gray400
-
-                                    )
-                                }
-                            } else {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(3),
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(top = 18.dp)
-                                ) {
-                                    items(readingBooks) { book ->
-                                        BookItem(
-                                            book = book,
-                                            onClicked = {
-                                                navController.navigate(
-                                                    NavigationRoute.BookDetail.createRoute(
-                                                        it
-                                                    )
-                                                )
-                                            }
+                            1 -> {
+                                if (readingBooks.isEmpty()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Semi18Text(
+                                            "읽고 있는 책이 없어요",
+                                            color = GureumTheme.colors.gray500
                                         )
+                                        Spacer(Modifier.height(16.dp))
+                                        Medi16Text(
+                                            "책을 찾아 추가하고 새로운 독서를 시작해 보세요.",
+                                            color = GureumTheme.colors.gray400
+
+                                        )
+                                    }
+                                } else {
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(3),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(top = 18.dp)
+                                    ) {
+                                        items(readingBooks) { book ->
+                                            BookItem(
+                                                book = book,
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        2 -> {
-                            if (finishedBooks.isEmpty()) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Semi18Text(
-                                        "아직 완독한 책이 없어요",
-                                        color = GureumTheme.colors.gray500
-                                    )
-                                    Spacer(Modifier.height(16.dp))
-                                    Medi16Text(
-                                        "첫 완독을 기록하면 서재가 채워져요.",
-                                        color = GureumTheme.colors.gray400
-                                    )
-                                }
-                            } else {
-
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(3),
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(top = 18.dp)
-                                ) {
-                                    items(finishedBooks) { book ->
-                                        BookItem(
-                                            book = book,
-                                            onClicked = {
-                                                navController.navigate(
-                                                    NavigationRoute.BookDetail.createRoute(
-                                                        it
-                                                    )
-                                                )
-                                            }
+                            2 -> {
+                                if (finishedBooks.isEmpty()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Semi18Text(
+                                            "아직 완독한 책이 없어요",
+                                            color = GureumTheme.colors.gray500
                                         )
+                                        Spacer(Modifier.height(16.dp))
+                                        Medi16Text(
+                                            "첫 완독을 기록하면 서재가 채워져요.",
+                                            color = GureumTheme.colors.gray400
+                                        )
+                                    }
+                                } else {
+
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(3),
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(top = 18.dp)
+                                    ) {
+                                        items(finishedBooks) { book ->
+                                            BookItem(
+                                                book = book,
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // 위쪽 그래디언트 오버레이
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(16.dp)
-                        .align(Alignment.TopCenter)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    GureumTheme.colors.background,
-                                    Color.Transparent
-                                ),
+                    // 위쪽 그래디언트 오버레이
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(16.dp)
+                            .align(Alignment.TopCenter)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        GureumTheme.colors.background,
+                                        Color.Transparent
+                                    ),
+                                )
                             )
-                        )
-                )
+                    )
+                }
             }
         }
     }
