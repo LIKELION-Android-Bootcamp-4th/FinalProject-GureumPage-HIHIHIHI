@@ -68,6 +68,8 @@ class MindMapAdapter(
         )
 
     override fun onBindViewHolder(holder: TreeViewHolder<MindMapNodeData>) {
+        if(holder.view == null) return
+
         val node = holder.node.value
         val titleView = holder.view.findViewById<TextView>(R.id.node_title)
         val iconView = holder.view.findViewById<TextView>(R.id.node_icon)
@@ -152,7 +154,6 @@ class MindMapAdapter(
 
     // 노드 추가를 스택에 추가
     fun performAdd(parent: NodeModel<MindMapNodeData>, child: NodeModel<MindMapNodeData>) {
-        if (!::editor.isInitialized || treeModel == null) return 
         snapshotBeforeChange()
         editor.addChildNodes(parent, child)
         notifyDataSetChange()
@@ -160,7 +161,6 @@ class MindMapAdapter(
     }
 
     fun performDelete(node: NodeModel<MindMapNodeData>) {
-        if (!::editor.isInitialized || treeModel == null) return
         snapshotBeforeChange()
         editor.removeNode(node)
         notifyDataSetChange()
@@ -168,10 +168,9 @@ class MindMapAdapter(
     }
 
     fun performUpdate(target: NodeModel<MindMapNodeData>, newValue: MindMapNodeData) {
-        if (!::editor.isInitialized || treeModel == null) return
         snapshotBeforeChange()
         target.value = newValue
-        notifyItemViewChange(target)
+        notifyDataSetChange()
         notifyHistory()
     }
 
