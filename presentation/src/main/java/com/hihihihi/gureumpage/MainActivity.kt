@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -72,6 +73,7 @@ import com.hihihihi.gureumpage.navigation.GureumBottomNavBar
 import com.hihihihi.gureumpage.navigation.GureumNavGraph
 import com.hihihihi.gureumpage.navigation.NavigationRoute
 import com.hihihihi.gureumpage.notification.common.Channels
+import com.hihihihi.gureumpage.ui.nonetwork.NoNetworkScreen
 import com.hihihihi.gureumpage.ui.timer.FloatingTimerService
 import com.hihihihi.gureumpage.ui.timer.LocalAppBarUpClick
 import com.hihihihi.gureumpage.ui.timer.TimerRepository
@@ -89,6 +91,11 @@ class MainActivity : ComponentActivity() {
         private val networkManager: NetworkManager
     ) : ViewModel() {
         val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
+        val isConnected = networkManager.networkState
+
+        fun recheckNetwork() {
+            networkManager.checkCurrentNetwork()
+        }
 
         val showNetworkWarning = networkManager.showNetworkWarning
 
@@ -122,6 +129,25 @@ class MainActivity : ComponentActivity() {
             val isDark = currentTheme != GureumThemeType.LIGHT
             val window = (LocalContext.current as Activity).window
 
+            val isConnected by viewModel.isConnected.collectAsState()
+
+
+            val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
+            LaunchedEffect(navController) { _navController = navController }
+
+            var hasShownNoNetwork by remember { mutableStateOf(false) }
+
+            LaunchedEffect(isConnected) {
+                if (!isConnected) {
+                    hasShownNoNetwork = true
+                } else if (hasShownNoNetwork) {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                    hasShownNoNetwork = false
+                }
+            }
+
             DisposableEffect(isDark) {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -130,9 +156,6 @@ class MainActivity : ComponentActivity() {
                 }
                 onDispose { }
             }
-
-            val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
-            LaunchedEffect(navController) { _navController = navController }
 
             LaunchedEffect(Unit) {
                 if (routeIfWidgetDeepLink(initIntent)) return@LaunchedEffect
@@ -150,16 +173,17 @@ class MainActivity : ComponentActivity() {
             // 모드 상태에 따라 GureumPageTheme 에 반영
             GureumPageTheme(darkTheme = isDark) {
                 Surface(modifier = Modifier.fillMaxSize(), color = GureumTheme.colors.background) {
-                    GureumPageApp(
-                        navController,
-                        initIntent,
-                        isTimerRunning,
-                        timerRepository
-                    )
-
-                    if (showNetworkWarning) {
-                        NetworkWarningBanner(
-                            onDismiss = { viewModel.dismissNetworkWarning() }
+                    if (!isConnected) {
+                        NoNetworkScreen(
+                            onRefresh = { viewModel.recheckNetwork() },
+                            onExit = { finish() }
+                        )
+                    } else {
+                        GureumPageApp(
+                            navController,
+                            initIntent,
+                            isTimerRunning,
+                            timerRepository
                         )
                     }
                 }
@@ -503,61 +527,6 @@ fun GureumPageApp(
                     navController = navController,
                     modifier = Modifier.fillMaxSize(),
                     snackbarHostState = snackbarHostState
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun NetworkWarningBanner(
-    onDismiss: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .padding(top = 40.dp)
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = GureumTheme.colors.systemRed
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Warning,
-                contentDescription = null,
-                tint = GureumTheme.colors.white
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Semi16Text(
-                    "앗, 네트워크 연결이 끊어졌어요!",
-                    color = GureumTheme.colors.white
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Medi14Text(
-                    "데이터를 불러오거나 저장할 수 없어요.",
-                    color = GureumTheme.colors.white
-                )
-                Medi14Text(
-                    "다시 연결하면 바로 불러올 수 있어요!",
-                    color = GureumTheme.colors.white
-                )
-            }
-
-            IconButton(onClick = onDismiss) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close),
-                    modifier = Modifier.size(16.dp),
-                    contentDescription = null,
-                    tint = GureumTheme.colors.white
                 )
             }
         }
