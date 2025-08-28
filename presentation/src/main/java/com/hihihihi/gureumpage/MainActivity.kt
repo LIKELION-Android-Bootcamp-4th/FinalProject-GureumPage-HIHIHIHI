@@ -42,7 +42,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
@@ -60,6 +62,7 @@ import com.hihihihi.gureumpage.ui.timer.TimerRepository
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -68,7 +71,8 @@ class MainActivity : ComponentActivity() {
     @HiltViewModel
     class GureumThemeViewModel @Inject constructor(
         getTheme: GetThemeFlowUseCase,
-        private val networkManager: NetworkManager
+        private val networkManager: NetworkManager,
+        private val getOnboardingCompleteUseCase: GetOnboardingCompleteUseCase
     ) : ViewModel() {
         val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
         val isConnected = networkManager.networkState
@@ -82,6 +86,8 @@ class MainActivity : ComponentActivity() {
         fun dismissNetworkWarning() {
             networkManager.dismissNetworkWarning()
         }
+
+        fun getOnboardingComplete(userId: String) = getOnboardingCompleteUseCase(userId)
     }
 
     @Inject
@@ -128,9 +134,28 @@ class MainActivity : ComponentActivity() {
                 if (!isConnected) {
                     hasShownNoNetwork = true
                 } else if (hasShownNoNetwork) {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(0) { inclusive = true }
+                    val user = FirebaseAuth.getInstance().currentUser
+
+                    if (user == null) {
+                        navController.navigate(NavigationRoute.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    } else {
+                        if(viewModel.getOnboardingComplete(user.uid).first()){
+                            navController.navigate(NavigationRoute.Home.route) {
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                        else {
+                            navController.navigate(NavigationRoute.OnBoarding.route) {
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
                     }
+
                     hasShownNoNetwork = false
                 }
             }
