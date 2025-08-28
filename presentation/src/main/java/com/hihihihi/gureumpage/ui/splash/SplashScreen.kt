@@ -53,6 +53,7 @@ import com.hihihihi.gureumpage.notification.summary.SummaryScheduler
 fun SplashView(
     navController: NavHostController,
     viewModel: SplashViewModel = hiltViewModel(),
+    pendingWidgetRoute: String? = null,
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -85,11 +86,18 @@ fun SplashView(
         animationSpec = tween(durationMillis = 1200), label = ""
     )
 
+    // 위젯 라우트를 먼저 ViewModel에 설정
+    LaunchedEffect(pendingWidgetRoute) {
+        if (pendingWidgetRoute != null) {
+            viewModel.setPendingWidgetRoute(pendingWidgetRoute)
+        }
+    }
+
     LaunchedEffect(Unit) {
         startAnimation = true
     }
 
-    val andimatedProgress by animateFloatAsState(
+    val animatedProgress by animateFloatAsState(
         targetValue = uiState.progress,
         animationSpec = tween(durationMillis = 300), label = ""
     )
@@ -128,8 +136,9 @@ fun SplashView(
     }
 
     LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
+
         if (proceed && !uiState.isLoading) {
-            when (uiState.navTarget) {
+            when (val target = uiState.navTarget) {
                 SplashViewModel.NavTarget.Login -> {
                     navController.navigate(NavigationRoute.Login.route) {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
@@ -151,7 +160,22 @@ fun SplashView(
                     }
                 }
 
-                else -> Unit
+                is SplashViewModel.NavTarget.Widget -> {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                    // Home 네비게이션 후 위젯 라우트로 이동
+                    navController.navigate(target.route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+
+                else -> navController.navigate(NavigationRoute.Home.route) {
+                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         }
     }
@@ -220,7 +244,7 @@ fun SplashView(
                 )
                 Spacer(Modifier.height(8.dp))
                 GureumLinearProgressBar(
-                    progress = andimatedProgress,
+                    progress = animatedProgress,
                     height = 12,
                 )
             }

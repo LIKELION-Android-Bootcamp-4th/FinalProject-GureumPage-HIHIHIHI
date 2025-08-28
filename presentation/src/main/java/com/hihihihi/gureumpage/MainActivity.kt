@@ -13,23 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.collection.isNotEmpty
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -45,11 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,13 +42,10 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
-import com.hihihihi.gureumpage.designsystem.components.Medi14Text
-import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.navigation.BottomNavItem
@@ -110,9 +90,17 @@ class MainActivity : ComponentActivity() {
     private var _navController: NavHostController? = null
     private var pendingDeepLink: Intent? = null
 
+    // 위젯 라우트를 저장할 변수 추가
+    private var _widgetRoute: String? = null
+
     @SuppressLint("ContextCastToActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // onCreate에서 인텐트 처리
+        if (isWidgetDeepLink(intent)) {
+            _widgetRoute = extractWidgetRoute(intent)
+        }
 
         setTheme(R.style.Theme_GureumPage)
         Channels.ensureAll(this)
@@ -131,8 +119,7 @@ class MainActivity : ComponentActivity() {
 
             val isConnected by viewModel.isConnected.collectAsState()
 
-
-            val navController = rememberNavController() //DeepLink 라우팅 처리 위해 navController 상위에서 선언
+            val navController = rememberNavController()
             LaunchedEffect(navController) { _navController = navController }
 
             var hasShownNoNetwork by remember { mutableStateOf(false) }
@@ -158,15 +145,21 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                if (routeIfWidgetDeepLink(initIntent)) return@LaunchedEffect
+                // onCreate에서 처리한 위젯 라우트가 있다면 사용
+                if (_widgetRoute != null) {
+                    return@LaunchedEffect
+                }
+
                 if (routeIfNotificationDeepLink(initIntent)) return@LaunchedEffect
 
                 // 보류분 처리도 동일 정책
                 pendingDeepLink?.let { pending ->
-                    val handled =
-                        routeIfWidgetDeepLink(pending) || routeIfNotificationDeepLink(pending)
+                    if (isWidgetDeepLink(pending)) {
+                        _widgetRoute = extractWidgetRoute(pending)
+                    } else {
+                        routeIfNotificationDeepLink(pending)
+                    }
                     pendingDeepLink = null
-                    if (handled) return@LaunchedEffect
                 }
             }
 
@@ -183,7 +176,9 @@ class MainActivity : ComponentActivity() {
                             navController,
                             initIntent,
                             isTimerRunning,
-                            timerRepository
+                            timerRepository,
+                            pendingWidgetRoute = _widgetRoute, // 저장된 위젯 라우트 전달
+                            onWidgetRouteConsumed = { _widgetRoute = null }
                         )
                     }
                 }
@@ -197,122 +192,32 @@ class MainActivity : ComponentActivity() {
         stopService(intent)
     }
 
-    // 백그라운드에서 알림으로 들어올 시 딥링크 처리
     @SuppressLint("RestrictedApi")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
 
+        // 위젯 딥링크인 경우 처리
+        if (isWidgetDeepLink(intent)) {
+            _widgetRoute = extractWidgetRoute(intent)
+            // NavController가 준비되었다면 바로 네비게이션
+            _navController?.let { navController ->
+                _widgetRoute?.let { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                    _widgetRoute = null
+                }
+            }
+            return
+        }
+
         if (_navController != null && _navController!!.graph.nodes.isNotEmpty()) {
-            if (routeIfWidgetDeepLink(intent)) return
             if (routeIfNotificationDeepLink(intent)) return
         } else {
             // 그래프 준비 전이면 보류
             pendingDeepLink = intent
-        }
-    }
-
-    // 위젯 스킴(gureumpage://app/…)이면 수동 라우팅
-    private fun routeIfWidgetDeepLink(intent: Intent): Boolean {
-        val uri = intent.data ?: return false
-        return routeWidgetUri(uri)
-    }
-
-    private fun routeWidgetUri(uri: Uri): Boolean {
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            _navController?.navigate(NavigationRoute.Splash.route) {
-                popUpTo(0) { inclusive = true }
-            }
-            return true
-        }
-
-        when {
-            // 놓친 기록: gureumpage://app/book/missedRecord/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
-                val bookId = uri.pathSegments.lastOrNull()
-
-                bookId?.let {
-                    val route = NavigationRoute.BookDetail.createRoute(
-                        bookId = it,
-                        showAddManualRecord = true
-                    )
-                    navigateFromWidget(route)
-                }
-                return true
-            }
-
-            // 타이머: gureumpage://app/book/timer/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/timer/[^/?]+.*")) -> {
-                val bookId = uri.pathSegments.lastOrNull()
-
-                bookId?.let {
-                    val route = NavigationRoute.Timer.createRoute(
-                        userBookId = it,
-                    )
-                    navigateFromWidget(route)
-                }
-
-                return true
-            }
-
-            // 필사 추가: gureumpage://app/book/addQuote/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/addQuote/[^/?]+.*")) -> {
-                val bookId = uri.pathSegments.lastOrNull()
-                bookId?.let {
-                    val route = NavigationRoute.BookDetail.createRoute(
-                        bookId = it,
-                        showAddQuote = true
-                    )
-                    navigateFromWidget(route)
-                }
-                return true
-            }
-
-            // 책 상세: gureumpage://app/book/{bookId}?from=widget
-            uri.toString().matches(Regex("gureumpage://app/book/[^/?]+.*")) -> {
-                val bookId = uri.pathSegments.lastOrNull()
-
-                bookId?.let {
-                    val route = NavigationRoute.BookDetail.createRoute(
-                        bookId = it,
-                    )
-                    navigateFromWidget(route)
-                }
-                return true
-            }
-
-            else -> {
-                return false
-            }
-        }
-    }
-
-    private fun navigateFromWidget(route: String) {
-        val navController = _navController ?: return
-        val currentRoute = navController.currentBackStackEntry?.destination?.route
-
-        when {
-            currentRoute == NavigationRoute.Splash.route ||
-                    currentRoute == NavigationRoute.Login.route
-                -> {
-                navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-                navController.navigate(route){
-                    launchSingleTop = true
-                    restoreState = true
-                }
-                return
-            }
-
-            else -> {
-                navController.navigate(route) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
         }
     }
 
@@ -328,6 +233,53 @@ class MainActivity : ComponentActivity() {
                 setIntent(intent)
             }
         }
+    }
+
+    private fun extractWidgetRoute(intent: Intent): String? {
+        val uri = intent.data ?: return null
+
+        return when {
+            uri.toString().matches(Regex("gureumpage://app/book/missedRecord/[^/?]+.*")) -> {
+                val bookId = uri.pathSegments.lastOrNull()
+                bookId?.let {
+                    NavigationRoute.BookDetail.createRoute(
+                        bookId = it,
+                        showAddManualRecord = true
+                    )
+                }
+            }
+
+            uri.toString().matches(Regex("gureumpage://app/book/timer/[^/?]+.*")) -> {
+                val bookId = uri.pathSegments.lastOrNull()
+                bookId?.let { NavigationRoute.Timer.createRoute(userBookId = it) }
+            }
+
+            uri.toString().matches(Regex("gureumpage://app/book/addQuote/[^/?]+.*")) -> {
+                val bookId = uri.pathSegments.lastOrNull()
+                bookId?.let {
+                    NavigationRoute.BookDetail.createRoute(
+                        bookId = it,
+                        showAddQuote = true
+                    )
+                }
+            }
+
+            uri.toString().matches(Regex("gureumpage://app/book/[^/?]+.*")) -> {
+                val bookId = uri.pathSegments.lastOrNull()
+                bookId?.let { NavigationRoute.BookDetail.createRoute(bookId = it) }
+            }
+
+            else -> {
+                null
+            }
+        }.also { route ->
+        }
+    }
+
+    private fun isWidgetDeepLink(intent: Intent): Boolean {
+        val uri = intent.data ?: return false
+        val isWidget = uri.scheme == "gureumpage" && uri.host == "app"
+        return isWidget
     }
 
     private fun routeNotificationUri(uri: Uri): Boolean {
@@ -375,6 +327,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         _navController = null
+        _widgetRoute = null
         super.onDestroy()
     }
 }
@@ -384,7 +337,9 @@ fun GureumPageApp(
     navController: NavHostController,
     initIntent: Intent,
     isTimerRunning: Boolean,
-    timerRepository: TimerRepository
+    timerRepository: TimerRepository,
+    pendingWidgetRoute: String? = null,
+    onWidgetRouteConsumed: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -432,7 +387,6 @@ fun GureumPageApp(
     var initialHandle by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(initialHandle) {
         if (!initialHandle) {
-//            navController.handleDeepLink(initIntent)
             initialHandle = true
         }
     }
@@ -526,7 +480,8 @@ fun GureumPageApp(
                 GureumNavGraph(
                     navController = navController,
                     modifier = Modifier.fillMaxSize(),
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    pendingWidgetRoute = pendingWidgetRoute
                 )
             }
         }

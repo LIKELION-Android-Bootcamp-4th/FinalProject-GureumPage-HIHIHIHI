@@ -26,12 +26,20 @@ class SplashViewModel @Inject constructor(
         data object Onboarding : NavTarget
         data object Home : NavTarget
         data object NoNetwork : NavTarget
+        data class Widget(val route: String) : NavTarget
     }
 
     private val _uiState = MutableStateFlow(SplashUiState())
     val uiState: StateFlow<SplashUiState> = _uiState
 
     private val auth = FirebaseAuth.getInstance()
+
+    // 위젯 라우트를 저장할 변수
+    private var pendingWidgetRoute: String? = null
+
+    fun setPendingWidgetRoute(route: String?) {
+        pendingWidgetRoute = route
+    }
 
     fun checkNetworkAndProceed() {
         viewModelScope.launch {
@@ -74,15 +82,33 @@ class SplashViewModel @Inject constructor(
                 val profile = getUserUseCase(user.uid)
                 val hasNickname = !profile?.nickname.isNullOrBlank()
                 if (hasNickname) setOnboardingCompleteUseCase(user.uid, true)
+
+                val finalTarget = when {
+                    !hasNickname -> {
+                        NavTarget.Onboarding
+                    }
+                    pendingWidgetRoute != null -> {
+                        NavTarget.Widget(pendingWidgetRoute!!)
+                    }
+                    else -> {
+                        NavTarget.Home
+                    }
+                }
+
                 _uiState.value = _uiState.value.copy(
-                    loadingMessage = if (hasNickname) "구름이와 홈으로 이동중" else "처음 오셨네요! 구름한장을 소개해드릴게요",
+                    loadingMessage = when (finalTarget) {
+                        is NavTarget.Onboarding -> "처음 오셨네요! 구름한장을 소개해드릴게요"
+                        is NavTarget.Widget -> "위젯에서 요청한 페이지로 이동중..."
+                        else -> "구름이와 홈으로 이동중"
+                    },
                     progress = 0.99f,
                 )
                 delay(500)
+
                 _uiState.value = _uiState.value.copy(
                     progress = 1f,
                     isLoading = false,
-                    navTarget = if (hasNickname) NavTarget.Home else NavTarget.Onboarding
+                    navTarget = finalTarget
                 )
             }
         }
