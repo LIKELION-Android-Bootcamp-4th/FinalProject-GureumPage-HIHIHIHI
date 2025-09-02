@@ -1,4 +1,5 @@
 <img width="1440" height="510" alt="Surface Pro 8 - 6" src="https://github.com/user-attachments/assets/e4633938-9b03-49aa-93e5-894f3ab9a9ac" />
+
 # 프로젝트 소개
 
 > 한 장씩 넘기며 기록하는 나의 독서 노트 **구름한장☁️**
