@@ -15,12 +15,12 @@ import com.hihihihi.data.repotisoryimpl.AuthRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.KakaoAuthRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.NaverAuthRepositoryImpl
 import com.hihihihi.data.remote.datasource.UserRemoteDataSource
+import com.hihihihi.data.repositoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.DailyReadPageRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.HistoryRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.MindmapNodeRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.MindmapRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.QuoteRepositoryImpl
-import com.hihihihi.data.repotisoryimpl.SearchRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserBookRepositoryImpl
 import com.hihihihi.data.repotisoryimpl.UserPreferencesRepositoryImpl
 import com.hihihihi.domain.repository.AuthRepository

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Snackbar
@@ -38,9 +39,7 @@ import androidx.navigation.NavHostController
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Medi14Text
-import com.hihihihi.gureumpage.designsystem.components.Medi16Text
 import com.hihihihi.gureumpage.designsystem.components.Semi16Text
-import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
 import com.hihihihi.gureumpage.ui.login.components.SocialLoginButton
@@ -70,8 +69,6 @@ fun LoginScreen(
             viewModel.clearError()
         }
     }
-
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -121,7 +118,7 @@ fun LoginScreen(
 
                 Semi16Text(
                     "나의 소중한 독서 기록",
-                    color = GureumTheme.colors.point,
+                    color = GureumTheme.colors.primaryDeep,
                 )
 
                 Spacer(modifier = Modifier.height(120.dp))
@@ -132,7 +129,7 @@ fun LoginScreen(
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_google,
                     backgroundColor = Color.White,
-                    enabled = !uiState.isLoading,
+                    isLastProvider = uiState.lastProvider == "google",
                     onClick = {
                         viewModel.googleLogin(context, googleLauncher)
                     }
@@ -145,8 +142,7 @@ fun LoginScreen(
                     textColor = Color.Black,
                     iconResId = R.drawable.ic_kakao,
                     backgroundColor = Color(0xFFFEE500),
-                    enabled = !uiState.isLoading,
-
+                    isLastProvider = uiState.lastProvider == "kakao",
                     onClick = {
                         viewModel.kakaoLogin(navController)
                     }
@@ -159,7 +155,7 @@ fun LoginScreen(
                     textColor = Color.White,
                     iconResId = R.drawable.ic_naver,
                     backgroundColor = Color(0xFF03C75A),
-                    enabled = !uiState.isLoading,
+                    isLastProvider = uiState.lastProvider == "naver",
                     onClick = {
                         activity?.let { viewModel.naverLogin(it, navController) }
                     }
@@ -211,6 +207,7 @@ fun LoginScreen(
 
         SnackbarHost(
             hostState = snackbarHostState,
+            modifier = Modifier.statusBarsPadding()
         ) { data ->
             Snackbar(
                 snackbarData = data,

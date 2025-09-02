@@ -45,7 +45,7 @@ fun HomeScreen(
         }
 
         uiState.value.errorMessage != null -> {
-            ErrorView(message = uiState.value.errorMessage!!) // 에러 발생 시 표시될 뷰
+            ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요") // 에러 발생 시 표시될 뷰
         }
 
         uiState.value.homeData != null -> {

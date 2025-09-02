@@ -15,11 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.hihihihi.gureumpage.common.utils.parseDisplayTimeToSeconds
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -40,21 +42,27 @@ fun StopReadingDialog(
     val colors = GureumTheme.colors
     val typo = GureumTypography
 
-    var startPage by remember(currentPage) { mutableStateOf((currentPage ?: 0).takeIf { it > 0 }?.toString() ?: "") }
+    var startPage by remember(currentPage) {
+        mutableStateOf((currentPage ?: 0).takeIf { it >= 0 }?.toString() ?: "")
+    }
     var endPage by remember { mutableStateOf("") }
 
-    fun String.onlyDigits(): String = filter(Char::isDigit)
     fun safeInt(s: String?): Int = s?.toIntOrNull() ?: -1
 
     val start = safeInt(startPage)
     val end = safeInt(endPage)
-    val isPageEntered = start >= 0 && end >= 0
-    val isPageOrdered = if (isPageEntered) start <= end else true
-    val isPageInRange = if (totalPage != null && totalPage > 0 && isPageEntered)
-        (start in 0..totalPage) && (end in 0..totalPage) else true
 
-    val canConfirm = isPageOrdered && isPageInRange
+    // 페이지 유효성 검증 로직 수정
+    val isPagesNotEmpty = startPage.isNotEmpty() && endPage.isNotEmpty()
+    val isPageOrdered = if (isPagesNotEmpty) start <= end else false
+    val isPageInRange = if (totalPage != null && totalPage > 0 && isPagesNotEmpty) {
+        start in 0..totalPage && end in 0..totalPage
+    } else isPagesNotEmpty
 
+    val totalSeconds = parseDisplayTimeToSeconds(displayTime)
+    val isOverOneMinute = totalSeconds >= 60
+
+    val canConfirm = isPagesNotEmpty && isPageOrdered && isPageInRange && isOverOneMinute
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -107,7 +115,7 @@ fun StopReadingDialog(
                     style = typo.bodySmall,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    color = if(willSave) colors.gray500 else colors.systemRed
+                    color = if (willSave) colors.gray500 else colors.systemRed
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -176,21 +184,35 @@ fun StopReadingDialog(
                 ) {
                     GureumTextField(
                         value = startPage,
-                        onValueChange = { startPage = it.onlyDigits() },
+                        onValueChange = {
+                            startPage = it.filter(Char::isDigit)
+                                .toIntOrNull()
+                                ?.coerceAtMost(totalPage ?: Int.MAX_VALUE)
+                                ?.toString()
+                                ?: ""
+                        },
                         hint = "시작 페이지",
+                        keyboardType = KeyboardType.Number,
                         modifier = Modifier.weight(1f)
                     )
                     Text("~", style = typo.bodyMedium, color = colors.gray700)
                     GureumTextField(
                         value = endPage,
-                        onValueChange = { endPage = it.onlyDigits() },
+                        onValueChange = {
+                            endPage = it.filter(Char::isDigit)
+                                .toIntOrNull()
+                                ?.coerceAtMost(totalPage ?: Int.MAX_VALUE)
+                                ?.toString()
+                                ?: ""
+                        },
                         hint = "끝 페이지",
                         modifier = Modifier.weight(1f),
+                        keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     )
                 }
 
-                if (!isPageOrdered || !isPageInRange) {
+                if (isPagesNotEmpty && (!isPageOrdered || !isPageInRange)) {
                     Spacer(Modifier.height(6.dp))
                     val warn = when {
                         !isPageOrdered -> "시작 페이지가 끝 페이지보다 작거나 같아야 해요."
@@ -210,7 +232,7 @@ fun StopReadingDialog(
                 Spacer(Modifier.height(24.dp))
 
                 GureumButton(
-                    text = "종료하기",
+                    text = if(!isOverOneMinute) "1분 미만의 독서는 기록할 수 없어요." else "종료하기",
                     onClick = {
                         if (canConfirm) onConfirmStopPages(start, end)
                     },

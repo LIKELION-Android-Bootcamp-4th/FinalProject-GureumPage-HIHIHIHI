@@ -13,6 +13,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 ) : UserPreferencesRepository {
     override val nickname: Flow<String> = localDatasource.nickname
     override val theme: Flow<GureumThemeType> = localDatasource.theme
+    override val lastProvider: Flow<String> = localDatasource.lastProvider
 
     override fun getOnboardingComplete(userId: String): Flow<Boolean> =
         localDatasource.getOnboardingComplete(userId)
@@ -28,6 +29,10 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun setTheme(theme: GureumThemeType) {
         localDatasource.setTheme(theme)
+    }
+
+    override suspend fun setLastProvider(provider: String) {
+        localDatasource.setLastProvider(provider)
     }
 
     override suspend fun clearAll() {

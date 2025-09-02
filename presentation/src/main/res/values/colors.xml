@@ -30,4 +30,11 @@
     <color name="bookBackground">#4DE3DECF</color>
     <color name="dividerDeep">#FFDADBCD</color>
     <color name="dividerShallow">#FFF1F2E6</color>
+    <color name="heat_bg">#FAF9F5</color>
+    <color name="heat_cell_0">#CFD0C7</color>
+    <color name="heat_cell_1">#B6BEA4</color>
+    <color name="heat_cell_2">#A1AF8A</color>
+    <color name="heat_cell_3">#8C9E76</color>
+    <color name="heat_cell_4">#79884A</color>
+    <color name="heat_label">#5B5B53</color>
 </resources>

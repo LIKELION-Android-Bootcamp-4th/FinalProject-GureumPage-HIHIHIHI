@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.common.utils.validateNickname
+import com.hihihihi.gureumpage.common.utils.NicknameRule
+import com.hihihihi.gureumpage.common.utils.NicknameValidator
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
@@ -45,16 +50,27 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
             modifier = Modifier.padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.End
         ) {
+            val rule = NicknameValidator.validate(viewModel.nickname)
             GureumTextField(
                 value = viewModel.nickname,
                 onValueChange = {
-                    viewModel.updateNickname(it.trim())
+                    viewModel.updateNickname(it)
                 },
                 hint = "닉네임을 입력해주세요",
                 textAlign = TextAlign.Center,
                 imeAction = ImeAction.Done,
-                isError = !viewModel.nickname.validateNickname(),
-                onSubmit = { viewModel.saveNickname() }
+                isError = rule !is NicknameRule.Ok,
+                trailingIcon = {
+                    if (viewModel.nickname.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.updateNickname("") }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Close,
+                                contentDescription = "지우기",
+                                tint = GureumTheme.colors.gray300
+                            )
+                        }
+                    }
+                },
             ) {
                 Text(
                     text = buildAnnotatedString {

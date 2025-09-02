@@ -43,10 +43,14 @@ fun ReadingRecordTab(histories: List<History>) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Semi16Text("아직 독서 기록이 없어요.")
+            Semi16Text(
+                "아직 독서 기록이 없어요.",
+                color = GureumTheme.colors.gray500
+            )
             Spacer(Modifier.height(16.dp))
             Medi14Text(
                 "독서 스톱워치로 독서를 시작하거나\n놓친 기록을 직접 추가해보세요!",
+                color = GureumTheme.colors.gray400,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -93,7 +97,56 @@ fun ReadingRecordTab(histories: List<History>) {
                 }
         }
     }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
+        histories
+            .filter { it.date != null }
+            .sortedByDescending { it.date }
+            .groupBy { it.date!!.toLocalDate() }
+            .forEach { (localDate, dailyRecords) ->
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 24.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Text(
+                        text = formatDateToSimpleString(dailyRecords.first().date),
+                        modifier = Modifier,
+                        color = GureumTheme.colors.gray400,
+                        style = GureumTypography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
 
+
+                    Semi16Text(
+                        text = formatSecondsToReadableTime(
+                            dailyRecords.sumOf { it.readTime }
+                        ),
+                        isUnderline = true
+                    )
+
+//                    TitleText(
+//                        text = formatSecondsToReadableTime(
+//                            dailyRecords.sumOf { it.readTime }
+//                        ),
+//                        isUnderline = true
+//                    )
+
+                }
+                dailyRecords.forEach { record ->
+                    RecordCard(
+                        isTimer = record.recordType == RecordType.TIMER,
+                        id = record.id,
+                        timeRange = formatTimeRange(record.startTime, record.endTime),
+                        duration = formatSecondsToReadableTime(record.readTime)
+                    )
+                }
+            }
+    }
 }
 
 @Composable

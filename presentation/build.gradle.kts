@@ -31,8 +31,8 @@ android {
         applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.0"
+        versionCode = 7
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -141,12 +141,28 @@ dependencies {
 
     implementation(libs.calendar.compose)
 
+
     implementation(libs.google.play.review)
     implementation(libs.google.play.review.ktx)
 
     implementation(libs.play.services.oss.licenses)
 
+    implementation("androidx.compose.material:material-icons-extended")
+
+
     implementation ("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+
+    implementation(libs.androidx.work.runtime.ktx)
+//    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+
+    ksp("com.google.dagger:hilt-compiler:2.56.2")
+
+    implementation("com.google.code.gson:gson:2.10.1")
+
 
     implementation ("androidx.core:core-splashscreen:1.0.1")
 

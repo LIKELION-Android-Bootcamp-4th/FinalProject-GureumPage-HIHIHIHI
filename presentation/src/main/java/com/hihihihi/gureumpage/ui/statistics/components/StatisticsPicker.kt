@@ -30,6 +30,7 @@ fun StatisticsPicker(
     items: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit,
+    infiniteScroll: Boolean = true,
 ) {
     val bottomSheetState = rememberModalBottomSheetState()
     val pickerState = rememberPickerState()
@@ -59,6 +60,7 @@ fun StatisticsPicker(
                     modifier = Modifier.weight(1f),
                     textModifier = Modifier.padding(4.dp),
                     startIndex = initialIndex,
+                    infiniteScroll = infiniteScroll,
                 )
                 Spacer(Modifier.width(72.dp))
             }

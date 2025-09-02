@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.mypage.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,6 +36,7 @@ fun MyPageUserProfileCard(
     title: String,
     badge: String, // 칭호
     nickname: String, // 유저 닉네임
+    provider: String,
     totalPages: String,
     totalBooks: String,
     totalTime: String,
@@ -86,6 +90,8 @@ fun MyPageUserProfileCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        ProviderChip(provider)
                     }
                 }
 
@@ -113,16 +119,18 @@ fun MyPageUserProfileCard(
 
             //독서 통계
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatColumn("총 페이지", totalPages)
-                StatColumn("총 권수", totalBooks)
-                StatColumn("총 독서 시간", totalTime)
+                StatColumn("읽은 페이지", totalPages)
+                StatColumn("읽은 책", totalBooks)
+                StatColumn("독서 시간", totalTime)
             }
         }
     }
 }
+
+
 
 @Composable
 private fun StatColumn(label: String, value: String) {
@@ -135,3 +143,31 @@ private fun StatColumn(label: String, value: String) {
         Text(text = value, style = typography.bodyMedium, color = colors.gray800)
     }
 }
+
+@Composable
+fun ProviderChip(provider: String) {
+    val (bgColor, iconRes, iconTint) = when (provider.lowercase()) {
+        "google.com" -> Triple(Color.White, R.drawable.ic_google, Color.Unspecified)
+        "kakao" -> Triple(Color(0xFFFEE500), R.drawable.ic_kakao, Color.Unspecified)
+        "naver" -> Triple(Color(0xFF03C75A), R.drawable.ic_naver, Color.Unspecified)
+        else -> Triple(GureumTheme.colors.gray300, R.drawable.ic_cloud_icon, Color.Unspecified)
+    }
+
+    Box(
+        modifier = Modifier
+            .height(20.dp)
+            .clip(RoundedCornerShape(50))
+            .background(bgColor)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = provider,
+            modifier = Modifier.size(10.dp),
+            tint = iconTint
+        )
+    }
+}
+
+

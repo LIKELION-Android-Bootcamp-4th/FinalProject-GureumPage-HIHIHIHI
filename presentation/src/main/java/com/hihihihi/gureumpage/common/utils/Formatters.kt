@@ -164,3 +164,16 @@ fun getDailyAverageReadTimeInSeconds(histories: List<History>): String {
         "0분"
     }
 }
+
+/**
+ * DisplayTimeToSeconds HH:mm:ss 같은 형식을 초로 바꿔줌
+ */
+fun parseDisplayTimeToSeconds(display: String): Int {
+    // 예: "00:45", "12:05", "01:10:30" 형태 모두 대응
+    val parts = display.split(":").mapNotNull { it.toIntOrNull() }
+    return when (parts.size) {
+        3 -> parts[0] * 3600 + parts[1] * 60 + parts[2] // HH:mm:ss
+        2 -> parts[0] * 60 + parts[1]                   // mm:ss
+        else -> 0
+    }
+}

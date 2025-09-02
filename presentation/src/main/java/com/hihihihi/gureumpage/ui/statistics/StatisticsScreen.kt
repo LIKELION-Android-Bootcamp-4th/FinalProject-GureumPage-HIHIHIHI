@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,14 +48,17 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
+    initialPreset: DateRangePreset = DateRangePreset.WEEK
 ) {
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPicker by remember { mutableStateOf(false) }
-    var presetIndex by rememberSaveable { mutableStateOf(0) }
+    var presetIndex by rememberSaveable { mutableIntStateOf(initialPreset.ordinal) }
     val preset = presetFromIndex(presetIndex)
     val rangeText = remember(presetIndex) { formatRange(preset) }
     val title = remember(presetIndex) { pagesTitle(preset) }
+
+    LaunchedEffect(initialPreset) { viewModel.loadStatistics(initialPreset) }
 
     if (showPicker) {
         StatisticsPicker(
@@ -64,7 +69,8 @@ fun StatisticsScreen(
                 presetIndex = index
                 showPicker = false
                 viewModel.loadStatistics(presetFromIndex(index))
-            }
+            },
+            infiniteScroll = false
         )
     }
 
@@ -106,27 +112,36 @@ fun StatisticsScreen(
         item {
             Semi16Text("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.category.isEmpty()) EmptyCard()
-            else CategoryCard(entries = uiState.category)
+            when {
+                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                uiState.category.isEmpty() -> EmptyCard()
+                else -> CategoryCard(entries = uiState.category)
+            }
         }
 
         item {
             Semi16Text("독서 시간 분포")
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.time.isEmpty() || uiState.time.all { it.y == 0f }) EmptyCard("새 기록을 추가하면 추이가 표시돼요.")
-            else ReadingTimeCard(entries = uiState.time)
+            when {
+                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                uiState.time.isEmpty() || uiState.time.all { it.y == 0f } -> EmptyCard(subText = "새 기록을 추가하면 추이가 표시돼요.")
+                else -> ReadingTimeCard(entries = uiState.time)
+            }
         }
 
         item {
             Semi16Text(title)
             Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f }) EmptyCard("책을 읽고 페이지를 기록해 주세요.")
-            else ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
+            when {
+                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f } -> EmptyCard(subText = "책을 읽고 페이지를 기록해 주세요.")
+                else -> ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
+            }
         }
     }
 }
 
-fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String {
+private fun formatRange(preset: DateRangePreset, now: LocalDateTime = LocalDateTime.now()): String {
     val range: DateRange = presetToRange(preset, now)
     val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
     return "${range.start.toLocalDate().format(formatter)}~${range.end.toLocalDate().format(formatter)}"
@@ -140,7 +155,15 @@ private fun pagesTitle(preset: DateRangePreset) = when (preset) {
     DateRangePreset.YEAR -> "연간 독서 페이지"
 }
 
-val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
+private fun presetFromIndex(index: Int) = when (index) {
+    0 -> DateRangePreset.WEEK
+    1 -> DateRangePreset.MONTH
+    2 -> DateRangePreset.THREE_MONTH
+    3 -> DateRangePreset.SIX_MONTH
+    else -> DateRangePreset.YEAR
+}
+
+private val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -149,12 +172,4 @@ private fun StatisticsPreview() {
     GureumPageTheme {
         StatisticsScreen()
     }
-}
-
-fun presetFromIndex(index: Int) = when (index) {
-    0 -> DateRangePreset.WEEK
-    1 -> DateRangePreset.MONTH
-    2 -> DateRangePreset.THREE_MONTH
-    3 -> DateRangePreset.SIX_MONTH
-    else -> DateRangePreset.YEAR
 }

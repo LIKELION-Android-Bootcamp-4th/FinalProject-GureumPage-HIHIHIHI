@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repositoryimpl
 
 import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
@@ -11,9 +11,23 @@ class SearchRepositoryImpl @Inject constructor(
 ) : SearchRepository {
 
     override suspend fun searchBooks(query: String): List<SearchBook> {
-        return searchRemoteDataSource.searchBooks(query)
-            .map { it.toDomain() }
+        return searchBooks(query = query, page = 1, pageSize = 10)
     }
+
+    override suspend fun searchBooks(
+        query: String,
+        page: Int,
+        pageSize: Int
+    ): List<SearchBook> {
+        val startIndex = page
+        // ↓ Remote에 startIndex/maxResults 기준으로 추가
+        return searchRemoteDataSource.searchBooks(
+            query = query,
+            startIndex = startIndex,
+            maxResults = pageSize
+        ).map { it.toDomain() }
+    }
+
 
     override suspend fun getBookPageCount(isbn: String): Int? {
         return try {

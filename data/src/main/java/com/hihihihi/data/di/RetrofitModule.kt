@@ -7,6 +7,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -14,12 +16,25 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
+
     @Provides
     @Singleton
-    fun provideSearchRetrofit(): Retrofit {
+    fun provideOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY  // ✅ 요청/응답 전체 로그
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchRetrofit(client: OkHttpClient): Retrofit {
         val gson = GsonBuilder().setLenient().create()
         return Retrofit.Builder()
             .baseUrl("https://www.aladin.co.kr/ttb/api/")
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }

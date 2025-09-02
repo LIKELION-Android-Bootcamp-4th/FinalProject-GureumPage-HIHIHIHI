@@ -26,14 +26,18 @@ import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
+import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
+import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
+import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
+import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
@@ -41,6 +45,7 @@ import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
+import com.hihihihi.domain.usecase.userbook.GetUserBookByIdUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
@@ -69,6 +74,13 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideGetUserBookByIdUseCase(
+        repository: UserBookRepository
+    ): GetUserBookByIdUseCase {
+        return GetUserBookByIdUseCase(repository)
+    }
+
+    @Provides
     fun provideGetHomeDataUseCase(
         userBookRepository: UserBookRepository,
         quoteRepository: QuoteRepository,
@@ -81,6 +93,15 @@ object UseCaseModule {
             historyRepository,
             userRepository
         )
+    }
+
+    @Provides
+    fun provideGetMyPageDataUseCase(
+        userRepository: UserRepository,
+        dailyRepository: DailyReadPageRepository,
+        userBookRepository: UserBookRepository
+    ): GetMyPageDataUseCase {
+        return GetMyPageDataUseCase(userRepository, dailyRepository, userBookRepository)
     }
 
     @Provides
@@ -267,6 +288,20 @@ object UseCaseModule {
         return GetThemeFlowUseCase(repository)
     }
 
+    @Provides
+    fun provideSetLastProviderUseCase(
+        repository: UserPreferencesRepository
+    ): SetLastProviderUseCase {
+        return SetLastProviderUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetLastProviderUseCase(
+        repository: UserPreferencesRepository
+    ): GetLastProviderUseCase {
+        return GetLastProviderUseCase(repository)
+    }
+
 
     @Provides
     fun provideGetStatisticsUseCase(
@@ -304,4 +339,12 @@ object UseCaseModule {
     ): GetQuoteByUserBookIdUseCase {
         return GetQuoteByUserBookIdUseCase(repository)
     }
+
+    @Provides
+    fun provideUpdateQuoteUseCase(
+        repository: QuoteRepository
+    ): UpdateQuoteUseCase {
+        return UpdateQuoteUseCase(repository)
+    }
+
 }

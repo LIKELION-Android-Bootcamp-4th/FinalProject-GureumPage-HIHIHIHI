@@ -1,6 +1,5 @@
 package com.hihihihi.domain.usecase.userbook
 
-import android.util.Log
 import com.hihihihi.domain.model.Mindmap
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.UserBook
@@ -32,7 +31,6 @@ class AddUserBookUseCase @Inject constructor(
                 userBookRepository.addUserBook(userId, userBook.isbn13, userBook).getOrThrow()
             val rootNodeId = "${userBookId}Root"
 
-            Log.e("TAG", "invoke: ${userBook.userId}")
             val operations = listOf(
                 NodeEditOperation.Add(
                     rootNode.copy(

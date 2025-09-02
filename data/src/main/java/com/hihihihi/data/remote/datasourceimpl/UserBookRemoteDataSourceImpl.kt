@@ -54,7 +54,7 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
             // 변환된 리스트를 Flow에 발행
             trySend(userBooks)
         }
-
+        FirestoreListenerManager.add(listenerRegistration)
         // Flow가 종료될 때 리스너 해제
         awaitClose { listenerRegistration.remove() }
     }
@@ -77,7 +77,7 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
                 close(Exception("UserBookDto 변환 실패"))
             }
         }
-
+        FirestoreListenerManager.add(listenerRegistration)
         awaitClose { listenerRegistration.remove() }
     }
 

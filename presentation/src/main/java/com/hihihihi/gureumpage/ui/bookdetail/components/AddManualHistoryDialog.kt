@@ -35,12 +35,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.hihihihi.gureumpage.R
 import com.hihihihi.gureumpage.common.utils.formatSecondsToReadableTimeWithoutSecond
+import com.hihihihi.gureumpage.designsystem.components.GureumBetweenDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumButton
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumClickEventTextField
-import com.hihihihi.gureumpage.designsystem.components.GureumPastToTodayDatePicker
 import com.hihihihi.gureumpage.designsystem.components.GureumTextField
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
 import com.hihihihi.gureumpage.designsystem.components.Medi16Text
@@ -54,12 +55,14 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddManualHistoryDialog(
     currentPage: Int,
     lastPage: Int,
+    startDate: LocalDateTime?,
     onDismiss: () -> Unit,
     onSave: (
         date: LocalDateTime,
@@ -74,7 +77,11 @@ fun AddManualHistoryDialog(
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     var date by remember { mutableStateOf(LocalDateTime.now()) }
-    var startTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var startTime by remember {
+        mutableStateOf(
+            LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)
+        )
+    }
     var endTime by remember { mutableStateOf<LocalDateTime?>(null) }
 
     var startPage by remember { mutableStateOf(currentPage.toString()) }
@@ -101,13 +108,18 @@ fun AddManualHistoryDialog(
 
 
     val canSave = startTime != null && endTime != null &&
-            (endTime!!.isAfter(startTime) || endTime == startTime) &&
+            endTime!!.isAfter(startTime) &&
             startPageNum != null && endPageNum != null &&
-            startPageNum > 0 && endPageNum > 0 &&
+            startPageNum >= 0 && endPageNum > 0 &&
             endPageNum >= startPageNum
 
-    Dialog(onDismissRequest = onDismiss) {
-        GureumCard(modifier = Modifier.fillMaxWidth()) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        GureumCard(modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +243,7 @@ fun AddManualHistoryDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     GureumClickEventTextField(
-                        value = startTime?.format(timeFormatter) ?: "",
+                        value = startTime.format(timeFormatter),
                         onValueChange = {},
                         hint = "시작 시간",
                         modifier = Modifier.weight(1f),
@@ -273,7 +285,7 @@ fun AddManualHistoryDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 GureumButton(
-                    text = "저장하기",
+                    text = if (readTime != null && readTime == 0) "1분 미만의 독서는 기록할 수 없어요" else "저장하기",
                     enabled = canSave,
                     onClick = {
                         onSave(
@@ -291,7 +303,10 @@ fun AddManualHistoryDialog(
         }
 
         if (showDatePicker) {
-            GureumPastToTodayDatePicker(
+            GureumBetweenDatePicker(
+                isSelectingStart = false,
+                startDate = startDate,
+                endDate = null,
                 onDismiss = { showDatePicker = false },
                 onConfirm = { millis ->
                     val localDate = Instant.ofEpochMilli(millis)
@@ -309,23 +324,26 @@ fun AddManualHistoryDialog(
             ) {
                 GureumCard {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        val startHour = startTime?.hour ?: 0
-                        val startMinute = startTime?.minute ?: 0
+                        val startHour = startTime.hour
+                        val startMinute = startTime.minute
 
                         // 종료 시간 선택 시 제약 조건 계산
-                        val hourValues = if (editingStartTime) (0..23).toList() else (startHour..23).toList()
+                        val hourValues =
+                            if (editingStartTime) (0..23).toList() else (startHour..23).toList()
 
                         val minuteValues = remember { (0..59).toList() }
 
                         key(editingStartTime) {
                             var tempHour by remember {
                                 mutableIntStateOf(
-                                    if (editingStartTime) (startTime?.hour ?: 0) else (endTime?.hour ?: startHour)
+                                    if (editingStartTime) (startTime?.hour ?: 0) else (endTime?.hour
+                                        ?: startHour)
                                 )
                             }
                             var tempMinute by remember {
                                 mutableIntStateOf(
-                                    if (editingStartTime) (startTime?.minute ?: 0) else (endTime?.minute ?: startMinute)
+                                    if (editingStartTime) (startTime?.minute
+                                        ?: 0) else (endTime?.minute ?: startMinute)
                                 )
                             }
 
@@ -344,19 +362,28 @@ fun AddManualHistoryDialog(
                             Spacer(Modifier.height(24.dp))
                             GureumButton(text = "확인", onClick = {
                                 if (editingStartTime) {
-                                    val newStartTime = LocalDateTime.of(date.toLocalDate(), LocalTime.of(tempHour, tempMinute))
+                                    val newStartTime =
+                                        LocalDateTime.of(
+                                            date.toLocalDate(),
+                                            LocalTime.of(tempHour, tempMinute)
+                                        )
                                     startTime = newStartTime
 
                                     // 종료 시간이 시작 시간보다 이전이면 조정
-                                    if (endTime != null && endTime!!.isBefore(newStartTime)) endTime = newStartTime
+                                    if (endTime != null && endTime!!.isBefore(newStartTime)) endTime =
+                                        newStartTime
                                 } else {
                                     // 종료 시간 설정
                                     var endHour = tempHour
                                     var endMinute = tempMinute
 
                                     if (endHour < startHour) endHour = startHour
-                                    if (endHour == startHour && endMinute < startMinute) endMinute = startMinute
-                                    endTime = LocalDateTime.of(date.toLocalDate(), LocalTime.of(endHour, endMinute))
+                                    if (endHour == startHour && endMinute < startMinute) endMinute =
+                                        startMinute
+                                    endTime = LocalDateTime.of(
+                                        date.toLocalDate(),
+                                        LocalTime.of(endHour, endMinute)
+                                    )
                                 }
                                 showTimePicker = false
                             })

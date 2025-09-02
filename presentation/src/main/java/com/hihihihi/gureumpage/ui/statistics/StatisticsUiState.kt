@@ -8,5 +8,7 @@ data class StatisticsUiState(
     val category: List<PieEntry> = emptyList(),
     val time: List<BarEntry> = emptyList(),
     val pages: List<Entry> = emptyList(),
-    val xLabels: List<String> = emptyList()
+    val xLabels: List<String> = emptyList(),
+    val hasError: Boolean = false,
+    val errorMessage: String = ""
 )

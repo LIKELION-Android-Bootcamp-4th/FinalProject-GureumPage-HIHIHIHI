@@ -1,6 +1,7 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components.tabs
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,8 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -24,13 +33,17 @@ import com.hihihihi.gureumpage.designsystem.components.Semi16Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.designsystem.theme.GureumTypography
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import com.hihihihi.gureumpage.R
 
 @Composable
 fun QuotesTab(
     quotes: List<Quote>,
-    onMenuClick: (quoteId: String) -> Unit = {}
+    onEdit: (quoteId: String) -> Unit,
+    onDelete: (quoteId: String) -> Unit
 ) {
+
     if (quotes.isEmpty()) {
         Column(
             modifier = Modifier
@@ -39,10 +52,14 @@ fun QuotesTab(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Semi16Text("아직 등록한 필사가 없어요.")
+            Semi16Text(
+                "아직 등록한 필사가 없어요.",
+                color = GureumTheme.colors.gray500,
+            )
             Spacer(Modifier.height(16.dp))
             Medi14Text(
                 "필사 추가를 통해\n마음에 드는 문장을 남겨보세요!",
+                color = GureumTheme.colors.gray400,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -60,10 +77,13 @@ fun QuotesTab(
                     date = quote.createdAt?.toLocalDate().toString(),
                     page = quote.pageNumber,
                     quote = quote.content,
-                    onMenuClick = onMenuClick
+                    expanded = remember { mutableStateOf(false) },
+                    onEdit = onEdit,
+                    onDelete = onDelete
                 )
             }
         }
+
     }
 }
 
@@ -73,7 +93,9 @@ private fun QuoteCard(
     date: String,
     page: Int?,
     quote: String,
-    onMenuClick: (quoteId: String) -> Unit
+    expanded: MutableState<Boolean>,
+    onEdit: (quoteId: String) -> Unit,
+    onDelete: (quoteId: String) -> Unit,
 ) {
     GureumCard(
         modifier = Modifier.padding(top = 20.dp)
@@ -106,16 +128,31 @@ private fun QuoteCard(
 
                 Spacer(Modifier.weight(1f))
 
-//                IconButton(
-//                    onClick = { onMenuClick(id) },
-//                    modifier = Modifier.size(32.dp)
-//                ) {
-//                    Icon(
-//                        painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
-//                        contentDescription = "dot_menu",
-//                        tint = GureumTheme.colors.gray600
-//                    )
-//                }
+                Box(modifier = Modifier.wrapContentSize()) {
+                    IconButton(
+                        onClick = { expanded.value = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
+                            contentDescription = "dot_menu",
+                            tint = GureumTheme.colors.gray600
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded.value,
+                        onDismissRequest = { expanded.value = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("수정") },
+                            onClick = { expanded.value = false; onEdit(id) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("삭제") },
+                            onClick = { expanded.value = false; onDelete(id) }
+                        )
+                    }
+                }
             }
 
             Text(
@@ -135,9 +172,9 @@ private fun QuoteCard(
 @Composable
 private fun QuotesTabPreview() {
     GureumPageTheme {
-        QuotesTab(
-            quotes = dummyQuotes,
-            onMenuClick = { id -> println("Menu clicked for Quote id: $id") }
-        )
+//        QuotesTab(
+//            quotes = dummyQuotes,
+//            onMenuClick = { id -> println("Menu clicked for Quote id: $id") }
+//        )
     }
 }

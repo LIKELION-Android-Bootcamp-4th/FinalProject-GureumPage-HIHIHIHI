@@ -12,7 +12,7 @@ import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
-import com.hihihihi.gureumpage.common.utils.validateNickname
+import com.hihihihi.gureumpage.common.utils.NicknameValidator.validateNickname
 import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +56,7 @@ class OnBoardingViewModel @Inject constructor(
 
     fun saveNickname() {
         val userId: String? = FirebaseAuth.getInstance().currentUser?.uid
-        viewModelScope.launch { setNicknameUseCase(userId!!, nickname) }
+        viewModelScope.launch { setNicknameUseCase(userId!!, nickname.trim()) }
     }
 
     // TODO: 추후 사용자 앱 설치 목적 파악을 위해 DB 테이블 만들기 고려
@@ -86,6 +86,7 @@ class OnBoardingViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
             theme?.let { setThemeUseCase(it) }
+            saveNickname()
             setOnboardingCompleteUseCase(currentUser.uid, true)
         }
     }

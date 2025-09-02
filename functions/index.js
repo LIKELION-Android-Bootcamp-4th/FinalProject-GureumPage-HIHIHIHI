@@ -9,13 +9,10 @@ const kakaoAuthHandler = require("./kakao-auth").handler;
 const naverAuthHandler = require("./naver-auth").handler;
 const {deleteUserAccountHandler} = require("./delete-user");
 
-
 exports.kakaoCustomAuth = onCall(kakaoAuthHandler);
 exports.naverCustomAuth = onCall(naverAuthHandler);
 
-
 exports.deleteUserAccount = onCall(deleteUserAccountHandler);
-
 
 exports.createOrUpdateUserDoc = auth.user().onCreate(async (user) => {
   const provider = (user.providerData && user.providerData.length > 0 && user.providerData[0].providerId) ?

@@ -1,5 +1,6 @@
 package com.hihihihi.gureumpage.ui.statistics
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mikephil.charting.data.BarEntry
@@ -26,18 +27,27 @@ class StatisticsViewModel @Inject constructor(
 
 
     init {
-        loadStatistics(DateRangePreset.WEEK)
+        if(FirebaseAuth.getInstance().currentUser != null){
+            loadStatistics(DateRangePreset.WEEK)
+        }
     }
 
     fun loadStatistics(preset: DateRangePreset) {
         viewModelScope.launch(Dispatchers.IO) {
-            getStatisticsUseCase(userId, preset).collect { statistics ->
+            try {
+                getStatisticsUseCase(userId, preset).collect { statistics ->
+                    _uiState.value = StatisticsUiState(
+                        category = statistics.category.map { PieEntry(it.value, it.label) },
+                        time = statistics.time.asReversed()
+                            .mapIndexed { index, slice -> BarEntry(index.toFloat(), slice.value) },
+                        pages = statistics.pages.map { Entry(it.x, it.y) },
+                        xLabels = statistics.xLabels,
+                    )
+                }
+            } catch (e: Exception) {
                 _uiState.value = StatisticsUiState(
-                    category = statistics.category.map { PieEntry(it.value, it.label) },
-                    time = statistics.time.asReversed()
-                        .mapIndexed { index, slice -> BarEntry(index.toFloat(), slice.value) },
-                    pages = statistics.pages.map { Entry(it.x, it.y) },
-                    xLabels = statistics.xLabels,
+                    hasError = true,
+                    errorMessage = "통계를 불러올 수 없습니다"
                 )
             }
         }
