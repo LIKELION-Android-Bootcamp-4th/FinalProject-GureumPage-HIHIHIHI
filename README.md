@@ -114,8 +114,4 @@
 | 팀장 | 부팀장 | 팀원 | 팀원 |
 |:----:|:----:|:----:|:----:|
 |<img width=150 src="https://avatars.githubusercontent.com/u/107612802?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/125240447?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/207657876?v=4">|<img width=150 src="https://avatars.githubusercontent.com/u/57650484?v=4">|
-|이소희|김의현|김학록|홍의정|
-
-![Group 389.png](attachment:80f53b4c-6ecd-4a9d-a729-609a5293fd9e:Group_389.png)
-
-![Group 387.png](attachment:ebd058a8-13d8-4977-9062-b2b19baf6f40:Group_387.png)
+|[이소희](https://github.com/see-ho)|[김의현](https://github.com/UiHyeon-Kim)|[김학록](https://github.com/hakrok)|[홍의정](https://github.com/aabc88)|
