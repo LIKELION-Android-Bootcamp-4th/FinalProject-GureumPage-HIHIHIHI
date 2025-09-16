@@ -5,24 +5,46 @@
 > 한 장씩 넘기며 기록하는 나의 독서 노트 **구름한장☁️**
 <br>책을 한 장씩 읽어나가는 경험을 구름처럼 가볍고 편안하게
 
-<!-- TODO 기획 의도나 앱 개발 목적 추가 -->
+<!-- TODO 기획 의도나 앱 개발 목적 추가? -->
+
+<br>
 
 # 개발 기간
 
 **🗓️ 2025.07.28 ~ 2025.09.02**
 
-<!-- # 기술 스택 -->
-<!-- 넣는다면 아마 표 형식으로 할 듯? -->
+<br>
+
+# 기술 스택
+- **언어/빌드**: Kotlin, Gradle(KTS)
+- **UI/UX**: Jetpack Compose, Glance
+- **아키텍처**: MVVM + Clean Architecture
+- **DI**: Hilt
+- **비동기/데이터**: Coroutine, Flow, DataStore
+- **백엔드**: Firebase Auth, Functions, Firestore, FCM
+- **API**: 책 검색 - 알라딘 API
+- **네트워크/기타**:
+    - **알라딘 API 통신**: Retrofit2, OkHttp3, Gson
+    - **통계 화면 구현**: MPAndroidChart
+    - **이미지 및 애니메이션**: Coil, Lottie
+    - **잔디 캘린더**: kizitonwose/Calendar
+    - **마인드맵**: android-thinkmap-treeview
+
+<br>
 
 # 아키텍처
 
 ### 시스템 구조도
 <img width="1531" height="1042" alt="Frame 120" src="https://github.com/user-attachments/assets/03cf276a-ac97-49fc-94e6-f0de09ac10ed" />
 
+- Firebase를 중심으로 백엔드 구성
+    - Auth로 소셜 로그인을 사용하며 Functions로 Custom Token을 반환하여 카카오, 네이버 로그인 지원
+    - FireStore 로 데이터 저장 및 조회 기능 구현
+    - 기본적으로 로컬 알림을 사용하되, 실시간 알림 필요 시를 대비해 FCM 사용
+    - 그 외에 도서 검색을 위한 알라딘 API 사용
 
 ### CA + MVVM
 <img width="2434" height="524" alt="Frame 121" src="https://github.com/user-attachments/assets/d8e5a821-5d8f-4f3d-bb35-32e13af2126f" />
-
 
 - MVVM 으로 UI 와 비즈니스 로직을 분리
 - Clean Architecture 로 계층간 의존성을 줄여 유지보수성과 테스트 용이성 높임
@@ -65,6 +87,7 @@
          └─📄 MainActivity.kt
 ``` -->
 
+<br>
 
 # 주요 기능
 
@@ -82,6 +105,7 @@
 | 마이페이지 | • 닉네임 변경<br>• 총 독서 통계 요약<br>• 독서 잔디 캘린더<br>• 평가하기(Play 평점), 문의하기(이메일 연결)<br>• 오픈소스 라이선스 목록<br>• 라이트/다크 테마 전환<br>• 로그아웃, 탈퇴 |
 | 온보딩 | • 닉네임 설정<br>• 앱 사용 목적 조사 & 앱 소개<br>• 테마(라이트/다크) 선택 |
 
+<br>
 
 # 주요 화면 스크린샷
 <table>
@@ -133,10 +157,19 @@
 
 <!-- 구글 드라이브로 시연연상 링크 달기? -->
 
+<br>
+
 # 팀원 소개
 | 팀장 | 부팀장 | 팀원 | 팀원 |
 |:----:|:----:|:----:|:----:|
 |<img width=150 src="https://avatars.githubusercontent.com/u/107612802?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/125240447?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/207657876?v=4">|<img width=150 src="https://avatars.githubusercontent.com/u/57650484?v=4">|
 |[이소희](https://github.com/see-ho)|[김의현](https://github.com/UiHyeon-Kim)|[김학록](https://github.com/hakrok)|[홍의정](https://github.com/aabc88)|
 
-<!-- 각 팀원 역할 넣을까 **말까**.. -->
+<!-- ## 담당 역할
+| 팀원 | 역할 |
+|---|---|
+| 이소희 | • 소셜 로그인: 네이버 / 카카오 / 구글 |
+| 김의현 | • 현재 읽는 중 책 목록 제공<br>• 책 카드: 제목·저자·표지, 현재 페이지, 누적 독서 시간 표시<br>• 하루 독서 목표 설정 & 도넛 차트로 달성도 확인<br>• 작성한 필사 문장 랜덤 노출<br>• 책 검색 서치바 제공 |
+| 김학록 | • 알라딘 API 기반 검색<br>• 키워드: 제목 / 저자 / 출판사 / ISBN<br>• 결과: 표지·제목·저자·페이지 수 등 상세 정보 표시<br>• 상태 변경: 읽을 책 / 읽는 중 / 읽은 책에 바로 추가 |
+| 홍의정 | • 상태별 목록 관리: 읽을 책 / 읽는 중 / 읽은 책<br>• 항목 클릭 시 책 상세 화면으로 이동 |
+<!-- | 강사님 | • 위젯 기능 초안 | -->
