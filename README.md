@@ -159,8 +159,8 @@
 
 ## 시연 영상
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=2eFPaFB1gIA">
-    <img src="https://img.youtube.com/vi/2eFPaFB1gIA/0.jpg" alt="시연 영상" width="800">
+  <a href="https://www.youtube.com/watch?v=mC706rSxEHk">
+    <img src="https://img.youtube.com/vi/2eFPaFB1gIA/0.jpg" alt="[시연 영상](https://youtu.be/mC706rSxEHk)" width="800">
   </a>
 </p>
 
@@ -171,6 +171,8 @@
 |:----:|:----:|:----:|:----:|
 |<img width=150 src="https://avatars.githubusercontent.com/u/107612802?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/125240447?v=4"/>|<img width=150 src="https://avatars.githubusercontent.com/u/207657876?v=4">|<img width=150 src="https://avatars.githubusercontent.com/u/57650484?v=4">|
 |[이소희](https://github.com/see-ho)|[김의현](https://github.com/UiHyeon-Kim)|[김학록](https://github.com/hakrok)|[홍의정](https://github.com/aabc88)|
+
+<br>
 
 ## 담당 역할
 | 팀원 | 역할 |
