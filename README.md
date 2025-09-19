@@ -157,6 +157,15 @@
 
 <br>
 
+## 시연 영상
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=2eFPaFB1gIA">
+    <img src="https://img.youtube.com/vi/2eFPaFB1gIA/0.jpg" alt="시연 영상" width="800">
+  </a>
+</p>
+
+<br>
+
 # 팀원 소개
 | 팀장 | 부팀장 | 팀원 | 팀원 |
 |:----:|:----:|:----:|:----:|
