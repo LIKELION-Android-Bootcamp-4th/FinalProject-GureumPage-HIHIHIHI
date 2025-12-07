@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 @Immutable
 data class GureumColors(
-    @Stable val white: Color,
+    val white: Color,
     val systemRed: Color,
     val systemGreen: Color,
     val point: Color,
