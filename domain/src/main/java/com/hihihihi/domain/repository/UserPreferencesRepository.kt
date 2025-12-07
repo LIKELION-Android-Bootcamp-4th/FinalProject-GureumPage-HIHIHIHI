@@ -7,6 +7,7 @@ interface UserPreferencesRepository {
     val nickname: Flow<String>
     val theme: Flow<GureumThemeType>
     val lastProvider: Flow<String>
+    val lastVisitFlow: Flow<Long>
 
     fun getOnboardingComplete(userId: String): Flow<Boolean>
 
@@ -15,4 +16,5 @@ interface UserPreferencesRepository {
     suspend fun setTheme(theme: GureumThemeType)
     suspend fun setLastProvider(provider: String)
     suspend fun clearAll()
+    suspend fun updateLastVisit()
 }

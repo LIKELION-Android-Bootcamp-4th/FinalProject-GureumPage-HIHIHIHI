@@ -20,23 +20,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -46,6 +38,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
+import com.hihihihi.domain.usecase.user.UpdateLastVisitUseCase
 import com.hihihihi.gureumpage.common.utils.NetworkManager
 import com.hihihihi.gureumpage.designsystem.components.GureumAppBar
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme
@@ -64,6 +57,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -92,6 +86,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var timerRepository: TimerRepository
+
+    @Inject
+    lateinit var updateLastVisitUseCase: UpdateLastVisitUseCase
 
     private var _navController: NavHostController? = null
     private var pendingDeepLink: Intent? = null
@@ -142,13 +139,12 @@ class MainActivity : ComponentActivity() {
                             launchSingleTop = true
                         }
                     } else {
-                        if(viewModel.getOnboardingComplete(user.uid).first()){
+                        if (viewModel.getOnboardingComplete(user.uid).first()) {
                             navController.navigate(NavigationRoute.Home.route) {
                                 popUpTo(0) { inclusive = true }
                                 launchSingleTop = true
                             }
-                        }
-                        else {
+                        } else {
                             navController.navigate(NavigationRoute.OnBoarding.route) {
                                 popUpTo(0) { inclusive = true }
                                 launchSingleTop = true
@@ -215,6 +211,10 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         val intent = Intent(this, FloatingTimerService::class.java)
         stopService(intent)
+
+        lifecycleScope.launch {
+            updateLastVisitUseCase()
+        }
     }
 
     @SuppressLint("RestrictedApi")

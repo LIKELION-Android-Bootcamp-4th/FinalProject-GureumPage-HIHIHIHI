@@ -29,9 +29,11 @@ import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
+import com.hihihihi.domain.usecase.user.CheckRecentVisitUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
+import com.hihihihi.domain.usecase.user.GetLastVisitUseCase
 import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetNicknameFlowUseCase
 import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
@@ -42,6 +44,7 @@ import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
+import com.hihihihi.domain.usecase.user.UpdateLastVisitUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
@@ -347,4 +350,24 @@ object UseCaseModule {
         return UpdateQuoteUseCase(repository)
     }
 
+    @Provides
+    fun provideGetLastVisitUseCase(
+        repository: UserPreferencesRepository
+    ): GetLastVisitUseCase {
+        return GetLastVisitUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateLastVisitUseCase(
+        repository: UserPreferencesRepository
+    ): UpdateLastVisitUseCase {
+        return UpdateLastVisitUseCase(repository)
+    }
+
+    @Provides
+    fun provideCheckRecentVisitUseCase(
+        repository: UserPreferencesRepository
+    ): CheckRecentVisitUseCase {
+        return CheckRecentVisitUseCase(repository)
+    }
 }
