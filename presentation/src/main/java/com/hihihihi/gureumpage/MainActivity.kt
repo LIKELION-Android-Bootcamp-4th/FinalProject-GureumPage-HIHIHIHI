@@ -297,7 +297,6 @@ class MainActivity : ComponentActivity() {
             else -> {
                 null
             }
-        }.also { route ->
         }
     }
 

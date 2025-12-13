@@ -28,7 +28,7 @@ object DailyGoalNotifier {
         // 새로운 날이면 SharedPreferences 및 스케줄 초기화
         val today = day
         val lastDay = sharedPref.getString("day", null)
-        if (lastDay != day) {
+        if (lastDay != today) {
             sharedPref.edit {
                 putString("day", today)
                 putFloat("last_ratio", 0f)
@@ -90,6 +90,11 @@ object DailyGoalNotifier {
                     sent80 = true
                 }
                 ReminderScheduler.cancel(context)
+                sharedPref.edit {
+                    putFloat("last_ratio", ratio)
+                    putBoolean("sent80", sent80)
+                }
+                return
             }
 
             // 80% 미만 → 데일리만 예약
@@ -97,12 +102,12 @@ object DailyGoalNotifier {
                 ReminderScheduler.scheduleDaily(context)
                 Goal80ReminderScheduler.cancelToday(context)
                 sent80 = false
+                sharedPref.edit {
+                    putFloat("last_ratio", ratio)
+                    putBoolean("sent80", sent80)
+                }
+                return
             }
-        }
-
-        sharedPref.edit {
-            putFloat("last_ratio", ratio)
-            putBoolean("sent80", sent80)
         }
     }
 }
