@@ -32,10 +32,13 @@ android {
 
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"${localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""}\"")
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""
+
         buildConfigField("String", "NAVER_CLIENT_ID", "\"${localProperties["NAVER_CLIENT_ID"] ?: ""}\"")
         manifestPlaceholders["NAVER_CLIENT_ID"] = localProperties["NAVER_CLIENT_ID"] ?: ""
+
         buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${localProperties["NAVER_CLIENT_SECRET"] ?: ""}\"")
         manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
+
         buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
     }
 
@@ -92,7 +95,6 @@ dependencies {
     // Retrofit + Gson
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation("com.google.code.gson:gson:2.10.1")
 
     // Coroutines + Flow
     implementation(libs.jetbrains.kotlinx.coroutines.core)
@@ -100,11 +102,10 @@ dependencies {
 
     // Hilt (의존성 주입)
     implementation(libs.hilt.android.v2562)
-    ksp(libs.hilt.android.compiler)
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    ksp(libs.hilt.android.compiler)
     ksp("androidx.hilt:hilt-compiler:1.2.0")
-    ksp("com.google.dagger:hilt-compiler:2.56.2")
 
     // MindMap
     implementation(libs.gyso.treeview)
