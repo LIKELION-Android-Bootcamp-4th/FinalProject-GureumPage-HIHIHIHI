@@ -16,6 +16,7 @@ import com.hihihihi.gureumpage.notification.common.NotificationFactory
 import com.hihihihi.gureumpage.notification.common.Quiet
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.util.concurrent.TimeUnit
 
 @HiltWorker
 class DailyReminderWorker @AssistedInject constructor(
@@ -30,18 +31,22 @@ class DailyReminderWorker @AssistedInject constructor(
         Channels.ensureAll(appContext)
 
         // 7일간 안 들어온 경우
-        val thresholdMillis = inputData.getLong("thresholdMillis", 1000 * 60 * 60 * 24 * 7)
+        val thresholdMillis = inputData.getLong("thresholdMillis", TimeUnit.DAYS.toMillis(7))
         val isRecent = checkRecentVisitUseCase(thresholdMillis)
 
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
+            ReminderScheduler.scheduleDaily(appContext, hour = 22, minute = 0)
             return Result.success()
         }
 
         // 무음 시간이거나 오랫동안 안 들어오면 알림 스킵
-        if (!Quiet.allow() || !isRecent) return Result.success()
+        if (!Quiet.allow() || !isRecent) {
+            ReminderScheduler.scheduleDaily(appContext, hour = 22, minute = 0)
+            return Result.success()
+        }
 
         val notReadToday = true
         if (notReadToday) {

@@ -72,7 +72,7 @@ object DailyGoalNotifier {
                 return
             }
 
-            // 목표르 100% 달성했으면 모든 알림 취소
+            // 목표를 100% 달성했으면 모든 알림 취소
             ratio >= 1f -> {
                 Goal80ReminderScheduler.cancelToday(context)
                 ReminderScheduler.cancel(context)
