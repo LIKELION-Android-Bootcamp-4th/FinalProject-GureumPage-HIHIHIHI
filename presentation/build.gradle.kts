@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 7
-        versionName = "1.1.1"
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -134,16 +134,16 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
+    // UI 관련 라이브러리
     implementation(libs.calendar.compose)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.airbnb.android:lottie-compose:5.2.0")
     implementation("com.github.a914-gowtham:compose-ratingbar:1.3.12")
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation(libs.google.play.review)
     implementation(libs.google.play.review.ktx)
     implementation(libs.play.services.oss.licenses)
-
-    implementation("androidx.compose.material:material-icons-extended")
 
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
