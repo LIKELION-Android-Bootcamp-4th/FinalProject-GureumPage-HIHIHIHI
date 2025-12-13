@@ -133,6 +133,7 @@ fun Semi24Text(
     color: Color = GureumTheme.colors.gray800,
     style: TextStyle = GureumTypography.headlineLarge,
     maxLine: Int = 4,
+    textAlign: TextAlign = TextAlign.Justify
 ) {
     Text(
         text = text,
@@ -140,7 +141,7 @@ fun Semi24Text(
         style = style,
         maxLines = maxLine,
         modifier = modifier,
-        textAlign = TextAlign.Justify
+        textAlign = textAlign
     )
 }
 

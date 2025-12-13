@@ -1,11 +1,10 @@
 [versions]
-agp = "8.9.0"
+agp = "8.12.3"
 converterGson = "3.0.0"
 dynamicanimation = "1.1.0"
 gson = "2.13.1"
 gysoTreeview = "1.0.1"
 hiltAndroidVersion = "2.56.2"
-hiltCompiler = "2.56.2"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"

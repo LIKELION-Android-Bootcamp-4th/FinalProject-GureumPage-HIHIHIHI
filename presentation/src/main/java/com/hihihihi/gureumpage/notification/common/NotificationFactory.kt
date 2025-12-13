@@ -10,6 +10,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.hihihihi.gureumpage.R
+import java.time.LocalTime
 
 class NotificationFactory(private val context: Context) {
 
@@ -72,4 +73,10 @@ class NotificationFactory(private val context: Context) {
         if (tag.isNullOrEmpty()) notiManager.notify(id, notification)
         else notiManager.notify(tag, id, notification)
     }
+}
+
+// 야간 알림 시간 여부
+object Quiet {
+    fun allow(start: Int = 21, end: Int = 8, now: Int = LocalTime.now().hour): Boolean =
+        if (start <= end) now !in start until end else !(now >= start || now < end)
 }

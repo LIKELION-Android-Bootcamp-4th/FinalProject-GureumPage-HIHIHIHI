@@ -11,25 +11,12 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -53,6 +40,7 @@ import com.hihihihi.gureumpage.notification.summary.SummaryScheduler
 fun SplashView(
     navController: NavHostController,
     viewModel: SplashViewModel = hiltViewModel(),
+    pendingWidgetRoute: String? = null,
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -85,11 +73,18 @@ fun SplashView(
         animationSpec = tween(durationMillis = 1200), label = ""
     )
 
+    // 위젯 라우트를 먼저 ViewModel에 설정
+    LaunchedEffect(pendingWidgetRoute) {
+        if (pendingWidgetRoute != null) {
+            viewModel.setPendingWidgetRoute(pendingWidgetRoute)
+        }
+    }
+
     LaunchedEffect(Unit) {
         startAnimation = true
     }
 
-    val andimatedProgress by animateFloatAsState(
+    val animatedProgress by animateFloatAsState(
         targetValue = uiState.progress,
         animationSpec = tween(durationMillis = 300), label = ""
     )
@@ -128,8 +123,9 @@ fun SplashView(
     }
 
     LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
+
         if (proceed && !uiState.isLoading) {
-            when (uiState.navTarget) {
+            when (val target = uiState.navTarget) {
                 SplashViewModel.NavTarget.Login -> {
                     navController.navigate(NavigationRoute.Login.route) {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
@@ -151,7 +147,16 @@ fun SplashView(
                     }
                 }
 
-                else -> Unit
+                is SplashViewModel.NavTarget.Widget -> {
+                    navController.navigate(target.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+
+                else -> {
+                    // Loading, NoNetwork 상태는 별도 UI에서 처리
+                }
             }
         }
     }
@@ -220,7 +225,7 @@ fun SplashView(
                 )
                 Spacer(Modifier.height(8.dp))
                 GureumLinearProgressBar(
-                    progress = andimatedProgress,
+                    progress = animatedProgress,
                     height = 12,
                 )
             }
