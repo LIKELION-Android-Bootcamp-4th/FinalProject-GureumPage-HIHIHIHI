@@ -28,14 +28,20 @@ fun GureumNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: String = NavigationRoute.Splash.route,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    pendingWidgetRoute: String? = null
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(NavigationRoute.Splash.route) { SplashView(navController) }
+        composable(NavigationRoute.Splash.route) {
+            SplashView(
+                navController = navController,
+                pendingWidgetRoute = pendingWidgetRoute
+            )
+        }
         composable(
             route = NavigationRoute.Home.route,
             deepLinks = listOf(

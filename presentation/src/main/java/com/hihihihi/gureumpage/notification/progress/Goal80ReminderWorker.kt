@@ -39,7 +39,7 @@ class Goal80ReminderWorker @AssistedInject constructor(
         val lastDay = preference.getString("day", null)
         val lastRatio = preference.getFloat("last_ratio", 0f)
 
-        if (goalEnabled && today == lastDay && lastRatio != 0f && lastRatio >= 0.8f) {
+        if (goalEnabled && today == lastDay && lastRatio != 0f && lastRatio >= 0.8f && lastRatio < 1f) {
             val pendingIntent = factory.pendingIntentTo("gureum://goals/today".toUri())
             val notification = factory.simpleAlarm(
                 Channels.PROGRESS,
