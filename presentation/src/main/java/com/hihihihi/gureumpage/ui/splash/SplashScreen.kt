@@ -11,25 +11,12 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -161,19 +148,15 @@ fun SplashView(
                 }
 
                 is SplashViewModel.NavTarget.Widget -> {
-                    navController.navigate(NavigationRoute.Home.route) {
+                    navController.navigate(target.route) {
                         popUpTo(NavigationRoute.Splash.route) { inclusive = true }
                         launchSingleTop = true
-                    }
-                    // Home 네비게이션 후 위젯 라우트로 이동
-                    navController.navigate(target.route) {
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
 
                 else -> {
-                  }
+                    // Loading, NoNetwork 상태는 별도 UI에서 처리
+                }
             }
         }
     }
