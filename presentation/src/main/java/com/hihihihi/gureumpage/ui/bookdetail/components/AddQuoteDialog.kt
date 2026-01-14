@@ -137,7 +137,7 @@ fun AddQuoteDialog(
                     hint = "책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요.",
                     minLines = 6,
                     maxLines = 6,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Default
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
