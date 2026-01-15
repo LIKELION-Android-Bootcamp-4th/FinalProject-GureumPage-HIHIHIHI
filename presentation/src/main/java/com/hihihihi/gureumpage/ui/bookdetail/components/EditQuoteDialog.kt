@@ -37,7 +37,9 @@ fun EditQuoteDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         GureumCard(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp)
@@ -105,10 +107,16 @@ fun EditQuoteDialog(
                 // 본문 라벨(필수 * 표시)
                 Medi12Text(
                     text = buildAnnotatedString {
-                        withStyle(GureumTypography.titleSmall.toSpanStyle().copy(color = GureumTheme.colors.gray800)) {
+                        withStyle(
+                            GureumTypography.titleSmall.toSpanStyle()
+                                .copy(color = GureumTheme.colors.gray800)
+                        ) {
                             append("인상 깊은 문장을 적어보세요")
                         }
-                        withStyle(GureumTypography.titleSmall.toSpanStyle().copy(color = GureumTheme.colors.primary)) {
+                        withStyle(
+                            GureumTypography.titleSmall.toSpanStyle()
+                                .copy(color = GureumTheme.colors.primary)
+                        ) {
                             append(" *")
                         }
                     }.text,
