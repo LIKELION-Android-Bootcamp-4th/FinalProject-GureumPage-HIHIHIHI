@@ -30,7 +30,6 @@ fun EditQuoteDialog(
 ) {
     var pageNumber by remember { mutableStateOf(initialPageNumber?.toString() ?: "") }
     var quote by remember { mutableStateOf(initialContent) }
-    val maxLen = 500
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -128,24 +127,13 @@ fun EditQuoteDialog(
                 // 본문 입력
                 GureumTextField(
                     value = quote,
-                    onValueChange = { input ->
-                        quote = if (input.length <= maxLen) input else input.take(maxLen)
-                    },
+                    onValueChange = { quote = it },
                     modifier = Modifier.fillMaxWidth(),
                     hint = "책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요.",
                     minLines = 6,
                     maxLines = 6,
                     imeAction = ImeAction.Default
                 )
-
-                // 글자 수 카운터 (우측 하단)
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Medi10Text(
-                        text = "최대 ${maxLen}자",
-                        color = GureumTheme.colors.gray400,
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
