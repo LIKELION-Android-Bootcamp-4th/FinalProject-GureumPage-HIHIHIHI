@@ -25,8 +25,8 @@ android {
         applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.1.2"
+        versionCode = 10
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
