@@ -137,7 +137,7 @@ fun AddQuoteDialog(
                     hint = "책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요.",
                     minLines = 6,
                     maxLines = 6,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Default
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -166,7 +166,7 @@ fun AddQuoteDialog(
                             color = GureumTheme.colors.gray800
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Medi10Text(
+                        Medi12Text(
                             text = "필사는 나만의 독서 기록을 남기는 좋은 방법입니다.\n마음에 드는 문장이나 떠오른 생각을 자유롭게 적어보세요.",
                             color = GureumTheme.colors.gray400
                         )
