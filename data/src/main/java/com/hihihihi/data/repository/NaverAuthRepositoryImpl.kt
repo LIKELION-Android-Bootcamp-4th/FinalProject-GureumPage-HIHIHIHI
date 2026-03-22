@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import android.app.Activity
 import com.hihihihi.data.remote.datasource.NaverDataSource

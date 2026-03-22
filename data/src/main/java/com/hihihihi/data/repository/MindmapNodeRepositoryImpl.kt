@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.MindmapNodeRemoteDataSource

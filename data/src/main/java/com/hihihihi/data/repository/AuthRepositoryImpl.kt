@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import android.content.Intent
 import kotlinx.coroutines.tasks.await
