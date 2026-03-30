@@ -1,6 +1,5 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.google.firebase.firestore.ListenerRegistration
 
 object FirestoreListenerManager {

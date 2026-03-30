@@ -1,4 +1,4 @@
-package com.hihihihi.data.repositoryimpl
+package com.hihihihi.data.repository
 
 import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource

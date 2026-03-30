@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.mapper.toDomain

@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesByUserIdAndDateUseCase
-import com.hihihihi.domain.usecase.daily.GetDailyReadPagesUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -15,14 +14,12 @@ import kotlinx.coroutines.NonCancellable.invokeOnCompletion
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.TimeZone
 import javax.inject.Inject

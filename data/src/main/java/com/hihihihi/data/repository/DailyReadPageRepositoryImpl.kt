@@ -1,9 +1,8 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import com.hihihihi.data.mapper.toDomain
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.domain.model.DailyReadPage
-import com.hihihihi.domain.model.History
 import com.hihihihi.domain.repository.DailyReadPageRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -21,7 +21,7 @@ import com.hihihihi.domain.usecase.mindmap.GetMindmapUseCase
 import com.hihihihi.domain.usecase.mindmap.UpdateMindmapUseCase
 import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
 import com.hihihihi.domain.usecase.mindmapnode.LoadNodesUseCase
-import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ObserveMindmapNodeUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteByUserBookIdUseCase
@@ -214,10 +214,10 @@ object UseCaseModule {
     }
 
     @Provides
-    fun provideObserveUseCase(
+    fun provideObserveMindmapNodeUseCase(
         repository: MindmapNodeRepository
-    ): ObserveUseCase {
-        return ObserveUseCase(repository)
+    ): ObserveMindmapNodeUseCase {
+        return ObserveMindmapNodeUseCase(repository)
     }
 
     @Provides
