@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.statistics
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mikephil.charting.data.BarEntry

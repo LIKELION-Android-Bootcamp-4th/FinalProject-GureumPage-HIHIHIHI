@@ -1,6 +1,5 @@
 package com.hihihihi.domain.usecase.search
 
-import android.util.Log
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.repository.SearchRepository
 import javax.inject.Inject

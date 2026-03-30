@@ -8,7 +8,6 @@ import androidx.glance.ImageProvider
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.layout.size
-import com.kakao.sdk.common.model.Description
 
 @Composable
 fun ActionIcon(resId: Int, description: String,action: Action) {

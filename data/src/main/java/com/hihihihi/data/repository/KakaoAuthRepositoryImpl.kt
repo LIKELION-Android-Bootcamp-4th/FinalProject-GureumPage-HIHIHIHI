@@ -1,4 +1,4 @@
-package com.hihihihi.data.repotisoryimpl
+package com.hihihihi.data.repository
 
 import com.hihihihi.data.remote.datasource.KakaoDataSource
 import com.hihihihi.domain.repository.KakaoAuthRepository

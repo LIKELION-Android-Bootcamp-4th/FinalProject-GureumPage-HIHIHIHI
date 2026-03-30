@@ -19,9 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hihihihi.gureumpage.designsystem.components.GureumCard
 import com.hihihihi.gureumpage.designsystem.components.GureumLinearProgressBar
-import com.hihihihi.gureumpage.designsystem.components.Medi10Text
 import com.hihihihi.gureumpage.designsystem.components.Medi12Text
-import com.hihihihi.gureumpage.designsystem.components.Semi12Text
 import com.hihihihi.gureumpage.designsystem.components.Semi14Text
 import com.hihihihi.gureumpage.designsystem.theme.GureumColors
 import com.hihihihi.gureumpage.designsystem.theme.GureumPageTheme

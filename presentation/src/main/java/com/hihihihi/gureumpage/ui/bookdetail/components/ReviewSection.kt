@@ -1,6 +1,5 @@
 package com.hihihihi.gureumpage.ui.bookdetail.components
 
-import android.widget.RatingBar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

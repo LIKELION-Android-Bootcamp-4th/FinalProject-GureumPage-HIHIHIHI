@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.operation.NodeEditOperation
 import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
-import com.hihihihi.domain.usecase.mindmapnode.ObserveUseCase
+import com.hihihihi.domain.usecase.mindmapnode.ObserveMindmapNodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MindMapViewModel @Inject constructor(
-    private val observeUseCase: ObserveUseCase,             // 노드 실시간 스트림
+    private val observeUseCase: ObserveMindmapNodeUseCase,  // 노드 실시간 스트림
     private val applyNodeOperation: ApplyNodeOperation,     // 일괄 변경 적용
 ) : ViewModel() {
     // 화면에 그릴 스냅샷 노드들

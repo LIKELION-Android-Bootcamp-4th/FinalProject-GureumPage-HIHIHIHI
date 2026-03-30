@@ -26,9 +26,6 @@ import com.hihihihi.gureumpage.designsystem.theme.GureumTheme
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.BookInfoTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.QuotesTab
 import com.hihihihi.gureumpage.ui.bookdetail.components.tabs.ReadingRecordTab
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyQuotes
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyRecords
-import com.hihihihi.gureumpage.ui.bookdetail.mock.dummyUserBook
 import kotlinx.coroutines.launch
 
 @Composable

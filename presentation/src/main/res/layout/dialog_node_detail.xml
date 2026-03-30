@@ -62,7 +62,7 @@
                 android:layout_height="24dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_close"
-                android:tint="@color/gray400" />
+                app:tint="@color/gray400" />
         </LinearLayout>
 
         <View
