@@ -5,7 +5,6 @@ import com.hihihihi.data.common.util.toLocalDateTime
 import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.data.remote.dto.QuoteDto
 import com.hihihihi.domain.model.Quote
-import com.hihihihi.domain.model.RecordType
 
 fun Quote.toDto(): QuoteDto = QuoteDto(
     quoteId = id,

@@ -1,15 +1,12 @@
 package com.hihihihi.data.remote.datasourceimpl
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.dto.DailyReadPageDto
-import com.hihihihi.data.remote.dto.HistoryDto
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
 
