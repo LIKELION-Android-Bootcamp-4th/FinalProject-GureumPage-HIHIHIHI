@@ -424,9 +424,9 @@ fun GureumPageApp(
     }
 
     BackHandler(enabled = currentRoute !in authRoutes) {
-        when {
+        when (currentRoute) {
             // 바텀 내비 아이템 중 홈이 아닐 때 -> 홈으로 스위칭
-            currentRoute in bottomRoutes && currentRoute != NavigationRoute.Home.route -> {
+            in bottomRoutes if currentRoute != NavigationRoute.Home.route -> {
                 navController.navigate(NavigationRoute.Home.route) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
@@ -435,7 +435,7 @@ fun GureumPageApp(
             }
 
             // 홈이면 → 종료
-            currentRoute == NavigationRoute.Home.route -> {
+            NavigationRoute.Home.route -> {
                 val now = System.currentTimeMillis()
                 if (now - lastBackMillis < 2000L) (context as? Activity)?.finish()
                 else {
