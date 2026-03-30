@@ -33,7 +33,7 @@
         android:contentDescription="cd_center"
         android:padding="8dp"
         android:src="@drawable/ic_arrow_expand"
-        android:tint="@color/primary" />
+        app:tint="@color/primary" />
 
     <LinearLayout
         android:id="@+id/layout_undo_redo"
@@ -52,8 +52,8 @@
             android:contentDescription="cd_undo"
             android:padding="8dp"
             android:src="@drawable/ic_undo"
-            android:tint="@color/primary"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="@color/primary" />
 
         <ImageButton
             android:id="@+id/btn_redo"
@@ -65,7 +65,7 @@
             android:contentDescription="cd_redo"
             android:padding="8dp"
             android:src="@drawable/ic_redo"
-            android:tint="@color/primary"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="@color/primary" />
     </LinearLayout>
 </FrameLayout>
