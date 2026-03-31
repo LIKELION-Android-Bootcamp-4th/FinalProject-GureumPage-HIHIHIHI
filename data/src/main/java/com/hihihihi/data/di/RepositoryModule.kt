@@ -1,145 +1,84 @@
 package com.hihihihi.data.di
 
-import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
-import com.hihihihi.data.remote.datasource.AuthDataSource
-import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
-import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
-import com.hihihihi.data.remote.datasource.KakaoDataSource
-import com.hihihihi.data.remote.datasource.MindmapNodeRemoteDataSource
-import com.hihihihi.data.remote.datasource.MindmapRemoteDataSource
-import com.hihihihi.data.remote.datasource.NaverDataSource
-import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
-import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
-import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.repository.AuthRepositoryImpl
-import com.hihihihi.data.repository.KakaoAuthRepositoryImpl
-import com.hihihihi.data.repository.NaverAuthRepositoryImpl
-import com.hihihihi.data.remote.datasource.UserRemoteDataSource
-import com.hihihihi.data.repository.SearchRepositoryImpl
 import com.hihihihi.data.repository.DailyReadPageRepositoryImpl
 import com.hihihihi.data.repository.HistoryRepositoryImpl
+import com.hihihihi.data.repository.KakaoAuthRepositoryImpl
 import com.hihihihi.data.repository.MindmapNodeRepositoryImpl
 import com.hihihihi.data.repository.MindmapRepositoryImpl
+import com.hihihihi.data.repository.NaverAuthRepositoryImpl
 import com.hihihihi.data.repository.QuoteRepositoryImpl
+import com.hihihihi.data.repository.SearchRepositoryImpl
 import com.hihihihi.data.repository.UserBookRepositoryImpl
 import com.hihihihi.data.repository.UserPreferencesRepositoryImpl
-import com.hihihihi.domain.repository.AuthRepository
-import com.hihihihi.domain.repository.KakaoAuthRepository
-import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.data.repository.UserRepositoryImpl
+import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
+import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.MindmapNodeRepository
 import com.hihihihi.domain.repository.MindmapRepository
+import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
 import com.hihihihi.domain.repository.UserPreferencesRepository
 import com.hihihihi.domain.repository.UserRepository
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)  // 앱 전체 라이프사이클 동안 싱글톤으로 제공
-object RepositoryModule {
-    // UserBookRepository 의존성 주입 제공
-    @Provides
-    @Singleton
-    fun provideUserBookRepository(
-        remoteDataSource: UserBookRemoteDataSource // 원격 데이터 소스 주입
-    ): UserBookRepository {
-        return UserBookRepositoryImpl(remoteDataSource) // 구현체 반환
-    }
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
 
-    @Provides
     @Singleton
-    fun provideQuoteRepository(
-        remoteDataSource: QuoteRemoteDataSource
-    ): QuoteRepository {
-        return QuoteRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindUserBookRepository(impl: UserBookRepositoryImpl): UserBookRepository
 
-    @Provides
     @Singleton
-    fun provideAuthRepository(
-        authDataSource: AuthDataSource
-    ): AuthRepository {
-        return AuthRepositoryImpl(authDataSource)
-    }
+    @Binds
+    abstract fun bindQuoteRepository(impl: QuoteRepositoryImpl): QuoteRepository
 
-    @Provides
     @Singleton
-    fun provideNaverAuthRepository(
-        naverDataSource: NaverDataSource
-    ): NaverAuthRepository {
-        return NaverAuthRepositoryImpl(naverDataSource)
-    }
+    @Binds
+    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 
-    @Provides
     @Singleton
-    fun provideKakaoAuthRepository(
-        kakaoDataSource: KakaoDataSource
-    ): KakaoAuthRepository {
-        return KakaoAuthRepositoryImpl(kakaoDataSource)
-    }
+    @Binds
+    abstract fun bindNaverAuthRepository(impl: NaverAuthRepositoryImpl): NaverAuthRepository
 
-    @Provides
     @Singleton
-    fun provideHistoryRepository(
-        remoteDataSource: HistoryRemoteDataSource
-    ): HistoryRepository {
-        return HistoryRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindKakaoAuthRepository(impl: KakaoAuthRepositoryImpl): KakaoAuthRepository
 
-    @Provides
     @Singleton
-    fun provideUserRepository(
-        remoteDataSource: UserRemoteDataSource
-    ): UserRepository {
-        return UserRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindHistoryRepository(impl: HistoryRepositoryImpl): HistoryRepository
 
-    @Provides
     @Singleton
-    fun provideDailyReadPageRepository(
-        remoteDataSource: DailyReadPageRemoteDataSource
-    ): DailyReadPageRepository {
-        return DailyReadPageRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 
-    @Provides
     @Singleton
-    fun provideSearchRepository(
-        remoteDataSource: SearchRemoteDataSource
-    ): SearchRepository {
-        return SearchRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindDailyReadPageRepository(impl: DailyReadPageRepositoryImpl): DailyReadPageRepository
 
-    @Provides
     @Singleton
-    fun provideMindmapRepository(
-        remoteDataSource: MindmapRemoteDataSource
-    ): MindmapRepository {
-        return MindmapRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindSearchRepository(impl: SearchRepositoryImpl): SearchRepository
 
-    @Provides
     @Singleton
-    fun provideMindmapNodeRepository(
-        remoteDataSource: MindmapNodeRemoteDataSource
-    ): MindmapNodeRepository {
-        return MindmapNodeRepositoryImpl(remoteDataSource)
-    }
+    @Binds
+    abstract fun bindMindmapRepository(impl: MindmapRepositoryImpl): MindmapRepository
 
-    @Provides
     @Singleton
-    fun provideUserPreferencesRepository(
-        userPreferencesDataSource: UserPreferencesLocalDataSource,
-        userRemoteDataSource: UserRemoteDataSource
-    ): UserPreferencesRepository {
-        return UserPreferencesRepositoryImpl(userPreferencesDataSource, userRemoteDataSource)
-    }
+    @Binds
+    abstract fun bindMindmapNodeRepository(impl: MindmapNodeRepositoryImpl): MindmapNodeRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 }
