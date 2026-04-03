@@ -8,7 +8,7 @@ import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.model.UserBook
-import com.hihihihi.domain.repository.SearchRepository
+import com.hihihihi.domain.usecase.search.GetBookPageCountUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ private const val MAX_TOTAL_RESULTS = 200
 class SearchViewModel @Inject constructor(
     private val searchBooksUseCase: SearchBooksUseCase,
     private val addUserBookUseCase: AddUserBookUseCase,
-    private val searchRepository: SearchRepository,
+    private val getBookPageCountUseCase: GetBookPageCountUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
@@ -107,15 +107,10 @@ class SearchViewModel @Inject constructor(
         return true
     }
 
-    // TODO: usecase로 일관성 맞추기
     fun getBookPageCount(isbn: String, onResult: (Int?) -> Unit) {
         viewModelScope.launch {
-            try {
-                val pageCount = searchRepository.getBookPageCount(isbn)
-                onResult(pageCount)
-            } catch (_: Exception) {
-                onResult(null)
-            }
+            val result = getBookPageCountUseCase(isbn)
+            onResult(result.getOrNull())
         }
     }
 
