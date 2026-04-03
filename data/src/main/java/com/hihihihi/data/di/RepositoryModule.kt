@@ -3,10 +3,8 @@ package com.hihihihi.data.di
 import com.hihihihi.data.repository.AuthRepositoryImpl
 import com.hihihihi.data.repository.DailyReadPageRepositoryImpl
 import com.hihihihi.data.repository.HistoryRepositoryImpl
-import com.hihihihi.data.repository.KakaoAuthRepositoryImpl
 import com.hihihihi.data.repository.MindmapNodeRepositoryImpl
 import com.hihihihi.data.repository.MindmapRepositoryImpl
-import com.hihihihi.data.repository.NaverAuthRepositoryImpl
 import com.hihihihi.data.repository.QuoteRepositoryImpl
 import com.hihihihi.data.repository.SearchRepositoryImpl
 import com.hihihihi.data.repository.UserBookRepositoryImpl
@@ -15,10 +13,8 @@ import com.hihihihi.data.repository.UserRepositoryImpl
 import com.hihihihi.domain.repository.AuthRepository
 import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
-import com.hihihihi.domain.repository.KakaoAuthRepository
 import com.hihihihi.domain.repository.MindmapNodeRepository
 import com.hihihihi.domain.repository.MindmapRepository
-import com.hihihihi.domain.repository.NaverAuthRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -45,14 +41,6 @@ abstract class RepositoryModule {
     @Singleton
     @Binds
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
-
-    @Singleton
-    @Binds
-    abstract fun bindNaverAuthRepository(impl: NaverAuthRepositoryImpl): NaverAuthRepository
-
-    @Singleton
-    @Binds
-    abstract fun bindKakaoAuthRepository(impl: KakaoAuthRepositoryImpl): KakaoAuthRepository
 
     @Singleton
     @Binds

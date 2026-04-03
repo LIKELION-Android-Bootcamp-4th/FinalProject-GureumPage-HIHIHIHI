@@ -9,10 +9,8 @@ import com.hihihihi.data.local.datasourceimpl.UserPreferencesLocalDataSourceImpl
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
 import com.hihihihi.data.remote.datasource.HistoryRemoteDataSource
-import com.hihihihi.data.remote.datasource.KakaoDataSource
 import com.hihihihi.data.remote.datasource.MindmapNodeRemoteDataSource
 import com.hihihihi.data.remote.datasource.MindmapRemoteDataSource
-import com.hihihihi.data.remote.datasource.NaverDataSource
 import com.hihihihi.data.remote.datasource.QuoteRemoteDataSource
 import com.hihihihi.data.remote.datasource.SearchRemoteDataSource
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
@@ -20,10 +18,8 @@ import com.hihihihi.data.remote.datasource.UserRemoteDataSource
 import com.hihihihi.data.remote.datasourceimpl.AuthDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.DailyReadPageRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.HistoryRemoteDataSourceImpl
-import com.hihihihi.data.remote.datasourceimpl.KakaoDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.MindmapNodeRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.MindmapRemoteDataSourceImpl
-import com.hihihihi.data.remote.datasourceimpl.NaverDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.QuoteRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.SearchRemoteDataSourceImpl
 import com.hihihihi.data.remote.datasourceimpl.UserBookRemoteDataSourceImpl
@@ -63,21 +59,6 @@ object DataSourceModule {
         functions: FirebaseFunctions
     ): AuthDataSource {
         return AuthDataSourceImpl(auth, functions)
-    }
-
-    @Provides
-    @Singleton
-    fun provideNaverAuthDataSource(
-    ): NaverDataSource {
-        return NaverDataSourceImpl()
-    }
-
-    @Provides
-    @Singleton
-    fun provideKakaoDataSource(
-        @ApplicationContext context: Context
-    ): KakaoDataSource {
-        return KakaoDataSourceImpl(context)
     }
 
     @Provides
