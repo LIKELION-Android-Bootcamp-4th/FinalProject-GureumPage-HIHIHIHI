@@ -13,7 +13,7 @@ class MindmapRemoteDataSourceImpl @Inject constructor(
     private fun reference(maindMapId: String) =
         fireStore.collection("mindmaps").document(maindMapId)
 
-    override suspend fun createMindmap(mindmapDto: MindmapDto): Result<Unit> = runCatching {
+    override suspend fun createMindmap(mindmapDto: MindmapDto) {
         require(mindmapDto.mindmapId.isNotBlank()) { "마인드맵 ID가 필요합니다." }
 
         reference(mindmapDto.mindmapId).set(mindmapDto).await()
@@ -26,7 +26,7 @@ class MindmapRemoteDataSourceImpl @Inject constructor(
             ?: throw IllegalArgumentException("마인드맵을 찾을 수 없습니다.")
     }
 
-    override suspend fun updateMindmap(mindmapDto: MindmapDto): Result<Unit> = runCatching {
+    override suspend fun updateMindmap(mindmapDto: MindmapDto) {
         require(mindmapDto.mindmapId.isNotBlank()) { "마인드맵 ID가 필요합니다." }
 
         reference(mindmapDto.mindmapId).set(mindmapDto, SetOptions.merge()).await()

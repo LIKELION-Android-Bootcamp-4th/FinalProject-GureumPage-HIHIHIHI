@@ -66,14 +66,14 @@ class LoginViewModel @Inject constructor(
 
         try {
             waitForUserDocumentCreation(currentUser.uid)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             setError("사용자 정보 설정에 실패했습니다. 다시 시도해주세요.")
             return
         }
 
         setLoading(true, "사용자 정보를 확인하는 중...")
 
-        val profile = getUserUseCase(currentUser.uid)
+        val profile = getUserUseCase(currentUser.uid).getOrNull()
         val hasNickname = !profile?.nickname.isNullOrBlank()
         if (hasNickname) setOnboardingCompleteUseCase(currentUser.uid, true)
 
@@ -145,6 +145,7 @@ class LoginViewModel @Inject constructor(
     ) {
         setLoading(true, "구글 로그인 중...")
 
+        // TODO: Credential 방식으로 변경하기
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id)) // strings.xml에 있어야 함
             .requestEmail()
@@ -162,7 +163,7 @@ class LoginViewModel @Inject constructor(
             try {
                 val idToken = SocialLoginManager.getGoogleIdToken(data)
                 loginWithSocialToken(SocialProvider.GOOGLE, idToken, navController)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
@@ -179,7 +180,7 @@ class LoginViewModel @Inject constructor(
                 signInWithSocialTokenUseCase(provider, accessToken)
                 setLastProviderUseCase(provider.name.lowercase())
                 navigateAfterLogin(navController)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 setError("로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }

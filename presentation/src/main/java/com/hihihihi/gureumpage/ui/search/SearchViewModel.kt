@@ -45,7 +45,7 @@ class SearchViewModel @Inject constructor(
                 page = 1
             )
             try {
-                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE)
+                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE).getOrThrow()
                 val dedup = results.distinctBy { it.isbn }
 
                 _uiState.value = _uiState.value.copy(
@@ -54,7 +54,7 @@ class SearchViewModel @Inject constructor(
                     hasMore = canLoadMore(dedup.size, 1),
                     page = 1
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
                     isSearching = false,
@@ -75,7 +75,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val nextPage = state.page + 1
                 val newResults =
-                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE).getOrThrow()
 
                 val before = state.searchResults
                 val merged = (before + newResults).distinctBy { it.isbn }
@@ -113,7 +113,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val pageCount = searchRepository.getBookPageCount(isbn)
                 onResult(pageCount)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 onResult(null)
             }
         }
