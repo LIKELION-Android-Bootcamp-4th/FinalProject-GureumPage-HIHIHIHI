@@ -6,8 +6,4 @@ interface MindmapRemoteDataSource {
 
     suspend fun createMindmap(mindmapDto: MindmapDto)
 
-    suspend fun getMindmap(mindmapId: String): MindmapDto
-
-    suspend fun updateMindmap(mindmapDto: MindmapDto)
-
 }
