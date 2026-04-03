@@ -21,7 +21,6 @@ class UserRepositoryImpl @Inject constructor(
         return remote.getUserFlow(userId).map { it.toDomain() }
     }
 
-
     override suspend fun updateNickname(userId: String, nickname: String) {
         remote.updateNickname(userId, nickname)
     }
