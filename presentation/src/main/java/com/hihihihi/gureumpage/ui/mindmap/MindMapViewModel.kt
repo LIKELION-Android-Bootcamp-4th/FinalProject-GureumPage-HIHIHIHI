@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MindMapViewModel @Inject constructor(
-    private val observeUseCase: ObserveMindmapNodeUseCase,  // 노드 실시간 스트림
+    private val observeMindmapNodeUseCase: ObserveMindmapNodeUseCase,  // 노드 실시간 스트림
     private val applyNodeOperation: ApplyNodeOperation,     // 일괄 변경 적용
 ) : ViewModel() {
     // 화면에 그릴 스냅샷 노드들
@@ -40,7 +40,7 @@ class MindMapViewModel @Inject constructor(
         this.mindmapId = mindmapId
         viewModelScope.launch {
             // 편집중이거나 수정중이 아닐 떄 덮어씀
-            observeUseCase(mindmapId).collect { if (!editing && !saving) _nodes.value = it }
+            observeMindmapNodeUseCase(mindmapId).collect { if (!editing && !saving) _nodes.value = it }
         }
     }
 
