@@ -13,9 +13,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.presentation.widgets.common.ImageDownloadWorker
 import com.hihihihi.presentation.widgets.common.WidgetBook
@@ -27,16 +27,16 @@ import kotlinx.coroutines.flow.first
 class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val getUserBooksByStatus: GetUserBooksByStatusUseCase
+    private val getUserBooksByStatus: GetUserBooksByStatusUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
         const val UNIQUE_WORK_NAME = "CurrentReadingBooksWokrer"
     }
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
     override suspend fun doWork(): Result {
 
@@ -44,7 +44,8 @@ class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
             val manager = GlanceAppWidgetManager(applicationContext)
             val glanceIds = manager.getGlanceIds(CurrentReadingBooksWidget::class.java)
 
-            val books = getUserBooksByStatus(currentUid, ReadingStatus.READING).first()
+            val uid = currentUid ?: return Result.success()
+            val books = getUserBooksByStatus(uid, ReadingStatus.READING).first()
             val imageUrls = books.mapNotNull { it.imageUrl }.filter { it.isNotBlank() }
 
             scheduleImageDownloads(imageUrls, applicationContext)
@@ -65,10 +66,10 @@ class CurrentReadingBooksWidgetWorker @AssistedInject constructor(
 
                     prefs[dataKey] = jsonData
                 }
-                CurrentReadingBooksWidget().update(applicationContext,id)
+                CurrentReadingBooksWidget().update(applicationContext, id)
             }
             return Result.success()
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
         return Result.failure()
     }
 }

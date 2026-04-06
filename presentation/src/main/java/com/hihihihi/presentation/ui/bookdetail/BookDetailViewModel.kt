@@ -2,11 +2,11 @@ package com.hihihihi.presentation.ui.bookdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import com.hihihihi.domain.usecase.quote.DeleteQuoteUseCase
@@ -35,23 +35,23 @@ class BookDetailViewModel @Inject constructor(
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
     private val deleteQuoteUseCase: DeleteQuoteUseCase,
     private val updateQuoteUseCase: UpdateQuoteUseCase,
-):ViewModel(){
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+) : ViewModel() {
 
     // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
 
     fun loadUserBookDetails(userBookId: String) {
         viewModelScope.launch {
             getBookDetailDataUseCase(userBookId)
-                .onStart { _uiState.update { it.copy(isLoading = true)   } }
+                .onStart { _uiState.update { it.copy(isLoading = true) } }
                 .catch { e -> _uiState.update { it.copy(errorMessage = e.message, isLoading = false) } }
-                .collect{ data ->
+                .collect { data ->
                     _uiState.update {
                         it.copy(
                             userBook = data.userBook,
@@ -74,9 +74,11 @@ class BookDetailViewModel @Inject constructor(
     ) {
         val userBook = uiState.value.userBook ?: return
 
+        val uid = currentUid ?: return
+
         val history = History(
             id = "",
-            userId = currentUid,
+            userId = uid,
             userBookId = userBook.userBookId,
             date = date,
             startTime = startTime,
@@ -101,9 +103,11 @@ class BookDetailViewModel @Inject constructor(
     fun addQuote(userBookId: String, content: String, pageNumber: Int?) {
         val userBook = uiState.value.userBook ?: return // 방어 코드
 
+        val uid = currentUid ?: return
+
         val newQuote = Quote(
             id = "",
-            userId = currentUid,
+            userId = uid,
             userBookId = userBookId,
             content = content,
             pageNumber = pageNumber,

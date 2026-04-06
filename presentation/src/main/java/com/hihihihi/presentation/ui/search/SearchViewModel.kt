@@ -2,12 +2,12 @@ package com.hihihihi.presentation.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.Mindmap
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.model.UserBook
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.search.GetBookPageCountUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
@@ -28,13 +28,13 @@ class SearchViewModel @Inject constructor(
     private val searchBooksUseCase: SearchBooksUseCase,
     private val addUserBookUseCase: AddUserBookUseCase,
     private val getBookPageCountUseCase: GetBookPageCountUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
     fun search(query: String) {
         viewModelScope.launch {
@@ -126,9 +126,11 @@ class SearchViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isAddingBook = true)
 
             try {
+                val uid = currentUid ?: throw Exception("로그인이 필요합니다.")
+
                 val userBook = UserBook(
                     userBookId = "",
-                    userId = FirebaseAuth.getInstance().currentUser?.uid!!,
+                    userId = uid,
                     isbn10 = "",
                     isbn13 = searchBook.isbn,
                     title = searchBook.title,
@@ -149,14 +151,14 @@ class SearchViewModel @Inject constructor(
                 )
 
                 val mindmap = Mindmap(
-                    userId = FirebaseAuth.getInstance().currentUser?.uid!!,
+                    userId = uid,
                     mindmapId = "",
                     userBookId = "",
                     rootNodeId = "",
                 )
 
                 val rootNode = MindmapNode(
-                    userId = FirebaseAuth.getInstance().currentUser?.uid!!,
+                    userId = uid,
                     mindmapNodeId = "",
                     mindmapId = "",
                     nodeTitle = searchBook.title,
@@ -168,7 +170,7 @@ class SearchViewModel @Inject constructor(
                     bookImage = searchBook.coverImageUrl
                 )
 
-                val result = addUserBookUseCase(currentUid, userBook, mindmap, rootNode)
+                val result = addUserBookUseCase(uid, userBook, mindmap, rootNode)
 
                 if (result.isSuccess) {
                     _uiState.value =
