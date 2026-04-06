@@ -111,14 +111,15 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         val documentId = "${userId}-${normalizedIsbn}"
         val docRef = firestore.collection("user_books").document(documentId)
 
-        // 이미 존재하는지 확인
-        if (docRef.get().await().exists()) {
-            throw IllegalStateException("이미 추가된 책입니다")
-        } else {
-            // DTO에 정규화된 ISBN 설정
+        // Firestore 트랜잭션으로 중복 확인 + 저장을 원자적으로 처리
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(docRef)
+            if (snapshot.exists()) {
+                throw IllegalStateException("이미 추가된 책입니다")
+            }
             val normalizedDto = userBookDto.copy(isbn13 = normalizedIsbn)
-            docRef.set(normalizedDto.toMap()).await()
-            return documentId
-        }
+            transaction.set(docRef, normalizedDto.toMap())
+        }.await()
+        return documentId
     }
 }

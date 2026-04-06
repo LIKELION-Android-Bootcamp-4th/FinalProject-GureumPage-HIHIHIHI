@@ -97,8 +97,8 @@ dependencies {
     implementation(libs.converter.gson)
 
     // Coroutines + Flow
-    implementation(libs.jetbrains.kotlinx.coroutines.core)
-    implementation(libs.jetbrains.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Hilt (의존성 주입)
     implementation(libs.hilt.android)

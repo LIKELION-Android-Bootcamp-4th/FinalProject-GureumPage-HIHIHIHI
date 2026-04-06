@@ -51,7 +51,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    suspend fun getLastProvider(): String {
+    private suspend fun getLastProvider(): String {
         return getLastProviderUseCase().first()
     }
 

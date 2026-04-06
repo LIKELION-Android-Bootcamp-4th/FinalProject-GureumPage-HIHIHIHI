@@ -9,8 +9,8 @@ import javax.inject.Inject
 class MindmapRemoteDataSourceImpl @Inject constructor(
     private val fireStore: FirebaseFirestore
 ) : MindmapRemoteDataSource {
-    private fun reference(maindMapId: String) =
-        fireStore.collection("mindmaps").document(maindMapId)
+    private fun reference(mindmapId: String) =
+        fireStore.collection("mindmaps").document(mindmapId)
 
     override suspend fun createMindmap(mindmapDto: MindmapDto) {
         require(mindmapDto.mindmapId.isNotBlank()) { "마인드맵 ID가 필요합니다." }

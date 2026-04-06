@@ -9,11 +9,11 @@ enum class SocialProvider { KAKAO, NAVER, GOOGLE }
 class SignInWithSocialTokenUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(provider: SocialProvider, accessToken: String): Result<Unit> = runSuspendCatching {
+    suspend operator fun invoke(provider: SocialProvider, token: String): Result<Unit> = runSuspendCatching {
         when (provider) {
-            SocialProvider.KAKAO -> authRepository.kakaoLogin(accessToken)
-            SocialProvider.NAVER -> authRepository.naverLogin(accessToken)
-            SocialProvider.GOOGLE -> authRepository.googleLogin(accessToken)
+            SocialProvider.KAKAO -> authRepository.kakaoLogin(token)
+            SocialProvider.NAVER -> authRepository.naverLogin(token)
+            SocialProvider.GOOGLE -> authRepository.googleLogin(token)
         }
     }
 }

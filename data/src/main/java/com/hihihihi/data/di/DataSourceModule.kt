@@ -54,7 +54,7 @@ object DataSourceModule {
 
     @Provides
     @Singleton
-    fun privateAuthDataSource(
+    fun provideAuthDataSource(
         auth: FirebaseAuth,
         functions: FirebaseFunctions
     ): AuthDataSource {
