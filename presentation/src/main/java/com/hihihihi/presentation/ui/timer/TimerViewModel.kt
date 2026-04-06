@@ -5,15 +5,14 @@ import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -22,12 +21,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     private val getUserBook: GetUserBookByIdUseCase,
     private val addHistory: AddHistoryUseCase,
-    private val auth: FirebaseAuth,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
     private val timerRepository: TimerRepository,
 ) : ViewModel() {
 
@@ -86,7 +86,12 @@ class TimerViewModel @Inject constructor(
     }
 
     fun ensureFloatingWindowClosed(context: Context) {
-        val intent = Intent(context, FloatingTimerService::class.java)
+        val intent = Intent().apply {
+            component = android.content.ComponentName(
+                "com.hihihihi.gureumpage",
+                "com.hihihihi.gureumpage.service.FloatingTimerService"
+            )
+        }
         context.stopService(intent)
     }
 
@@ -194,7 +199,12 @@ class TimerViewModel @Inject constructor(
     }
 
     fun startFloatingWindowMode(context: Context) {
-        val intent = Intent(context, FloatingTimerService::class.java)
+        val intent = Intent().setComponent(
+            android.content.ComponentName(
+                context.packageName,
+                "com.hihihihi.gureumpage.service.FloatingTimerService"
+            )
+        )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)
         } else {
@@ -203,12 +213,17 @@ class TimerViewModel @Inject constructor(
     }
 
     fun stopFloatingWindowMode(context: Context) {
-        val intent = Intent(context, FloatingTimerService::class.java)
+        val intent = Intent().setComponent(
+            android.content.ComponentName(
+                context.packageName,
+                "com.hihihihi.gureumpage.service.FloatingTimerService"
+            )
+        )
         context.stopService(intent)
     }
 
     fun finishAndSave(userBookId: String?, startPage: Int, endPage: Int) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = getCurrentUserIdUseCase() ?: return
         val seconds = _uiState.value.elapsedSec
         val delta = (endPage - startPage).coerceAtLeast(0)
 

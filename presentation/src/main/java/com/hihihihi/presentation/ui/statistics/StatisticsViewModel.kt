@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieEntry
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.DateRangePreset
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,21 +17,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val getStatisticsUseCase: GetStatisticsUseCase
+    private val getStatisticsUseCase: GetStatisticsUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(StatisticsUiState())
     val uiState: StateFlow<StatisticsUiState> = _uiState
 
-    val userId = FirebaseAuth.getInstance().currentUser!!.uid
+    val userId: String? = getCurrentUserIdUseCase()
 
 
     init {
-        if(FirebaseAuth.getInstance().currentUser != null){
+        if (userId != null) {
             loadStatistics(DateRangePreset.WEEK)
         }
     }
 
     fun loadStatistics(preset: DateRangePreset) {
+        if (userId == null) return
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 getStatisticsUseCase(userId, preset).collect { statistics ->

@@ -2,10 +2,10 @@ package com.hihihihi.presentation.ui.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.repository.NetworkMonitor
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
-import com.hihihihi.gureumpage.common.utils.NetworkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,8 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
     private val getUserUseCase: GetUserUseCase,
-    private val networkManager: NetworkManager
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val networkManager: NetworkMonitor
 ) : ViewModel() {
 
     sealed interface NavTarget {
@@ -31,8 +32,6 @@ class SplashViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SplashUiState())
     val uiState: StateFlow<SplashUiState> = _uiState
-
-    private val auth = FirebaseAuth.getInstance()
 
     // 위젯 라우트를 저장할 변수
     private var pendingWidgetRoute: String? = null
@@ -64,14 +63,14 @@ class SplashViewModel @Inject constructor(
                 return@launch
             }
 
-            val user = auth.currentUser
+            val userId = getCurrentUserIdUseCase()
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름이가 사용자 정보를 확인하는중...",
                 progress = 0.7f
             )
             delay(400)
 
-            if (user == null) {
+            if (userId == null) {
                 _uiState.value = _uiState.value.copy(
                     loadingMessage = "로그인이 필요해요",
                     navTarget = NavTarget.Login,
@@ -79,9 +78,9 @@ class SplashViewModel @Inject constructor(
                     isLoading = false
                 )
             } else {
-                val profile = getUserUseCase(user.uid).getOrNull()
+                val profile = getUserUseCase(userId).getOrNull()
                 val hasNickname = !profile?.nickname.isNullOrBlank()
-                if (hasNickname) setOnboardingCompleteUseCase(user.uid, true)
+                if (hasNickname) setOnboardingCompleteUseCase(userId, true)
 
                 val finalTarget = when {
                     !hasNickname -> {

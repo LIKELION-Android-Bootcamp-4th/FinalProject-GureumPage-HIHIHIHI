@@ -2,9 +2,9 @@ package com.hihihihi.presentation.ui.mypage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.hihihihi.data.remote.datasourceimpl.FirestoreListenerManager
 import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.hihihihi.domain.usecase.auth.LogoutUseCase
 import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
@@ -31,12 +31,13 @@ class MypageViewModel @Inject constructor(
     private val updateNicknameUseCase: UpdateNicknameUseCase,       // 닉네임 변경
 //    private val getUserBooksUseCase: GetUserBooksUseCase,           //총 권수 계산용
     getTheme: GetThemeFlowUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
     // FirebaseAuth로 현재 uid 참조
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val currentUid: String?
-        get() = auth.currentUser?.uid
+        get() = getCurrentUserIdUseCase()
 
     //DataStore 에서 다크모드 여부를 Flow 로 받아오는 StateFlow 형태로 보관
     val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
@@ -71,7 +72,7 @@ class MypageViewModel @Inject constructor(
                         }
 
                     }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(errorMessage = e.message, isLoading = false)
                 }
@@ -88,12 +89,10 @@ class MypageViewModel @Inject constructor(
     }
 
 
-    //로그아웃: firebase 세션 종료 후 이벤트 발생
+    //로그아웃: 세션 종료 후 이벤트 발생
     fun logout() = viewModelScope.launch {
         runCatching {
-            FirestoreListenerManager.clearAll()
-
-            auth.signOut()
+            logoutUseCase()
         }
             .onSuccess {
                 _uiState.value = MyPageUiState(isLoading = false)

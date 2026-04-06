@@ -8,8 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithSocialTokenUseCase
 import com.hihihihi.domain.usecase.auth.SocialProvider
 import com.hihihihi.domain.usecase.user.GetLastProviderUseCase
@@ -17,19 +16,15 @@ import com.hihihihi.domain.usecase.user.GetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
-import com.hihihihi.gureumpage.R
-import com.hihihihi.gureumpage.navigation.NavigationRoute
-import com.hihihihi.gureumpage.ui.login.util.SocialLoginManager
+import com.hihihihi.domain.usecase.user.WaitForUserDocumentCreationUseCase
 import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,6 +35,8 @@ class LoginViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val setLastProviderUseCase: SetLastProviderUseCase,
     private val getLastProviderUseCase: GetLastProviderUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val waitForUserDocumentCreationUseCase: WaitForUserDocumentCreationUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
@@ -60,14 +57,14 @@ class LoginViewModel @Inject constructor(
     private suspend fun navigateAfterLogin(navController: NavHostController) {
         setLoading(true, "사용자 정보를 설정하는 중...")
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser == null) {
+        val currentUserUid = getCurrentUserIdUseCase()
+        if (currentUserUid == null) {
             setError("로그인 정보를 찾을 수 없습니다")
             return
         }
 
         try {
-            waitForUserDocumentCreation(currentUser.uid)
+            waitForUserDocumentCreationUseCase(currentUserUid).getOrThrow()
         } catch (_: Exception) {
             setError("사용자 정보 설정에 실패했습니다. 다시 시도해주세요.")
             return
@@ -75,11 +72,11 @@ class LoginViewModel @Inject constructor(
 
         setLoading(true, "사용자 정보를 확인하는 중...")
 
-        val profile = getUserUseCase(currentUser.uid).getOrNull()
+        val profile = getUserUseCase(currentUserUid).getOrNull()
         val hasNickname = !profile?.nickname.isNullOrBlank()
-        if (hasNickname) setOnboardingCompleteUseCase(currentUser.uid, true)
+        if (hasNickname) setOnboardingCompleteUseCase(currentUserUid, true)
 
-        val isOnboardingComplete = getOnboardingCompleteUseCase(currentUser.uid).firstOrNull() ?: false
+        val isOnboardingComplete = getOnboardingCompleteUseCase(currentUserUid).firstOrNull() ?: false
 
         val destination = if (isOnboardingComplete && hasNickname) {
             NavigationRoute.Home.route
@@ -93,34 +90,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun waitForUserDocumentCreation(uid: String, maxRetries: Int = 10) {
-        val firestore = FirebaseFirestore.getInstance()
-        var retryCount = 0
-
-        while (retryCount < maxRetries) {
-            try {
-                val document = firestore.collection("users").document(uid)
-                    .get()
-                    .await()
-
-                if (document.exists()) {
-                    return
-                }
-
-                delay(1000)
-                retryCount++
-
-            } catch (e: Exception) {
-                if (retryCount == maxRetries - 1) {
-                    throw e
-                }
-                delay(1000)
-                retryCount++
-            }
-        }
-
-        throw Exception("사용자 문서 생성 시간이 초과되었습니다")
-    }
 
     private fun setLoading(isLoading: Boolean, message: String = "") {
         _uiState.value = _uiState.value.copy(
@@ -148,8 +117,12 @@ class LoginViewModel @Inject constructor(
         setLoading(true, "구글 로그인 중...")
 
         // TODO: Credential 방식으로 변경하기
+        val webClientIdResId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+        val defaultWebClientId = if (webClientIdResId != 0) context.getString(webClientIdResId) else ""
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id)) // strings.xml에 있어야 함
+            .requestIdToken(defaultWebClientId)
+
             .requestEmail()
             .build()
 

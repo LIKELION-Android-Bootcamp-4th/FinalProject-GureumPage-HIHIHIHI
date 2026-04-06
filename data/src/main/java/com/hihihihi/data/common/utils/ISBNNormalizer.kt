@@ -1,4 +1,4 @@
-package com.hihihihi.data.common.util
+package com.hihihihi.data.common.utils
 
 // ISBN 정규화 유틸리티 클래스
 object ISBNNormalizer {

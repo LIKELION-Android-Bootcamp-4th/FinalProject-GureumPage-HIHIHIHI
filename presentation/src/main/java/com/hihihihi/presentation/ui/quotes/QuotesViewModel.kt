@@ -2,8 +2,8 @@ package com.hihihihi.presentation.ui.quotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.quote.GetQuoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class QuotesViewModel @Inject constructor(
-    private val getQuoteUseCase: GetQuoteUseCase
+    private val getQuoteUseCase: GetQuoteUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : ViewModel() {
     private val _quotes = MutableStateFlow<List<Quote>>(emptyList())
     val quotes: StateFlow<List<Quote>> = _quotes.asStateFlow()
@@ -22,12 +23,11 @@ class QuotesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(QuotesUiState(isLoading = true))
     val uiState: StateFlow<QuotesUiState> = _uiState.asStateFlow()
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
     init {
-        getQuotes(currentUid)
+        currentUid?.let { getQuotes(it) }
     }
 
     fun getQuotes(userId: String) {

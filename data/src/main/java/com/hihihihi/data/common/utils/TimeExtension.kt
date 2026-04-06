@@ -1,4 +1,4 @@
-package com.hihihihi.data.common.util
+package com.hihihihi.data.common.utils
 
 import com.google.firebase.Timestamp
 import java.time.LocalDateTime

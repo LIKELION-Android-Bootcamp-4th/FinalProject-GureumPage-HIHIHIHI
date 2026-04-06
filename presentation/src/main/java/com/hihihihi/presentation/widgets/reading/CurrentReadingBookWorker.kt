@@ -13,9 +13,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import com.hihihihi.presentation.widgets.common.ImageDownloadWorker
 import com.hihihihi.presentation.widgets.common.WidgetBook
@@ -27,16 +27,16 @@ import kotlinx.coroutines.flow.first
 class CurrentReadingBookWidgetWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val getUserBookByStatus: GetUserBooksByStatusUseCase
+    private val getUserBookByStatus: GetUserBooksByStatusUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
         const val UNIQUE_WORK_NAME = "CurrentReadingBookWorker"
     }
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
     override suspend fun doWork(): Result {
 
@@ -45,7 +45,8 @@ class CurrentReadingBookWidgetWorker @AssistedInject constructor(
             val manager = GlanceAppWidgetManager(applicationContext)
             val glanceId = manager.getGlanceIds(CurrentReadingBookWidget::class.java)
 
-            val book = getUserBookByStatus(currentUid, ReadingStatus.READING).first().firstOrNull()
+            val uid = currentUid ?: return Result.success()
+            val book = getUserBookByStatus(uid, ReadingStatus.READING).first().firstOrNull()
 
             book?.imageUrl?.let { imageUrl ->
                 if (imageUrl.isNotBlank()) {
@@ -66,10 +67,10 @@ class CurrentReadingBookWidgetWorker @AssistedInject constructor(
                     val dataKey = stringPreferencesKey(CurrentReadingBookWidget.WIDGET_DATA_KEY)
                     prefs[dataKey] = jsonData
                 }
-                CurrentReadingBookWidget().update(applicationContext,id)
+                CurrentReadingBookWidget().update(applicationContext, id)
             }
             return Result.success()
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
         return Result.failure()
     }
 
@@ -84,7 +85,7 @@ private fun scheduleImageDownload(imageUrl: String, context: Context) {
                 .build()
         )
         .build()
-    
+
     WorkManager.getInstance(context)
         .enqueueUniqueWork(
             "image_download_${imageUrl.hashCode()}",

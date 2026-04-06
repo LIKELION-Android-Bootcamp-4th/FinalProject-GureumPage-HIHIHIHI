@@ -1,8 +1,8 @@
 package com.hihihihi.presentation.widgets.common
 
 import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesByUserIdAndDateUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksByStatusUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable.invokeOnCompletion
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
@@ -27,12 +26,12 @@ import javax.inject.Singleton
 
 @Singleton
 class WigetAutoUpdater @Inject constructor(
-    @ApplicationContext private val appContext : Context,
+    @ApplicationContext private val appContext: Context,
     private val dispatcher: WidgetUpdateDispatcher,
     private val getUserBooksByStatus: GetUserBooksByStatusUseCase,
     private val getDailyReadPagesByUserIdAndDateUseCase: GetDailyReadPagesByUserIdAndDateUseCase,
-    private val auth : FirebaseAuth
-    ){
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var authJob: Job? = null
     private var userWatchJob: Job? = null
@@ -41,17 +40,16 @@ class WigetAutoUpdater @Inject constructor(
     fun start() {
         if (authJob != null) return
         authJob = scope.launch {
-            rebindUserWatch(auth.currentUser?.uid)
+            var lastUid = getCurrentUserIdUseCase()
+            rebindUserWatch(lastUid)
 
-            // Auth 상태 변화 대응
-            val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-                rebindUserWatch(firebaseAuth.currentUser?.uid)
-            }
-            auth.addAuthStateListener(listener)
-
-            // 이 Job이 취소될 때 리스너 정리
-            invokeOnCompletion {
-                auth.removeAuthStateListener(listener)
+            while (isActive) {
+                delay(5000L)
+                val currentUid = getCurrentUserIdUseCase()
+                if (currentUid != lastUid) {
+                    lastUid = currentUid
+                    rebindUserWatch(currentUid)
+                }
             }
         }
     }

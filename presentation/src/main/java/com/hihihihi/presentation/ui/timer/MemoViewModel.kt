@@ -2,8 +2,8 @@ package com.hihihihi.presentation.ui.timer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.Quote
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MemoViewModel @Inject constructor(
     private val addQuote: AddQuoteUseCase,
-    private val auth: FirebaseAuth
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : ViewModel() {
 
     private val _ui = MutableStateFlow(MemoUiState())
@@ -36,7 +36,7 @@ class MemoViewModel @Inject constructor(
         publisher: String = "",
         onDone: () -> Unit = {}
     ) {
-        val uid = auth.currentUser?.uid
+        val uid = getCurrentUserIdUseCase()
         if (uid.isNullOrBlank()) {
             _ui.update { it.copy(error = "AUTH_REQUIRED") }
             onDone()

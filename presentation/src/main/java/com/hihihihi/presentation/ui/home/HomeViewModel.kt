@@ -2,7 +2,7 @@ package com.hihihihi.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,10 +17,10 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getHomeDataUseCase: GetHomeDataUseCase,
     private val changeDailyGoalTimeUseCase: UpdateDailyGoalTimeUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : ViewModel() {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
 
     // UI 상태를 관리하는 StateFlow (내부 업데이트는 _uiState, 외부에선 uiState만 노출)
@@ -30,23 +30,27 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getHomeDataUseCase(currentUid)
-                .catch { e ->
-                    _uiState.update {
-                        it.copy(errorMessage = e.message, isLoading = false)
+            currentUid?.let { uid ->
+                getHomeDataUseCase(uid)
+                    .catch { e ->
+                        _uiState.update {
+                            it.copy(errorMessage = e.message, isLoading = false)
+                        }
                     }
-                }
-                .collect { homeData ->
-                    _uiState.update {
-                        it.copy(homeData = homeData, isLoading = false)
+                    .collect { homeData ->
+                        _uiState.update {
+                            it.copy(homeData = homeData, isLoading = false)
+                        }
                     }
-                }
+            }
         }
     }
 
     fun changeDailyGoalTime(dailyGoalTime: Int) {
         viewModelScope.launch {
-            changeDailyGoalTimeUseCase(currentUid, dailyGoalTime)
+            currentUid?.let { uid ->
+                changeDailyGoalTimeUseCase(uid, dailyGoalTime)
+            }
         }
     }
 }

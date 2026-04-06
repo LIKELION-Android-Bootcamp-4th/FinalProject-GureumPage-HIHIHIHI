@@ -7,8 +7,8 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.daily.GetDailyReadPagesByUserIdAndDateUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -21,16 +21,16 @@ import java.time.temporal.TemporalAdjusters
 class HistoryHeatMapWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val getDailyReadPagesByUserIdAndDateUseCase: GetDailyReadPagesByUserIdAndDateUseCase
+    private val getDailyReadPagesByUserIdAndDateUseCase: GetDailyReadPagesByUserIdAndDateUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
         const val UNIQUE_WORK_NAME = "HeatMapWorker"
     }
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val currentUid: String
-        get() = auth.currentUser!!.uid
+    private val currentUid: String?
+        get() = getCurrentUserIdUseCase()
 
 
     override suspend fun doWork(): Result {
@@ -44,7 +44,8 @@ class HistoryHeatMapWorker @AssistedInject constructor(
                 today.minusWeeks(8).atStartOfDay().atZone(java.time.ZoneId.systemDefault())
             val startDate = java.util.Date.from(dataStartDate.toInstant())
 
-            val dailies = getDailyReadPagesByUserIdAndDateUseCase(currentUid, startDate).first()
+            val uid = currentUid ?: return Result.success()
+            val dailies = getDailyReadPagesByUserIdAndDateUseCase(uid, startDate).first()
 
             val grouped: Map<LocalDate, Int> = dailies
                 .groupBy { it.date } // it.date: LocalDate
@@ -62,7 +63,7 @@ class HistoryHeatMapWorker @AssistedInject constructor(
                 HistoryHeatMapWidget().update(applicationContext, id)
             }
             return Result.success()
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
         return Result.failure()
 
     }

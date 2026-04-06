@@ -7,13 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.hihihihi.domain.model.GureumThemeType
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.user.SetNicknameUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
-import com.hihihihi.gureumpage.common.utils.NicknameValidator.validateNickname
-import com.hihihihi.gureumpage.ui.onboarding.model.OnboardingStep
 import com.hihihihi.presentation.ui.onboarding.model.OnboardingStep
 import com.hihihihi.presentation.utils.NicknameValidator.validateNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +25,7 @@ class OnBoardingViewModel @Inject constructor(
     private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
     private val setNicknameUseCase: SetNicknameUseCase,
     private val setThemeUseCase: SetThemeUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
     private val _steps = MutableStateFlow<List<OnboardingStep>>(emptyList())
     val steps: StateFlow<List<OnboardingStep>> = _steps
@@ -57,7 +56,7 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun saveNickname() {
-        val userId: String? = FirebaseAuth.getInstance().currentUser?.uid
+        val userId: String? = getCurrentUserIdUseCase()
         viewModelScope.launch { setNicknameUseCase(userId!!, nickname.trim()) }
     }
 
@@ -86,10 +85,10 @@ class OnBoardingViewModel @Inject constructor(
 
     fun saveOnboardingComplete() {
         viewModelScope.launch {
-            val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
+            val uid = getCurrentUserIdUseCase() ?: return@launch
             theme?.let { setThemeUseCase(it) }
             saveNickname()
-            setOnboardingCompleteUseCase(currentUser.uid, true)
+            setOnboardingCompleteUseCase(uid, true)
         }
     }
 }
