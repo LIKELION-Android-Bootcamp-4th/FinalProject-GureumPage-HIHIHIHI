@@ -1,0 +1,103 @@
+import java.util.Properties
+import kotlin.apply
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
+    alias(libs.plugins.google.oss.licenses)
+}
+
+val localProperties = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        load(localFile.inputStream())
+    }
+}
+
+android {
+    namespace = "com.hihihihi.gureumpage"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.hihihihi.gureumpage"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 10
+        versionName = "1.1.3"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "NAVER_CLIENT_ID", "\"${localProperties["NAVER_CLIENT_ID"] ?: ""}\"")
+        manifestPlaceholders["NAVER_CLIENT_ID"] = localProperties["NAVER_CLIENT_ID"] ?: ""
+
+        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${localProperties["NAVER_CLIENT_SECRET"] ?: ""}\"")
+        manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
+
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"${localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""}\"")
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""
+
+        buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+}
+
+dependencies {
+
+    implementation(project(":presentation"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.material3)
+
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+
+    // kakao auth
+    implementation("com.kakao.sdk:v2-user:2.20.3")
+
+    // naver auth
+    implementation("com.navercorp.nid:oauth:5.9.0")
+
+    implementation(libs.play.services.oss.licenses)
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation("androidx.hilt:hilt-work:1.2.0")
+
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+}
