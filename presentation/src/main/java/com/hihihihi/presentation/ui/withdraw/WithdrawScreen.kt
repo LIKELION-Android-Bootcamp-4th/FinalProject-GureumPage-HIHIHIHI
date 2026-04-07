@@ -31,7 +31,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +43,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -55,7 +56,6 @@ import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.components.Semi18Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import kotlinx.coroutines.delay
 
 data class WithdrawalReason(
@@ -74,12 +74,14 @@ private val withdrawalReasons = listOf(
 @Composable
 fun WithdrawScreen(
     userName: String,
-    navController: NavHostController,
+    onNavigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit,
     viewModel: WithdrawViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var currentHighlightedIndex by remember { mutableStateOf(0) }
 
@@ -102,10 +104,12 @@ fun WithdrawScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.withdrawEvent.collect {
-            navController.navigate(NavigationRoute.Login.route) {
-                popUpTo(0) { inclusive = true }
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    WithdrawEffect.NavigateToLogin -> onNavigateToLogin()
+                }
             }
         }
     }
@@ -230,7 +234,7 @@ fun WithdrawScreen(
         ) {
             // 다시 생각해볼게요 버튼
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = { onNavigateBack() },
                 enabled = !uiState.isLoading,
                 modifier = Modifier
                     .weight(1f)
@@ -406,8 +410,9 @@ fun WithdrawalReasonItem(
 private fun WithdrawalScreenPreview() {
     GureumPageTheme {
         WithdrawScreen(
-            "name",
-            navController = rememberNavController(),
+            userName = "name",
+            onNavigateToLogin = {},
+            onNavigateBack = {},
         )
     }
 }

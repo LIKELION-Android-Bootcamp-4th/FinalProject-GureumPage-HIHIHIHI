@@ -23,7 +23,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,7 +35,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.domain.usecase.auth.SocialProvider
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
@@ -51,7 +53,8 @@ import kotlinx.coroutines.launch
 @SuppressLint("ContextCastToActivity")
 @Composable
 fun LoginScreen(
-    navController: NavHostController,
+    onNavigateToHome: () -> Unit,
+    onNavigateToOnBoarding: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -59,12 +62,24 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val googleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         result.data?.let { intent ->
-            viewModel.handleGoogleSignInResult(intent, navController)
+            viewModel.handleGoogleSignInResult(intent)
+        }
+    }
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    LoginEffect.NavigateToHome -> onNavigateToHome()
+                    LoginEffect.NavigateToOnBoarding -> onNavigateToOnBoarding()
+                }
+            }
         }
     }
 
@@ -152,7 +167,7 @@ fun LoginScreen(
                     coroutineScope.launch {
                         runCatching { SocialLoginManager.loginWithKakao(context) }
                             .onSuccess { token ->
-                                viewModel.loginWithSocialToken(SocialProvider.KAKAO, token, navController)
+                                viewModel.loginWithSocialToken(SocialProvider.KAKAO, token)
                             }
                             .onFailure { viewModel.setError("카카오 로그인에 실패했습니다.") }
                     }
@@ -172,7 +187,7 @@ fun LoginScreen(
                     coroutineScope.launch {
                         runCatching { SocialLoginManager.loginWithNaver(act) }
                             .onSuccess { token ->
-                                viewModel.loginWithSocialToken(SocialProvider.NAVER, token, navController)
+                                viewModel.loginWithSocialToken(SocialProvider.NAVER, token)
                             }
                             .onFailure { viewModel.setError("네이버 로그인에 실패했습니다.") }
                     }

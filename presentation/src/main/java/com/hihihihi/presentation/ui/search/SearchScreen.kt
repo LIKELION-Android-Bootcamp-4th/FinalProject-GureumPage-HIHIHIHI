@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -50,7 +49,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    navController: NavController,
+    onNavigateBack: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -169,7 +168,7 @@ fun SearchScreen(
         SearchTopAppBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
-            onBackClick = { navController.popBackStack() },
+            onBackClick = { onNavigateBack() },
             onCloseClick = {
                 searchQuery = ""
                 hasSearched = false

@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,18 +39,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.notification.reminder.ReminderScheduler
 import com.hihihihi.presentation.notification.summary.SummaryScheduler
 
 @Composable
 fun SplashView(
-    navController: NavHostController,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToOnBoarding: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToWidget: (String) -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
     pendingWidgetRoute: String? = null,
 ) {
@@ -139,34 +140,10 @@ fun SplashView(
 
         if (proceed && !uiState.isLoading) {
             when (val target = uiState.navTarget) {
-                SplashViewModel.NavTarget.Login -> {
-                    navController.navigate(NavigationRoute.Login.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                SplashViewModel.NavTarget.Onboarding -> {
-                    navController.navigate(NavigationRoute.OnBoarding.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                SplashViewModel.NavTarget.Home -> {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                is SplashViewModel.NavTarget.Widget -> {
-                    navController.navigate(target.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
+                SplashViewModel.NavTarget.Login -> onNavigateToLogin()
+                SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()
+                SplashViewModel.NavTarget.Home -> onNavigateToHome()
+                is SplashViewModel.NavTarget.Widget -> onNavigateToWidget(target.route)
                 else -> {
                     // Loading, NoNetwork 상태는 별도 UI에서 처리
                 }
@@ -215,7 +192,7 @@ fun SplashView(
                 containerColor = GureumTheme.colors.card,
                 confirmButton = {
                     TextButton(onClick = {
-                        (navController.context as? Activity)?.finish()
+                        (context as? Activity)?.finish()
                     }) { Text("앱 종료") }
                 }
             )

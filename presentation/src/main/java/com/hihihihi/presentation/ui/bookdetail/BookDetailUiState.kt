@@ -11,7 +11,8 @@ data class BookDetailUiState(
     val errorMessage: String? = null,       // 에러 메시지 (null이면 에러 없음)
     val quotes: List<Quote> = emptyList(),  // 필사 목록
     val histories: List<History> = emptyList(), // 읽은 책 목록
-    val addQuoteState: AddQuoteState = AddQuoteState()  // 필사 추가 상태 관리 객체
+    val addQuoteState: AddQuoteState = AddQuoteState(),  // 필사 추가 상태 관리 객체
+    val dialogState: BookDetailDialogState = BookDetailDialogState.None
 )
 
 // 필사 추가 작업에 대한 상태를 별도로 관리하기 위한 클래스

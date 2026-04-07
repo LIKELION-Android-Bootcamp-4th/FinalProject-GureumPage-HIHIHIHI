@@ -38,19 +38,80 @@ fun GureumNavGraph(
     ) {
         composable(NavigationRoute.Splash.route) {
             SplashView(
-                navController = navController,
+                onNavigateToLogin = {
+                    navController.navigate(NavigationRoute.Login.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToOnBoarding = {
+                    navController.navigate(NavigationRoute.OnBoarding.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToWidget = { route ->
+                    navController.navigate(route) {
+                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 pendingWidgetRoute = pendingWidgetRoute
             )
         }
+
         composable(
             route = NavigationRoute.Home.route,
             deepLinks = listOf(
                 navDeepLink { uriPattern = "gureum://home" },
                 navDeepLink { uriPattern = "app://home" }
             )
-        ) { HomeScreen(navController = navController) }
-        composable(NavigationRoute.Login.route) { LoginScreen(navController) }
-        composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
+        ) {
+            HomeScreen(
+                onNavigateToBookDetail = { bookId ->
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(bookId))
+                },
+                onNavigateToSearch = {
+                    navController.navigate(NavigationRoute.Search.route)
+                }
+            )
+        }
+
+        composable(NavigationRoute.Login.route) {
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToOnBoarding = {
+                    navController.navigate(NavigationRoute.OnBoarding.route) {
+                        popUpTo(NavigationRoute.Login.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(NavigationRoute.OnBoarding.route) {
+            OnBoardingScreen(
+                onNavigateToHome = {
+                    navController.navigate(NavigationRoute.Home.route) {
+                        popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = NavigationRoute.MindMap.route,
             arguments = listOf(
@@ -61,9 +122,23 @@ fun GureumNavGraph(
             val mindmapId = backStackEntry.arguments?.getString("mindmapId")
             mindmapId?.let { MindMapScreen(mindmapId = it) }
         }
+
         composable(NavigationRoute.Quotes.route) { QuotesScreen() }
-        composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
-        composable(NavigationRoute.Search.route) { SearchScreen(navController) }
+
+        composable(NavigationRoute.Library.route) {
+            LibraryScreen(
+                onNavigateToBookDetail = { bookId ->
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(bookId))
+                }
+            )
+        }
+
+        composable(NavigationRoute.Search.route) {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = NavigationRoute.StatisticsWeekly.route,
             deepLinks = listOf(
@@ -71,6 +146,7 @@ fun GureumNavGraph(
                 navDeepLink { uriPattern = "app://statistics/weekly" }
             )
         ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.WEEK) }
+
         composable(
             route = NavigationRoute.StatisticsMonthly.route,
             deepLinks = listOf(
@@ -78,6 +154,7 @@ fun GureumNavGraph(
                 navDeepLink { uriPattern = "app://statistics/monthly" }
             )
         ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.MONTH) }
+
         composable(
             route = NavigationRoute.StatisticsYearly.route,
             deepLinks = listOf(
@@ -85,6 +162,7 @@ fun GureumNavGraph(
                 navDeepLink { uriPattern = "app://statistics/yearly" }
             )
         ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.YEAR) }
+
         composable(
             route = NavigationRoute.Timer.route,
             arguments = listOf(navArgument("userBookId") { type = NavType.StringType })
@@ -96,7 +174,6 @@ fun GureumNavGraph(
                 userBookId = userBookId,
                 onExit = {
                     navController.popBackStack()
-
                     navController.navigate(NavigationRoute.BookDetail.createRoute(userBookId)) {
                         launchSingleTop = true
                         restoreState = true
@@ -104,7 +181,25 @@ fun GureumNavGraph(
                 }
             )
         }
-        composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
+
+        composable(NavigationRoute.MyPage.route) {
+            MyPageScreen(
+                onNavigateToLogin = {
+                    navController.navigate(NavigationRoute.Login.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                            saveState = false
+                        }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
+                },
+                onNavigateToWithdraw = { userName ->
+                    navController.navigate(NavigationRoute.Withdraw.createRoute(userName))
+                }
+            )
+        }
+
         composable(
             route = NavigationRoute.BookDetail.route,
             arguments = listOf(
@@ -144,8 +239,14 @@ fun GureumNavGraph(
             bookId?.let {
                 BookDetailScreen(
                     bookId = it,
-                    navController = navController,
                     snackbarHostState = snackbarHostState,
+                    onNavigateToMindmap = { bookId, mindmapId ->
+                        navController.navigate(NavigationRoute.MindMap.createRoute(bookId, mindmapId))
+                    },
+                    onNavigateToTimer = { userBookId ->
+                        navController.navigate(NavigationRoute.Timer.createRoute(userBookId))
+                    },
+                    onNavigateBack = { navController.popBackStack() },
                     initialShowAddQuote = showAddQuote,
                     initialShowAddManualRecord = showAddManualRecord
                 )
@@ -158,7 +259,15 @@ fun GureumNavGraph(
         ) { backStackEntry ->
             val userName = backStackEntry.arguments?.getString("userName")
             userName?.let {
-                WithdrawScreen(userName = it, navController = navController)
+                WithdrawScreen(
+                    userName = it,
+                    onNavigateToLogin = {
+                        navController.navigate(NavigationRoute.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }
