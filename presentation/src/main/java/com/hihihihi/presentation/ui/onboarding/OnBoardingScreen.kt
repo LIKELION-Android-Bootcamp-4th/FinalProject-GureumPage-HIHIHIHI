@@ -4,7 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,7 +28,7 @@ fun OnBoardingScreen(
     navController: NavHostController,
     viewModel: OnBoardingViewModel = hiltViewModel(),
 ) {
-    val steps by viewModel.steps.collectAsState()
+    val steps by viewModel.steps.collectAsStateWithLifecycle()
     GureumPageTheme(darkTheme = true) {
         OnboardingContents(
             steps = steps,
