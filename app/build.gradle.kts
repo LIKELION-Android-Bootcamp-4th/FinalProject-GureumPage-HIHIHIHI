@@ -1,5 +1,4 @@
 import java.util.Properties
-import kotlin.apply
 
 plugins {
     alias(libs.plugins.android.application)
@@ -63,40 +62,30 @@ android {
 }
 
 dependencies {
-
     implementation(project(":presentation"))
     implementation(project(":data"))
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.material3)
-
-    implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-
-    // kakao auth
-    implementation("com.kakao.sdk:v2-user:2.20.3")
-
-    // naver auth
-    implementation("com.navercorp.nid:oauth:5.9.0")
-
-    implementation(libs.play.services.oss.licenses)
-
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation("androidx.hilt:hilt-work:1.2.0")
-
-    implementation("com.google.firebase:firebase-auth")
-
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.play.services.oss.licenses)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.kakao.user)
+    implementation(libs.naver.oauth)
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.bundles.hilt)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
