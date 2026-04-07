@@ -2,7 +2,7 @@ package com.hihihihi.domain.util
 
 import kotlin.coroutines.cancellation.CancellationException
 
-inline fun <T> runSuspendCatching(block: () -> T): Result<T> =
+suspend inline fun <T> runSuspendCatching(block: suspend () -> T): Result<T> =
     try {
         Result.success(block())
     } catch (e: CancellationException) {
