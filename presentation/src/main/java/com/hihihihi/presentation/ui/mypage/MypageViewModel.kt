@@ -9,6 +9,7 @@ import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
+import com.hihihihi.presentation.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +30,7 @@ class MypageViewModel @Inject constructor(
     private val updateNicknameUseCase: UpdateNicknameUseCase,
     getTheme: GetThemeFlowUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
 
     private val currentUid: String?
@@ -60,7 +61,7 @@ class MypageViewModel @Inject constructor(
                     }
                     .collect { myPageData ->
                         _uiState.update {
-                            it.copy(myPageData = myPageData, isLoading = false)
+                            it.copy(myPageUiModel = myPageData.toUiModel(), isLoading = false)
                         }
                     }
             } catch (e: Exception) {
@@ -83,7 +84,7 @@ class MypageViewModel @Inject constructor(
             logoutUseCase()
         }
             .onSuccess {
-                _uiState.value = MyPageUiState(isLoading = false)
+                _uiState.value = MyPageUiState(isLoading = false, myPageUiModel = null)
                 _effect.send(MypageEffect.NavigateToLogin)
             }
             .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
@@ -102,7 +103,7 @@ class MypageViewModel @Inject constructor(
     }
 
     fun onWithdrawClick() {
-        val userName = _uiState.value.myPageData?.user?.nickname ?: ""
+        val userName = _uiState.value.myPageUiModel?.nickname ?: ""
         viewModelScope.launch { _effect.send(MypageEffect.NavigateToWithdraw(userName)) }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingBottomContents
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingScaffold
@@ -27,11 +28,16 @@ fun OnBoardingScreen(
     onNavigateBack: () -> Unit,
     viewModel: OnBoardingViewModel = hiltViewModel(),
 ) {
-    val steps by viewModel.steps.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     GureumPageTheme(darkTheme = true) {
         OnboardingContents(
-            steps = steps,
-            viewModel = viewModel,
+            steps = viewModel.steps,
+            uiState = uiState,
+            onNicknameChange = viewModel::updateNickname,
+            onTogglePurpose = viewModel::togglePurpose,
+            onFeaturePageChanged = viewModel::featurePageChanged,
+            onSelectTheme = viewModel::selectTheme,
+            isNextEnabled = viewModel::isNextEnabled,
             onNavigateBack = onNavigateBack,
             onSave = { viewModel.saveOnboardingComplete() },
             onFinish = onNavigateToHome,
@@ -42,10 +48,15 @@ fun OnBoardingScreen(
 @Composable
 private fun OnboardingContents(
     steps: List<OnboardingStep>,
-    viewModel: OnBoardingViewModel,
+    uiState: OnBoardingUiState,
+    onNicknameChange: (String) -> Unit,
+    onTogglePurpose: (String) -> Unit,
+    onFeaturePageChanged: (Int, Int) -> Unit,
+    onSelectTheme: (GureumThemeType) -> Unit,
+    isNextEnabled: (OnboardingStep) -> Boolean,
     onNavigateBack: () -> Unit,
     onSave: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
 ) {
     val pagerState = rememberPagerState { steps.size }
     val scope = rememberCoroutineScope()
@@ -62,7 +73,7 @@ private fun OnboardingContents(
 
     OnboardingScaffold(
         pagerState = pagerState,
-        topContent = { page, step ->
+        topContent = { _, step ->
             if (step !is OnboardingStep.Welcome && step !is OnboardingStep.Finish) {
                 OnboardingTopContents(
                     onBack = {
@@ -70,18 +81,33 @@ private fun OnboardingContents(
                             if (pagerState.currentPage > 0) pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
                     },
-                    progress = computeProgress(pagerState)
+                    progress = computeProgress(pagerState),
                 )
             }
         },
-        mainContent = { page, step ->
+        mainContent = { _, step ->
             when (step) {
                 OnboardingStep.Welcome -> WelcomePage()
-                OnboardingStep.Nickname -> NicknamePage(viewModel = viewModel)
-                OnboardingStep.Purpose -> PurposePage(viewModel = viewModel)
-                OnboardingStep.Feature -> FeaturePage(viewModel = viewModel)
-                OnboardingStep.Theme -> ThemePage(viewModel = viewModel)
-                OnboardingStep.Finish -> FinishPage(viewModel = viewModel)
+                OnboardingStep.Nickname -> NicknamePage(
+                    nickname = uiState.nickname,
+                    onNicknameChange = onNicknameChange,
+                )
+
+                OnboardingStep.Purpose -> PurposePage(
+                    selectedPurposes = uiState.selectedPurposes,
+                    onTogglePurpose = onTogglePurpose,
+                )
+
+                OnboardingStep.Feature -> FeaturePage(
+                    onFeaturePageChanged = onFeaturePageChanged,
+                )
+
+                OnboardingStep.Theme -> ThemePage(
+                    selectedTheme = uiState.theme,
+                    onSelectTheme = onSelectTheme,
+                )
+
+                OnboardingStep.Finish -> FinishPage()
             }
         },
         bottomContent = { page, step ->
@@ -93,7 +119,7 @@ private fun OnboardingContents(
                     OnboardingStep.Feature -> "옆으로 밀어 구름한장의 기능을 확인해보세요!"
                     else -> ""
                 },
-                isNextEnabled = viewModel.isNextEnabled(currentStep),
+                isNextEnabled = isNextEnabled(currentStep),
                 onNext = {
                     scope.launch {
                         if (step == OnboardingStep.Theme) onSave()

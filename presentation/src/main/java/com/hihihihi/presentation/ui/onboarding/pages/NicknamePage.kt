@@ -1,6 +1,5 @@
 package com.hihihihi.presentation.ui.onboarding.pages
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,48 +24,47 @@ import com.hihihihi.presentation.designsystem.components.GureumTextField
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
-import com.hihihihi.presentation.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.presentation.ui.onboarding.components.OnBoardingMainContents
 import com.hihihihi.presentation.utils.NicknameRule
 import com.hihihihi.presentation.utils.NicknameValidator
 
 @Composable
-fun NicknamePage(viewModel: OnBoardingViewModel) {
-
+fun NicknamePage(
+    nickname: String,
+    onNicknameChange: (String) -> Unit,
+) {
     OnBoardingMainContents(
         gureumRes = R.drawable.ic_cloud_question,
         titleText = "어떻게 불러드릴까요?",
-        subTitleText = "앱에서 사용할 닉네임을 설정해주세요"
+        subTitleText = "앱에서 사용할 닉네임을 설정해주세요",
     ) {
         Spacer(Modifier.height(6.dp))
         Text(
             text = "2~8자 이내로 입력해주세요",
             style = GureumTypography.bodyMedium,
-            color = GureumTheme.colors.gray400
+            color = GureumTheme.colors.gray400,
         )
         Spacer(Modifier.height(24.dp))
 
         Column(
             modifier = Modifier.padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.End,
         ) {
-            val rule = NicknameValidator.validate(viewModel.nickname)
+            val rule = NicknameValidator.validate(nickname)
             GureumTextField(
-                value = viewModel.nickname,
-                onValueChange = {
-                    viewModel.updateNickname(it)
-                },
+                value = nickname,
+                onValueChange = onNicknameChange,
                 hint = "닉네임을 입력해주세요",
                 textAlign = TextAlign.Center,
                 imeAction = ImeAction.Done,
                 isError = rule !is NicknameRule.Ok,
                 trailingIcon = {
-                    if (viewModel.nickname.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateNickname("") }) {
+                    if (nickname.isNotEmpty()) {
+                        IconButton(onClick = { onNicknameChange("") }) {
                             Icon(
                                 imageVector = Icons.Outlined.Close,
                                 contentDescription = "지우기",
-                                tint = GureumTheme.colors.gray300
+                                tint = GureumTheme.colors.gray300,
                             )
                         }
                     }
@@ -76,24 +74,23 @@ fun NicknamePage(viewModel: OnBoardingViewModel) {
                     text = buildAnnotatedString {
                         pushStyle(
                             GureumTypography.titleSmall.toSpanStyle()
-                                .copy(GureumTheme.colors.gray400)
+                                .copy(GureumTheme.colors.gray400),
                         )
-                        append(viewModel.nickname.length.toString())
+                        append(nickname.length.toString())
                         append("/8")
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             }
         }
     }
 }
 
-@SuppressLint("ViewModelConstructorInComposable")
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun NicknamePagePreview() {
     GureumPageTheme {
-//        NicknamePage(OnBoardingViewModel())
+        NicknamePage(nickname = "구름이", onNicknameChange = {})
     }
 }

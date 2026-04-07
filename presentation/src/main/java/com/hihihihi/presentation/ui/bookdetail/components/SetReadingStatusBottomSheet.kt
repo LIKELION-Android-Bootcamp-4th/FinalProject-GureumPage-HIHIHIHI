@@ -30,7 +30,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.BodySubText
 import com.hihihihi.presentation.designsystem.components.GureumButton
@@ -39,6 +38,7 @@ import com.hihihihi.presentation.designsystem.components.GureumTextField
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
+import com.hihihihi.presentation.ui.model.UserBookUiModel
 import com.hihihihi.presentation.ui.search.component.CategoryRow
 import com.hihihihi.presentation.utils.formatMillisToLocalDateTime
 import java.time.Instant
@@ -50,7 +50,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetReadingStatusBottomSheet(
-    userBook: UserBook,
+    userBook: UserBookUiModel,
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onConfirm: (ReadingStatus, Int?, LocalDateTime?, LocalDateTime?) -> Unit,
@@ -82,14 +82,14 @@ fun SetReadingStatusBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp),
         ) {
             Medi16Text("상태 변경")
             Spacer(modifier = Modifier.height(14.dp))
 
             ReadingStatusSelector(
                 selectedStatus = selectedStatus,
-                onStatusChange = { selectedStatus = it }
+                onStatusChange = { selectedStatus = it },
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -114,9 +114,9 @@ fun SetReadingStatusBottomSheet(
                         selectedStatus,
                         if (selectedStatus != ReadingStatus.FINISHED) pageInput.toIntOrNull() else userBook.totalPage,
                         if (selectedStatus == ReadingStatus.PLANNED) null else startDate,
-                        if (selectedStatus == ReadingStatus.FINISHED) endDate else null
+                        if (selectedStatus == ReadingStatus.FINISHED) endDate else null,
                     )
-                }
+                },
             )
             Spacer(modifier = Modifier.height(26.dp))
         }
@@ -133,31 +133,33 @@ fun SetReadingStatusBottomSheet(
                         .toLocalDate()
                     return !selectedDate.isAfter(today)
                 }
-            }
+            },
         )
 
         DatePickerDialog(
             onDismissRequest = { showStartDatePicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    showStartDatePicker = false
-                    startDatePickerState.selectedDateMillis?.let { millis ->
-                        val selectedDateTime = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-                            .atStartOfDay()
-                        startDate = selectedDateTime
+                TextButton(
+                    onClick = {
+                        showStartDatePicker = false
+                        startDatePickerState.selectedDateMillis?.let { millis ->
+                            val selectedDateTime = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                                .atStartOfDay()
+                            startDate = selectedDateTime
 
-                        // 종료일이 시작일보다 이전이면 종료일 초기화
-                        if (endDate != null && selectedDateTime.isAfter(endDate)) {
-                            endDate = null
+                            // 종료일이 시작일보다 이전이면 종료일 초기화
+                            if (endDate != null && selectedDateTime.isAfter(endDate)) {
+                                endDate = null
+                            }
                         }
-                    }
-                }) { Text("확인") }
+                    },
+                ) { Text("확인") }
             },
             dismissButton = {
                 TextButton(onClick = { showStartDatePicker = false }) { Text("취소") }
-            }
+            },
         ) {
             DatePicker(state = startDatePickerState)
         }
@@ -182,23 +184,25 @@ fun SetReadingStatusBottomSheet(
 
                     return true
                 }
-            }
+            },
         )
 
         DatePickerDialog(
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    showEndDatePicker = false
-                    endDatePickerState.selectedDateMillis?.let { millis ->
-                        val selectedDateTime = formatMillisToLocalDateTime(millis)
-                        endDate = selectedDateTime
-                    }
-                }) { Text("확인") }
+                TextButton(
+                    onClick = {
+                        showEndDatePicker = false
+                        endDatePickerState.selectedDateMillis?.let { millis ->
+                            val selectedDateTime = formatMillisToLocalDateTime(millis)
+                            endDate = selectedDateTime
+                        }
+                    },
+                ) { Text("확인") }
             },
             dismissButton = {
                 TextButton(onClick = { showEndDatePicker = false }) { Text("취소") }
-            }
+            },
         ) {
             DatePicker(state = endDatePickerState)
         }
@@ -208,7 +212,7 @@ fun SetReadingStatusBottomSheet(
 @Composable
 fun ReadingStatusSelector(
     selectedStatus: ReadingStatus,
-    onStatusChange: (ReadingStatus) -> Unit
+    onStatusChange: (ReadingStatus) -> Unit,
 ) {
     val statuses = listOf(
         ReadingStatus.PLANNED to ("읽을 예정인 책"),
@@ -217,7 +221,7 @@ fun ReadingStatusSelector(
     )
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         statuses.forEach { (status, subtitle) ->
             val isSelected = selectedStatus == status
@@ -225,7 +229,7 @@ fun ReadingStatusSelector(
                 title = status.displayName,
                 subtitle = subtitle,
                 isSelected = isSelected,
-                onClick = { onStatusChange(status) }
+                onClick = { onStatusChange(status) },
             )
         }
     }
@@ -252,7 +256,7 @@ fun ReadingStatusInputs(
             GureumClickEventTextField(
                 value = startDate?.format(formatter) ?: "",
                 hint = "시작한 날",
-                onClick = onStartDateClick
+                onClick = onStartDateClick,
             )
             Spacer(Modifier.height(14.dp))
             Semi16Text("현재 페이지 (선택사항)")
@@ -265,18 +269,18 @@ fun ReadingStatusInputs(
                             .toIntOrNull()
                             ?.coerceAtMost(lastPage)
                             ?.toString()
-                            ?: ""
+                            ?: "",
                     )
                 },
                 hint = "예 : 157",
                 trailingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_book_outline),
-                        contentDescription = "페이지"
+                        contentDescription = "페이지",
                     )
                 },
                 keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Done,
             )
             BodySubText("시작할 페이지를 입력하세요 (기본값: 0페이지)")
         }
@@ -288,12 +292,12 @@ fun ReadingStatusInputs(
                 GureumClickEventTextField(
                     value = startDate?.format(formatter) ?: "",
                     hint = "시작한 날",
-                    onClick = onStartDateClick
+                    onClick = onStartDateClick,
                 )
                 GureumClickEventTextField(
                     value = endDate?.format(formatter) ?: "",
                     hint = "다 읽은 날",
-                    onClick = onEndDateClick
+                    onClick = onEndDateClick,
                 )
             }
         }

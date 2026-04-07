@@ -15,37 +15,37 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.bookdetail.mock.dummyUserBook
+import com.hihihihi.presentation.ui.model.UserBookUiModel
 import com.hihihihi.presentation.utils.formatDateToSimpleString
 
 @Composable
 fun ReadingProgressSection(
-    userBook: UserBook
+    userBook: UserBookUiModel,
 ) {
     val start = formatDateToSimpleString(userBook.startDate)
     val end = if (userBook.status == ReadingStatus.FINISHED) formatDateToSimpleString(userBook.endDate) else ""
 
     Column(
         modifier = Modifier.padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
             text = "독서 진행도",
             style = GureumTypography.titleMedium,
             color = GureumTheme.colors.gray800,
-            modifier = Modifier.padding(bottom = 2.dp)
+            modifier = Modifier.padding(bottom = 2.dp),
         )
         GureumLinearProgressBar(
             12,
-            userBook.currentPage.toFloat() / userBook.totalPage
+            userBook.currentPage.toFloat() / userBook.totalPage,
         )
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = buildAnnotatedString {
