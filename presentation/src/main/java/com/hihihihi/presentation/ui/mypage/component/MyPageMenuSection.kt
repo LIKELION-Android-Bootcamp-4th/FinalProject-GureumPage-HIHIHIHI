@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +26,7 @@ fun MyPageMenuSection(
     onLogoutClick: () -> Unit,
     onWithDrawClick: () -> Unit
 ) {
-    val theme by viewModel.theme.collectAsState()
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     val colors = GureumTheme.colors
     val context = LocalContext.current
 

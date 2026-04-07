@@ -23,7 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,9 +63,9 @@ fun TimerScreen(
     val context = LocalContext.current
 
     // UI 상태 수집
-    val state by viewModel.uiState.collectAsState()
-    val memoState by memoViewModel.ui.collectAsState()
-    val sharedTimerState by viewModel.sharedTimerState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val memoState by memoViewModel.ui.collectAsStateWithLifecycle()
+    val sharedTimerState by viewModel.sharedTimerState.collectAsStateWithLifecycle()
 
     // 정지 확인 다이얼로그 상태
     var showStopDialog by rememberSaveable { mutableStateOf(false) }
