@@ -79,7 +79,7 @@ class SplashViewModel @Inject constructor(
                     isLoading = false
                 )
             } else {
-                val profile = getUserUseCase(user.uid)
+                val profile = getUserUseCase(user.uid).getOrNull()
                 val hasNickname = !profile?.nickname.isNullOrBlank()
                 if (hasNickname) setOnboardingCompleteUseCase(user.uid, true)
 
@@ -87,9 +87,11 @@ class SplashViewModel @Inject constructor(
                     !hasNickname -> {
                         NavTarget.Onboarding
                     }
+
                     pendingWidgetRoute != null -> {
                         NavTarget.Widget(pendingWidgetRoute!!)
                     }
+
                     else -> {
                         NavTarget.Home
                     }

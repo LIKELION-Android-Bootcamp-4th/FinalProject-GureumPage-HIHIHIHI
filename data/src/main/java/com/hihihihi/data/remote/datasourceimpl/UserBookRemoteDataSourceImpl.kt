@@ -81,14 +81,10 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
-    override suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit> = try {
+    override suspend fun patchUserBook(userBookDto: UserBookDto) {
         val docRef = firestore.collection("user_books").document(userBookDto.userBookId)
 
         docRef.set(userBookDto.toMap()).await()
-
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
     override suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean {
@@ -108,25 +104,22 @@ class UserBookRemoteDataSourceImpl @Inject constructor(
         userId: String,
         rawIsbn: String,
         userBookDto: UserBookDto
-    ): Result<String> {
-        return try {
-            val normalizedIsbn = ISBNNormalizer.normalize(rawIsbn)
-                ?: return Result.failure(Exception("유효하지 않은 ISBN입니다"))
+    ): String {
+        val normalizedIsbn = ISBNNormalizer.normalize(rawIsbn)
+            ?: throw IllegalArgumentException("유효하지 않은 ISBN입니다")
 
-            val documentId = "${userId}-${normalizedIsbn}"
-            val docRef = firestore.collection("user_books").document(documentId)
+        val documentId = "${userId}-${normalizedIsbn}"
+        val docRef = firestore.collection("user_books").document(documentId)
 
-            // 이미 존재하는지 확인
-            if (docRef.get().await().exists()) {
-                Result.failure(Exception("이미 추가된 책입니다"))
-            } else {
-                // DTO에 정규화된 ISBN 설정
-                val normalizedDto = userBookDto.copy(isbn13 = normalizedIsbn)
-                docRef.set(normalizedDto.toMap()).await()
-                Result.success(documentId)
+        // Firestore 트랜잭션으로 중복 확인 + 저장을 원자적으로 처리
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(docRef)
+            if (snapshot.exists()) {
+                throw IllegalStateException("이미 추가된 책입니다")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            val normalizedDto = userBookDto.copy(isbn13 = normalizedIsbn)
+            transaction.set(docRef, normalizedDto.toMap())
+        }.await()
+        return documentId
     }
 }

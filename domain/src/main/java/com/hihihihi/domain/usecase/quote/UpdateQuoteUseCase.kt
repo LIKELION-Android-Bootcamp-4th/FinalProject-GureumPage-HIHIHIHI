@@ -1,6 +1,7 @@
 package com.hihihihi.domain.usecase.quote
 
 import com.hihihihi.domain.repository.QuoteRepository
+import com.hihihihi.domain.util.runSuspendCatching
 import javax.inject.Inject
 
 class UpdateQuoteUseCase @Inject constructor(
@@ -10,5 +11,7 @@ class UpdateQuoteUseCase @Inject constructor(
         quoteId: String,
         content: String,
         pageNumber: Int?
-    ): Result<Unit> = repository.updateQuote(quoteId, content, pageNumber)
+    ): Result<Unit> = runSuspendCatching {
+        repository.updateQuote(quoteId, content, pageNumber)
+    }
 }

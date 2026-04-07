@@ -1,7 +1,7 @@
 package com.hihihihi.data.remote.datasource
 
-import com.hihihihi.domain.operation.NodeEditOperation
 import com.hihihihi.data.remote.dto.MindmapNodeDto
+import com.hihihihi.domain.operation.NodeEditOperation
 import kotlinx.coroutines.flow.Flow
 
 interface MindmapNodeRemoteDataSource {
@@ -12,5 +12,5 @@ interface MindmapNodeRemoteDataSource {
     suspend fun loadNodes(mindmapId: String): List<MindmapNodeDto>
 
     // 편집 모드에서 발생한 변경을 적용
-    suspend fun applyNodeOperation(mindmapId: String, operations: List<NodeEditOperation>): Result<Unit>
+    suspend fun applyNodeOperation(mindmapId: String, operations: List<NodeEditOperation>)
 }
