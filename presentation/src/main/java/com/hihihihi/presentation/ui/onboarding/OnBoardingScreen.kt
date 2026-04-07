@@ -4,13 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingBottomContents
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingScaffold
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingTopContents
@@ -25,7 +23,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnBoardingScreen(
-    navController: NavHostController,
+    onNavigateToHome: () -> Unit,
+    onNavigateBack: () -> Unit,
     viewModel: OnBoardingViewModel = hiltViewModel(),
 ) {
     val steps by viewModel.steps.collectAsStateWithLifecycle()
@@ -33,14 +32,9 @@ fun OnBoardingScreen(
         OnboardingContents(
             steps = steps,
             viewModel = viewModel,
-            navController = navController,
+            onNavigateBack = onNavigateBack,
             onSave = { viewModel.saveOnboardingComplete() },
-            onFinish = {
-                navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
+            onFinish = onNavigateToHome,
         )
     }
 }
@@ -49,7 +43,7 @@ fun OnBoardingScreen(
 private fun OnboardingContents(
     steps: List<OnboardingStep>,
     viewModel: OnBoardingViewModel,
-    navController: NavHostController,
+    onNavigateBack: () -> Unit,
     onSave: () -> Unit,
     onFinish: () -> Unit
 ) {
@@ -62,7 +56,7 @@ private fun OnboardingContents(
         if (pagerState.currentPage > 0) {
             scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
         } else {
-            navController.popBackStack()
+            onNavigateBack()
         }
     }
 

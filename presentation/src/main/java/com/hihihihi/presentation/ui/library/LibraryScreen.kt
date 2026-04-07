@@ -25,7 +25,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -39,20 +38,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi18Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.library.component.BookItem
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @Composable
 fun LibraryScreen(
-    navController: NavHostController,
+    onNavigateToBookDetail: (String) -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val tabTitles = listOf("읽기 전", "읽는 중", "읽은 후")
@@ -184,13 +182,7 @@ fun LibraryScreen(
                                         items(plannedBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = {
-                                                    navController.navigate(
-                                                        NavigationRoute.BookDetail.createRoute(
-                                                            it
-                                                        )
-                                                    )
-                                                }
+                                                onClicked = { onNavigateToBookDetail(it) }
                                             )
                                         }
                                     }
@@ -230,13 +222,7 @@ fun LibraryScreen(
                                         items(readingBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = {
-                                                    navController.navigate(
-                                                        NavigationRoute.BookDetail.createRoute(
-                                                            it
-                                                        )
-                                                    )
-                                                }
+                                                onClicked = { onNavigateToBookDetail(it) }
                                             )
                                         }
                                     }
@@ -274,13 +260,7 @@ fun LibraryScreen(
                                         items(finishedBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = {
-                                                    navController.navigate(
-                                                        NavigationRoute.BookDetail.createRoute(
-                                                            it
-                                                        )
-                                                    )
-                                                }
+                                                onClicked = { onNavigateToBookDetail(it) }
                                             )
                                         }
                                     }

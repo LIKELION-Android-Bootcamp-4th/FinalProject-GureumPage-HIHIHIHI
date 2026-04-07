@@ -18,51 +18,44 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.presentation.ui.mypage.component.MyPageMenuSection
 import com.hihihihi.presentation.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.presentation.ui.mypage.component.NicknameChangeDialog
 import com.hihihihi.presentation.utils.formatSecondsToReadableTimeWithoutSecond
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyPageScreen(
-    navController: NavHostController,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToWithdraw: (String) -> Unit,
     viewModel: MypageViewModel = hiltViewModel()
 ) {
     val colors = GureumTheme.colors
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    var showNicknameDialog by rememberSaveable { mutableStateOf(false) } // 다이얼로그 상태
-    var showLogoutDialog by rememberSaveable { mutableStateOf(false) } // 다이얼로그 상태
-
-    //로그아웃 이벤트 수집 -> 로그인 화면으로 이동
-    LaunchedEffect(Unit) {
-        viewModel.logoutEvent.collectLatest {
-            navController.navigate(NavigationRoute.Login.route) {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
-                    saveState = false
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    MypageEffect.NavigateToLogin -> onNavigateToLogin()
+                    is MypageEffect.NavigateToWithdraw -> onNavigateToWithdraw(effect.userName)
                 }
-                launchSingleTop = true
-                restoreState = false
             }
         }
     }
@@ -112,7 +105,6 @@ fun MyPageScreen(
                 val timeText = remember(data.totalReadMinutes) {
                     formatSecondsToReadableTimeWithoutSecond(data.totalReadMinutes * 60)
                 }
-                //프로필 카드 ( 연필 아이콘 클릭 -> 다이얼로그 오픈)
                 MyPageUserProfileCard(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     title = "안녕하세요!",
@@ -122,7 +114,7 @@ fun MyPageScreen(
                     totalPages = "${data.totalPages}쪽",
                     totalBooks = "${data.totalBooks}권",
                     totalTime = timeText,
-                    onEditNicknameClick = { showNicknameDialog = true }
+                    onEditNicknameClick = viewModel::onNicknameChangeClick
                 )
             }
         }
@@ -139,58 +131,50 @@ fun MyPageScreen(
         )
 
         MyPageMenuSection(
-            onLogoutClick = { showLogoutDialog = true },
-            onWithDrawClick = {
-                navController.navigate(
-                    NavigationRoute.Withdraw.createRoute(
-                        state.myPageData?.user?.nickname ?: ""
+            onLogoutClick = viewModel::onLogoutClick,
+            onWithDrawClick = viewModel::onWithdrawClick
+        )
+    }
+
+    when (state.dialogState) {
+        MyPageDialogState.None -> Unit
+
+        MyPageDialogState.NicknameChange -> {
+            NicknameChangeDialog(
+                currentNickname = state.myPageData?.user?.nickname ?: "",
+                onDismiss = viewModel::dismissDialog,
+                onSave = { new ->
+                    viewModel.changeNickname(new)
+                    viewModel.dismissDialog()
+                }
+            )
+        }
+
+        MyPageDialogState.Logout -> {
+            AlertDialog(
+                onDismissRequest = viewModel::dismissDialog,
+                title = { Semi16Text("로그아웃") },
+                text = { Medi14Text("정말 로그아웃 하실건가요?") },
+                containerColor = GureumTheme.colors.card,
+                confirmButton = {
+                    Medi14Text(
+                        text = "로그아웃",
+                        color = GureumTheme.colors.systemRed,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable { viewModel.logout() }
                     )
-                )
-            }
-        )
-    }
-
-    //닉네임 변경 다이얼로그
-    if (showNicknameDialog) {
-        NicknameChangeDialog(
-            currentNickname = state.myPageData?.user?.nickname ?: "",
-            onDismiss = { showNicknameDialog = false },
-            onSave = { new ->
-                viewModel.changeNickname(new)
-                showNicknameDialog = false
-            }
-        )
-    }
-
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            title = { Semi16Text("로그아웃") },
-            text = { Medi14Text("정말 로그아웃 하실건가요?") },
-            containerColor = GureumTheme.colors.card,
-            confirmButton = {
-                Medi14Text(
-                    text = "로그아웃",
-                    color = GureumTheme.colors.systemRed,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable {
-                            viewModel.logout()
-                            showLogoutDialog = false
-                        }
-                )
-            },
-            dismissButton = {
-                Medi14Text(
-                    text = "취소",
-                    color = GureumTheme.colors.gray500,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable {
-                            showLogoutDialog = false
-                        }
-                )
-            }
-        )
+                },
+                dismissButton = {
+                    Medi14Text(
+                        text = "취소",
+                        color = GureumTheme.colors.gray500,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable { viewModel.dismissDialog() }
+                    )
+                }
+            )
+        }
     }
 }
