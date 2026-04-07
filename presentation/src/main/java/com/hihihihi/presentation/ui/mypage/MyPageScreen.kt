@@ -43,7 +43,7 @@ import com.hihihihi.presentation.utils.formatSecondsToReadableTimeWithoutSecond
 fun MyPageScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWithdraw: (String) -> Unit,
-    viewModel: MypageViewModel = hiltViewModel()
+    viewModel: MypageViewModel = hiltViewModel(),
 ) {
     val colors = GureumTheme.colors
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,7 +64,7 @@ fun MyPageScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colors.background)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -73,7 +73,7 @@ fun MyPageScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
@@ -82,12 +82,12 @@ fun MyPageScreen(
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     Semi16Text(
                         text = "사용자 정보를 불러오는데 실패했어요!",
                         color = GureumTheme.colors.gray600,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -95,44 +95,44 @@ fun MyPageScreen(
                     Medi14Text(
                         text = "잠시 후 다시 시도해주세요",
                         color = GureumTheme.colors.gray500,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
 
-            state.myPageData != null -> {
-                val data = state.myPageData!!
+            state.myPageUiModel != null -> {
+                val data = state.myPageUiModel!!
                 val timeText = remember(data.totalReadMinutes) {
                     formatSecondsToReadableTimeWithoutSecond(data.totalReadMinutes * 60)
                 }
                 MyPageUserProfileCard(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     title = "안녕하세요!",
-                    badge = data.user?.appellation?.ifBlank { "칭호 없음" } ?: "칭호 없음",
-                    nickname = "${data.user?.nickname?.ifBlank { "닉네임 없음" } ?: "닉네임 없음"}님",
-                    provider = data.user?.provider ?: "",
+                    badge = data.appellation?.ifBlank { "칭호 없음" } ?: "칭호 없음",
+                    nickname = "${data.nickname?.ifBlank { "닉네임 없음" } ?: "닉네임 없음"}님",
+                    provider = data.provider ?: "",
                     totalPages = "${data.totalPages}쪽",
                     totalBooks = "${data.totalBooks}권",
                     totalTime = timeText,
-                    onEditNicknameClick = viewModel::onNicknameChangeClick
+                    onEditNicknameClick = viewModel::onNicknameChangeClick,
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        MyPageCalenderSection(stats = state.myPageData?.readingStats ?: emptyMap())
+        MyPageCalenderSection(stats = state.myPageUiModel?.readingStats ?: emptyMap())
 
         Spacer(modifier = Modifier.height(28.dp))
 
         Divider(
             thickness = 8.dp,
-            color = colors.background10
+            color = colors.background10,
         )
 
         MyPageMenuSection(
             onLogoutClick = viewModel::onLogoutClick,
-            onWithDrawClick = viewModel::onWithdrawClick
+            onWithDrawClick = viewModel::onWithdrawClick,
         )
     }
 
@@ -141,12 +141,12 @@ fun MyPageScreen(
 
         MyPageDialogState.NicknameChange -> {
             NicknameChangeDialog(
-                currentNickname = state.myPageData?.user?.nickname ?: "",
+                currentNickname = state.myPageUiModel?.nickname ?: "",
                 onDismiss = viewModel::dismissDialog,
                 onSave = { new ->
                     viewModel.changeNickname(new)
                     viewModel.dismissDialog()
-                }
+                },
             )
         }
 
@@ -162,7 +162,7 @@ fun MyPageScreen(
                         color = GureumTheme.colors.systemRed,
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable { viewModel.logout() }
+                            .clickable { viewModel.logout() },
                     )
                 },
                 dismissButton = {
@@ -171,9 +171,9 @@ fun MyPageScreen(
                         color = GureumTheme.colors.gray500,
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable { viewModel.dismissDialog() }
+                            .clickable { viewModel.dismissDialog() },
                     )
-                }
+                },
             )
         }
     }

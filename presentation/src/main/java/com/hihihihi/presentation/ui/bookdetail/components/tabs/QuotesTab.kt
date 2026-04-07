@@ -28,7 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hihihihi.domain.model.Quote
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -36,12 +35,13 @@ import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
+import com.hihihihi.presentation.ui.model.QuoteUiModel
 
 @Composable
 fun QuotesTab(
-    quotes: List<Quote>,
+    quotes: List<QuoteUiModel>,
     onEdit: (quoteId: String) -> Unit,
-    onDelete: (quoteId: String) -> Unit
+    onDelete: (quoteId: String) -> Unit,
 ) {
 
     if (quotes.isEmpty()) {
@@ -50,7 +50,7 @@ fun QuotesTab(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 100.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Semi16Text(
                 "아직 등록한 필사가 없어요.",
@@ -61,7 +61,7 @@ fun QuotesTab(
                 "필사 추가를 통해\n마음에 드는 문장을 남겨보세요!",
                 color = GureumTheme.colors.gray400,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     } else {
@@ -69,7 +69,7 @@ fun QuotesTab(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp)
+                .padding(bottom = 20.dp),
         ) {
             quotes.forEach { quote ->
                 QuoteCard(
@@ -79,7 +79,7 @@ fun QuotesTab(
                     quote = quote.content,
                     expanded = remember { mutableStateOf(false) },
                     onEdit = onEdit,
-                    onDelete = onDelete
+                    onDelete = onDelete,
                 )
             }
         }
@@ -98,18 +98,18 @@ private fun QuoteCard(
     onDelete: (quoteId: String) -> Unit,
 ) {
     GureumCard(
-        modifier = Modifier.padding(top = 20.dp)
+        modifier = Modifier.padding(top = 20.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, bottom = 14.dp, top = 8.dp)
+                .padding(start = 16.dp, bottom = 14.dp, top = 8.dp),
         ) {
             Row(
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = date,
@@ -131,25 +131,25 @@ private fun QuoteCard(
                 Box(modifier = Modifier.wrapContentSize()) {
                     IconButton(
                         onClick = { expanded.value = true },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_horizontal_ellipsis_outline),
                             contentDescription = "dot_menu",
-                            tint = GureumTheme.colors.gray600
+                            tint = GureumTheme.colors.gray600,
                         )
                     }
                     DropdownMenu(
                         expanded = expanded.value,
-                        onDismissRequest = { expanded.value = false }
+                        onDismissRequest = { expanded.value = false },
                     ) {
                         DropdownMenuItem(
                             text = { Text("수정") },
-                            onClick = { expanded.value = false; onEdit(id) }
+                            onClick = { expanded.value = false; onEdit(id) },
                         )
                         DropdownMenuItem(
                             text = { Text("삭제") },
-                            onClick = { expanded.value = false; onDelete(id) }
+                            onClick = { expanded.value = false; onDelete(id) },
                         )
                     }
                 }

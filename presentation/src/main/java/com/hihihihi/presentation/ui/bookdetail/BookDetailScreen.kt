@@ -26,10 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.hihihihi.domain.model.History
-import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
-import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.ui.bookdetail.components.AddManualHistoryDialog
 import com.hihihihi.presentation.ui.bookdetail.components.AddQuoteDialog
@@ -45,6 +42,9 @@ import com.hihihihi.presentation.ui.bookdetail.components.SetReadingStatusBottom
 import com.hihihihi.presentation.ui.bookdetail.mock.dummyUserBook
 import com.hihihihi.presentation.ui.home.components.ErrorView
 import com.hihihihi.presentation.ui.home.components.LoadingView
+import com.hihihihi.presentation.ui.model.HistoryUiModel
+import com.hihihihi.presentation.ui.model.QuoteUiModel
+import com.hihihihi.presentation.ui.model.UserBookUiModel
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +57,7 @@ fun BookDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: BookDetailViewModel = hiltViewModel(),
     initialShowAddQuote: Boolean = false,
-    initialShowAddManualRecord: Boolean = false
+    initialShowAddManualRecord: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -113,14 +113,14 @@ fun BookDetailScreen(
                 onReadingStatusClick = viewModel::onReadingStatusClick,
                 onReviewSave = { rating, review -> viewModel.patchReview(rating, review) },
                 onQuoteEdit = { quoteId ->
-                    val quote = uiState.quotes.find { it.id == quoteId }
-                    if (quote != null) viewModel.onQuoteEditClick(quoteId, quote)
+                    val quoteUiModel = uiState.quotes.find { it.id == quoteId }
+                    if (quoteUiModel != null) viewModel.onQuoteEditClick(quoteUiModel)
                 },
                 onQuoteDelete = { id -> viewModel.deleteQuote(id) },
                 onAddQuoteClick = viewModel::onAddQuoteClick,
                 onAddManualHistoryClick = viewModel::onAddManualHistoryClick,
                 onNavigateToMindmap = viewModel::navigateToMindmap,
-                onNavigateToTimer = viewModel::navigateToTimer
+                onNavigateToTimer = viewModel::navigateToTimer,
             )
         }
 
@@ -138,7 +138,7 @@ fun BookDetailScreen(
                 onSave = { pageNumber, content ->
                     viewModel.addQuote(bookId, content, pageNumber?.toIntOrNull())
                 },
-                lastPage = dialogState.lastPage
+                lastPage = dialogState.lastPage,
             )
         }
 
@@ -151,7 +151,7 @@ fun BookDetailScreen(
                 onSave = { date, startTime, endTime, readTime, readPageCount, currentPage ->
                     viewModel.addManualHistory(date, startTime, endTime, readTime, readPageCount, currentPage)
                     viewModel.dismissDialog()
-                }
+                },
             )
         }
 
@@ -164,24 +164,24 @@ fun BookDetailScreen(
                     onConfirm = { status, page, startDate, endDate ->
                         viewModel.patchUserBook(status, page, startDate, endDate)
                         viewModel.dismissDialog()
-                    }
+                    },
                 )
             }
         }
 
         is BookDetailDialogState.EditQuote -> {
             EditQuoteDialog(
-                initialContent = dialogState.quote.content,
-                initialPageNumber = dialogState.quote.pageNumber,
+                initialContent = dialogState.quoteUiModel.content,
+                initialPageNumber = dialogState.quoteUiModel.pageNumber,
                 onDismiss = viewModel::dismissDialog,
                 onSave = { newContent, newPageNumber ->
                     viewModel.updateQuote(
-                        quoteId = dialogState.quoteId,
+                        quoteId = dialogState.quoteUiModel.id,
                         newContent = newContent,
-                        newPageNumber = newPageNumber
+                        newPageNumber = newPageNumber,
                     )
                     viewModel.dismissDialog()
-                }
+                },
             )
         }
 
@@ -199,12 +199,12 @@ fun BookDetailScreen(
                             status = ReadingStatus.FINISHED,
                             page = userBook.totalPage,
                             startDate = userBook.startDate,
-                            endDate = endDate
+                            endDate = endDate,
                         )
                         viewModel.dismissDialog()
                         Toast.makeText(context, "🎉 완독을 축하드립니다!", Toast.LENGTH_LONG).show()
                     },
-                    onDismiss = viewModel::dismissDialog
+                    onDismiss = viewModel::dismissDialog,
                 )
             }
         }
@@ -213,9 +213,9 @@ fun BookDetailScreen(
 
 @Composable
 fun BookDetailContent(
-    userBook: UserBook,
-    quotes: List<Quote>,
-    histories: List<History>,
+    userBook: UserBookUiModel,
+    quotes: List<QuoteUiModel>,
+    histories: List<HistoryUiModel>,
     bookStatistic: BookStatistic,
     onReadingStatusClick: () -> Unit,
     onAddQuoteClick: () -> Unit = {},
@@ -224,7 +224,7 @@ fun BookDetailContent(
     onNavigateToTimer: () -> Unit = {},
     onReviewSave: (Double, String) -> Unit = { _, _ -> },
     onQuoteEdit: (String) -> Unit = {},
-    onQuoteDelete: (String) -> Unit = {}
+    onQuoteDelete: (String) -> Unit = {},
 ) {
     val scrollState = rememberLazyListState()
 
@@ -245,7 +245,7 @@ fun BookDetailContent(
                     ReviewSection(
                         initialRating = userBook.rating?.toFloat() ?: 0f,
                         initialReview = userBook.review ?: "",
-                        onSave = { rating, review -> onReviewSave(rating, review) }
+                        onSave = { rating, review -> onReviewSave(rating, review) },
                     )
                 }
             }
@@ -255,7 +255,7 @@ fun BookDetailContent(
                     quotes = quotes,
                     histories = histories,
                     onQuoteEdit = onQuoteEdit,
-                    onQuoteDelete = onQuoteDelete
+                    onQuoteDelete = onQuoteDelete,
                 )
                 Spacer(Modifier.height(50.dp))
             }
@@ -269,7 +269,7 @@ fun BookDetailContent(
             onNavigateToTimer = onNavigateToTimer,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
+                .navigationBarsPadding(),
         )
     }
 }

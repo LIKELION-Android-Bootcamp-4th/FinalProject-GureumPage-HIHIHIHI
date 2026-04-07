@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBooksUseCase
+import com.hihihihi.presentation.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val getUserBooksUseCase: GetUserBooksUseCase, // 유저 책 목록 가져오는 UseCase
-    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
 
     // ui 상태 :
@@ -37,14 +38,14 @@ class LibraryViewModel @Inject constructor(
                 getUserBooksUseCase(userId).collect { books ->
                     _uiState.value = LibraryUiState(
                         isLoading = false,
-                        books = books
+                        books = books.map { it.toUiModel() },
                     )
                 }
             } catch (e: Exception) {
                 //에러 발생 시 ui 상태에 에러 메시지 전달
                 _uiState.value = LibraryUiState(
                     isLoading = false,
-                    errorMessage = e.message ?: "알 수 없는 오류 발생"
+                    errorMessage = e.message ?: "알 수 없는 오류 발생",
                 )
             }
         }

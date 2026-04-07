@@ -6,6 +6,7 @@ import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
@@ -13,6 +14,8 @@ import com.hihihihi.domain.usecase.quote.DeleteQuoteUseCase
 import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
+import com.hihihihi.presentation.ui.model.QuoteUiModel
+import com.hihihihi.presentation.ui.model.toUiModel
 import com.hihihihi.presentation.utils.formatSecondsToReadableTime
 import com.hihihihi.presentation.utils.getDailyAverageReadTimeInSeconds
 import com.hihihihi.presentation.utils.getDayCountLabel
@@ -38,7 +41,7 @@ class BookDetailViewModel @Inject constructor(
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
     private val deleteQuoteUseCase: DeleteQuoteUseCase,
     private val updateQuoteUseCase: UpdateQuoteUseCase,
-    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookDetailUiState())
@@ -46,6 +49,10 @@ class BookDetailViewModel @Inject constructor(
 
     private val _effect = Channel<BookDetailEffect>(Channel.BUFFERED)
     val effect: Flow<BookDetailEffect> = _effect.receiveAsFlow()
+
+    // domain 백킹 — mutation 연산(patchUserBook, addQuote, addManualHistory)에서 사용
+    private var _domainUserBook: UserBook? = null
+    private var _domainHistories: List<History> = emptyList()
 
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
@@ -57,6 +64,9 @@ class BookDetailViewModel @Inject constructor(
                 .catch { e -> _uiState.update { it.copy(errorMessage = e.message, isLoading = false) } }
                 .collect { data ->
                     val userBook = data.userBook
+                    _domainUserBook = userBook
+                    _domainHistories = data.history
+
                     val shouldShowCompletion = userBook != null &&
                             userBook.status == ReadingStatus.READING &&
                             userBook.currentPage >= userBook.totalPage &&
@@ -65,15 +75,15 @@ class BookDetailViewModel @Inject constructor(
 
                     _uiState.update {
                         it.copy(
-                            userBook = userBook,
-                            quotes = data.quotes,
-                            histories = data.history,
+                            userBook = userBook?.toUiModel(),
+                            quotes = data.quotes.map { q -> q.toUiModel() },
+                            histories = data.history.map { h -> h.toUiModel() },
                             isLoading = false,
                             dialogState = if (shouldShowCompletion && it.dialogState == BookDetailDialogState.None) {
                                 BookDetailDialogState.Completion
                             } else {
                                 it.dialogState
-                            }
+                            },
                         )
                     }
                 }
@@ -87,14 +97,14 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun onAddManualHistoryClick() {
-        val userBook = _uiState.value.userBook
+        val userBook = _domainUserBook
         _uiState.update {
             it.copy(
                 dialogState = BookDetailDialogState.AddManualHistory(
                     currentPage = userBook?.currentPage ?: 0,
                     lastPage = userBook?.totalPage ?: 0,
-                    startDate = userBook?.startDate
-                )
+                    startDate = userBook?.startDate,
+                ),
             )
         }
     }
@@ -103,8 +113,8 @@ class BookDetailViewModel @Inject constructor(
         _uiState.update { it.copy(dialogState = BookDetailDialogState.ReadingStatus) }
     }
 
-    fun onQuoteEditClick(quoteId: String, quote: Quote) {
-        _uiState.update { it.copy(dialogState = BookDetailDialogState.EditQuote(quoteId, quote)) }
+    fun onQuoteEditClick(quoteUiModel: QuoteUiModel) {
+        _uiState.update { it.copy(dialogState = BookDetailDialogState.EditQuote(quoteUiModel)) }
     }
 
     fun dismissDialog() {
@@ -129,9 +139,9 @@ class BookDetailViewModel @Inject constructor(
         endTime: LocalDateTime,
         readTime: Int,
         readPageCount: Int,
-        currentPage: Int
+        currentPage: Int,
     ) {
-        val userBook = uiState.value.userBook ?: return
+        val userBook = _domainUserBook ?: return
         val uid = currentUid ?: return
 
         val history = History(
@@ -143,7 +153,7 @@ class BookDetailViewModel @Inject constructor(
             endTime = endTime,
             readTime = readTime,
             readPageCount = readPageCount,
-            recordType = RecordType.MANUAL
+            recordType = RecordType.MANUAL,
         )
 
         viewModelScope.launch {
@@ -156,7 +166,7 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun addQuote(userBookId: String, content: String, pageNumber: Int?) {
-        val userBook = uiState.value.userBook ?: return
+        val userBook = _domainUserBook ?: return
         val uid = currentUid ?: return
 
         val newQuote = Quote(
@@ -170,7 +180,7 @@ class BookDetailViewModel @Inject constructor(
             title = userBook.title,
             author = userBook.author,
             publisher = userBook.publisher ?: "",
-            imageUrl = userBook.imageUrl
+            imageUrl = userBook.imageUrl,
         )
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isLoading = true))
@@ -181,7 +191,7 @@ class BookDetailViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
             } else if (result.isFailure) {
                 _uiState.value = _uiState.value.copy(
-                    addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류")
+                    addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"),
                 )
             }
         }
@@ -192,32 +202,33 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun getStatistic(): BookStatistic {
+        val userBook = _domainUserBook
         return BookStatistic(
-            readingPeriod = if (uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(
-                uiState.value.userBook?.startDate!!,
-                uiState.value.userBook?.endDate,
-                uiState.value.userBook?.status!!
+            readingPeriod = if (userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(
+                userBook.startDate!!,
+                userBook.endDate,
+                userBook.status,
             ),
-            totalReadingTime = uiState.value.histories
+            totalReadingTime = _domainHistories
                 .sumOf { it.readTime }
                 .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
-            averageDailyTime = getDailyAverageReadTimeInSeconds(uiState.value.histories)
+            averageDailyTime = getDailyAverageReadTimeInSeconds(_domainHistories),
         )
     }
 
     fun patchUserBook(status: ReadingStatus?, page: Int?, startDate: LocalDateTime?, endDate: LocalDateTime?) {
-        val userBook = uiState.value.userBook ?: return
+        val userBook = _domainUserBook ?: return
         val patchUserBook = userBook.copy(
             status = status ?: userBook.status,
             currentPage = page ?: userBook.currentPage,
             startDate = startDate ?: userBook.startDate,
-            endDate = endDate ?: userBook.endDate
+            endDate = endDate ?: userBook.endDate,
         )
         viewModelScope.launch { patchUserBookUseCase(patchUserBook) }
     }
 
     fun patchReview(rating: Double, review: String) {
-        val userBook = uiState.value.userBook ?: return
+        val userBook = _domainUserBook ?: return
         val patchUserBook = userBook.copy(rating = rating, review = review)
         viewModelScope.launch { patchUserBookUseCase(patchUserBook) }
     }
@@ -253,7 +264,7 @@ class BookDetailViewModel @Inject constructor(
 data class BookStatistic(
     val readingPeriod: String,
     val totalReadingTime: String,
-    val averageDailyTime: String
+    val averageDailyTime: String,
 )
 
 sealed interface BookDetailDialogState {
@@ -262,11 +273,11 @@ sealed interface BookDetailDialogState {
     data class AddManualHistory(
         val currentPage: Int,
         val lastPage: Int,
-        val startDate: LocalDateTime?
+        val startDate: LocalDateTime?,
     ) : BookDetailDialogState
 
     data object ReadingStatus : BookDetailDialogState
-    data class EditQuote(val quoteId: String, val quote: Quote) : BookDetailDialogState
+    data class EditQuote(val quoteUiModel: QuoteUiModel) : BookDetailDialogState
     data object Completion : BookDetailDialogState
 }
 

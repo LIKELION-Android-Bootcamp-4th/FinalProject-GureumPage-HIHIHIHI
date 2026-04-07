@@ -42,15 +42,14 @@ import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
-import com.hihihihi.presentation.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.presentation.ui.onboarding.model.OnboardingFeature
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FeaturePage(
-    viewModel: OnBoardingViewModel
+    onFeaturePageChanged: (Int, Int) -> Unit,
 ) {
     val pagerState = rememberPagerState { featurePages.size }
 
@@ -58,32 +57,30 @@ fun FeaturePage(
         snapshotFlow { pagerState.currentPage to pagerState.pageCount }
             .distinctUntilChanged()
             .collect { (currentPage, pageCount) ->
-                viewModel.featurePageChanged(currentPage, pageCount)
+                onFeaturePageChanged(currentPage, pageCount)
             }
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        // 바텀 시스템 내비 영역 인셋
         val bottomInset = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
         val indicatorPadding = maxHeight * 0.26f - bottomInset
 
-        // 오버 스크롤 모션 삭제
         CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) { pageIndex ->
                 val page = featurePages[pageIndex]
 
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
                         painter = painterResource(page.gureumImage),
                         contentDescription = "OnboardingGureumImage",
-                        modifier = Modifier.size(120.dp)
+                        modifier = Modifier.size(120.dp),
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
@@ -97,7 +94,7 @@ fun FeaturePage(
                         text = page.subTitle,
                         color = GureumTheme.colors.gray500,
                         textAlign = TextAlign.Center,
-                        lineHeight = 22.sp
+                        lineHeight = 22.sp,
                     )
                     Spacer(Modifier.height(24.dp))
                     Column {
@@ -111,37 +108,30 @@ fun FeaturePage(
             }
         }
         PagerIndicator(
-            state = pagerState, modifier = Modifier
+            state = pagerState,
+            modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = indicatorPadding)
+                .padding(bottom = indicatorPadding),
         )
     }
 }
 
 @Composable
 private fun DotWithText(detail: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(GureumTheme.colors.primary)
+                .background(GureumTheme.colors.primary),
         )
         Spacer(Modifier.width(8.dp))
-        Medi14Text(
-            text = detail,
-            color = GureumTheme.colors.gray400
-        )
+        Medi14Text(text = detail, color = GureumTheme.colors.gray400)
     }
 }
 
 @Composable
-private fun PagerIndicator(
-    state: PagerState,
-    modifier: Modifier = Modifier,
-) {
+private fun PagerIndicator(state: PagerState, modifier: Modifier = Modifier) {
     val colors = GureumTheme.colors
     Row(
         modifier = modifier,
@@ -155,39 +145,33 @@ private fun PagerIndicator(
                 modifier = Modifier
                     .size(if (currentPage) 10.dp else 8.dp)
                     .clip(CircleShape)
-                    .background(color)
+                    .background(color),
             )
-            if (index < state.pageCount - 1) {
-                Spacer(Modifier.width(8.dp))
-            }
+            if (index < state.pageCount - 1) Spacer(Modifier.width(8.dp))
         }
     }
 }
 
 private val featurePages = listOf(
     OnboardingFeature(
-        R.drawable.ic_cloud_library,
-        "나만의 디지털 서재",
+        R.drawable.ic_cloud_library, "나만의 디지털 서재",
         "읽은 책, 읽는 중, 완독한 책을\n체계적으로 관리해요",
-        listOf("책 상태별 분류 관리", "독서 진행률 추적", "책 정보와 내 필사 보기")
+        listOf("책 상태별 분류 관리", "독서 진행률 추적", "책 정보와 내 필사 보기"),
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_timer,
-        "독서 스톱워치",
+        R.drawable.ic_cloud_timer, "독서 스톱워치",
         "독서 시간을 측정하고\n꾸준한 독서 습관을 만들어보세요",
-        listOf("스톱워치로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공")
+        listOf("스톱워치로 독서 시간 측정", "일일 목표 설정", "누적 통계 제공"),
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_mindmap,
-        "필사 & 마인드맵",
+        R.drawable.ic_cloud_mindmap, "필사 & 마인드맵",
         "인상 깊은 문장을 기록하거나\n인물, 정보의 관계를 마인드 맵으로 만들어요",
-        listOf("책 속 문장 필사", "자유로운 마인드맵 생성", "인물 및 줄거리 관계도")
+        listOf("책 속 문장 필사", "자유로운 마인드맵 생성", "인물 및 줄거리 관계도"),
     ),
     OnboardingFeature(
-        R.drawable.ic_cloud_statistics,
-        "독서 통계 & 분석",
+        R.drawable.ic_cloud_statistics, "독서 통계 & 분석",
         "내 독서 패턴을 분석하고\n더 나은 독서 계획을 세워봐요",
-        listOf("장르별 선호도 분석", "시간대별 독서 패턴", "월별/주간/연간 독서량 추이")
+        listOf("장르별 선호도 분석", "시간대별 독서 패턴", "월별/주간/연간 독서량 추이"),
     ),
 )
 
@@ -195,6 +179,6 @@ private val featurePages = listOf(
 @Composable
 private fun FeaturePagePreview() {
     GureumPageTheme {
-//        FeaturePage()
+        FeaturePage(onFeaturePageChanged = { _, _ -> })
     }
 }

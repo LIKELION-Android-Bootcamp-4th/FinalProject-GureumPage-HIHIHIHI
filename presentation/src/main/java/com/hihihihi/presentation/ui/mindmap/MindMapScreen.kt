@@ -34,17 +34,21 @@ fun MindMapScreen(
 ) {
     val context = LocalContext.current
     val adapter = remember { MindMapAdapter(context) }
-    val nodes by viewModel.nodes.collectAsStateWithLifecycle() // 스냅샷
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val nodes = uiState.nodes
     val lineColor = GureumTheme.colors.gray200.toArgb()
 
     val thumbColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
-        intArrayOf(ContextCompat.getColor(context, R.color.primary), ContextCompat.getColor(context, R.color.gray300))
+        intArrayOf(ContextCompat.getColor(context, R.color.primary), ContextCompat.getColor(context, R.color.gray300)),
     )
 
     val trackColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
-        intArrayOf(ContextCompat.getColor(context, R.color.primary50), ContextCompat.getColor(context, R.color.gray200))
+        intArrayOf(
+            ContextCompat.getColor(context, R.color.primary50),
+            ContextCompat.getColor(context, R.color.gray200)
+        ),
     )
 
     LaunchedEffect(mindmapId) {
@@ -54,7 +58,7 @@ fun MindMapScreen(
     DisposableEffect(Unit) {
         onDispose {
             // 편집 중일때 나가도 자동 저장
-            if (viewModel.editing) {
+            if (uiState.editing) {
                 viewModel.endEdit(adapter.asDomainList(mindmapId), autoSave = true)
             }
         }
@@ -64,7 +68,7 @@ fun MindMapScreen(
         factory = ActivityMindmapBinding::inflate,
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding()
+            .navigationBarsPadding(),
     ) {
         if (baseTreeView.adapter !is MindMapAdapter) {
             baseTreeView.adapter = adapter
@@ -73,8 +77,8 @@ fun MindMapScreen(
                     context,
                     50,     // 부모 - 자식 간 거리
                     20,       // 노드 간 거리
-                    DashLine(lineColor, 8)
-                )
+                    DashLine(lineColor, 8),
+                ),
             )
             adapter.setEditor(baseTreeView.editor) // 에디터 탑재
         }
@@ -89,7 +93,7 @@ fun MindMapScreen(
         }
 
         // 편집 중이 아닐 때만 원격 스냅샷으로 트리 구성
-        if (!viewModel.editing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
+        if (!uiState.editing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
             val root = nodes.firstOrNull { it.parentNodeId == null } ?: return@AndroidViewBinding
             val modelRoot = NodeModel(root.toUi())
             val model = TreeModel(modelRoot)
@@ -129,7 +133,7 @@ fun MindMapScreen(
         switchEditMode.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) viewModel.startEdit() else viewModel.endEdit(
                 adapter.asDomainList(mindmapId),
-                autoSave = true
+                autoSave = true,
             )
 
             adapter.changeEditMode(isChecked)
