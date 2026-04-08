@@ -10,5 +10,7 @@ data class StatisticsUiState(
     val pages: List<Entry> = emptyList(),
     val xLabels: List<String> = emptyList(),
     val hasError: Boolean = false,
-    val errorMessage: String = ""
+    val errorMessage: String = "",
+    val showPicker: Boolean = false,
+    val selectedPresetIndex: Int = 0,
 )

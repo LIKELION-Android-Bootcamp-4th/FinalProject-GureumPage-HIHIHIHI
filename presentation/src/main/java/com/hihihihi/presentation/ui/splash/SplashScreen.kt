@@ -27,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,16 +58,13 @@ fun SplashView(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var askedOnce by rememberSaveable { mutableStateOf(false) }
-    var proceed by rememberSaveable { mutableStateOf(false) }
-    var kicked by rememberSaveable { mutableStateOf(false) }
     var showProgress by remember { mutableStateOf(false) }
     var startAnimation by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
-        proceed = true
+        viewModel.onPermissionResult()
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
         else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
     }
@@ -103,42 +99,36 @@ fun SplashView(
         animationSpec = tween(durationMillis = 300), label = "",
     )
 
-    LaunchedEffect(askedOnce) {
+    LaunchedEffect(uiState.permissionAsked) {
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
-            if (!granted && !askedOnce) {
-                askedOnce = true
+            if (!granted && !uiState.permissionAsked) {
+                viewModel.markPermissionAsked()
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return@LaunchedEffect
             }
         }
-        proceed = true
+        viewModel.onPermissionResult()
     }
 
-    // 권한 허용 후 네트워크 상태 확인
-    LaunchedEffect(proceed) {
-        if (proceed && !kicked) {
-            kicked = true
+    // 권한 처리 후 스케줄러 설정
+    LaunchedEffect(uiState.permissionHandled) {
+        if (uiState.permissionHandled && !uiState.schedulersSetUp) {
+            viewModel.markSchedulersSetUp()
             showProgress = true
-        }
 
-        if (proceed) {
             ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
-
             SummaryScheduler.scheduleWeekly(context)   // 월 09:00
             SummaryScheduler.scheduleMonthly(context)  // 1일 09:00
             SummaryScheduler.scheduleYearly(context)   // 1월 1일 09:00
-
-            // 주, 월, 년 알림 테스트
-//            SummaryScheduler.scheduleAllIn(context, 5)
         }
     }
 
-    LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
+    LaunchedEffect(uiState.permissionHandled, uiState.isLoading, uiState.navTarget) {
 
-        if (proceed && !uiState.isLoading) {
+        if (uiState.permissionHandled && !uiState.isLoading) {
             when (val target = uiState.navTarget) {
                 SplashViewModel.NavTarget.Login -> onNavigateToLogin()
                 SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()

@@ -12,7 +12,11 @@ data class TimerUiState(
     val startPage: Int? = null,
     val totalPage: Int? = null,
     val countdown: Int? = null,
-    val showMemoDialog: Boolean = false
+    val showMemoDialog: Boolean = false,
+    val showStopDialog: Boolean = false,
+    val wasRunningBeforeDialog: Boolean = false,
+    val showBackExitScreen: Boolean = false,
+    val wasRunningBeforeBack: Boolean = false,
 ) {
     val progress: Float
         get() {

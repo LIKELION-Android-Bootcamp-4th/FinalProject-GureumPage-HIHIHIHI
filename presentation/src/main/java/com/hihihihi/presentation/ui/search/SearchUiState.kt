@@ -14,5 +14,7 @@ data class SearchUiState(
     val hasMore: Boolean = true,
     val isAddingBook: Boolean = false,
     val addBookMessage: String? = null,
-    val isAddBookSuccess: Boolean = false
+    val isAddBookSuccess: Boolean = false,
+    val hasSearched: Boolean = false,
+    val selectedBook: SearchBook? = null,
 )

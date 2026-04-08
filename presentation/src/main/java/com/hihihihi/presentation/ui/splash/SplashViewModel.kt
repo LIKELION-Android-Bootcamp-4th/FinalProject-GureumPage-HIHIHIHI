@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,6 +38,18 @@ class SplashViewModel @Inject constructor(
 
     fun setPendingWidgetRoute(route: Any?) {
         pendingWidgetRoute = route
+    }
+
+    fun markPermissionAsked() {
+        _uiState.update { it.copy(permissionAsked = true) }
+    }
+
+    fun onPermissionResult() {
+        _uiState.update { it.copy(permissionHandled = true) }
+    }
+
+    fun markSchedulersSetUp() {
+        _uiState.update { it.copy(schedulersSetUp = true) }
     }
 
     fun checkNetworkAndProceed() {
