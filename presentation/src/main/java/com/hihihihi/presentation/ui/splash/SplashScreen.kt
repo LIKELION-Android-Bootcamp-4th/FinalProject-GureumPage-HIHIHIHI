@@ -35,12 +35,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.components.Medi12Text
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.notification.reminder.ReminderScheduler
@@ -83,7 +86,6 @@ fun SplashView(
         animationSpec = tween(durationMillis = 1200), label = "",
     )
 
-    // 위젯 라우트를 먼저 ViewModel에 설정
     LaunchedEffect(pendingWidgetRoute) {
         if (pendingWidgetRoute != null) {
             viewModel.setPendingWidgetRoute(pendingWidgetRoute)
@@ -113,21 +115,19 @@ fun SplashView(
         viewModel.onPermissionResult()
     }
 
-    // 권한 처리 후 스케줄러 설정
     LaunchedEffect(uiState.permissionHandled) {
         if (uiState.permissionHandled && !uiState.schedulersSetUp) {
             viewModel.markSchedulersSetUp()
             showProgress = true
 
             ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
-            SummaryScheduler.scheduleWeekly(context)   // 월 09:00
-            SummaryScheduler.scheduleMonthly(context)  // 1일 09:00
-            SummaryScheduler.scheduleYearly(context)   // 1월 1일 09:00
+            SummaryScheduler.scheduleWeekly(context)
+            SummaryScheduler.scheduleMonthly(context)
+            SummaryScheduler.scheduleYearly(context)
         }
     }
 
     LaunchedEffect(uiState.permissionHandled, uiState.isLoading, uiState.navTarget) {
-
         if (uiState.permissionHandled && !uiState.isLoading) {
             when (val target = uiState.navTarget) {
                 SplashViewModel.NavTarget.Login -> onNavigateToLogin()
@@ -141,6 +141,29 @@ fun SplashView(
         }
     }
 
+    SplashContent(
+        isNoNetwork = uiState.navTarget == SplashViewModel.NavTarget.NoNetwork,
+        isLoading = uiState.isLoading,
+        loadingMessage = uiState.loadingMessage,
+        showProgress = showProgress,
+        alpha = alpha,
+        offsetY = offsetY,
+        animatedProgress = animatedProgress,
+        onExit = { (context as? Activity)?.finish() },
+    )
+}
+
+@Composable
+private fun SplashContent(
+    isNoNetwork: Boolean,
+    isLoading: Boolean,
+    loadingMessage: String,
+    showProgress: Boolean,
+    alpha: Float,
+    offsetY: Dp,
+    animatedProgress: Float,
+    onExit: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -174,23 +197,19 @@ fun SplashView(
             )
         }
 
-        if (uiState.navTarget == SplashViewModel.NavTarget.NoNetwork) {
+        if (isNoNetwork) {
             AlertDialog(
                 onDismissRequest = { },
                 title = { Text("네트워크 오류") },
                 text = { Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.") },
                 containerColor = GureumTheme.colors.card,
                 confirmButton = {
-                    TextButton(
-                        onClick = {
-                            (context as? Activity)?.finish()
-                        },
-                    ) { Text("앱 종료") }
+                    TextButton(onClick = onExit) { Text("앱 종료") }
                 },
             )
         }
 
-        if (showProgress && uiState.isLoading && uiState.loadingMessage.isNotEmpty()) {
+        if (showProgress && isLoading && loadingMessage.isNotEmpty()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -199,7 +218,7 @@ fun SplashView(
                     .padding(16.dp),
             ) {
                 Medi12Text(
-                    uiState.loadingMessage,
+                    loadingMessage,
                     style = GureumTypography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                     ),
@@ -212,5 +231,23 @@ fun SplashView(
                 )
             }
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark")
+@Composable
+private fun SplashPreview() {
+    GureumPageTheme {
+        SplashContent(
+            isNoNetwork = false,
+            isLoading = true,
+            loadingMessage = "데이터를 불러오는 중...",
+            showProgress = true,
+            alpha = 1f,
+            offsetY = 0.dp,
+            animatedProgress = 0.6f,
+            onExit = {},
+        )
     }
 }

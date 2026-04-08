@@ -1,6 +1,7 @@
 package com.hihihihi.presentation.ui.mindmap
 
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
@@ -24,6 +26,7 @@ import com.gyso.treeview.model.TreeModel
 import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.databinding.ActivityMindmapBinding
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.mindmap.mapper.toUi
 
@@ -32,10 +35,31 @@ fun MindMapScreen(
     mindmapId: String,
     viewModel: MindMapViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(mindmapId) {
+        viewModel.load(mindmapId)
+    }
+
+    MindMapContent(
+        mindmapId = mindmapId,
+        nodes = uiState.nodes,
+        isEditing = uiState.editing,
+        onEndEdit = { list, autoSave -> viewModel.endEdit(list, autoSave) },
+        onStartEdit = viewModel::startEdit,
+    )
+}
+
+@Composable
+private fun MindMapContent(
+    mindmapId: String,
+    nodes: List<MindmapNode>,
+    isEditing: Boolean,
+    onEndEdit: (List<MindmapNode>, Boolean) -> Unit,
+    onStartEdit: () -> Unit,
+) {
     val context = LocalContext.current
     val adapter = remember { MindMapAdapter(context) }
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val nodes = uiState.nodes
     val lineColor = GureumTheme.colors.gray200.toArgb()
 
     val thumbColors = ColorStateList(
@@ -45,21 +69,13 @@ fun MindMapScreen(
 
     val trackColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
-        intArrayOf(
-            ContextCompat.getColor(context, R.color.primary50),
-            ContextCompat.getColor(context, R.color.gray200)
-        ),
+        intArrayOf(ContextCompat.getColor(context, R.color.primary50), ContextCompat.getColor(context, R.color.gray200)),
     )
-
-    LaunchedEffect(mindmapId) {
-        viewModel.load(mindmapId)
-    }
 
     DisposableEffect(Unit) {
         onDispose {
-            // 편집 중일때 나가도 자동 저장
-            if (uiState.editing) {
-                viewModel.endEdit(adapter.asDomainList(mindmapId), autoSave = true)
+            if (isEditing) {
+                onEndEdit(adapter.asDomainList(mindmapId), true)
             }
         }
     }
@@ -93,7 +109,7 @@ fun MindMapScreen(
         }
 
         // 편집 중이 아닐 때만 원격 스냅샷으로 트리 구성
-        if (!uiState.editing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
+        if (!isEditing && nodes.isNotEmpty() && !adapter.sameAs(nodes, mindmapId)) {
             val root = nodes.firstOrNull { it.parentNodeId == null } ?: return@AndroidViewBinding
             val modelRoot = NodeModel(root.toUi())
             val model = TreeModel(modelRoot)
@@ -131,10 +147,7 @@ fun MindMapScreen(
         btnRedo.setOnClickListener { adapter.redo() }
 
         switchEditMode.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) viewModel.startEdit() else viewModel.endEdit(
-                adapter.asDomainList(mindmapId),
-                autoSave = true,
-            )
+            if (isChecked) onStartEdit() else onEndEdit(adapter.asDomainList(mindmapId), true)
 
             adapter.changeEditMode(isChecked)
             btnRedo.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
@@ -151,4 +164,84 @@ private fun MindMapAdapter.sameAs(nodes: List<MindmapNode>, mindmapId: String): 
     val cur = asDomainList(mindmapId).sortedBy { it.mindmapNodeId }
     val src = nodes.sortedBy { it.mindmapNodeId }
     return cur == src
+}
+
+@Preview(name = "Empty - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Empty - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun MindMapEmptyPreview() {
+    GureumPageTheme {
+        MindMapContent(
+            mindmapId = "preview",
+            nodes = emptyList(),
+            isEditing = false,
+            onEndEdit = { _, _ -> },
+            onStartEdit = {},
+        )
+    }
+}
+
+@Preview(name = "WithNodes - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "WithNodes - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun MindMapWithNodesPreview() {
+    val sampleNodes = listOf(
+        MindmapNode(
+            userId = "user1",
+            mindmapNodeId = "root",
+            mindmapId = "preview",
+            nodeTitle = "데미안",
+            nodeEx = "헤르만 헤세",
+            parentNodeId = null,
+            color = null,
+            icon = null,
+            deleted = false,
+            bookImage = null
+        ),
+        MindmapNode(
+            userId = "user1",
+            mindmapNodeId = "child1",
+            mindmapId = "preview",
+            nodeTitle = "싱클레어",
+            nodeEx = "주인공",
+            parentNodeId = "root",
+            color = null,
+            icon = null,
+            deleted = false,
+            bookImage = null
+        ),
+        MindmapNode(
+            userId = "user1",
+            mindmapNodeId = "child2",
+            mindmapId = "preview",
+            nodeTitle = "데미안",
+            nodeEx = "인도자",
+            parentNodeId = "root",
+            color = null,
+            icon = null,
+            deleted = false,
+            bookImage = null
+        ),
+        MindmapNode(
+            userId = "user1",
+            mindmapNodeId = "grandchild1",
+            mindmapId = "preview",
+            nodeTitle = "에바 부인",
+            nodeEx = "구원",
+            parentNodeId = "child1",
+            color = null,
+            icon = null,
+            deleted = false,
+            bookImage = null
+        )
+    )
+    GureumPageTheme {
+        MindMapContent(
+            mindmapId = "preview",
+            nodes = sampleNodes,
+            isEditing = false,
+            onEndEdit = { _, _ -> },
+            onStartEdit = {},
+        )
+    }
 }

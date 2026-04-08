@@ -14,7 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,20 +23,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
+import com.hihihihi.presentation.ui.model.MyPageUiModel
 import com.hihihihi.presentation.ui.mypage.component.MyPageCalenderSection
 import com.hihihihi.presentation.ui.mypage.component.MyPageMenuSection
 import com.hihihihi.presentation.ui.mypage.component.MyPageUserProfileCard
 import com.hihihihi.presentation.ui.mypage.component.NicknameChangeDialog
 import com.hihihihi.presentation.utils.formatSecondsToReadableTimeWithoutSecond
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +50,8 @@ fun MyPageScreen(
     onNavigateToWithdraw: (String) -> Unit,
     viewModel: MypageViewModel = hiltViewModel(),
 ) {
-    val colors = GureumTheme.colors
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(lifecycleOwner) {
@@ -60,6 +65,43 @@ fun MyPageScreen(
         }
     }
 
+    MyPageContent(
+        isLoading = state.isLoading,
+        errorMessage = state.errorMessage,
+        myPageUiModel = state.myPageUiModel,
+        dialogState = state.dialogState,
+        theme = theme,
+        onThemeToggle = viewModel::toggleTheme,
+        onNicknameChangeClick = viewModel::onNicknameChangeClick,
+        onLogoutClick = viewModel::onLogoutClick,
+        onWithdrawClick = viewModel::onWithdrawClick,
+        onDismissDialog = viewModel::dismissDialog,
+        onChangeNickname = { new ->
+            viewModel.changeNickname(new)
+            viewModel.dismissDialog()
+        },
+        onLogout = viewModel::logout,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MyPageContent(
+    isLoading: Boolean,
+    errorMessage: String?,
+    myPageUiModel: MyPageUiModel?,
+    dialogState: MyPageDialogState,
+    theme: GureumThemeType,
+    onThemeToggle: (GureumThemeType) -> Unit,
+    onNicknameChangeClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+    onWithdrawClick: () -> Unit,
+    onDismissDialog: () -> Unit,
+    onChangeNickname: (String) -> Unit,
+    onLogout: () -> Unit,
+) {
+    val colors = GureumTheme.colors
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +111,7 @@ fun MyPageScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         when {
-            state.isLoading -> Box(
+            isLoading -> Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 32.dp),
@@ -78,7 +120,7 @@ fun MyPageScreen(
                 CircularProgressIndicator()
             }
 
-            state.errorMessage != null -> {
+            errorMessage != null -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,9 +131,7 @@ fun MyPageScreen(
                         color = GureumTheme.colors.gray600,
                         textAlign = TextAlign.Center,
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Medi14Text(
                         text = "잠시 후 다시 시도해주세요",
                         color = GureumTheme.colors.gray500,
@@ -100,8 +140,8 @@ fun MyPageScreen(
                 }
             }
 
-            state.myPageUiModel != null -> {
-                val data = state.myPageUiModel!!
+            myPageUiModel != null -> {
+                val data = myPageUiModel
                 val timeText = remember(data.totalReadMinutes) {
                     formatSecondsToReadableTimeWithoutSecond(data.totalReadMinutes * 60)
                 }
@@ -114,45 +154,37 @@ fun MyPageScreen(
                     totalPages = "${data.totalPages}쪽",
                     totalBooks = "${data.totalBooks}권",
                     totalTime = timeText,
-                    onEditNicknameClick = viewModel::onNicknameChangeClick,
+                    onEditNicknameClick = onNicknameChangeClick,
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        MyPageCalenderSection(stats = state.myPageUiModel?.readingStats ?: emptyMap())
-
+        MyPageCalenderSection(stats = myPageUiModel?.readingStats ?: emptyMap())
         Spacer(modifier = Modifier.height(28.dp))
-
-        Divider(
-            thickness = 8.dp,
-            color = colors.background10,
-        )
-
+        HorizontalDivider(thickness = 8.dp, color = colors.background10)
         MyPageMenuSection(
-            onLogoutClick = viewModel::onLogoutClick,
-            onWithDrawClick = viewModel::onWithdrawClick,
+            theme = theme,
+            onThemeToggle = onThemeToggle,
+            onLogoutClick = onLogoutClick,
+            onWithDrawClick = onWithdrawClick
         )
     }
 
-    when (state.dialogState) {
+    when (dialogState) {
         MyPageDialogState.None -> Unit
 
         MyPageDialogState.NicknameChange -> {
             NicknameChangeDialog(
-                currentNickname = state.myPageUiModel?.nickname ?: "",
-                onDismiss = viewModel::dismissDialog,
-                onSave = { new ->
-                    viewModel.changeNickname(new)
-                    viewModel.dismissDialog()
-                },
+                currentNickname = myPageUiModel?.nickname ?: "",
+                onDismiss = onDismissDialog,
+                onSave = onChangeNickname,
             )
         }
 
         MyPageDialogState.Logout -> {
             AlertDialog(
-                onDismissRequest = viewModel::dismissDialog,
+                onDismissRequest = onDismissDialog,
                 title = { Semi16Text("로그아웃") },
                 text = { Medi14Text("정말 로그아웃 하실건가요?") },
                 containerColor = GureumTheme.colors.card,
@@ -162,7 +194,7 @@ fun MyPageScreen(
                         color = GureumTheme.colors.systemRed,
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable { viewModel.logout() },
+                            .clickable { onLogout() },
                     )
                 },
                 dismissButton = {
@@ -171,10 +203,45 @@ fun MyPageScreen(
                         color = GureumTheme.colors.gray500,
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable { viewModel.dismissDialog() },
+                            .clickable { onDismissDialog() },
                     )
                 },
             )
         }
+    }
+}
+
+@Preview(name = "DarkMode", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "LightMode", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun MyPageWithDataPreview() {
+    val sampleData = MyPageUiModel(
+        nickname = "구름이",
+        appellation = "독서왕",
+        provider = "google",
+        readingStats = mapOf(
+            LocalDate.now().minusDays(2) to 50,
+            LocalDate.now().minusDays(1) to 120,
+            LocalDate.now() to 80,
+        ),
+        totalBooks = 12,
+        totalPages = 3450,
+        totalReadMinutes = 1250,
+    )
+    GureumPageTheme {
+        MyPageContent(
+            isLoading = false,
+            errorMessage = null,
+            myPageUiModel = sampleData,
+            dialogState = MyPageDialogState.None,
+            theme = GureumThemeType.DARK,
+            onThemeToggle = {},
+            onNicknameChangeClick = {},
+            onLogoutClick = {},
+            onWithdrawClick = {},
+            onDismissDialog = {},
+            onChangeNickname = {},
+            onLogout = {},
+        )
     }
 }

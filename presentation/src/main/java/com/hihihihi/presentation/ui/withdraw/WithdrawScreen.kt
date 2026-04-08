@@ -80,22 +80,7 @@ fun WithdrawScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val listState = rememberLazyListState()
     val lifecycleOwner = LocalLifecycleOwner.current
-
-    var currentHighlightedIndex by remember { mutableStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(3000)
-            currentHighlightedIndex = (currentHighlightedIndex + 1) % withdrawalReasons.size
-
-            listState.animateScrollToItem(
-                index = currentHighlightedIndex,
-                scrollOffset = -50
-            )
-        }
-    }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
@@ -114,62 +99,60 @@ fun WithdrawScreen(
         }
     }
 
+    WithdrawContent(
+        userName = userName,
+        isLoading = uiState.isLoading,
+        loadingMessage = uiState.loadingMessage,
+        snackbarHostState = snackbarHostState,
+        onNavigateBack = onNavigateBack,
+        onWithdraw = viewModel::withdrawUser,
+    )
+}
+
+@Composable
+private fun WithdrawContent(
+    userName: String,
+    isLoading: Boolean,
+    loadingMessage: String,
+    snackbarHostState: SnackbarHostState,
+    onNavigateBack: () -> Unit,
+    onWithdraw: () -> Unit,
+) {
+    val listState = rememberLazyListState()
+    var currentHighlightedIndex by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000)
+            currentHighlightedIndex = (currentHighlightedIndex + 1) % withdrawalReasons.size
+            listState.animateScrollToItem(index = currentHighlightedIndex, scrollOffset = -50)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
             .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // 제목
-        Semi18Text(
-            text = "정말 떠나시나요?",
-            color = GureumTheme.colors.gray900,
-        )
-
+        Semi18Text(text = "정말 떠나시나요?", color = GureumTheme.colors.gray900)
         Spacer(modifier = Modifier.height(8.dp))
-
-        // 부제목
-        Medi14Text(
-            text = "${userName}님과 함께한",
-            color = GureumTheme.colors.gray400,
-        )
-
-        Medi14Text(
-            text = "소중한 독서 여정이 모두 사라져요",
-            color = GureumTheme.colors.gray400,
-        )
-
+        Medi14Text(text = "${userName}님과 함께한", color = GureumTheme.colors.gray400)
+        Medi14Text(text = "소중한 독서 여정이 모두 사라져요", color = GureumTheme.colors.gray400)
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 경고 박스
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    GureumTheme.colors.systemRed.copy(alpha = 0.1f),
-                    RoundedCornerShape(12.dp)
-                )
-                .border(
-                    1.dp,
-                    GureumTheme.colors.systemRed.copy(alpha = 0.5f),
-                    RoundedCornerShape(12.dp)
-                )
-                .padding(16.dp)
+                .background(GureumTheme.colors.systemRed.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                .border(1.dp, GureumTheme.colors.systemRed.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .padding(16.dp),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Semi16Text(
-                    text = "계정 탈퇴 시 삭제되는 데이터",
-                    color = GureumTheme.colors.systemRed
-                )
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Semi16Text(text = "계정 탈퇴 시 삭제되는 데이터", color = GureumTheme.colors.systemRed)
                 Spacer(modifier = Modifier.height(4.dp))
-                Semi12Text(
-                    text = "한 번 삭제된 데이터는 복구될 수 없어요",
-                    color = GureumTheme.colors.gray700,
-                )
+                Semi12Text(text = "한 번 삭제된 데이터는 복구될 수 없어요", color = GureumTheme.colors.gray700)
             }
         }
 
@@ -179,13 +162,10 @@ fun WithdrawScreen(
             state = listState,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             itemsIndexed(withdrawalReasons) { index, reason ->
-                WithdrawalReasonItem(
-                    reason = reason,
-                    isHighlighted = index == currentHighlightedIndex
-                )
+                WithdrawalReasonItem(reason = reason, isHighlighted = index == currentHighlightedIndex)
             }
         }
 
@@ -194,139 +174,71 @@ fun WithdrawScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    GureumTheme.colors.point.copy(alpha = 0.2f),
-                    RoundedCornerShape(12.dp)
-                )
-                .border(
-                    1.dp,
-                    GureumTheme.colors.point.copy(alpha = 0.5f),
-                    RoundedCornerShape(12.dp)
-                )
-                .padding(20.dp)
+                .background(GureumTheme.colors.point.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .border(1.dp, GureumTheme.colors.point.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .padding(20.dp),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Semi16Text(
-                    text = "잠깐만요! 🥺",
-                    color = GureumTheme.colors.gray900,
-                )
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Semi16Text(text = "잠깐만요! 🥺", color = GureumTheme.colors.gray900)
                 Spacer(modifier = Modifier.height(8.dp))
-                Medi14Text(
-                    text = "지금까지 쌓아온 독서 기록들이 정말 아까워요.",
-                    color = GureumTheme.colors.gray500,
-                )
-                Medi14Text(
-                    text = "다시 한 번 생각해보시는 건 어떨까요?",
-                    color = GureumTheme.colors.gray500,
-                )
+                Medi14Text(text = "지금까지 쌓아온 독서 기록들이 정말 아까워요.", color = GureumTheme.colors.gray500)
+                Medi14Text(text = "다시 한 번 생각해보시는 건 어떨까요?", color = GureumTheme.colors.gray500)
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 버튼들
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // 다시 생각해볼게요 버튼
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(
-                onClick = { onNavigateBack() },
-                enabled = !uiState.isLoading,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GureumTheme.colors.primary
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onClick = onNavigateBack,
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f).height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GureumTheme.colors.primary),
+                shape = RoundedCornerShape(12.dp),
             ) {
-                Medi14Text(
-                    text = "다시 생각해볼게요",
-                    color = GureumTheme.colors.white,
-                )
+                Medi14Text(text = "다시 생각해볼게요", color = GureumTheme.colors.white)
             }
-
-            // 정말 탈퇴할래요 버튼
             Button(
-                onClick = { viewModel.withdrawUser() },
-                enabled = !uiState.isLoading,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GureumTheme.colors.gray200
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onClick = onWithdraw,
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f).height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GureumTheme.colors.gray200),
+                shape = RoundedCornerShape(12.dp),
             ) {
-                Medi14Text(
-                    text = "정말 탈퇴할래요",
-                    color = GureumTheme.colors.white,
-                )
+                Medi14Text(text = "정말 탈퇴할래요", color = GureumTheme.colors.white)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // 하단 안내 텍스트
-        Medi12Text(
-            text = "탈퇴 후에도 언제든 다시 돌아와서",
-            color = GureumTheme.colors.gray500,
-        )
+        Medi12Text(text = "탈퇴 후에도 언제든 다시 돌아와서", color = GureumTheme.colors.gray500)
         Spacer(modifier = Modifier.height(2.dp))
-        Medi12Text(
-            text = "새로운 독서 여정을 시작할 수 있어요",
-            color = GureumTheme.colors.gray500,
-        )
+        Medi12Text(text = "새로운 독서 여정을 시작할 수 있어요", color = GureumTheme.colors.gray500)
     }
 
-    if (uiState.isLoading) {
+    if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
-                    .background(
-                        GureumTheme.background.color,
-                        RoundedCornerShape(12.dp)
-                    )
+                    .background(GureumTheme.background.color, RoundedCornerShape(12.dp))
                     .padding(32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(40.dp),
-                        color = GureumTheme.colors.primary
-                    )
-
-                    if (uiState.loadingMessage?.isNotEmpty() == true) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(modifier = Modifier.size(40.dp), color = GureumTheme.colors.primary)
+                    if (loadingMessage.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Medi14Text(
-                            text = uiState.loadingMessage!!,
-                            color = GureumTheme.colors.gray700
-                        )
+                        Medi14Text(text = loadingMessage, color = GureumTheme.colors.gray700)
                     }
                 }
             }
         }
     }
 
-    SnackbarHost(
-        hostState = snackbarHostState,
-    ) { data ->
-        Snackbar(
-            snackbarData = data,
-            containerColor = GureumTheme.colors.systemRed,
-            contentColor = Color.White
-        )
+    SnackbarHost(hostState = snackbarHostState) { data ->
+        Snackbar(snackbarData = data, containerColor = GureumTheme.colors.systemRed, contentColor = Color.White)
     }
 }
 
@@ -405,14 +317,18 @@ fun WithdrawalReasonItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark")
 @Composable
-private fun WithdrawalScreenPreview() {
+private fun WithdrawPreview() {
     GureumPageTheme {
-        WithdrawScreen(
-            userName = "name",
-            onNavigateToLogin = {},
+        WithdrawContent(
+            userName = "구름이",
+            isLoading = false,
+            loadingMessage = "",
+            snackbarHostState = SnackbarHostState(),
             onNavigateBack = {},
+            onWithdraw = {},
         )
     }
 }
