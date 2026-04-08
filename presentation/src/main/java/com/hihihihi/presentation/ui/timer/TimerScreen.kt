@@ -23,12 +23,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.presentation.ui.timer.component.CountdownOverlayWithHole
@@ -67,14 +66,6 @@ fun TimerScreen(
     val memoState by memoViewModel.ui.collectAsStateWithLifecycle()
     val sharedTimerState by viewModel.sharedTimerState.collectAsStateWithLifecycle()
 
-    // 정지 확인 다이얼로그 상태
-    var showStopDialog by rememberSaveable { mutableStateOf(false) }
-    var wasRunningBeforeDialog by rememberSaveable { mutableStateOf(false) }
-
-    // 필사 다이얼로그 - showMemoDialog 상태 사용
-    var showBackExitScreen by rememberSaveable { mutableStateOf(false) }
-    var wasRunningBeforeBack by rememberSaveable { mutableStateOf(false) }
-
     var overlayRectWin by remember { mutableStateOf<Rect?>(null) }
     var cardRectWin by remember { mutableStateOf<Rect?>(null) }
 
@@ -85,9 +76,9 @@ fun TimerScreen(
                 val c = cardRectWin!!
                 Rect(
                     offset = Offset(c.left - o.left, c.top - o.top),
-                    size = c.size
+                    size = c.size,
                 )
-            } else null
+            } else null,
         )
     }
 
@@ -105,8 +96,8 @@ fun TimerScreen(
     LaunchedEffect(userBookId) {
         viewModel.bind(userBookId)
         memoViewModel.clear()
-        showBackExitScreen = false
-        showStopDialog = false
+        viewModel.dismissBackExitScreen(resumeTimer = false)
+        viewModel.dismissStopDialog(resumeTimer = false)
     }
 
     val appBarUp = LocalAppBarUpClick.current
@@ -116,32 +107,28 @@ fun TimerScreen(
         if (state.countdown != null) return@LaunchedEffect
         if (appBarUp != 0L && appBarUp != lastHandledUpTs) {
             lastHandledUpTs = appBarUp
-            wasRunningBeforeBack = state.isRunning
-            if (state.isRunning) viewModel.pause()
-            showBackExitScreen = true
+            viewModel.requestBackExitScreen(wasRunning = state.isRunning)
         }
     }
 
     // 하드웨어 뒤로가기
     BackHandler(
-        enabled = state.countdown == null && !showStopDialog && !state.showMemoDialog && !showBackExitScreen
+        enabled = state.countdown == null && !state.showStopDialog && !state.showMemoDialog && !state.showBackExitScreen,
     ) {
-        wasRunningBeforeBack = state.isRunning
-        if (state.isRunning) viewModel.pause()
-        showBackExitScreen = true
+        viewModel.requestBackExitScreen(wasRunning = state.isRunning)
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background)
-            .onGloballyPositioned { overlayRectWin = it.boundsInWindow() }
+            .onGloballyPositioned { overlayRectWin = it.boundsInWindow() },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(24.dp))
 
@@ -154,7 +141,7 @@ fun TimerScreen(
                     .fillMaxWidth()
                     .onGloballyPositioned { coords ->
                         cardRectWin = coords.boundsInWindow()
-                    }
+                    },
             )
 
             Spacer(Modifier.height(24.dp))
@@ -162,7 +149,7 @@ fun TimerScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
             ) {
                 IconButton(
                     onClick = {
@@ -172,7 +159,7 @@ fun TimerScreen(
                             if (!Settings.canDrawOverlays(context)) {
                                 val intent = Intent(
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                    "package:${context.packageName}".toUri()
+                                    "package:${context.packageName}".toUri(),
                                 )
                                 context.startActivity(intent)
                                 return@IconButton
@@ -182,13 +169,13 @@ fun TimerScreen(
                         viewModel.startFloatingWindowMode(context)
                         (context as? Activity)?.moveTaskToBack(true)
                     },
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(36.dp),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = "플로팅 모드",
                         tint = colors.gray300,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                 }
             }
@@ -201,7 +188,7 @@ fun TimerScreen(
                     .size(240.dp)
                     .offset(y = 12.dp),
                 isRunning = state.isRunning,
-                centerText = state.countdown?.toString() ?: state.displayTimeMMSS
+                centerText = state.countdown?.toString() ?: state.displayTimeMMSS,
             )
 
             Spacer(Modifier.height(40.dp))
@@ -217,7 +204,7 @@ fun TimerScreen(
                 lines = lines,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
             )
 
             Spacer(Modifier.height(16.dp))
@@ -231,14 +218,12 @@ fun TimerScreen(
                 },
                 onStop = {
                     if (state.countdown != null) return@TimerControlsRow
-                    wasRunningBeforeDialog = state.isRunning
-                    if (state.isRunning) viewModel.pause()
-                    showStopDialog = true
+                    viewModel.requestStopDialog(wasRunning = state.isRunning)
                 },
                 onEdit = {
                     if (state.countdown != null) return@TimerControlsRow
                     viewModel.showMemoDialog()
-                }
+                },
             )
 
             Spacer(Modifier.height(32.dp))
@@ -249,28 +234,25 @@ fun TimerScreen(
                 number = state.countdown!!,
                 holeRect = cardRectForOverlay,
                 holeCornerRadiusDp = 16f,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
 
         // 정지 확인 다이얼로그
-        if (showStopDialog) {
+        if (state.showStopDialog) {
             StopReadingDialog(
                 displayTime = state.displayTimeMMSS,
                 title = state.bookTitle,
                 author = state.author,
                 currentPage = state.startPage,
                 totalPage = state.totalPage,
-                onConfirmStop = { showStopDialog = false },
-                onDismiss = {
-                    showStopDialog = false
-                    if (wasRunningBeforeDialog) viewModel.start()
-                },
+                onConfirmStop = { viewModel.dismissStopDialog(resumeTimer = false) },
+                onDismiss = { viewModel.dismissStopDialog(resumeTimer = true) },
                 onConfirmStopPages = { s, e ->
                     viewModel.finishAndSave(userBookId, s, e)
-                    showStopDialog = false
+                    viewModel.dismissStopDialog(resumeTimer = false)
                     onExit()
-                }
+                },
             )
         }
 
@@ -292,26 +274,23 @@ fun TimerScreen(
                         viewModel.dismissMemoDialog()
                     }
                 },
-                lastPage = state.totalPage
+                lastPage = state.totalPage,
             )
         }
 
         // 뒤로가기 다이얼로그
-        if (showBackExitScreen) {
+        if (state.showBackExitScreen) {
             StopReadingConfirmDialog(
                 displayTime = state.displayTimeMMSS,
                 title = state.bookTitle,
                 author = state.author,
                 willSave = false,
-                onContinue = {
-                    showBackExitScreen = false
-                    if (wasRunningBeforeBack) viewModel.start()
-                },
+                onContinue = { viewModel.dismissBackExitScreen(resumeTimer = true) },
                 onStop = {
                     viewModel.stop()
-                    showBackExitScreen = false
+                    viewModel.dismissBackExitScreen(resumeTimer = false)
                     onExit()
-                }
+                },
             )
         }
     }

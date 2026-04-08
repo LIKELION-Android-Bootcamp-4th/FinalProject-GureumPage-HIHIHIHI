@@ -17,11 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -48,29 +44,25 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
-    initialPreset: DateRangePreset = DateRangePreset.WEEK
+    initialPreset: DateRangePreset = DateRangePreset.WEEK,
 ) {
     val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showPicker by remember { mutableStateOf(false) }
-    var presetIndex by rememberSaveable { mutableIntStateOf(initialPreset.ordinal) }
-    val preset = presetFromIndex(presetIndex)
-    val rangeText = remember(presetIndex) { formatRange(preset) }
-    val title = remember(presetIndex) { pagesTitle(preset) }
+    val preset = presetFromIndex(uiState.selectedPresetIndex)
+    val rangeText = remember(uiState.selectedPresetIndex) { formatRange(preset) }
+    val title = remember(uiState.selectedPresetIndex) { pagesTitle(preset) }
 
-    LaunchedEffect(initialPreset) { viewModel.loadStatistics(initialPreset) }
+    LaunchedEffect(initialPreset) {
+        viewModel.loadStatistics(initialPreset)
+    }
 
-    if (showPicker) {
+    if (uiState.showPicker) {
         StatisticsPicker(
-            initialIndex = presetIndex,
+            initialIndex = uiState.selectedPresetIndex,
             items = STAT_PRESET_LABELS,
-            onDismiss = { showPicker = false },
-            onConfirm = { index ->
-                presetIndex = index
-                showPicker = false
-                viewModel.loadStatistics(presetFromIndex(index))
-            },
-            infiniteScroll = false
+            onDismiss = { viewModel.hidePicker() },
+            onConfirm = { index -> viewModel.setPreset(index) },
+            infiniteScroll = false,
         )
     }
 
@@ -78,13 +70,13 @@ fun StatisticsScreen(
         modifier = Modifier.fillMaxSize(),
         state = scrollState,
         contentPadding = PaddingValues(vertical = 20.dp, horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Semi14Text(
                     text = rangeText,
-                    color = GureumTheme.colors.gray700
+                    color = GureumTheme.colors.gray700,
                 )
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -93,17 +85,17 @@ fun StatisticsScreen(
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            onClick = { showPicker = true },
+                            onClick = { viewModel.showPicker() },
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Semi16Text(STAT_PRESET_LABELS[presetIndex], color = GureumTheme.colors.gray700)
+                    Semi16Text(STAT_PRESET_LABELS[uiState.selectedPresetIndex], color = GureumTheme.colors.gray700)
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_down),
                         contentDescription = null,
                         modifier = Modifier.size(28.dp),
-                        tint = GureumTheme.colors.gray800
+                        tint = GureumTheme.colors.gray800,
                     )
                 }
             }

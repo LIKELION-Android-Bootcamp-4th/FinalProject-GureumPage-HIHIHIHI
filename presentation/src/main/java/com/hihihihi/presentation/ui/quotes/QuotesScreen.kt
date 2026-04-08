@@ -11,10 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +21,6 @@ import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi18Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.home.components.ErrorView
-import com.hihihihi.presentation.ui.model.QuoteUiModel
 import com.hihihihi.presentation.ui.quotes.component.QuoteContent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +32,6 @@ fun QuotesScreen(
     //모달 관련
     var sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var selectedQuote by remember { mutableStateOf<QuoteUiModel?>(null) }
 
     when {
         uiState.isLoading -> {
@@ -70,15 +65,11 @@ fun QuotesScreen(
         else -> {
             QuoteContent(
                 quotes = uiState.quotes,
-                selectedQuote = selectedQuote,
+                selectedQuote = uiState.selectedQuote,
                 sheetState = sheetState,
                 scope = scope,
-                onQuoteSelected = { quote ->
-                    selectedQuote = quote
-                },
-                onDismiss = {
-                    selectedQuote = null
-                },
+                onQuoteSelected = { quote -> viewModel.selectQuote(quote) },
+                onDismiss = { viewModel.selectQuote(null) },
             )
         }
     }

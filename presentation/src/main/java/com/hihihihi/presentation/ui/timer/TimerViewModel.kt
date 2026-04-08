@@ -89,7 +89,7 @@ class TimerViewModel @Inject constructor(
         val intent = Intent().apply {
             component = android.content.ComponentName(
                 "com.hihihihi.gureumpage",
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
             )
         }
         context.stopService(intent)
@@ -103,6 +103,26 @@ class TimerViewModel @Inject constructor(
         _uiState.update { it.copy(showMemoDialog = false) }
     }
 
+    fun requestStopDialog(wasRunning: Boolean) {
+        if (wasRunning) pauseStopwatch()
+        _uiState.update { it.copy(showStopDialog = true, wasRunningBeforeDialog = wasRunning) }
+    }
+
+    fun dismissStopDialog(resumeTimer: Boolean) {
+        _uiState.update { it.copy(showStopDialog = false) }
+        if (resumeTimer && _uiState.value.wasRunningBeforeDialog) start()
+    }
+
+    fun requestBackExitScreen(wasRunning: Boolean) {
+        if (wasRunning) pauseStopwatch()
+        _uiState.update { it.copy(showBackExitScreen = true, wasRunningBeforeBack = wasRunning) }
+    }
+
+    fun dismissBackExitScreen(resumeTimer: Boolean) {
+        _uiState.update { it.copy(showBackExitScreen = false) }
+        if (resumeTimer && _uiState.value.wasRunningBeforeBack) start()
+    }
+
     fun bind(userBookId: String) {
         booksJob = viewModelScope.launch {
             val userBook = getUserBook(userBookId).first()
@@ -113,7 +133,7 @@ class TimerViewModel @Inject constructor(
                     author = userBook.author,
                     bookImageUrl = userBook.imageUrl,
                     startPage = userBook.currentPage,
-                    totalPage = userBook.totalPage
+                    totalPage = userBook.totalPage,
                 )
             }
 
@@ -122,11 +142,11 @@ class TimerViewModel @Inject constructor(
                     bookInfo = BookInfo(
                         title = userBook.title,
                         author = userBook.author,
-                        imageUrl = userBook.imageUrl
+                        imageUrl = userBook.imageUrl,
                     ),
                     userBookId = userBook.userBookId,
                     startPage = userBook.currentPage,
-                    totalPage = userBook.totalPage
+                    totalPage = userBook.totalPage,
                 )
             }
         }
@@ -202,8 +222,8 @@ class TimerViewModel @Inject constructor(
         val intent = Intent().setComponent(
             android.content.ComponentName(
                 context.packageName,
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
-            )
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
+            ),
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)
@@ -216,8 +236,8 @@ class TimerViewModel @Inject constructor(
         val intent = Intent().setComponent(
             android.content.ComponentName(
                 context.packageName,
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
-            )
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
+            ),
         )
         context.stopService(intent)
     }
@@ -237,7 +257,7 @@ class TimerViewModel @Inject constructor(
             endTime = now,
             readTime = seconds,
             readPageCount = delta,
-            recordType = RecordType.TIMER
+            recordType = RecordType.TIMER,
         )
 
         viewModelScope.launch {
@@ -264,8 +284,8 @@ class TimerViewModel @Inject constructor(
                 bookInfo = BookInfo(
                     title = currentState.bookTitle,
                     author = currentState.author,
-                    imageUrl = currentState.bookImageUrl
-                )
+                    imageUrl = currentState.bookImageUrl,
+                ),
             )
         }
     }
