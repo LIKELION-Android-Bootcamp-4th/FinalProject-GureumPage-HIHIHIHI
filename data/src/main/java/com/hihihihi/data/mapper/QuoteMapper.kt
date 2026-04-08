@@ -1,8 +1,8 @@
 package com.hihihihi.data.mapper
 
 import com.google.firebase.firestore.FieldValue
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.data.common.util.toTimestamp
+import com.hihihihi.data.common.utils.toLocalDateTime
+import com.hihihihi.data.common.utils.toTimestamp
 import com.hihihihi.data.remote.dto.QuoteDto
 import com.hihihihi.domain.model.Quote
 

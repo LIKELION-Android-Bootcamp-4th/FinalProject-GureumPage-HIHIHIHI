@@ -1,0 +1,165 @@
+package com.hihihihi.presentation.navigation
+
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.hihihihi.presentation.ui.bookdetail.BookDetailScreen
+import com.hihihihi.presentation.ui.home.HomeScreen
+import com.hihihihi.presentation.ui.library.LibraryScreen
+import com.hihihihi.presentation.ui.login.LoginScreen
+import com.hihihihi.presentation.ui.mindmap.MindMapScreen
+import com.hihihihi.presentation.ui.mypage.MyPageScreen
+import com.hihihihi.presentation.ui.onboarding.OnBoardingScreen
+import com.hihihihi.presentation.ui.quotes.QuotesScreen
+import com.hihihihi.presentation.ui.search.SearchScreen
+import com.hihihihi.presentation.ui.splash.SplashView
+import com.hihihihi.presentation.ui.statistics.StatisticsScreen
+import com.hihihihi.presentation.ui.timer.TimerScreen
+import com.hihihihi.presentation.ui.withdraw.WithdrawScreen
+
+@Composable
+fun GureumNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    startDestination: String = NavigationRoute.Splash.route,
+    snackbarHostState: SnackbarHostState,
+    pendingWidgetRoute: String? = null
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        modifier = modifier
+    ) {
+        composable(NavigationRoute.Splash.route) {
+            SplashView(
+                navController = navController,
+                pendingWidgetRoute = pendingWidgetRoute
+            )
+        }
+        composable(
+            route = NavigationRoute.Home.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://home" },
+                navDeepLink { uriPattern = "app://home" }
+            )
+        ) { HomeScreen(navController = navController) }
+        composable(NavigationRoute.Login.route) { LoginScreen(navController) }
+        composable(NavigationRoute.OnBoarding.route) { OnBoardingScreen(navController) }
+        composable(
+            route = NavigationRoute.MindMap.route,
+            arguments = listOf(
+                navArgument("mindmapId") { type = NavType.StringType },
+                navArgument("bookId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val mindmapId = backStackEntry.arguments?.getString("mindmapId")
+            mindmapId?.let { MindMapScreen(mindmapId = it) }
+        }
+        composable(NavigationRoute.Quotes.route) { QuotesScreen() }
+        composable(NavigationRoute.Library.route) { LibraryScreen(navController) }
+        composable(NavigationRoute.Search.route) { SearchScreen(navController) }
+        composable(
+            route = NavigationRoute.StatisticsWeekly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/weekly" },
+                navDeepLink { uriPattern = "app://statistics/weekly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.WEEK) }
+        composable(
+            route = NavigationRoute.StatisticsMonthly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/monthly" },
+                navDeepLink { uriPattern = "app://statistics/monthly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.MONTH) }
+        composable(
+            route = NavigationRoute.StatisticsYearly.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://statistics/yearly" },
+                navDeepLink { uriPattern = "app://statistics/yearly" }
+            )
+        ) { StatisticsScreen(initialPreset = com.hihihihi.domain.model.DateRangePreset.YEAR) }
+        composable(
+            route = NavigationRoute.Timer.route,
+            arguments = listOf(navArgument("userBookId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userBookId = requireNotNull(backStackEntry.arguments?.getString("userBookId")) {
+                "TimerScreen requires non-null userBookId"
+            }
+            TimerScreen(
+                userBookId = userBookId,
+                onExit = {
+                    navController.popBackStack()
+
+                    navController.navigate(NavigationRoute.BookDetail.createRoute(userBookId)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable(NavigationRoute.MyPage.route) { MyPageScreen(navController = navController) }
+        composable(
+            route = NavigationRoute.BookDetail.route,
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("showAddQuote") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "false"
+                },
+                navArgument("showAddManualRecord") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "false"
+                }
+            ),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "gureum://bookdetail/{bookId}" },
+                navDeepLink { uriPattern = "app://bookdetail/{bookId}" },
+                navDeepLink {
+                    uriPattern =
+                        "gureum://bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}"
+                },
+                navDeepLink {
+                    uriPattern =
+                        "app://bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}"
+                }
+            )
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId")
+            val showAddQuote =
+                backStackEntry.arguments?.getString("showAddQuote")?.toBooleanStrictOrNull()
+                    ?: false
+            val showAddManualRecord =
+                backStackEntry.arguments?.getString("showAddManualRecord")?.toBooleanStrictOrNull()
+                    ?: false
+
+            bookId?.let {
+                BookDetailScreen(
+                    bookId = it,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+                    initialShowAddQuote = showAddQuote,
+                    initialShowAddManualRecord = showAddManualRecord
+                )
+            }
+        }
+
+        composable(
+            route = NavigationRoute.Withdraw.route,
+            arguments = listOf(navArgument("userName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userName = backStackEntry.arguments?.getString("userName")
+            userName?.let {
+                WithdrawScreen(userName = it, navController = navController)
+            }
+        }
+    }
+}

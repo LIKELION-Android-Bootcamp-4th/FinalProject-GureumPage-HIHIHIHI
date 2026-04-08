@@ -5,10 +5,24 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.functions.HttpsCallableResult
 
 interface AuthDataSource {
+
     fun signInWithGoogleCredential(idToken: String): Task<AuthResult>
+
     fun signInWithCustomToken(token: String): Task<AuthResult>
+
     fun requestCustomToken(functionName: String, accessToken: String): Task<HttpsCallableResult>
 
     fun kakaoLogin(accessToken: String): Task<HttpsCallableResult>
+
     fun naverLogin(accessToken: String): Task<HttpsCallableResult>
+
+    fun getCurrentUserId(): String?
+
+    suspend fun unlinkKakao()
+
+    suspend fun unlinkNaver()
+
+    fun deleteUserAccount(): Task<HttpsCallableResult>
+
+    fun signOut()
 }

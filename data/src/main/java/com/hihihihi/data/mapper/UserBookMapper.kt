@@ -1,9 +1,9 @@
 package com.hihihihi.data.remote.mapper
 
 import com.google.firebase.firestore.FieldValue
+import com.hihihihi.data.common.utils.toLocalDateTime
+import com.hihihihi.data.common.utils.toTimestamp
 import com.hihihihi.data.remote.dto.UserBookDto
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 
