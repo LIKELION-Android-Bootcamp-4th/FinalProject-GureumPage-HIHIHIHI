@@ -18,7 +18,7 @@ class SplashViewModel @Inject constructor(
     private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
-    private val networkManager: NetworkMonitor
+    private val networkManager: NetworkMonitor,
 ) : ViewModel() {
 
     sealed interface NavTarget {
@@ -27,16 +27,15 @@ class SplashViewModel @Inject constructor(
         data object Onboarding : NavTarget
         data object Home : NavTarget
         data object NoNetwork : NavTarget
-        data class Widget(val route: String) : NavTarget
+        data class Widget(val route: Any) : NavTarget
     }
 
     private val _uiState = MutableStateFlow(SplashUiState())
     val uiState: StateFlow<SplashUiState> = _uiState
 
-    // 위젯 라우트를 저장할 변수
-    private var pendingWidgetRoute: String? = null
+    private var pendingWidgetRoute: Any? = null
 
-    fun setPendingWidgetRoute(route: String?) {
+    fun setPendingWidgetRoute(route: Any?) {
         pendingWidgetRoute = route
     }
 
@@ -44,13 +43,13 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름한장을 시작하는 중...",
-                progress = 0.2f
+                progress = 0.2f,
             )
             delay(400)
 
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름이가 네트워크 연결을 확인하는중...",
-                progress = 0.4f
+                progress = 0.4f,
             )
             delay(400)
 
@@ -58,7 +57,7 @@ class SplashViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     navTarget = NavTarget.NoNetwork,
                     isLoading = false,
-                    progress = 1f
+                    progress = 1f,
                 )
                 return@launch
             }
@@ -66,7 +65,7 @@ class SplashViewModel @Inject constructor(
             val userId = getCurrentUserIdUseCase()
             _uiState.value = _uiState.value.copy(
                 loadingMessage = "구름이가 사용자 정보를 확인하는중...",
-                progress = 0.7f
+                progress = 0.7f,
             )
             delay(400)
 
@@ -75,7 +74,7 @@ class SplashViewModel @Inject constructor(
                     loadingMessage = "로그인이 필요해요",
                     navTarget = NavTarget.Login,
                     progress = 0.99f,
-                    isLoading = false
+                    isLoading = false,
                 )
             } else {
                 val profile = getUserUseCase(userId).getOrNull()
@@ -109,7 +108,7 @@ class SplashViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     progress = 1f,
                     isLoading = false,
-                    navTarget = finalTarget
+                    navTarget = finalTarget,
                 )
             }
         }

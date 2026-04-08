@@ -52,9 +52,9 @@ fun SplashView(
     onNavigateToLogin: () -> Unit,
     onNavigateToOnBoarding: () -> Unit,
     onNavigateToHome: () -> Unit,
-    onNavigateToWidget: (String) -> Unit,
+    onNavigateToWidget: (Any) -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
-    pendingWidgetRoute: String? = null,
+    pendingWidgetRoute: Any? = null,
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -66,7 +66,7 @@ fun SplashView(
     var startAnimation by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
         proceed = true
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
@@ -79,12 +79,12 @@ fun SplashView(
         finishedListener = {
             showProgress = true
             viewModel.checkNetworkAndProceed()
-        }
+        },
     )
 
     val offsetY by animateDpAsState(
         targetValue = if (startAnimation) 0.dp else 40.dp,
-        animationSpec = tween(durationMillis = 1200), label = ""
+        animationSpec = tween(durationMillis = 1200), label = "",
     )
 
     // 위젯 라우트를 먼저 ViewModel에 설정
@@ -100,13 +100,13 @@ fun SplashView(
 
     val animatedProgress by animateFloatAsState(
         targetValue = uiState.progress,
-        animationSpec = tween(durationMillis = 300), label = ""
+        animationSpec = tween(durationMillis = 300), label = "",
     )
 
     LaunchedEffect(askedOnce) {
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
+                context, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
             if (!granted && !askedOnce) {
                 askedOnce = true
@@ -158,29 +158,29 @@ fun SplashView(
                 brush = Brush.linearGradient(
                     colors = if (GureumTheme.isDarkTheme) listOf(
                         GureumTheme.colors.background,
-                        Color(0xFF00153F)
+                        Color(0xFF00153F),
                     ) else listOf(
                         Color(0xFF51C1F6),
                         Color(0xFFE1F5FE),
-                        Color(0xFFFFFDE7)
-                    )
-                )
-            )
+                        Color(0xFFFFFDE7),
+                    ),
+                ),
+            ),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.align(Alignment.Center),
         ) {
             Text(
                 "구름한장",
                 style = GureumTypography.displayMedium.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 ),
                 color = GureumTheme.colors.gray900,
                 modifier = Modifier
                     .offset(y = offsetY)
-                    .graphicsLayer { this.alpha = alpha }
+                    .graphicsLayer { this.alpha = alpha },
             )
         }
 
@@ -191,10 +191,12 @@ fun SplashView(
                 text = { Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.") },
                 containerColor = GureumTheme.colors.card,
                 confirmButton = {
-                    TextButton(onClick = {
-                        (context as? Activity)?.finish()
-                    }) { Text("앱 종료") }
-                }
+                    TextButton(
+                        onClick = {
+                            (context as? Activity)?.finish()
+                        },
+                    ) { Text("앱 종료") }
+                },
             )
         }
 
@@ -204,14 +206,14 @@ fun SplashView(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 100.dp)
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Medi12Text(
                     uiState.loadingMessage,
                     style = GureumTypography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     ),
-                    color = GureumTheme.colors.gray900
+                    color = GureumTheme.colors.gray900,
                 )
                 Spacer(Modifier.height(8.dp))
                 GureumLinearProgressBar(
