@@ -25,6 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.PieEntry
 import com.hihihihi.domain.model.DateRange
 import com.hihihihi.domain.model.DateRangePreset
 import com.hihihihi.domain.usecase.statistics.presetToRange
@@ -46,22 +49,50 @@ fun StatisticsScreen(
     viewModel: StatisticsViewModel = hiltViewModel(),
     initialPreset: DateRangePreset = DateRangePreset.WEEK,
 ) {
-    val scrollState = rememberLazyListState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val preset = presetFromIndex(uiState.selectedPresetIndex)
-    val rangeText = remember(uiState.selectedPresetIndex) { formatRange(preset) }
-    val title = remember(uiState.selectedPresetIndex) { pagesTitle(preset) }
 
     LaunchedEffect(initialPreset) {
         viewModel.loadStatistics(initialPreset)
     }
 
-    if (uiState.showPicker) {
+    StatisticsContent(
+        category = uiState.category,
+        time = uiState.time,
+        pages = uiState.pages,
+        xLabels = uiState.xLabels,
+        hasError = uiState.hasError,
+        showPicker = uiState.showPicker,
+        selectedPresetIndex = uiState.selectedPresetIndex,
+        onShowPicker = viewModel::showPicker,
+        onHidePicker = viewModel::hidePicker,
+        onSetPreset = viewModel::setPreset,
+    )
+}
+
+@Composable
+private fun StatisticsContent(
+    category: List<PieEntry>,
+    time: List<BarEntry>,
+    pages: List<Entry>,
+    xLabels: List<String>,
+    hasError: Boolean,
+    showPicker: Boolean,
+    selectedPresetIndex: Int,
+    onShowPicker: () -> Unit,
+    onHidePicker: () -> Unit,
+    onSetPreset: (Int) -> Unit,
+) {
+    val scrollState = rememberLazyListState()
+    val preset = presetFromIndex(selectedPresetIndex)
+    val rangeText = remember(selectedPresetIndex) { formatRange(preset) }
+    val title = remember(selectedPresetIndex) { pagesTitle(preset) }
+
+    if (showPicker) {
         StatisticsPicker(
-            initialIndex = uiState.selectedPresetIndex,
+            initialIndex = selectedPresetIndex,
             items = STAT_PRESET_LABELS,
-            onDismiss = { viewModel.hidePicker() },
-            onConfirm = { index -> viewModel.setPreset(index) },
+            onDismiss = onHidePicker,
+            onConfirm = onSetPreset,
             infiniteScroll = false,
         )
     }
@@ -85,11 +116,11 @@ fun StatisticsScreen(
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            onClick = { viewModel.showPicker() },
+                            onClick = onShowPicker,
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Semi16Text(STAT_PRESET_LABELS[uiState.selectedPresetIndex], color = GureumTheme.colors.gray700)
+                    Semi16Text(STAT_PRESET_LABELS[selectedPresetIndex], color = GureumTheme.colors.gray700)
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_down),
@@ -105,9 +136,9 @@ fun StatisticsScreen(
             Semi16Text("독서 장르 분포")
             Spacer(modifier = Modifier.height(12.dp))
             when {
-                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
-                uiState.category.isEmpty() -> EmptyCard()
-                else -> CategoryCard(entries = uiState.category)
+                hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                category.isEmpty() -> EmptyCard()
+                else -> CategoryCard(entries = category)
             }
         }
 
@@ -115,9 +146,9 @@ fun StatisticsScreen(
             Semi16Text("독서 시간 분포")
             Spacer(modifier = Modifier.height(12.dp))
             when {
-                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
-                uiState.time.isEmpty() || uiState.time.all { it.y == 0f } -> EmptyCard(subText = "새 기록을 추가하면 추이가 표시돼요.")
-                else -> ReadingTimeCard(entries = uiState.time)
+                hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                time.isEmpty() || time.all { it.y == 0f } -> EmptyCard(subText = "새 기록을 추가하면 추이가 표시돼요.")
+                else -> ReadingTimeCard(entries = time)
             }
         }
 
@@ -125,9 +156,9 @@ fun StatisticsScreen(
             Semi16Text(title)
             Spacer(modifier = Modifier.height(12.dp))
             when {
-                uiState.hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
-                uiState.pages.isEmpty() || uiState.pages.all { it.y == 0f } -> EmptyCard(subText = "책을 읽고 페이지를 기록해 주세요.")
-                else -> ReadingPageCard(entries = uiState.pages, xLabels = uiState.xLabels)
+                hasError -> EmptyCard("통계를 불러올 수 없습니다", "잠시 후 다시 시도해주세요")
+                pages.isEmpty() || pages.all { it.y == 0f } -> EmptyCard(subText = "책을 읽고 페이지를 기록해 주세요.")
+                else -> ReadingPageCard(entries = pages, xLabels = xLabels)
             }
         }
     }
@@ -157,11 +188,68 @@ private fun presetFromIndex(index: Int) = when (index) {
 
 private val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
-@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Empty - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Empty - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun StatisticsPreview() {
+private fun StatisticsEmptyPreview() {
     GureumPageTheme {
-        StatisticsScreen()
+        StatisticsContent(
+            category = emptyList(),
+            time = emptyList(),
+            pages = emptyList(),
+            xLabels = emptyList(),
+            hasError = false,
+            showPicker = false,
+            selectedPresetIndex = 0,
+            onShowPicker = {},
+            onHidePicker = {},
+            onSetPreset = {},
+        )
+    }
+}
+
+@Preview(name = "WithData - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "WithData - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun StatisticsWithDataPreview() {
+    val sampleCategory = listOf(
+        PieEntry(40f, "소설"),
+        PieEntry(30f, "자기계발"),
+        PieEntry(20f, "경제"),
+        PieEntry(10f, "기타")
+    )
+    val sampleTime = listOf(
+        BarEntry(0f, 30f),
+        BarEntry(1f, 45f),
+        BarEntry(2f, 10f),
+        BarEntry(3f, 60f),
+        BarEntry(4f, 20f),
+        BarEntry(5f, 0f),
+        BarEntry(6f, 15f)
+    )
+    val samplePages = listOf(
+        Entry(0f, 100f),
+        Entry(1f, 150f),
+        Entry(2f, 120f),
+        Entry(3f, 200f),
+        Entry(4f, 180f),
+        Entry(5f, 250f),
+        Entry(6f, 220f)
+    )
+    val sampleXLabels = listOf("월", "화", "수", "목", "금", "토", "일")
+
+    GureumPageTheme {
+        StatisticsContent(
+            category = sampleCategory,
+            time = sampleTime,
+            pages = samplePages,
+            xLabels = sampleXLabels,
+            hasError = false,
+            showPicker = false,
+            selectedPresetIndex = 0,
+            onShowPicker = {},
+            onHidePicker = {},
+            onSetPreset = {},
+        )
     }
 }

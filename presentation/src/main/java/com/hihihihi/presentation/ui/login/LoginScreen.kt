@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -44,6 +45,7 @@ import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.login.components.SocialLoginButton
@@ -55,7 +57,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToOnBoarding: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val activity = LocalContext.current as? Activity
@@ -65,11 +67,9 @@ fun LoginScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        result.data?.let { intent ->
-            viewModel.handleGoogleSignInResult(intent)
-        }
+        result.data?.let { intent -> viewModel.handleGoogleSignInResult(intent) }
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -89,6 +89,41 @@ fun LoginScreen(
             viewModel.clearError()
         }
     }
+
+    LoginContent(
+        lastProvider = uiState.lastProvider,
+        isLoading = uiState.isLoading,
+        loadingMessage = uiState.loadingMessage,
+        snackbarHostState = snackbarHostState,
+        onGoogleLogin = { viewModel.googleLogin(context, googleLauncher) },
+        onKakaoLogin = {
+            coroutineScope.launch {
+                runCatching { SocialLoginManager.loginWithKakao(context) }
+                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.KAKAO, it) }
+                    .onFailure { viewModel.setError("카카오 로그인에 실패했습니다.") }
+            }
+        },
+        onNaverLogin = {
+            val act = activity ?: return@LoginContent
+            coroutineScope.launch {
+                runCatching { SocialLoginManager.loginWithNaver(act) }
+                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.NAVER, it) }
+                    .onFailure { viewModel.setError("네이버 로그인에 실패했습니다.") }
+            }
+        },
+    )
+}
+
+@Composable
+private fun LoginContent(
+    lastProvider: String?,
+    isLoading: Boolean,
+    loadingMessage: String?,
+    snackbarHostState: SnackbarHostState,
+    onGoogleLogin: () -> Unit,
+    onKakaoLogin: () -> Unit,
+    onNaverLogin: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,104 +131,65 @@ fun LoginScreen(
                 brush = Brush.linearGradient(
                     colors = if (GureumTheme.isDarkTheme) listOf(
                         GureumTheme.colors.background,
-                        Color(0xFF00153F)
+                        Color(0xFF00153F),
                     ) else listOf(
                         Color(0xFF51C1F6),
                         Color(0xFFB3E3F8),
-                        Color(0xFFFFFDE7)
-                    )
-                )
-            )
+                        Color(0xFFFFFDE7),
+                    ),
+                ),
+            ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_cloud_icon),
                 contentDescription = "logo",
-                modifier = Modifier.size(52.dp)
+                modifier = Modifier.size(52.dp),
             )
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 "구름한장",
-                style = GureumTypography.displayMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = GureumTheme.colors.gray900
+                style = GureumTypography.displayMedium.copy(fontWeight = FontWeight.Bold),
+                color = GureumTheme.colors.gray900,
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            Semi16Text(
-                "한 장 한 장 쌓이는",
-                color = GureumTheme.colors.gray700,
-            )
-
+            Semi16Text("한 장 한 장 쌓이는", color = GureumTheme.colors.gray700)
             Spacer(modifier = Modifier.height(4.dp))
-
-            Semi16Text(
-                "나의 소중한 독서 기록",
-                color = GureumTheme.colors.primaryDeep,
-            )
-
+            Semi16Text("나의 소중한 독서 기록", color = GureumTheme.colors.primaryDeep)
             Spacer(modifier = Modifier.height(120.dp))
-
 
             SocialLoginButton(
                 text = "구글 로그인",
                 textColor = Color.Black,
                 iconResId = R.drawable.ic_google,
                 backgroundColor = Color.White,
-                isLastProvider = uiState.lastProvider == "google",
-                onClick = {
-                    viewModel.googleLogin(context, googleLauncher)
-                }
+                isLastProvider = lastProvider == "google",
+                onClick = onGoogleLogin,
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             SocialLoginButton(
                 text = "카카오 로그인",
                 textColor = Color.Black,
                 iconResId = R.drawable.ic_kakao,
                 backgroundColor = Color(0xFFFEE500),
-                isLastProvider = uiState.lastProvider == "kakao",
-                onClick = {
-                    coroutineScope.launch {
-                        runCatching { SocialLoginManager.loginWithKakao(context) }
-                            .onSuccess { token ->
-                                viewModel.loginWithSocialToken(SocialProvider.KAKAO, token)
-                            }
-                            .onFailure { viewModel.setError("카카오 로그인에 실패했습니다.") }
-                    }
-                }
+                isLastProvider = lastProvider == "kakao",
+                onClick = onKakaoLogin,
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             SocialLoginButton(
                 text = "네이버 로그인",
                 textColor = Color.White,
                 iconResId = R.drawable.ic_naver,
                 backgroundColor = Color(0xFF03C75A),
-                isLastProvider = uiState.lastProvider == "naver",
-                onClick = {
-                    val act = activity ?: return@SocialLoginButton
-                    coroutineScope.launch {
-                        runCatching { SocialLoginManager.loginWithNaver(act) }
-                            .onSuccess { token ->
-                                viewModel.loginWithSocialToken(SocialProvider.NAVER, token)
-                            }
-                            .onFailure { viewModel.setError("네이버 로그인에 실패했습니다.") }
-                    }
-                }
+                isLastProvider = lastProvider == "naver",
+                onClick = onNaverLogin,
             )
-
             Spacer(modifier = Modifier.height(16.dp))
             Medi12Text(
                 "로그인하여 나만의 독서 여정을 시작해보세요 ✨",
@@ -202,36 +198,27 @@ fun LoginScreen(
         }
     }
 
-    if (uiState.isLoading) {
+    if (isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Box(
                 modifier = Modifier
-                    .background(
-                        GureumTheme.background.color,
-                        RoundedCornerShape(12.dp)
-                    )
+                    .background(GureumTheme.background.color, RoundedCornerShape(12.dp))
                     .padding(32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(40.dp),
-                        color = GureumTheme.colors.primary
+                        color = GureumTheme.colors.primary,
                     )
-
-                    if (uiState.loadingMessage?.isNotEmpty() == true) {
+                    if (loadingMessage?.isNotEmpty() == true) {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Medi14Text(
-                            text = uiState.loadingMessage!!,
-                            color = GureumTheme.colors.gray700
-                        )
+                        Medi14Text(text = loadingMessage, color = GureumTheme.colors.gray700)
                     }
                 }
             }
@@ -240,13 +227,29 @@ fun LoginScreen(
 
     SnackbarHost(
         hostState = snackbarHostState,
-        modifier = Modifier.statusBarsPadding()
+        modifier = Modifier.statusBarsPadding(),
     ) { data ->
         Snackbar(
             snackbarData = data,
             containerColor = GureumTheme.colors.systemRed,
-            contentColor = Color.White
+            contentColor = Color.White,
         )
     }
+}
 
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark")
+@Composable
+private fun LoginPreview() {
+    GureumPageTheme {
+        LoginContent(
+            lastProvider = "google",
+            isLoading = false,
+            loadingMessage = null,
+            snackbarHostState = SnackbarHostState(),
+            onGoogleLogin = {},
+            onKakaoLogin = {},
+            onNaverLogin = {},
+        )
+    }
 }

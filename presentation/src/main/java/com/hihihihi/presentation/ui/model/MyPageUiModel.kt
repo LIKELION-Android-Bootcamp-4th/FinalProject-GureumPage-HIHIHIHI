@@ -1,8 +1,10 @@
 package com.hihihihi.presentation.ui.model
 
+import androidx.compose.runtime.Immutable
 import com.hihihihi.domain.usecase.user.MyPageData
 import java.time.LocalDate
 
+@Immutable
 data class MyPageUiModel(
     val nickname: String?,
     val appellation: String?,

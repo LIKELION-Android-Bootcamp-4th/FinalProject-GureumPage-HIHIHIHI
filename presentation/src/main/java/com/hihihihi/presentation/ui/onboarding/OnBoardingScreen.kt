@@ -1,11 +1,13 @@
 package com.hihihihi.presentation.ui.onboarding
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.domain.model.GureumThemeType
@@ -30,9 +32,11 @@ fun OnBoardingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     GureumPageTheme(darkTheme = true) {
-        OnboardingContents(
+        OnBoardingContent(
             steps = viewModel.steps,
-            uiState = uiState,
+            nickname = uiState.nickname,
+            selectedPurposes = uiState.selectedPurposes,
+            theme = uiState.theme,
             onNicknameChange = viewModel::updateNickname,
             onTogglePurpose = viewModel::togglePurpose,
             onFeaturePageChanged = viewModel::featurePageChanged,
@@ -46,9 +50,11 @@ fun OnBoardingScreen(
 }
 
 @Composable
-private fun OnboardingContents(
+private fun OnBoardingContent(
     steps: List<OnboardingStep>,
-    uiState: OnBoardingUiState,
+    nickname: String,
+    selectedPurposes: List<String>,
+    theme: GureumThemeType?,
     onNicknameChange: (String) -> Unit,
     onTogglePurpose: (String) -> Unit,
     onFeaturePageChanged: (Int, Int) -> Unit,
@@ -89,12 +95,12 @@ private fun OnboardingContents(
             when (step) {
                 OnboardingStep.Welcome -> WelcomePage()
                 OnboardingStep.Nickname -> NicknamePage(
-                    nickname = uiState.nickname,
+                    nickname = nickname,
                     onNicknameChange = onNicknameChange,
                 )
 
                 OnboardingStep.Purpose -> PurposePage(
-                    selectedPurposes = uiState.selectedPurposes,
+                    selectedPurposes = selectedPurposes,
                     onTogglePurpose = onTogglePurpose,
                 )
 
@@ -103,7 +109,7 @@ private fun OnboardingContents(
                 )
 
                 OnboardingStep.Theme -> ThemePage(
-                    selectedTheme = uiState.theme,
+                    selectedTheme = theme,
                     onSelectTheme = onSelectTheme,
                 )
 
@@ -136,4 +142,26 @@ private fun OnboardingContents(
 private fun computeProgress(pagerState: PagerState): Float {
     val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
     return (position / (pagerState.pageCount - 1)).coerceIn(0f, 1f)
+}
+
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OnBoardingPreview() {
+    GureumPageTheme(darkTheme = true) {
+        OnBoardingContent(
+            steps = listOf(OnboardingStep.Welcome, OnboardingStep.Nickname, OnboardingStep.Purpose, OnboardingStep.Feature, OnboardingStep.Theme, OnboardingStep.Finish),
+            nickname = "",
+            selectedPurposes = emptyList(),
+            theme = null,
+            onNicknameChange = {},
+            onTogglePurpose = {},
+            onFeaturePageChanged = { _, _ -> },
+            onSelectTheme = {},
+            isNextEnabled = { true },
+            onNavigateBack = {},
+            onSave = {},
+            onFinish = {},
+        )
+    }
 }

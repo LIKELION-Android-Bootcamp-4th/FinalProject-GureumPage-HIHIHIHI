@@ -2,6 +2,7 @@ package com.hihihihi.presentation.ui.timer
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
@@ -35,10 +36,12 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.bookdetail.components.AddQuoteDialog
 import com.hihihihi.presentation.ui.timer.component.CountdownOverlayWithHole
@@ -58,29 +61,9 @@ fun TimerScreen(
     viewModel: TimerViewModel = hiltViewModel(),
     memoViewModel: MemoViewModel = hiltViewModel(),
 ) {
-    val colors = GureumTheme.colors
     val context = LocalContext.current
-
-    // UI 상태 수집
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val memoState by memoViewModel.ui.collectAsStateWithLifecycle()
-    val sharedTimerState by viewModel.sharedTimerState.collectAsStateWithLifecycle()
-
-    var overlayRectWin by remember { mutableStateOf<Rect?>(null) }
-    var cardRectWin by remember { mutableStateOf<Rect?>(null) }
-
-    val cardRectForOverlay by remember(overlayRectWin, cardRectWin) {
-        mutableStateOf(
-            if (overlayRectWin != null && cardRectWin != null) {
-                val o = overlayRectWin!!
-                val c = cardRectWin!!
-                Rect(
-                    offset = Offset(c.left - o.left, c.top - o.top),
-                    size = c.size,
-                )
-            } else null,
-        )
-    }
 
     LaunchedEffect(Unit) {
         viewModel.ensureFloatingWindowClosed(context)
@@ -111,11 +94,109 @@ fun TimerScreen(
         }
     }
 
-    // 하드웨어 뒤로가기
     BackHandler(
         enabled = state.countdown == null && !state.showStopDialog && !state.showMemoDialog && !state.showBackExitScreen,
     ) {
         viewModel.requestBackExitScreen(wasRunning = state.isRunning)
+    }
+
+    val memoLines = remember(memoState.items, userBookId) {
+        memoState.items
+            .filter { it.userBookId == userBookId }
+            .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
+    }
+
+    TimerContent(
+        bookTitle = state.bookTitle,
+        author = state.author,
+        bookImageUrl = state.bookImageUrl,
+        isRunning = state.isRunning,
+        countdown = state.countdown,
+        displayTimeMMSS = state.displayTimeMMSS,
+        startPage = state.startPage,
+        totalPage = state.totalPage,
+        showMemoDialog = state.showMemoDialog,
+        showStopDialog = state.showStopDialog,
+        showBackExitScreen = state.showBackExitScreen,
+        memoLines = memoLines,
+        onToggle = viewModel::toggleRun,
+        onRequestStopDialog = { viewModel.requestStopDialog(wasRunning = state.isRunning) },
+        onDismissStopDialog = viewModel::dismissStopDialog,
+        onConfirmStopAndExit = { s, e ->
+            viewModel.finishAndSave(userBookId, s, e)
+            viewModel.dismissStopDialog(resumeTimer = false)
+            onExit()
+        },
+        onDismissBackExitScreen = viewModel::dismissBackExitScreen,
+        onStopAndExit = {
+            viewModel.stop()
+            viewModel.dismissBackExitScreen(resumeTimer = false)
+            onExit()
+        },
+        onShowMemoDialog = viewModel::showMemoDialog,
+        onDismissMemoDialog = viewModel::dismissMemoDialog,
+        onSaveMemo = { page, content ->
+            memoViewModel.add(
+                userBookId = userBookId,
+                pageNumber = page?.toIntOrNull(),
+                content = content,
+                title = state.bookTitle,
+                author = state.author,
+                imageUrl = state.bookImageUrl,
+            ) { viewModel.dismissMemoDialog() }
+        },
+        onOpenFloatingMode = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val ctx = context
+                if (!Settings.canDrawOverlays(ctx)) {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${ctx.packageName}".toUri())
+                    ctx.startActivity(intent)
+                    return@TimerContent
+                }
+            }
+            viewModel.startFloatingWindowMode(context)
+            (context as? Activity)?.moveTaskToBack(true)
+        },
+    )
+}
+
+@Composable
+private fun TimerContent(
+    bookTitle: String,
+    author: String,
+    bookImageUrl: String,
+    isRunning: Boolean,
+    countdown: Int?,
+    displayTimeMMSS: String,
+    startPage: Int?,
+    totalPage: Int?,
+    showMemoDialog: Boolean,
+    showStopDialog: Boolean,
+    showBackExitScreen: Boolean,
+    memoLines: List<String>,
+    onToggle: () -> Unit,
+    onRequestStopDialog: () -> Unit,
+    onDismissStopDialog: (resumeTimer: Boolean) -> Unit,
+    onConfirmStopAndExit: (startPage: Int, endPage: Int) -> Unit,
+    onDismissBackExitScreen: (resumeTimer: Boolean) -> Unit,
+    onStopAndExit: () -> Unit,
+    onShowMemoDialog: () -> Unit,
+    onDismissMemoDialog: () -> Unit,
+    onSaveMemo: (page: String?, content: String) -> Unit,
+    onOpenFloatingMode: () -> Unit,
+) {
+    val colors = GureumTheme.colors
+
+    var overlayRectWin by remember { mutableStateOf<Rect?>(null) }
+    var cardRectWin by remember { mutableStateOf<Rect?>(null) }
+    val cardRectForOverlay by remember(overlayRectWin, cardRectWin) {
+        mutableStateOf(
+            if (overlayRectWin != null && cardRectWin != null) {
+                val o = overlayRectWin!!
+                val c = cardRectWin!!
+                Rect(offset = Offset(c.left - o.left, c.top - o.top), size = c.size)
+            } else null,
+        )
     }
 
     Box(
@@ -125,49 +206,25 @@ fun TimerScreen(
             .onGloballyPositioned { overlayRectWin = it.boundsInWindow() },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(24.dp))
 
-            // 현재 읽는 책 카드
             NowReadingCard(
-                title = state.bookTitle,
-                author = state.author,
-                imageUrl = state.bookImageUrl,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { coords ->
-                        cardRectWin = coords.boundsInWindow()
-                    },
+                title = bookTitle,
+                author = author,
+                imageUrl = bookImageUrl,
+                modifier = Modifier.fillMaxWidth().onGloballyPositioned { cardRectWin = it.boundsInWindow() },
             )
 
             Spacer(Modifier.height(24.dp))
 
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 IconButton(
                     onClick = {
-                        if (state.countdown != null) return@IconButton
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            if (!Settings.canDrawOverlays(context)) {
-                                val intent = Intent(
-                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                    "package:${context.packageName}".toUri(),
-                                )
-                                context.startActivity(intent)
-                                return@IconButton
-                            }
-                        }
-
-                        viewModel.startFloatingWindowMode(context)
-                        (context as? Activity)?.moveTaskToBack(true)
+                        if (countdown != null) return@IconButton
+                        onOpenFloatingMode()
                     },
                     modifier = Modifier.size(36.dp),
                 ) {
@@ -182,116 +239,110 @@ fun TimerScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 원형 타이머
             TimerRing(
-                modifier = Modifier
-                    .size(240.dp)
-                    .offset(y = 12.dp),
-                isRunning = state.isRunning,
-                centerText = state.countdown?.toString() ?: state.displayTimeMMSS,
+                modifier = Modifier.size(240.dp).offset(y = 12.dp),
+                isRunning = isRunning,
+                centerText = countdown?.toString() ?: displayTimeMMSS,
             )
 
             Spacer(Modifier.height(40.dp))
 
-            // 메모 영역
-            val lines = remember(memoState.items, userBookId) {
-                memoState.items
-                    .filter { q -> q.userBookId == userBookId }
-                    .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
-            }
-
-            MemoList(
-                lines = lines,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            )
+            MemoList(lines = memoLines, modifier = Modifier.fillMaxWidth().weight(1f))
 
             Spacer(Modifier.height(16.dp))
 
-            // 컨트롤(시작/일시정지, 정지, 메모편집)
             TimerControlsRow(
-                isRunning = state.isRunning,
+                isRunning = isRunning,
                 onToggle = {
-                    if (state.countdown != null) return@TimerControlsRow
-                    viewModel.toggleRun()
+                    if (countdown != null) return@TimerControlsRow
+                    onToggle()
                 },
                 onStop = {
-                    if (state.countdown != null) return@TimerControlsRow
-                    viewModel.requestStopDialog(wasRunning = state.isRunning)
+                    if (countdown != null) return@TimerControlsRow
+                    onRequestStopDialog()
                 },
                 onEdit = {
-                    if (state.countdown != null) return@TimerControlsRow
-                    viewModel.showMemoDialog()
+                    if (countdown != null) return@TimerControlsRow
+                    onShowMemoDialog()
                 },
             )
 
             Spacer(Modifier.height(32.dp))
         }
 
-        if (state.countdown != null) {
+        if (countdown != null) {
             CountdownOverlayWithHole(
-                number = state.countdown!!,
+                number = countdown,
                 holeRect = cardRectForOverlay,
                 holeCornerRadiusDp = 16f,
                 modifier = Modifier.fillMaxSize(),
             )
         }
 
-        // 정지 확인 다이얼로그
-        if (state.showStopDialog) {
+        if (showStopDialog) {
             StopReadingDialog(
-                displayTime = state.displayTimeMMSS,
-                title = state.bookTitle,
-                author = state.author,
-                currentPage = state.startPage,
-                totalPage = state.totalPage,
-                onConfirmStop = { viewModel.dismissStopDialog(resumeTimer = false) },
-                onDismiss = { viewModel.dismissStopDialog(resumeTimer = true) },
-                onConfirmStopPages = { s, e ->
-                    viewModel.finishAndSave(userBookId, s, e)
-                    viewModel.dismissStopDialog(resumeTimer = false)
-                    onExit()
-                },
+                displayTime = displayTimeMMSS,
+                title = bookTitle,
+                author = author,
+                currentPage = startPage,
+                totalPage = totalPage,
+                onConfirmStop = { onDismissStopDialog(false) },
+                onDismiss = { onDismissStopDialog(true) },
+                onConfirmStopPages = { s, e -> onConfirmStopAndExit(s, e) },
             )
         }
 
-        if (state.showMemoDialog) {
+        if (showMemoDialog) {
             AddQuoteDialog(
-                onDismiss = {
-                    viewModel.dismissMemoDialog()
-                },
+                onDismiss = onDismissMemoDialog,
                 onSave = { page, content ->
-                    memoViewModel.add(
-                        userBookId = userBookId,
-                        pageNumber = page?.toIntOrNull(),
-                        content = content,
-                        title = state.bookTitle,
-                        author = state.author,
-                        imageUrl = state.bookImageUrl,
-                    ) {
-                        // 저장 성공 후 다이얼로그 닫기
-                        viewModel.dismissMemoDialog()
-                    }
+                    onSaveMemo(page, content)
                 },
-                lastPage = state.totalPage,
+                lastPage = totalPage,
             )
         }
 
-        // 뒤로가기 다이얼로그
-        if (state.showBackExitScreen) {
+        if (showBackExitScreen) {
             StopReadingConfirmDialog(
-                displayTime = state.displayTimeMMSS,
-                title = state.bookTitle,
-                author = state.author,
+                displayTime = displayTimeMMSS,
+                title = bookTitle,
+                author = author,
                 willSave = false,
-                onContinue = { viewModel.dismissBackExitScreen(resumeTimer = true) },
-                onStop = {
-                    viewModel.stop()
-                    viewModel.dismissBackExitScreen(resumeTimer = false)
-                    onExit()
-                },
+                onContinue = { onDismissBackExitScreen(true) },
+                onStop = onStopAndExit,
             )
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TimerPreview() {
+    GureumPageTheme {
+        TimerContent(
+            bookTitle = "채식주의자",
+            author = "한강",
+            bookImageUrl = "",
+            isRunning = true,
+            countdown = null,
+            displayTimeMMSS = "12:34",
+            startPage = 50,
+            totalPage = 300,
+            showMemoDialog = false,
+            showStopDialog = false,
+            showBackExitScreen = false,
+            memoLines = listOf("#1 - 인상깊은 문장"),
+            onToggle = {},
+            onRequestStopDialog = {},
+            onDismissStopDialog = {},
+            onConfirmStopAndExit = { _, _ -> },
+            onDismissBackExitScreen = {},
+            onStopAndExit = {},
+            onShowMemoDialog = {},
+            onDismissMemoDialog = {},
+            onSaveMemo = { _, _ -> },
+            onOpenFloatingMode = {},
+        )
     }
 }

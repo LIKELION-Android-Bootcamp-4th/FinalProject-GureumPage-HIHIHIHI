@@ -1,9 +1,11 @@
 package com.hihihihi.presentation.ui.model
 
+import androidx.compose.runtime.Immutable
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.UserBook
 import java.time.LocalDateTime
 
+@Immutable
 data class UserBookUiModel(
     val userBookId: String,
     val title: String,
