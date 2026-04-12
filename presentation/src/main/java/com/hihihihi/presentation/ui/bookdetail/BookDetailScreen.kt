@@ -283,7 +283,11 @@ private fun BookDetailPreview() {
             modifier = Modifier.fillMaxSize(),
         ) {
             BookDetailFab(
-                ReadingStatus.READING,
+                readingStatus = ReadingStatus.READING,
+                onAddQuoteClick = {},
+                onAddManualHistoryClick = {},
+                onNavigateToMindmap = {},
+                onNavigateToTimer = {},
                 modifier = Modifier
                     .align(alignment = Alignment.BottomEnd)
                     .padding(bottom = 32.dp, end = 22.dp),

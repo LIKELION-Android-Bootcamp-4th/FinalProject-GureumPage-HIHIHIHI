@@ -53,7 +53,7 @@ fun FeaturePage(
 ) {
     val pagerState = rememberPagerState { featurePages.size }
 
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage to pagerState.pageCount }
             .distinctUntilChanged()
             .collect { (currentPage, pageCount) ->

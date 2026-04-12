@@ -1,7 +1,9 @@
 package com.hihihihi.presentation.ui.onboarding
 
+import androidx.compose.runtime.Immutable
 import com.hihihihi.domain.model.GureumThemeType
 
+@Immutable
 data class OnBoardingUiState(
     val nickname: String = "",
     val selectedPurposes: List<String> = emptyList(),

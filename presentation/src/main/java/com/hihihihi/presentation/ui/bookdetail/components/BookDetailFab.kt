@@ -49,10 +49,10 @@ import com.hihihihi.presentation.designsystem.theme.GureumTheme
 fun BookDetailFab(
     readingStatus: ReadingStatus,
     modifier: Modifier = Modifier,
-    onAddQuoteClick: () -> Unit = {},
-    onAddManualHistoryClick: () -> Unit = {},
-    onNavigateToMindmap: () -> Unit = {},
-    onNavigateToTimer: () -> Unit = {}
+    onAddQuoteClick: () -> Unit,
+    onAddManualHistoryClick: () -> Unit,
+    onNavigateToMindmap: () -> Unit,
+    onNavigateToTimer: () -> Unit,
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
@@ -182,6 +182,12 @@ data class MiniFabItem(
 @Composable
 private fun BookDetailFabPreview() {
     GureumPageTheme {
-        BookDetailFab(readingStatus = ReadingStatus.READING)
+        BookDetailFab(
+            readingStatus = ReadingStatus.READING,
+            onAddQuoteClick = {},
+            onAddManualHistoryClick = {},
+            onNavigateToMindmap = {},
+            onNavigateToTimer = {},
+        )
     }
 }

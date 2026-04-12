@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -72,15 +73,17 @@ fun QuotesTab(
                 .padding(bottom = 20.dp),
         ) {
             quotes.forEach { quote ->
-                QuoteCard(
-                    id = quote.id,
-                    date = quote.createdAt?.toLocalDate().toString(),
-                    page = quote.pageNumber,
-                    quote = quote.content,
-                    expanded = remember { mutableStateOf(false) },
-                    onEdit = onEdit,
-                    onDelete = onDelete,
-                )
+                key(quote.id) {
+                    QuoteCard(
+                        id = quote.id,
+                        date = quote.createdAt?.toLocalDate().toString(),
+                        page = quote.pageNumber,
+                        quote = quote.content,
+                        expanded = remember { mutableStateOf(false) },
+                        onEdit = onEdit,
+                        onDelete = onDelete,
+                    )
+                }
             }
         }
 

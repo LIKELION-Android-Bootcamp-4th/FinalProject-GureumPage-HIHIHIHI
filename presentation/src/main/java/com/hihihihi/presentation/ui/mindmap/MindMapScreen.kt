@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -72,10 +73,13 @@ private fun MindMapContent(
         intArrayOf(ContextCompat.getColor(context, R.color.primary50), ContextCompat.getColor(context, R.color.gray200)),
     )
 
+    val currentIsEditing by rememberUpdatedState(isEditing)
+    val currentOnEndEdit by rememberUpdatedState(onEndEdit)
+
     DisposableEffect(Unit) {
         onDispose {
-            if (isEditing) {
-                onEndEdit(adapter.asDomainList(mindmapId), true)
+            if (currentIsEditing) {
+                currentOnEndEdit(adapter.asDomainList(mindmapId), true)
             }
         }
     }
