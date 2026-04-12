@@ -204,11 +204,11 @@ class BookDetailViewModel @Inject constructor(
     fun getStatistic(): BookStatistic {
         val userBook = _domainUserBook
         return BookStatistic(
-            readingPeriod = if (userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(
-                userBook.startDate!!,
-                userBook.endDate,
-                userBook.status,
-            ),
+            readingPeriod = userBook?.let { book ->
+                val startDate = book.startDate
+                if (startDate == null) "아직 읽지 않은 책"
+                else getDayCountLabel(startDate, book.endDate, book.status)
+            } ?: "아직 읽지 않은 책",
             totalReadingTime = _domainHistories
                 .sumOf { it.readTime }
                 .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
