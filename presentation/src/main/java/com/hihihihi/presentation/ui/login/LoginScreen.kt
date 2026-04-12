@@ -50,6 +50,7 @@ import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.login.components.SocialLoginButton
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @SuppressLint("ContextCastToActivity")
@@ -100,7 +101,10 @@ fun LoginScreen(
             coroutineScope.launch {
                 runCatching { SocialLoginManager.loginWithKakao(context) }
                     .onSuccess { viewModel.loginWithSocialToken(SocialProvider.KAKAO, it) }
-                    .onFailure { viewModel.setError("카카오 로그인에 실패했습니다.") }
+                    .onFailure {
+                        if (it is CancellationException) throw it
+                        viewModel.setError("카카오 로그인에 실패했습니다.")
+                    }
             }
         },
         onNaverLogin = {
@@ -108,7 +112,10 @@ fun LoginScreen(
             coroutineScope.launch {
                 runCatching { SocialLoginManager.loginWithNaver(act) }
                     .onSuccess { viewModel.loginWithSocialToken(SocialProvider.NAVER, it) }
-                    .onFailure { viewModel.setError("네이버 로그인에 실패했습니다.") }
+                    .onFailure {
+                        if (it is CancellationException) throw it
+                        viewModel.setError("네이버 로그인에 실패했습니다.")
+                    }
             }
         },
     )
