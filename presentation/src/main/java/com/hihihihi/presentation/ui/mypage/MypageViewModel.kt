@@ -103,7 +103,11 @@ class MypageViewModel @Inject constructor(
     }
 
     fun onWithdrawClick() {
-        val userName = _uiState.value.myPageUiModel?.nickname ?: ""
+        val userName = _uiState.value.myPageUiModel?.nickname
+        if (userName.isNullOrBlank()) {
+            _uiState.update { it.copy(errorMessage = "사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.") }
+            return
+        }
         viewModelScope.launch { _effect.send(MypageEffect.NavigateToWithdraw(userName)) }
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -189,14 +190,12 @@ private fun TimerContent(
 
     var overlayRectWin by remember { mutableStateOf<Rect?>(null) }
     var cardRectWin by remember { mutableStateOf<Rect?>(null) }
-    val cardRectForOverlay by remember(overlayRectWin, cardRectWin) {
-        mutableStateOf(
-            if (overlayRectWin != null && cardRectWin != null) {
-                val o = overlayRectWin!!
-                val c = cardRectWin!!
-                Rect(offset = Offset(c.left - o.left, c.top - o.top), size = c.size)
-            } else null,
-        )
+    val cardRectForOverlay by remember {
+        derivedStateOf {
+            val o = overlayRectWin ?: return@derivedStateOf null
+            val c = cardRectWin ?: return@derivedStateOf null
+            Rect(offset = Offset(c.left - o.left, c.top - o.top), size = c.size)
+        }
     }
 
     Box(

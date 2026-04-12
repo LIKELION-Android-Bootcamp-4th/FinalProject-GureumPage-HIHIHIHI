@@ -1,8 +1,10 @@
 package com.hihihihi.presentation.ui.model
 
+import androidx.compose.runtime.Immutable
 import com.hihihihi.domain.model.Quote
 import java.time.LocalDateTime
 
+@Immutable
 data class QuoteUiModel(
     val id: String,
     val content: String,

@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object StatisticsWeekly
 @Serializable data object StatisticsMonthly
 @Serializable data object StatisticsYearly
-@Serializable data class MindMap(val bookId: String, val mindmapId: String?)
+@Serializable data class MindMap(val bookId: String, val mindmapId: String? = null)
 @Serializable data class Timer(val userBookId: String)
 @Serializable data class BookDetail(
     val bookId: String,

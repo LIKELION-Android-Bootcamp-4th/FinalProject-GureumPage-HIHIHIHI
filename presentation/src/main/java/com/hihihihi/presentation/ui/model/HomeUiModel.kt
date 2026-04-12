@@ -1,7 +1,9 @@
 package com.hihihihi.presentation.ui.model
 
+import androidx.compose.runtime.Immutable
 import com.hihihihi.domain.usecase.user.HomeData
 
+@Immutable
 data class HomeUiModel(
     val nickname: String,
     val appellation: String,

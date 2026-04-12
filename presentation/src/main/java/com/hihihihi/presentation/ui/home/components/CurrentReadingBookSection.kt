@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -29,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.hihihihi.presentation.R
@@ -152,16 +152,12 @@ private fun ReadingBooksPager(
 @Composable
 private fun ReadingBookCard(
     book: UserBookUiModel,
-    pagerState: androidx.compose.foundation.pager.PagerState,
+    pagerState: PagerState,
     page: Int,
     scaleSizeRatio: Float,
     onBookClick: (String) -> Unit,
 ) {
     BoxWithConstraints {
-        val maxWidthDp = pxToDp(constraints.maxWidth)
-        val bookmarkWidth = 24.dp // 북마크 아이콘 너비 + 여백
-        val availableTextWidth = maxWidthDp - bookmarkWidth - 32.dp // 패딩 고려
-
         GureumCard(
             modifier = Modifier
                 .graphicsLayer {
@@ -185,13 +181,11 @@ private fun ReadingBookCard(
                 },
             onClick = { onBookClick(book.userBookId) },
         ) {
-            BookCardContent(
-                book = book,
-                availableTextWidth = availableTextWidth,
-            )
+            BookCardContent(book = book)
         }
 
         // 북마크 아이콘
+        val maxWidthDp = pxToDp(constraints.maxWidth)
         Icon(
             painter = painterResource(R.drawable.ic_bookmark),
             contentDescription = "북마크",
@@ -206,7 +200,6 @@ private fun ReadingBookCard(
 @Composable
 private fun BookCardContent(
     book: UserBookUiModel,
-    availableTextWidth: Dp,
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
