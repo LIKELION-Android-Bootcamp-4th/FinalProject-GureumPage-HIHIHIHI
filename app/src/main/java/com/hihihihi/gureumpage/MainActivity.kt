@@ -373,7 +373,7 @@ fun GureumPageApp(
     val currentDestination = navBackStackEntry?.destination
 
     val isAuthRoute = currentDestination?.hierarchy?.any {
-        it.hasRoute(Login::class) || it.hasRoute(OnBoarding::class)
+        it.hasRoute(Login::class) || it.hasRoute(OnBoarding::class) || it.hasRoute(Splash::class)
     } == true
     val isBottomNavRoute = currentDestination?.let { dest ->
         BottomNavItem.items.any { item -> dest.hierarchy.any { it.hasRoute(item.routeClass) } }

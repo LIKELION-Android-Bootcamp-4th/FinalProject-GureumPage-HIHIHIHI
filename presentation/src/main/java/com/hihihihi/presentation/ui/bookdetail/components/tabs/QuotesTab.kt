@@ -76,7 +76,7 @@ fun QuotesTab(
                 key(quote.id) {
                     QuoteCard(
                         id = quote.id,
-                        date = quote.createdAt?.toLocalDate().toString(),
+                        date = quote.createdAt?.toLocalDate()?.toString() ?: "",
                         page = quote.pageNumber,
                         quote = quote.content,
                         expanded = remember { mutableStateOf(false) },
