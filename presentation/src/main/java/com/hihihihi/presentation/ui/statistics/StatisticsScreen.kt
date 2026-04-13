@@ -62,7 +62,7 @@ fun StatisticsScreen(
         xLabels = uiState.xLabels,
         hasError = uiState.hasError,
         showPicker = uiState.showPicker,
-        selectedPresetIndex = uiState.selectedPresetIndex,
+        selectedPreset = uiState.selectedPreset,
         onShowPicker = viewModel::showPicker,
         onHidePicker = viewModel::hidePicker,
         onSetPreset = viewModel::setPreset,
@@ -77,22 +77,21 @@ private fun StatisticsContent(
     xLabels: List<String>,
     hasError: Boolean,
     showPicker: Boolean,
-    selectedPresetIndex: Int,
+    selectedPreset: DateRangePreset,
     onShowPicker: () -> Unit,
     onHidePicker: () -> Unit,
-    onSetPreset: (Int) -> Unit,
+    onSetPreset: (DateRangePreset) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val preset = presetFromIndex(selectedPresetIndex)
-    val rangeText = remember(selectedPresetIndex) { formatRange(preset) }
-    val title = remember(selectedPresetIndex) { pagesTitle(preset) }
+    val rangeText = remember(selectedPreset) { formatRange(selectedPreset) }
+    val title = remember(selectedPreset) { pagesTitle(selectedPreset) }
 
     if (showPicker) {
         StatisticsPicker(
-            initialIndex = selectedPresetIndex,
+            initialIndex = DateRangePreset.entries.indexOf(selectedPreset).coerceAtLeast(0),
             items = STAT_PRESET_LABELS,
             onDismiss = onHidePicker,
-            onConfirm = onSetPreset,
+            onConfirm = { index -> onSetPreset(DateRangePreset.entries.getOrElse(index) { DateRangePreset.WEEK }) },
             infiniteScroll = false,
         )
     }
@@ -120,7 +119,10 @@ private fun StatisticsContent(
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Semi16Text(STAT_PRESET_LABELS[selectedPresetIndex], color = GureumTheme.colors.gray700)
+                    Semi16Text(
+                        STAT_PRESET_LABELS[DateRangePreset.entries.indexOf(selectedPreset).coerceAtLeast(0)],
+                        color = GureumTheme.colors.gray700,
+                    )
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_down),
@@ -178,14 +180,6 @@ private fun pagesTitle(preset: DateRangePreset) = when (preset) {
     DateRangePreset.YEAR -> "연간 독서 페이지"
 }
 
-private fun presetFromIndex(index: Int) = when (index) {
-    0 -> DateRangePreset.WEEK
-    1 -> DateRangePreset.MONTH
-    2 -> DateRangePreset.THREE_MONTH
-    3 -> DateRangePreset.SIX_MONTH
-    else -> DateRangePreset.YEAR
-}
-
 private val STAT_PRESET_LABELS = listOf("1주", "1개월", "3개월", "6개월", "1년")
 
 @Preview(name = "Empty - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -200,7 +194,7 @@ private fun StatisticsEmptyPreview() {
             xLabels = emptyList(),
             hasError = false,
             showPicker = false,
-            selectedPresetIndex = 0,
+            selectedPreset = DateRangePreset.WEEK,
             onShowPicker = {},
             onHidePicker = {},
             onSetPreset = {},
@@ -216,7 +210,7 @@ private fun StatisticsWithDataPreview() {
         PieEntry(40f, "소설"),
         PieEntry(30f, "자기계발"),
         PieEntry(20f, "경제"),
-        PieEntry(10f, "기타")
+        PieEntry(10f, "기타"),
     )
     val sampleTime = listOf(
         BarEntry(0f, 30f),
@@ -225,7 +219,7 @@ private fun StatisticsWithDataPreview() {
         BarEntry(3f, 60f),
         BarEntry(4f, 20f),
         BarEntry(5f, 0f),
-        BarEntry(6f, 15f)
+        BarEntry(6f, 15f),
     )
     val samplePages = listOf(
         Entry(0f, 100f),
@@ -234,7 +228,7 @@ private fun StatisticsWithDataPreview() {
         Entry(3f, 200f),
         Entry(4f, 180f),
         Entry(5f, 250f),
-        Entry(6f, 220f)
+        Entry(6f, 220f),
     )
     val sampleXLabels = listOf("월", "화", "수", "목", "금", "토", "일")
 
@@ -246,7 +240,7 @@ private fun StatisticsWithDataPreview() {
             xLabels = sampleXLabels,
             hasError = false,
             showPicker = false,
-            selectedPresetIndex = 0,
+            selectedPreset = DateRangePreset.WEEK,
             onShowPicker = {},
             onHidePicker = {},
             onSetPreset = {},

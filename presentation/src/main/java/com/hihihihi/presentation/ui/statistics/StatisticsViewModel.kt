@@ -26,7 +26,6 @@ class StatisticsViewModel @Inject constructor(
 
     val userId: String? = getCurrentUserIdUseCase()
 
-
     init {
         if (userId != null) {
             loadStatistics(DateRangePreset.WEEK)
@@ -41,9 +40,9 @@ class StatisticsViewModel @Inject constructor(
         _uiState.update { it.copy(showPicker = false) }
     }
 
-    fun setPreset(index: Int) {
-        _uiState.update { it.copy(selectedPresetIndex = index, showPicker = false) }
-        loadStatistics(presetFromIndex(index))
+    fun setPreset(preset: DateRangePreset) {
+        _uiState.update { it.copy(selectedPreset = preset, showPicker = false) }
+        loadStatistics(preset)
     }
 
     fun loadStatistics(preset: DateRangePreset) {
@@ -69,13 +68,5 @@ class StatisticsViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun presetFromIndex(index: Int) = when (index) {
-        0 -> DateRangePreset.WEEK
-        1 -> DateRangePreset.MONTH
-        2 -> DateRangePreset.THREE_MONTH
-        3 -> DateRangePreset.SIX_MONTH
-        else -> DateRangePreset.YEAR
     }
 }
