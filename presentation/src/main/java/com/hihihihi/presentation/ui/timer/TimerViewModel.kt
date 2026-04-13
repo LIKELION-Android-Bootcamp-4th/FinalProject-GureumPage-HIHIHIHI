@@ -93,7 +93,7 @@ class TimerViewModel @Inject constructor(
     fun ensureFloatingWindowClosed(context: Context) {
         val intent = Intent().apply {
             component = android.content.ComponentName(
-                "com.hihihihi.gureumpage",
+                context.packageName,
                 "com.hihihihi.gureumpage.service.FloatingTimerService",
             )
         }

@@ -42,8 +42,8 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun saveNickname() {
-        val userId: String? = getCurrentUserIdUseCase()
-        viewModelScope.launch { setNicknameUseCase(userId!!, _uiState.value.nickname.trim()) }
+        val userId = getCurrentUserIdUseCase() ?: return
+        viewModelScope.launch { setNicknameUseCase(userId, _uiState.value.nickname.trim()) }
     }
 
     fun togglePurpose(purpose: String) {
@@ -77,7 +77,7 @@ class OnBoardingViewModel @Inject constructor(
         viewModelScope.launch {
             val uid = getCurrentUserIdUseCase() ?: return@launch
             _uiState.value.theme?.let { setThemeUseCase(it) }
-            saveNickname()
+            setNicknameUseCase(uid, _uiState.value.nickname.trim())
             setOnboardingCompleteUseCase(uid, true)
         }
     }
