@@ -41,7 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.bookdetail.components.AddQuoteDialog
@@ -66,9 +69,33 @@ fun TimerScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val memoState by memoViewModel.ui.collectAsStateWithLifecycle()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     LaunchedEffect(Unit) {
         viewModel.ensureFloatingWindowClosed(context)
         viewModel.resumeIfNeeded()
+    }
+
+    // 오버레이 권한 요청 / 플로팅 윈도우 시작
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    TimerEffect.RequestOverlayPermission -> {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            "package:${context.packageName}".toUri(),
+                        )
+                        context.startActivity(intent)
+                    }
+
+                    TimerEffect.StartFloatingWindow -> {
+                        viewModel.startFloatingWindowMode(context)
+                        (context as? Activity)?.moveTaskToBack(true)
+                    }
+                }
+            }
+        }
     }
 
     LaunchedEffect(state.showMemoDialog) {
@@ -80,8 +107,7 @@ fun TimerScreen(
     LaunchedEffect(userBookId) {
         viewModel.bind(userBookId)
         memoViewModel.clear()
-        viewModel.dismissBackExitScreen(resumeTimer = false)
-        viewModel.dismissStopDialog(resumeTimer = false)
+        viewModel.dismissDialog()
     }
 
     val appBarUp = LocalAppBarUpClick.current
@@ -91,14 +117,14 @@ fun TimerScreen(
         if (state.countdown != null) return@LaunchedEffect
         if (appBarUp != 0L && appBarUp != lastHandledUpTs) {
             lastHandledUpTs = appBarUp
-            viewModel.requestBackExitScreen(wasRunning = state.isRunning)
+            viewModel.showDialog(TimerDialogType.BackExit)
         }
     }
 
     BackHandler(
         enabled = state.countdown == null && !state.showStopDialog && !state.showMemoDialog && !state.showBackExitScreen,
     ) {
-        viewModel.requestBackExitScreen(wasRunning = state.isRunning)
+        viewModel.showDialog(TimerDialogType.BackExit)
     }
 
     val memoLines = remember(memoState.items, userBookId) {
@@ -121,21 +147,19 @@ fun TimerScreen(
         showBackExitScreen = state.showBackExitScreen,
         memoLines = memoLines,
         onToggle = viewModel::toggleRun,
-        onRequestStopDialog = { viewModel.requestStopDialog(wasRunning = state.isRunning) },
-        onDismissStopDialog = viewModel::dismissStopDialog,
+        onRequestStopDialog = { viewModel.showDialog(TimerDialogType.StopConfirm) },
+        onDismissDialog = viewModel::dismissDialog,
         onConfirmStopAndExit = { s, e ->
             viewModel.finishAndSave(userBookId, s, e)
-            viewModel.dismissStopDialog(resumeTimer = false)
+            viewModel.dismissDialog()
             onExit()
         },
-        onDismissBackExitScreen = viewModel::dismissBackExitScreen,
         onStopAndExit = {
             viewModel.stop()
-            viewModel.dismissBackExitScreen(resumeTimer = false)
+            viewModel.dismissDialog()
             onExit()
         },
-        onShowMemoDialog = viewModel::showMemoDialog,
-        onDismissMemoDialog = viewModel::dismissMemoDialog,
+        onShowMemoDialog = { viewModel.showDialog(TimerDialogType.Memo) },
         onSaveMemo = { page, content ->
             memoViewModel.add(
                 userBookId = userBookId,
@@ -144,19 +168,11 @@ fun TimerScreen(
                 title = state.bookTitle,
                 author = state.author,
                 imageUrl = state.bookImageUrl,
-            ) { viewModel.dismissMemoDialog() }
+            ) { viewModel.dismissDialog() }
         },
         onOpenFloatingMode = {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val ctx = context
-                if (!Settings.canDrawOverlays(ctx)) {
-                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${ctx.packageName}".toUri())
-                    ctx.startActivity(intent)
-                    return@TimerContent
-                }
-            }
-            viewModel.startFloatingWindowMode(context)
-            (context as? Activity)?.moveTaskToBack(true)
+            val canDraw = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
+            viewModel.openFloatingMode(canDraw)
         },
     )
 }
@@ -177,12 +193,10 @@ private fun TimerContent(
     memoLines: List<String>,
     onToggle: () -> Unit,
     onRequestStopDialog: () -> Unit,
-    onDismissStopDialog: (resumeTimer: Boolean) -> Unit,
+    onDismissDialog: (resumeTimer: Boolean) -> Unit,
     onConfirmStopAndExit: (startPage: Int, endPage: Int) -> Unit,
-    onDismissBackExitScreen: (resumeTimer: Boolean) -> Unit,
     onStopAndExit: () -> Unit,
     onShowMemoDialog: () -> Unit,
-    onDismissMemoDialog: () -> Unit,
     onSaveMemo: (page: String?, content: String) -> Unit,
     onOpenFloatingMode: () -> Unit,
 ) {
@@ -205,7 +219,9 @@ private fun TimerContent(
             .onGloballyPositioned { overlayRectWin = it.boundsInWindow() },
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(24.dp))
@@ -214,7 +230,9 @@ private fun TimerContent(
                 title = bookTitle,
                 author = author,
                 imageUrl = bookImageUrl,
-                modifier = Modifier.fillMaxWidth().onGloballyPositioned { cardRectWin = it.boundsInWindow() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { cardRectWin = it.boundsInWindow() },
             )
 
             Spacer(Modifier.height(24.dp))
@@ -239,14 +257,21 @@ private fun TimerContent(
             Spacer(Modifier.height(8.dp))
 
             TimerRing(
-                modifier = Modifier.size(240.dp).offset(y = 12.dp),
+                modifier = Modifier
+                    .size(240.dp)
+                    .offset(y = 12.dp),
                 isRunning = isRunning,
                 centerText = countdown?.toString() ?: displayTimeMMSS,
             )
 
             Spacer(Modifier.height(40.dp))
 
-            MemoList(lines = memoLines, modifier = Modifier.fillMaxWidth().weight(1f))
+            MemoList(
+                lines = memoLines,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -285,15 +310,15 @@ private fun TimerContent(
                 author = author,
                 currentPage = startPage,
                 totalPage = totalPage,
-                onConfirmStop = { onDismissStopDialog(false) },
-                onDismiss = { onDismissStopDialog(true) },
+                onConfirmStop = { onDismissDialog(false) },
+                onDismiss = { onDismissDialog(true) },
                 onConfirmStopPages = { s, e -> onConfirmStopAndExit(s, e) },
             )
         }
 
         if (showMemoDialog) {
             AddQuoteDialog(
-                onDismiss = onDismissMemoDialog,
+                onDismiss = { onDismissDialog(false) },
                 onSave = { page, content ->
                     onSaveMemo(page, content)
                 },
@@ -307,7 +332,7 @@ private fun TimerContent(
                 title = bookTitle,
                 author = author,
                 willSave = false,
-                onContinue = { onDismissBackExitScreen(true) },
+                onContinue = { onDismissDialog(true) },
                 onStop = onStopAndExit,
             )
         }
@@ -334,12 +359,10 @@ private fun TimerPreview() {
             memoLines = listOf("#1 - 인상깊은 문장"),
             onToggle = {},
             onRequestStopDialog = {},
-            onDismissStopDialog = {},
+            onDismissDialog = {},
             onConfirmStopAndExit = { _, _ -> },
-            onDismissBackExitScreen = {},
             onStopAndExit = {},
             onShowMemoDialog = {},
-            onDismissMemoDialog = {},
             onSaveMemo = { _, _ -> },
             onOpenFloatingMode = {},
         )
