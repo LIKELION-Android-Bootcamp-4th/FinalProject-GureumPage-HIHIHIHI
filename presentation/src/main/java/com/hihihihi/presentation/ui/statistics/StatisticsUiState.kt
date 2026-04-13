@@ -3,6 +3,7 @@ package com.hihihihi.presentation.ui.statistics
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieEntry
+import com.hihihihi.domain.model.DateRangePreset
 
 data class StatisticsUiState(
     val category: List<PieEntry> = emptyList(),
@@ -12,5 +13,5 @@ data class StatisticsUiState(
     val hasError: Boolean = false,
     val errorMessage: String = "",
     val showPicker: Boolean = false,
-    val selectedPresetIndex: Int = 0,
+    val selectedPreset: DateRangePreset = DateRangePreset.WEEK,
 )
