@@ -7,13 +7,14 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableResult
 import com.hihihihi.data.remote.datasource.AuthDataSource
+import com.navercorp.nid.oauth.util.NidOAuthCallback
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AuthDataSourceImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    private val functions: FirebaseFunctions
+    private val functions: FirebaseFunctions,
 ) : AuthDataSource {
 
     override fun signInWithGoogleCredential(idToken: String): Task<AuthResult> {
@@ -58,19 +59,17 @@ class AuthDataSourceImpl @Inject constructor(
     override suspend fun unlinkNaver() {
         return kotlin.coroutines.suspendCoroutine { continuation ->
             com.navercorp.nid.oauth.NidOAuthLogin()
-                .callDeleteTokenApi(object : com.navercorp.nid.oauth.OAuthLoginCallback {
-                    override fun onSuccess() {
-                        continuation.resume(Unit)
-                    }
+                .callDeleteTokenApi(
+                    object : NidOAuthCallback {
+                        override fun onSuccess() {
+                            continuation.resume(Unit)
+                        }
 
-                    override fun onFailure(httpStatus: Int, message: String) {
-                        continuation.resumeWithException(Exception(message))
-                    }
-
-                    override fun onError(errorCode: Int, message: String) {
-                        continuation.resumeWithException(Exception(message))
-                    }
-                })
+                        override fun onFailure(errorCode: String, errorDesc: String) {
+                            continuation.resumeWithException(Exception("Naver unlink failed: $errorCode, $errorDesc"))
+                        }
+                    },
+                )
         }
     }
 

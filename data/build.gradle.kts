@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.hihihihi.data"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26

@@ -9,7 +9,7 @@ import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.NaverIdLoginSDK
-import com.navercorp.nid.oauth.OAuthLoginCallback
+import com.navercorp.nid.oauth.util.NidOAuthCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
 
@@ -49,19 +49,15 @@ object SocialLoginManager {
 
     suspend fun loginWithNaver(activity: Activity): String =
         suspendCancellableCoroutine { cont ->
-            NaverIdLoginSDK.authenticate(activity, object : OAuthLoginCallback {
+            NaverIdLoginSDK.authenticate(activity, object : NidOAuthCallback {
                 override fun onSuccess() {
                     val token = NaverIdLoginSDK.getAccessToken()
                     if (token != null) cont.resume(token, null)
                     else cont.resumeWithException(Exception("Naver accessToken is null"))
                 }
 
-                override fun onFailure(httpStatus: Int, message: String) {
-                    cont.resumeWithException(Exception("Naver login failed: $message"))
-                }
-
-                override fun onError(errorCode: Int, message: String) {
-                    cont.resumeWithException(Exception("Naver login error: $message"))
+                override fun onFailure(errorCode: String, errorDesc: String) {
+                    cont.resumeWithException(Exception("Naver login failed: $errorCode, $errorDesc"))
                 }
             })
         }
