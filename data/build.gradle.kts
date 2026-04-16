@@ -25,7 +25,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         //local.properties API KEY 사용하기 위함
-        buildConfigField("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
+        buildConfigField ("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
 
     }
     //local.properties API KEY 사용하기 위함
@@ -74,8 +74,6 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
-
-    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-firestore")

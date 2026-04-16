@@ -10,13 +10,4 @@ interface AuthRepository {
 
     suspend fun naverLogin(accessToken: String)
 
-    fun getCurrentUserId(): String?
-
-    suspend fun unlinkKakao()
-
-    suspend fun unlinkNaver()
-
-    suspend fun deleteUserAccount()
-
-    suspend fun logout()
 }

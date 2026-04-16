@@ -1,7 +1,7 @@
 package com.hihihihi.data.mapper
 
-import com.hihihihi.data.common.utils.toLocalDateTime
-import com.hihihihi.data.common.utils.toTimestamp
+import com.hihihihi.data.common.util.toLocalDateTime
+import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.data.remote.dto.UserDto
 import com.hihihihi.domain.model.User
 
