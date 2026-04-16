@@ -13,9 +13,10 @@ interface UserBookRemoteDataSource {
 
     fun getUserBook(userBookId: String): Flow<UserBookDto>
 
-    suspend fun patchUserBook(userBookDto: UserBookDto): Result<Unit>
+    suspend fun patchUserBook(userBookDto: UserBookDto)
 
     suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean
 
-    suspend fun addUserBook(userId: String, rawIsbn: String, userBookDto: UserBookDto): Result<String>
+    // 반환값 String은 도메인 모델 생성시 사용함.
+    suspend fun addUserBook(userId: String, rawIsbn: String, userBookDto: UserBookDto): String
 }

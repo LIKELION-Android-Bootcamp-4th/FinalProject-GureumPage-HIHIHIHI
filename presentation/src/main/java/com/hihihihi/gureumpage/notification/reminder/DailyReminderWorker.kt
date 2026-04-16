@@ -32,7 +32,7 @@ class DailyReminderWorker @AssistedInject constructor(
 
         // 7일간 안 들어온 경우
         val thresholdMillis = inputData.getLong("thresholdMillis", TimeUnit.DAYS.toMillis(7))
-        val isRecent = checkRecentVisitUseCase(thresholdMillis)
+        val isRecent = checkRecentVisitUseCase(thresholdMillis).getOrDefault(false)
 
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)

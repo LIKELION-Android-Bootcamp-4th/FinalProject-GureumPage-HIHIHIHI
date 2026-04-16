@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Dagger - Hilt
-    implementation(libs.hilt.android.v2562)
+    implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
     // Gson

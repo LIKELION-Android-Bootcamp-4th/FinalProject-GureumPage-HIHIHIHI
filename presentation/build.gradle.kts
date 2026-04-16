@@ -97,11 +97,11 @@ dependencies {
     implementation(libs.converter.gson)
 
     // Coroutines + Flow
-    implementation(libs.jetbrains.kotlinx.coroutines.core)
-    implementation(libs.jetbrains.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
     // Hilt (의존성 주입)
-    implementation(libs.hilt.android.v2562)
+    implementation(libs.hilt.android)
     implementation("androidx.hilt:hilt-work:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     ksp(libs.hilt.android.compiler)

@@ -7,7 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface MindmapNodeRepository {
     fun observe(mindmapId: String): Flow<List<MindmapNode>>
 
-    suspend fun loadNodes(mindmapId: String): List<MindmapNode>
-
-    suspend fun applyNodeOperation(mindmapId: String, operations: List<NodeEditOperation>): Result<Unit>
+    suspend fun applyNodeOperation(mindmapId: String, operations: List<NodeEditOperation>)
 }

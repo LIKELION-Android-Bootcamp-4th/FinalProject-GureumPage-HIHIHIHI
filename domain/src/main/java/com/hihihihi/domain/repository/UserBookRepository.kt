@@ -13,10 +13,11 @@ interface UserBookRepository {
 
     fun getUserBook(userBookId: String): Flow<UserBook>
 
-    suspend fun patchUserBook(userBook: UserBook): Result<Unit>
+    suspend fun patchUserBook(userBook: UserBook)
 
     suspend fun checkUserBookExists(userId: String, rawIsbn: String): Boolean
 
-    suspend fun addUserBook(userId: String, rawIsbn: String, userBook: UserBook): Result<String>
+    // 반환값 String은 도메인 모델 생성시 사용함.
+    suspend fun addUserBook(userId: String, rawIsbn: String, userBook: UserBook): String
 
 }
