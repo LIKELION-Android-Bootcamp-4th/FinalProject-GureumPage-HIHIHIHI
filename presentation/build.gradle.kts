@@ -8,23 +8,38 @@ val localProperties = Properties().apply {
 }
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.oss.licenses)
 }
 
 android {
-    namespace = "com.hihihihi.presentation"
+    namespace = "com.hihihihi.gureumpage"
     compileSdk = 35
 
     defaultConfig {
+        applicationId = "com.hihihihi.gureumpage"
         minSdk = 26
+        targetSdk = 35
+        versionCode = 10
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"${localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""}\"")
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""
 
+        buildConfigField("String", "NAVER_CLIENT_ID", "\"${localProperties["NAVER_CLIENT_ID"] ?: ""}\"")
+        manifestPlaceholders["NAVER_CLIENT_ID"] = localProperties["NAVER_CLIENT_ID"] ?: ""
+
+        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${localProperties["NAVER_CLIENT_SECRET"] ?: ""}\"")
+        manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
+
+        buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
     }
 
     buildTypes {
@@ -55,6 +70,7 @@ android {
 
 dependencies {
     // CA
+    implementation(project(":data"))
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
@@ -65,7 +81,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.appcompat)
+    implementation(libs.firebase.functions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -100,6 +116,21 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 
+    // Firebase 관련
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-auth:21.4.0")
+
+    // kakao auth
+    implementation("com.kakao.sdk:v2-user:2.20.3")
+
+    // naver auth
+    implementation("com.navercorp.nid:oauth:5.9.0")
 
     implementation(libs.androidx.datastore.preferences)
 
@@ -121,9 +152,4 @@ dependencies {
 //    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
-
-    // 소셜 로그인 Auth SDK
-    implementation("com.google.android.gms:play-services-auth:21.4.0")
-    implementation("com.kakao.sdk:v2-user:2.20.3")
-    implementation("com.navercorp.nid:oauth:5.9.0")
 }

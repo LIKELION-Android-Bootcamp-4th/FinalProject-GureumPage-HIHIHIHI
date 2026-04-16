@@ -30,24 +30,4 @@ class AuthRepositoryImpl @Inject constructor(
         val customToken = (result.data as Map<*, *>)["token"] as String
         authDataSource.signInWithCustomToken(customToken).await()
     }
-
-    override fun getCurrentUserId(): String? {
-        return authDataSource.getCurrentUserId()
-    }
-
-    override suspend fun unlinkKakao() {
-        authDataSource.unlinkKakao()
-    }
-
-    override suspend fun unlinkNaver() {
-        authDataSource.unlinkNaver()
-    }
-
-    override suspend fun deleteUserAccount() {
-        authDataSource.deleteUserAccount().await()
-    }
-
-    override suspend fun logout() {
-        authDataSource.signOut()
-    }
 }
