@@ -12,12 +12,8 @@ data class TimerUiState(
     val startPage: Int? = null,
     val totalPage: Int? = null,
     val countdown: Int? = null,
-    val dialogState: TimerDialogState = TimerDialogState.None,
+    val showMemoDialog: Boolean = false
 ) {
-    val showMemoDialog: Boolean get() = dialogState is TimerDialogState.Memo
-    val showStopDialog: Boolean get() = dialogState is TimerDialogState.StopConfirm
-    val showBackExitScreen: Boolean get() = dialogState is TimerDialogState.BackExit
-
     val progress: Float
         get() {
             val period = ringPeriodSec.coerceAtLeast(1)
@@ -33,4 +29,3 @@ data class TimerUiState(
             else "%02d:%02d".format(m, s)
         }
 }
-

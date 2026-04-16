@@ -12,8 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -21,70 +19,61 @@ import androidx.navigation.compose.rememberNavController
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import kotlin.reflect.KClass
 
 sealed class BottomNavItem(
-    val destination: Any,
-    val routeClass: KClass<*>,
+    val route: String,
     val label: String,
     val unSelectedIconResId: Int,
-    val onSelectedIconResId: Int,
+    val onSelectedIconResId: Int
 ) {
-    object HomeItem : BottomNavItem(
-        destination = Home,
-        routeClass = Home::class,
-        label = "홈",
-        unSelectedIconResId = R.drawable.ic_home_outline,
-        onSelectedIconResId = R.drawable.ic_home_filled,
+    object Home : BottomNavItem(
+        NavigationRoute.Home.route,
+        "홈",
+        R.drawable.ic_home_outline,
+        R.drawable.ic_home_filled
     )
 
-    object LibraryItem : BottomNavItem(
-        destination = Library,
-        routeClass = Library::class,
-        label = "내 서재",
-        unSelectedIconResId = R.drawable.ic_book_outline,
-        onSelectedIconResId = R.drawable.ic_book_filled,
+    object Library : BottomNavItem(
+        NavigationRoute.Library.route,
+        "내 서재",
+        R.drawable.ic_book_outline,
+        R.drawable.ic_book_filled
     )
 
-    object QuotesItem : BottomNavItem(
-        destination = Quotes,
-        routeClass = Quotes::class,
-        label = "필사",
-        unSelectedIconResId = R.drawable.ic_lightbulb_outline,
-        onSelectedIconResId = R.drawable.ic_lightbulb_filled,
+    object Quotes : BottomNavItem(
+        NavigationRoute.Quotes.route,
+        "필사",
+        R.drawable.ic_lightbulb_outline,
+        R.drawable.ic_lightbulb_filled
     )
 
-    object StatisticsItem : BottomNavItem(
-        destination = StatisticsWeekly,
-        routeClass = StatisticsWeekly::class,
-        label = "통계",
-        unSelectedIconResId = R.drawable.ic_chart_pie_outline,
-        onSelectedIconResId = R.drawable.ic_chart_pie_filled,
+    object Statistics : BottomNavItem(
+        NavigationRoute.StatisticsWeekly.route,
+        "통계",
+        R.drawable.ic_chart_pie_outline,
+        R.drawable.ic_chart_pie_filled
     )
 
-    object MyPageItem : BottomNavItem(
-        destination = MyPage,
-        routeClass = MyPage::class,
-        label = "마이페이지",
-        unSelectedIconResId = R.drawable.ic_user_outline,
-        onSelectedIconResId = R.drawable.ic_user_filled,
+    object MyPage : BottomNavItem(
+        NavigationRoute.MyPage.route,
+        "마이페이지",
+        R.drawable.ic_user_outline,
+        R.drawable.ic_user_filled
     )
 
     companion object {
-        val items = listOf(LibraryItem, QuotesItem, HomeItem, StatisticsItem, MyPageItem)
+        val items = listOf(Library, Quotes, Home, Statistics, MyPage)
     }
 }
 
 @Composable
 fun GureumBottomNavBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar {
         BottomNavItem.items.forEach { item ->
-            val isSelected = currentDestination?.hierarchy?.any {
-                it.hasRoute(item.routeClass)
-            } == true
+            val isSelected = currentRoute == item.route
             val iconId = if (isSelected) item.onSelectedIconResId else item.unSelectedIconResId
 
             NavigationBarItem(
@@ -97,12 +86,16 @@ fun GureumBottomNavBar(navController: NavHostController) {
                 selected = isSelected,
                 label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
                 onClick = {
-                    if (isSelected) return@NavigationBarItem
 
-                    if (item is BottomNavItem.HomeItem) {
-                        val popped = navController.popBackStack<Home>(inclusive = false)
+                    if (currentRoute == item.route) return@NavigationBarItem
+
+                    if (item.route == NavigationRoute.Home.route) {
+                        val popped = navController.popBackStack(
+                            NavigationRoute.Home.route,
+                            inclusive = false
+                        )
                         if (!popped) {
-                            navController.navigate(Home) {
+                            navController.navigate(NavigationRoute.Home.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -111,8 +104,8 @@ fun GureumBottomNavBar(navController: NavHostController) {
                             }
                         }
                     } else {
-                        navController.navigate(item.destination) {
-                            popUpTo<Home> {
+                        navController.navigate(item.route) {
+                            popUpTo(NavigationRoute.Home.route) {
                                 saveState = true
                                 inclusive = false
                             }

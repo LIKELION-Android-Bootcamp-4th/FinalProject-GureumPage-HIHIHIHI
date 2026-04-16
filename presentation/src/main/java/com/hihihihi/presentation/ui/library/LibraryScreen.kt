@@ -1,6 +1,5 @@
 package com.hihihihi.presentation.ui.library
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +25,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -34,51 +34,37 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi18Text
-import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
+import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.library.component.BookItem
-import com.hihihihi.presentation.ui.model.UserBookUiModel
 import kotlinx.coroutines.launch
-import kotlin.collections.filter
 import kotlin.math.abs
 
 @Composable
 fun LibraryScreen(
-    onNavigateToBookDetail: (String) -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LibraryContent(
-        books = uiState.books,
-        errorMessage = uiState.errorMessage,
-        onNavigateToBookDetail = onNavigateToBookDetail,
-    )
-}
-
-@Composable
-private fun LibraryContent(
-    books: List<UserBookUiModel>,
-    errorMessage: String?,
-    onNavigateToBookDetail: (String) -> Unit,
+    navController: NavHostController,
+    viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val tabTitles = listOf("읽기 전", "읽는 중", "읽은 후")
+
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val scope = rememberCoroutineScope()
 
-    val plannedBooks = books.filter { it.status == ReadingStatus.PLANNED }
-    val readingBooks = books.filter { it.status == ReadingStatus.READING }
-    val finishedBooks = books.filter { it.status == ReadingStatus.FINISHED }
+    val uiState by viewModel.uiState.collectAsState()
+
+    val plannedBooks = uiState.books.filter { it.status == ReadingStatus.PLANNED }
+    val readingBooks = uiState.books.filter { it.status == ReadingStatus.READING }
+    val finishedBooks = uiState.books.filter { it.status == ReadingStatus.FINISHED }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -150,7 +136,7 @@ private fun LibraryContent(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    if (errorMessage != null) {
+                    if (uiState.errorMessage != null) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -198,7 +184,13 @@ private fun LibraryContent(
                                         items(plannedBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = { onNavigateToBookDetail(it) }
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
                                             )
                                         }
                                     }
@@ -238,7 +230,13 @@ private fun LibraryContent(
                                         items(readingBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = { onNavigateToBookDetail(it) }
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
                                             )
                                         }
                                     }
@@ -276,7 +274,13 @@ private fun LibraryContent(
                                         items(finishedBooks) { book ->
                                             BookItem(
                                                 book = book,
-                                                onClicked = { onNavigateToBookDetail(it) }
+                                                onClicked = {
+                                                    navController.navigate(
+                                                        NavigationRoute.BookDetail.createRoute(
+                                                            it
+                                                        )
+                                                    )
+                                                }
                                             )
                                         }
                                     }
@@ -337,79 +341,5 @@ private fun SlidingPillIndicator(
                 .background(GureumTheme.colors.primary)
                 .zIndex(-1f)
         )
-    }
-}
-
-@Preview(name = "Empty - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "Empty - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun LibraryEmptyPreview() {
-    GureumPageTheme {
-        LibraryContent(books = emptyList(), errorMessage = null, onNavigateToBookDetail = {})
-    }
-}
-
-@Preview(name = "WithBooks - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "WithBooks - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun LibraryWithBooksPreview() {
-    val sampleBooks = listOf(
-        UserBookUiModel(
-            userBookId = "1",
-            title = "데미안",
-            author = "헤르만 헤세",
-            imageUrl = "",
-            status = ReadingStatus.PLANNED,
-            currentPage = 0,
-            totalPage = 250,
-            startDate = null,
-            endDate = null,
-            totalReadTime = 0,
-            rating = null,
-            review = null,
-            category = "소설",
-            publisher = "민음사",
-            isbn13 = "1234567890123",
-            description = "나를 찾아가는 길"
-        ),
-        UserBookUiModel(
-            userBookId = "2",
-            title = "코틀린 입문",
-            author = "작가 미상",
-            imageUrl = "",
-            status = ReadingStatus.READING,
-            currentPage = 50,
-            totalPage = 400,
-            startDate = null,
-            endDate = null,
-            totalReadTime = 120,
-            rating = null,
-            review = null,
-            category = "IT",
-            publisher = "출판사",
-            isbn13 = "9876543210987",
-            description = "코틀린은 즐거워"
-        ),
-        UserBookUiModel(
-            userBookId = "3",
-            title = "클린 아키텍처",
-            author = "로버트 C. 마틴",
-            imageUrl = "",
-            status = ReadingStatus.FINISHED,
-            currentPage = 350,
-            totalPage = 350,
-            startDate = null,
-            endDate = null,
-            totalReadTime = 600,
-            rating = 5.0,
-            review = "훌륭한 책입니다.",
-            category = "IT",
-            publisher = "인사이트",
-            isbn13 = "1122334455667",
-            description = "소프트웨어 구조에 대하여"
-        )
-    )
-    GureumPageTheme {
-        LibraryContent(books = sampleBooks, errorMessage = null, onNavigateToBookDetail = {})
     }
 }

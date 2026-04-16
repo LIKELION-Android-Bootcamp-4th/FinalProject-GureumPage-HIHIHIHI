@@ -8,32 +8,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hihihihi.presentation.R
+import com.hihihihi.presentation.ui.onboarding.OnBoardingViewModel
 import com.hihihihi.presentation.ui.onboarding.components.OnBoardingMainContents
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingPurposeCard
 import com.hihihihi.presentation.ui.onboarding.model.OnboardingPurposeContents
 
 @Composable
-fun PurposePage(
-    selectedPurposes: List<String>,
-    onTogglePurpose: (String) -> Unit,
-) {
+fun PurposePage(viewModel: OnBoardingViewModel) {
+    val selectedPurpose = viewModel.selectedPurposes
+
     OnBoardingMainContents(
         titleText = "구름한장을 사용하는\n목적을 알려주세요",
         subTitleText = "한가지 이상 선택해주세요",
-        showGureum = false,
+        showGureum = false
     ) {
         Spacer(Modifier.height(20.dp))
 
         Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = 20.dp)
         ) {
             Column {
                 purposeContents.forEach { content ->
-                    val isChecked = selectedPurposes.contains(content.title)
+                    val isChecked = selectedPurpose.contains(content.title)
                     OnboardingPurposeCard(
                         cardItem = content,
                         checked = isChecked,
-                        onCheckedChange = { onTogglePurpose(content.title) },
+                        onCheckedChange = {
+                            viewModel.togglePurpose(content.title)
+                        },
                     )
                     Spacer(Modifier.height(10.dp))
                 }

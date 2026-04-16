@@ -25,6 +25,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
 import com.hihihihi.presentation.designsystem.components.GureumButton
 import com.hihihihi.presentation.designsystem.components.GureumCancelButton
@@ -33,21 +34,20 @@ import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import com.hihihihi.presentation.ui.model.UserBookUiModel
 
 @Composable
 fun BookCompletionDialog(
-    userBook: UserBookUiModel,
+    userBook: UserBook,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     val confettiComposition by rememberLottieComposition(
-        LottieCompositionSpec.Asset("confetti.json"),
+        LottieCompositionSpec.Asset("confetti.json")
     )
 
     val confettiProgress by animateLottieCompositionAsState(
         composition = confettiComposition,
-        iterations = 1,
+        iterations = 1
     )
 
     val isConfettiFinished = confettiProgress == 1f
@@ -57,8 +57,8 @@ fun BookCompletionDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-        ),
+            dismissOnClickOutside = true
+        )
     ) {
         Box {
             GureumCard(
@@ -70,7 +70,7 @@ fun BookCompletionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Semi16Text(
                         text = "🎉 축하합니다! 🎉",
@@ -83,7 +83,7 @@ fun BookCompletionDialog(
                     Medi14Text(
                         text = "책을 모두 읽으셨네요!",
                         color = GureumTheme.colors.gray800,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -102,14 +102,14 @@ fun BookCompletionDialog(
                         text = userBook.title,
                         color = GureumTheme.colors.gray800,
                         maxLine = 2,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
 
                     Medi12Text(
                         text = userBook.author,
                         color = GureumTheme.colors.gray700,
                         maxLine = 1,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -117,7 +117,7 @@ fun BookCompletionDialog(
                     Medi12Text(
                         text = "${userBook.currentPage} / ${userBook.totalPage} 페이지 완독",
                         color = GureumTheme.colors.primary,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -125,14 +125,14 @@ fun BookCompletionDialog(
                     Medi14Text(
                         text = "책 상태를 '읽은 책'으로 변경하시겠습니까?",
                         color = GureumTheme.colors.gray800,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         GureumCancelButton(
                             "나중에",
@@ -158,7 +158,7 @@ fun BookCompletionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .align(Alignment.TopCenter),
+                        .align(Alignment.TopCenter)
                 )
             }
         }

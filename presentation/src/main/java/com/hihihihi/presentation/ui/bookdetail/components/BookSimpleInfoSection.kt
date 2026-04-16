@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.domain.model.ReadingStatus
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.BodyText
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
@@ -31,12 +32,11 @@ import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.bookdetail.mock.dummyUserBook
-import com.hihihihi.presentation.ui.model.UserBookUiModel
 
 @Composable
 fun BookSimpleInfoSection(
-    userBook: UserBookUiModel,
-    onReadingStatusClick: () -> Unit,
+    userBook: UserBook,
+    onReadingStatusClick: () -> Unit
 ) {
     val statusColor = when (userBook.status) {
         ReadingStatus.PLANNED -> GureumTheme.colors.gray400
@@ -50,13 +50,13 @@ fun BookSimpleInfoSection(
             .padding(20.dp)
             .heightIn(max = 140.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         BookCoverImage(
             imageUrl = userBook.imageUrl,
             modifier = Modifier
                 .size(100.dp, 140.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(8.dp))
         )
         Column(
             modifier = Modifier.weight(1f),
@@ -71,12 +71,12 @@ fun BookSimpleInfoSection(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_cloud_reading),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(40.dp)
                 )
                 Text(
                     userBook.status.displayName,
@@ -87,7 +87,7 @@ fun BookSimpleInfoSection(
                     painter = painterResource(id = R.drawable.ic_arrow_down),
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(GureumTheme.colors.gray800),
-                    modifier = Modifier.clickable { onReadingStatusClick() },
+                    modifier = Modifier.clickable { onReadingStatusClick() }
                 )
             }
         }

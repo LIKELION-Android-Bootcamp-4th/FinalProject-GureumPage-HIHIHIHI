@@ -1,23 +1,37 @@
 package com.hihihihi.presentation.navigation
 
-import kotlinx.serialization.Serializable
+sealed class NavigationRoute(val route: String) {
+    object Splash : NavigationRoute("splash")
+    object Home : NavigationRoute("home")
+    object Login : NavigationRoute("login")
+    object OnBoarding : NavigationRoute("onboarding")
+    object MindMap : NavigationRoute("mindmap/{bookId}/{mindmapId}") {
+        fun createRoute(bookId: String, mindmapId: String?): String = "mindmap/$bookId/$mindmapId"
+    }
 
-@Serializable data object Splash
-@Serializable data object Home
-@Serializable data object Login
-@Serializable data object OnBoarding
-@Serializable data object Quotes
-@Serializable data object Library
-@Serializable data object Search
-@Serializable data object MyPage
-@Serializable data object StatisticsWeekly
-@Serializable data object StatisticsMonthly
-@Serializable data object StatisticsYearly
-@Serializable data class MindMap(val bookId: String, val mindmapId: String? = null)
-@Serializable data class Timer(val userBookId: String)
-@Serializable data class BookDetail(
-    val bookId: String,
-    val showAddQuote: Boolean = false,
-    val showAddManualRecord: Boolean = false
-)
-@Serializable data class Withdraw(val userName: String)
+    object Quotes : NavigationRoute("quotes")
+    object Library : NavigationRoute("library")
+    object Search : NavigationRoute("search")
+    object StatisticsWeekly : NavigationRoute("statistics/weekly")
+    object StatisticsMonthly : NavigationRoute("statistics/monthly")
+    object StatisticsYearly : NavigationRoute("statistics/yearly")
+    object Timer : NavigationRoute("timer/{userBookId}") {
+        fun createRoute(userBookId: String): String = "timer/$userBookId"
+    }
+
+    object MyPage : NavigationRoute("mypage")
+    object BookDetail : NavigationRoute("bookdetail/{bookId}?showAddQuote={showAddQuote}&showAddManualRecord={showAddManualRecord}") {
+        fun createRoute(
+            bookId: String,
+            showAddQuote: Boolean = false,
+            showAddManualRecord: Boolean = false
+        ): String {
+            val route = "bookdetail/$bookId?showAddQuote=$showAddQuote&showAddManualRecord=$showAddManualRecord"
+            return route
+        }
+    }
+
+    object Withdraw : NavigationRoute("withdraw/{userName}") {
+        fun createRoute(userName: String): String = "withdraw/$userName"
+    }
+}

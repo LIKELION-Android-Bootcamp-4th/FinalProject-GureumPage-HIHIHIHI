@@ -1,5 +1,10 @@
 package com.hihihihi.presentation.ui.onboarding
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.GureumThemeType
@@ -12,8 +17,6 @@ import com.hihihihi.presentation.utils.NicknameValidator.validateNickname
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,60 +27,67 @@ class OnBoardingViewModel @Inject constructor(
     private val setThemeUseCase: SetThemeUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
+    private val _steps = MutableStateFlow<List<OnboardingStep>>(emptyList())
+    val steps: StateFlow<List<OnboardingStep>> = _steps
 
-    private val _uiState = MutableStateFlow(OnBoardingUiState())
-    val uiState: StateFlow<OnBoardingUiState> = _uiState.asStateFlow()
+    val selectedPurposes = mutableStateListOf<String>()
 
-    val steps: List<OnboardingStep> = listOf(
-        OnboardingStep.Welcome,
-        OnboardingStep.Nickname,
-        OnboardingStep.Purpose,
-        OnboardingStep.Feature,
-        OnboardingStep.Theme,
-        OnboardingStep.Finish,
-    )
+    private var featurePageCount by mutableIntStateOf(0)
+    var currentInnerPage by mutableIntStateOf(0)
+        private set
+    var nickname by mutableStateOf("")
+        private set
+    var theme by mutableStateOf<GureumThemeType?>(null)
+        private set
+
+    init {
+        _steps.value = listOf(
+            OnboardingStep.Welcome,
+            OnboardingStep.Nickname,
+            OnboardingStep.Purpose,
+            OnboardingStep.Feature,
+            OnboardingStep.Theme,
+            OnboardingStep.Finish
+        )
+    }
 
     fun updateNickname(nickname: String) {
-        _uiState.update { it.copy(nickname = nickname) }
+        this.nickname = nickname
     }
 
     fun saveNickname() {
-        val userId = getCurrentUserIdUseCase() ?: return
-        viewModelScope.launch { setNicknameUseCase(userId, _uiState.value.nickname.trim()) }
+        val userId: String? = getCurrentUserIdUseCase()
+        viewModelScope.launch { setNicknameUseCase(userId!!, nickname.trim()) }
     }
 
+    // TODO: 추후 사용자 앱 설치 목적 파악을 위해 DB 테이블 만들기 고려
     fun togglePurpose(purpose: String) {
-        _uiState.update { state ->
-            val current = state.selectedPurposes.toMutableList()
-            if (current.contains(purpose)) current.remove(purpose) else current.add(purpose)
-            state.copy(selectedPurposes = current)
-        }
+        if (selectedPurposes.contains(purpose)) selectedPurposes.remove(purpose)
+        else selectedPurposes.add(purpose)
     }
 
     fun featurePageChanged(page: Int, count: Int) {
-        _uiState.update { it.copy(currentInnerPage = page, featurePageCount = count - 1) }
+        currentInnerPage = page
+        featurePageCount = count - 1
     }
 
-    fun isNextEnabled(step: OnboardingStep): Boolean {
-        val state = _uiState.value
-        return when (step) {
-            OnboardingStep.Nickname -> state.nickname.validateNickname()
-            OnboardingStep.Purpose -> state.selectedPurposes.isNotEmpty()
-            OnboardingStep.Feature -> state.currentInnerPage >= state.featurePageCount
-            OnboardingStep.Theme -> state.theme != null
-            else -> true
-        }
+    fun isNextEnabled(step: OnboardingStep): Boolean = when (step) {
+        OnboardingStep.Nickname -> nickname.validateNickname()
+        OnboardingStep.Purpose -> selectedPurposes.isNotEmpty()
+        OnboardingStep.Feature -> currentInnerPage >= featurePageCount
+        OnboardingStep.Theme -> theme != null
+        else -> true
     }
 
     fun selectTheme(theme: GureumThemeType) {
-        _uiState.update { it.copy(theme = theme) }
+        this@OnBoardingViewModel.theme = theme
     }
 
     fun saveOnboardingComplete() {
         viewModelScope.launch {
             val uid = getCurrentUserIdUseCase() ?: return@launch
-            _uiState.value.theme?.let { setThemeUseCase(it) }
-            setNicknameUseCase(uid, _uiState.value.nickname.trim())
+            theme?.let { setThemeUseCase(it) }
+            saveNickname()
             setOnboardingCompleteUseCase(uid, true)
         }
     }

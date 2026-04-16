@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -30,8 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
 import com.hihihihi.presentation.designsystem.components.GureumCard
@@ -40,7 +41,6 @@ import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
-import com.hihihihi.presentation.ui.model.UserBookUiModel
 import com.hihihihi.presentation.utils.formatDateToSimpleString
 import com.hihihihi.presentation.utils.formatSecondsToReadableTime
 import com.hihihihi.presentation.utils.pxToDp
@@ -49,9 +49,9 @@ import kotlin.math.absoluteValue
 @SuppressLint("RestrictedApi", "UnusedBoxWithConstraintsScope")
 @Composable
 fun CurrentReadingBookSection(
-    books: List<UserBookUiModel>,
+    books: List<UserBook>,
     onBookClick: (String) -> Unit,
-    onAddBookClick: () -> Unit,
+    onAddBookClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -61,7 +61,7 @@ fun CurrentReadingBookSection(
         Box(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
-                .padding(top = 8.dp),
+                .padding(top = 8.dp)
         ) {
             Semi16Text("독서중인 책", isUnderline = true)
         }
@@ -73,7 +73,7 @@ fun CurrentReadingBookSection(
         } else {
             ReadingBooksPager(
                 books = books,
-                onBookClick = onBookClick,
+                onBookClick = onBookClick
             )
         }
 
@@ -86,26 +86,26 @@ fun CurrentReadingBookSection(
 
 @Composable
 fun EmptyReadingBooksCard(
-    onAddBookClick: () -> Unit,
+    onAddBookClick: () -> Unit
 ) {
     GureumCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp),
-        onClick = onAddBookClick,
+        onClick = onAddBookClick
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 32.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_plus),
                 contentDescription = "책 추가",
                 tint = GureumTheme.colors.gray300,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(32.dp)
             )
 
             Spacer(Modifier.height(20.dp))
@@ -119,8 +119,8 @@ fun EmptyReadingBooksCard(
 
 @Composable
 private fun ReadingBooksPager(
-    books: List<UserBookUiModel>,
-    onBookClick: (String) -> Unit,
+    books: List<UserBook>,
+    onBookClick: (String) -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { books.size })
     val contentPadding = 30.dp
@@ -142,7 +142,7 @@ private fun ReadingBooksPager(
             pagerState = pagerState,
             page = page,
             scaleSizeRatio = scaleSizeRatio,
-            onBookClick = onBookClick,
+            onBookClick = onBookClick
         )
     }
 }
@@ -151,13 +151,17 @@ private fun ReadingBooksPager(
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun ReadingBookCard(
-    book: UserBookUiModel,
-    pagerState: PagerState,
+    book: UserBook,
+    pagerState: androidx.compose.foundation.pager.PagerState,
     page: Int,
     scaleSizeRatio: Float,
-    onBookClick: (String) -> Unit,
+    onBookClick: (String) -> Unit
 ) {
     BoxWithConstraints {
+        val maxWidthDp = pxToDp(constraints.maxWidth)
+        val bookmarkWidth = 24.dp // 북마크 아이콘 너비 + 여백
+        val availableTextWidth = maxWidthDp - bookmarkWidth - 32.dp // 패딩 고려
+
         GureumCard(
             modifier = Modifier
                 .graphicsLayer {
@@ -179,27 +183,30 @@ private fun ReadingBookCard(
                         translationX = sign * size.width * (1 - it) / 2
                     }
                 },
-            onClick = { onBookClick(book.userBookId) },
+            onClick = { onBookClick(book.userBookId) }
         ) {
-            BookCardContent(book = book)
+            BookCardContent(
+                book = book,
+                availableTextWidth = availableTextWidth
+            )
         }
 
         // 북마크 아이콘
-        val maxWidthDp = pxToDp(constraints.maxWidth)
         Icon(
             painter = painterResource(R.drawable.ic_bookmark),
             contentDescription = "북마크",
             tint = GureumTheme.colors.primary,
             modifier = Modifier
                 .offset(x = maxWidthDp * 0.88f, y = 0.dp)
-                .height(24.dp),
+                .height(24.dp)
         )
     }
 }
 
 @Composable
 private fun BookCardContent(
-    book: UserBookUiModel,
+    book: UserBook,
+    availableTextWidth: Dp
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -218,7 +225,7 @@ private fun BookCardContent(
             BookInfo(
                 book = book,
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
             )
         }
 
@@ -231,12 +238,12 @@ private fun BookCardContent(
 
 @Composable
 private fun BookInfo(
-    book: UserBookUiModel,
-    modifier: Modifier = Modifier,
+    book: UserBook,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
             // 제목 - 북마크 공간 고려해서 maxLines 조정
@@ -246,7 +253,7 @@ private fun BookInfo(
                 color = GureumTheme.colors.primary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(0.85f), // 북마크 공간 확보
+                modifier = Modifier.fillMaxWidth(0.85f) // 북마크 공간 확보
             )
 
             Spacer(Modifier.height(4.dp))
@@ -256,7 +263,7 @@ private fun BookInfo(
                 style = GureumTypography.bodySmall,
                 color = GureumTheme.colors.gray500,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(Modifier.height(4.dp))
@@ -264,17 +271,17 @@ private fun BookInfo(
             Text(
                 text = "누적 독서 시간: ${formatSecondsToReadableTime(book.totalReadTime)}",
                 style = GureumTypography.bodySmall,
-                color = GureumTheme.colors.gray500,
+                color = GureumTheme.colors.gray500
             )
         }
     }
 }
 
 @Composable
-private fun BookProgress(book: UserBookUiModel) {
+private fun BookProgress(book: UserBook) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End,
+        horizontalAlignment = Alignment.End
     ) {
         val progress = if (book.totalPage > 0) {
             book.currentPage.toFloat() / book.totalPage
@@ -282,7 +289,7 @@ private fun BookProgress(book: UserBookUiModel) {
 
         GureumLinearProgressBar(
             progress = progress,
-            height = 6,
+            height = 6
         )
 
         Spacer(Modifier.height(4.dp))
@@ -290,7 +297,7 @@ private fun BookProgress(book: UserBookUiModel) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             book.startDate?.let { startDate ->
                 Text(
@@ -303,7 +310,7 @@ private fun BookProgress(book: UserBookUiModel) {
             Text(
                 text = "${book.currentPage} / ${book.totalPage}",
                 style = GureumTypography.labelSmall,
-                color = GureumTheme.colors.gray500,
+                color = GureumTheme.colors.gray500
             )
         }
     }
