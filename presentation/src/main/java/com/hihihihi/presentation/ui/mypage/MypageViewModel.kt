@@ -9,14 +9,15 @@ import com.hihihihi.domain.usecase.user.GetMyPageDataUseCase
 import com.hihihihi.domain.usecase.user.GetThemeFlowUseCase
 import com.hihihihi.domain.usecase.user.SetThemeUseCase
 import com.hihihihi.domain.usecase.user.UpdateNicknameUseCase
+import com.hihihihi.presentation.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,38 +25,30 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MypageViewModel @Inject constructor(
-    private val setThemeUseCase: SetThemeUseCase,                   // 다크모드 저장용 Usecase
+    private val setThemeUseCase: SetThemeUseCase,
     private val getMyPageDataUseCase: GetMyPageDataUseCase,
-//    private val getDailyReadPagesUseCase: GetDailyReadPagesUseCase, // 잔디
-//    private val getUserUseCase: GetUserUseCase,                     // 사용자 정보 조회
-    private val updateNicknameUseCase: UpdateNicknameUseCase,       // 닉네임 변경
-//    private val getUserBooksUseCase: GetUserBooksUseCase,           //총 권수 계산용
+    private val updateNicknameUseCase: UpdateNicknameUseCase,
     getTheme: GetThemeFlowUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
 
-    // FirebaseAuth로 현재 uid 참조
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
 
-    //DataStore 에서 다크모드 여부를 Flow 로 받아오는 StateFlow 형태로 보관
     val theme = getTheme().stateIn(viewModelScope, SharingStarted.Lazily, GureumThemeType.DARK)
 
-    //스위치 클릭 시 호출
     fun toggleTheme(theme: GureumThemeType) {
         viewModelScope.launch {
-            setThemeUseCase(theme) //선택된 모드 상태를 저장
+            setThemeUseCase(theme)
         }
     }
 
-    // 마이페이지 사용자 정보
     private val _uiState = MutableStateFlow(MyPageUiState())
     val uiState: StateFlow<MyPageUiState> = _uiState
 
-    //로그아웃 이벤트
-    private val _logoutEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
+    private val _effect = Channel<MypageEffect>(Channel.BUFFERED)
+    val effect: Flow<MypageEffect> = _effect.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -68,9 +61,8 @@ class MypageViewModel @Inject constructor(
                     }
                     .collect { myPageData ->
                         _uiState.update {
-                            it.copy(myPageData = myPageData, isLoading = false)
+                            it.copy(myPageUiModel = myPageData.toUiModel(), isLoading = false)
                         }
-
                     }
             } catch (e: Exception) {
                 _uiState.update {
@@ -80,7 +72,6 @@ class MypageViewModel @Inject constructor(
         }
     }
 
-    //닉네임 변경, 현재 uid 기준으로
     fun changeNickname(newNickname: String) = viewModelScope.launch {
         val uid = currentUid ?: return@launch
         runCatching { updateNicknameUseCase(uid, newNickname) }
@@ -88,16 +79,46 @@ class MypageViewModel @Inject constructor(
             .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
     }
 
-
-    //로그아웃: 세션 종료 후 이벤트 발생
     fun logout() = viewModelScope.launch {
         runCatching {
             logoutUseCase()
         }
             .onSuccess {
-                _uiState.value = MyPageUiState(isLoading = false)
-                _logoutEvent.tryEmit(Unit)
+                _uiState.value = MyPageUiState(isLoading = false, myPageUiModel = null)
+                _effect.send(MypageEffect.NavigateToLogin)
             }
             .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
     }
+
+    fun onLogoutClick() {
+        _uiState.update { it.copy(dialogState = MyPageDialogState.Logout) }
+    }
+
+    fun onNicknameChangeClick() {
+        _uiState.update { it.copy(dialogState = MyPageDialogState.NicknameChange) }
+    }
+
+    fun dismissDialog() {
+        _uiState.update { it.copy(dialogState = MyPageDialogState.None) }
+    }
+
+    fun onWithdrawClick() {
+        val userName = _uiState.value.myPageUiModel?.nickname
+        if (userName.isNullOrBlank()) {
+            _uiState.update { it.copy(errorMessage = "사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.") }
+            return
+        }
+        viewModelScope.launch { _effect.send(MypageEffect.NavigateToWithdraw(userName)) }
+    }
+}
+
+sealed interface MyPageDialogState {
+    data object None : MyPageDialogState
+    data object Logout : MyPageDialogState
+    data object NicknameChange : MyPageDialogState
+}
+
+sealed interface MypageEffect {
+    data object NavigateToLogin : MypageEffect
+    data class NavigateToWithdraw(val userName: String) : MypageEffect
 }

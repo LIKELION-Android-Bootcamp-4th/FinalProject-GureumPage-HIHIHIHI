@@ -15,21 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.hihihihi.domain.model.Quote
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
+import com.hihihihi.presentation.ui.model.QuoteUiModel
 import com.hihihihi.presentation.utils.formatDateToSimpleString
 
 @Composable
-fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
+fun QuoteItem(item: QuoteUiModel, onItemClick: (QuoteUiModel) -> Unit) {
     GureumCard(
         corner = 16.dp,
-        onClick = { onItemClick(item) }
+        onClick = { onItemClick(item) },
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            //책 이미지
             BookCoverImage(
                 modifier = Modifier
                     .size(width = 60.dp, height = 80.dp)
@@ -39,33 +38,30 @@ fun QuoteItem(item: Quote, onItemClick: (Quote) -> Unit) {
             Spacer(modifier = Modifier.width(12.dp))
             Column(
                 modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start,
             ) {
-                //책 제목
                 Text(
                     text = item.title,
                     style = GureumTypography.bodyLarge,
                     color = GureumTheme.colors.gray600,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                //날짜
                 Text(
                     text = formatDateToSimpleString(item.createdAt),
                     style = GureumTypography.bodyMedium,
                     color = GureumTheme.colors.gray300,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                //작성한 필사
                 Text(
                     text = item.content,
                     style = GureumTypography.bodyMedium,
                     color = GureumTheme.colors.gray800,
                     maxLines = 4,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

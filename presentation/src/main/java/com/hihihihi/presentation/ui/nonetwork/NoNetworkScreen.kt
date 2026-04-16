@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.nonetwork
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,33 +18,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.components.Semi24Text
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 
 @Composable
 fun NoNetworkScreen(
     onRefresh: () -> Unit,
-    onExit: () -> Unit
+    onExit: () -> Unit,
 ) {
-    BackHandler {
-        onExit()
-    }
+    BackHandler { onExit() }
+    NoNetworkContent(onRefresh = onRefresh)
+}
 
+@Composable
+private fun NoNetworkContent(onRefresh: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             Icons.Default.CloudOff,
             contentDescription = null,
             modifier = Modifier.size(60.dp),
-            tint = GureumTheme.colors.gray400
+            tint = GureumTheme.colors.gray400,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -51,7 +56,7 @@ fun NoNetworkScreen(
         Semi24Text(
             "인터넷 연결이 끊어졌어요",
             color = GureumTheme.colors.gray700,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -59,7 +64,7 @@ fun NoNetworkScreen(
         Medi16Text(
             "Wi-Fi나 모바일 데이터 연결을\n확인해 주세요",
             color = GureumTheme.colors.gray600,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -68,14 +73,19 @@ fun NoNetworkScreen(
             onClick = onRefresh,
             modifier = Modifier.padding(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = GureumTheme.colors.primary
-            )
+                containerColor = GureumTheme.colors.primary,
+            ),
         ) {
-            Semi16Text(
-                "새로 고침",
-                color = GureumTheme.colors.white
-            )
+            Semi16Text("새로 고침", color = GureumTheme.colors.white)
         }
+    }
+}
 
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun NoNetworkPreview() {
+    GureumPageTheme {
+        NoNetworkContent(onRefresh = {})
     }
 }
