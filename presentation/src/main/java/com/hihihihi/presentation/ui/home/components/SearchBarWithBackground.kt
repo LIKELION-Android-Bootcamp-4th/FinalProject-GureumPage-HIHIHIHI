@@ -35,19 +35,20 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.User
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Floating
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
+import com.hihihihi.presentation.ui.home.mock.mockUser
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun SearchBarWithBackground(
-    nickname: String,
-    appellation: String,
-    onSearchBarClick: () -> Unit = {},
+    user: User,
+    onSearchBarClick: () -> Unit = {}
 ) {
     val backGroundImage = if (GureumTheme.isDarkTheme) R.drawable.bg_home_dark else R.drawable.bg_home_light
 
@@ -64,14 +65,14 @@ fun SearchBarWithBackground(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(290.dp), // 배경이 겹쳐질 만큼만 높이
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop
         )
 
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(20.dp)
-                .statusBarsPadding(),
+                .statusBarsPadding()
         ) {
             Box(
                 modifier = Modifier
@@ -81,21 +82,21 @@ fun SearchBarWithBackground(
                     .border(1.dp, GureumTheme.colors.textFieldOutline, shape = RoundedCornerShape(50)) // 테두리
                     .clickable(
                         indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
+                        interactionSource = remember { MutableInteractionSource() }
                     ) { onSearchBarClick() }
                     .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterStart,
+                contentAlignment = Alignment.CenterStart
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search_outline),
                         contentDescription = null,
-                        tint = GureumTheme.colors.gray400,
+                        tint = GureumTheme.colors.gray400
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Medi12Text(
                         text = "책 검색",
-                        color = GureumTheme.colors.gray400,
+                        color = GureumTheme.colors.gray400
                     )
                 }
             }
@@ -107,21 +108,20 @@ fun SearchBarWithBackground(
                     text = buildAnnotatedString {
                         withStyle(
                             GureumTypography.titleLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.primary),
-                        ) { append(appellation) }
+                                .copy(color = GureumTheme.colors.primary)
+                        ) { append(user.appellation) }
                         withStyle(
                             GureumTypography.titleLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.gray900),
+                                .copy(color = GureumTheme.colors.gray900)
                         ) {
-                            append(" $nickname")
+                            append(" ${user.nickname}")
 
                         }
                         withStyle(
                             GureumTypography.bodyLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.gray900),
+                                .copy(color = GureumTheme.colors.gray900)
                         ) { append(" 님") }
-                    },
-                )
+                    })
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -129,23 +129,23 @@ fun SearchBarWithBackground(
                     text = buildAnnotatedString {
                         withStyle(
                             GureumTypography.bodyLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.gray900),
+                                .copy(color = GureumTheme.colors.gray900)
                         ) { append("오늘도 ") }
                         withStyle(
                             GureumTypography.titleLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.primary),
+                                .copy(color = GureumTheme.colors.primary)
                         ) { append("구름한장") }
                         withStyle(
                             GureumTypography.bodyLarge.toSpanStyle()
-                                .copy(color = GureumTheme.colors.gray900),
+                                .copy(color = GureumTheme.colors.gray900)
                         ) { append("과 함께") }
-                    },
+                    }
                 )
 
                 // \n 으로 했더니 간격이 이상해서 별도로 뺌
                 Text(
                     text = "마음의 양식을 쌓아볼까요?",
-                    style = MaterialTheme.typography.bodyLarge.copy(color = GureumTheme.colors.gray900),
+                    style = MaterialTheme.typography.bodyLarge.copy(color = GureumTheme.colors.gray900)
                 )
 
             }
@@ -155,14 +155,14 @@ fun SearchBarWithBackground(
             modifier = Modifier
                 .offset(
                     x = maxWidth * 0.6f, // 오른쪽 비율 위치
-                    y = maxHeight * 0.25f, // 아래 비율 위치
+                    y = maxHeight * 0.25f // 아래 비율 위치
                 )
-                .statusBarsPadding(),
+                .statusBarsPadding()
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_cloud_reading),
                 contentDescription = "Floating Cloud",
-                modifier = Modifier.size(130.dp),
+                modifier = Modifier.size(130.dp)
             )
         }
 
@@ -173,8 +173,8 @@ fun SearchBarWithBackground(
                 .align(Alignment.BottomCenter)
                 .background(
                     color = GureumTheme.colors.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                ),
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                )
         )
     }
 }
@@ -185,6 +185,6 @@ fun SearchBarWithBackground(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        SearchBarWithBackground(nickname = "구름이", appellation = "독서왕")
+        SearchBarWithBackground(mockUser)
     }
 }

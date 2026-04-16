@@ -7,12 +7,12 @@ import com.hihihihi.domain.usecase.auth.WithdrawUserUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,10 +27,12 @@ class WithdrawViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(WithdrawUiState())
     val uiState: StateFlow<WithdrawUiState> = _uiState.asStateFlow()
 
-    private val _effect = Channel<WithdrawEffect>(Channel.BUFFERED)
-    val effect: Flow<WithdrawEffect> = _effect.receiveAsFlow()
+    //탈퇴 이벤트
+    private val _withdrawEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val withdrawEvent: SharedFlow<Unit> = _withdrawEvent.asSharedFlow()
 
     private fun setLoading(isLoading: Boolean, message: String = "") {
+
         _uiState.value = _uiState.value.copy(
             isLoading = isLoading,
             loadingMessage = message,
@@ -72,20 +74,19 @@ class WithdrawViewModel @Inject constructor(
 
             clearUserDataUseCase.clearAll()
 
+            // 3. 상태 초기화 및 로그아웃 이벤트 발생
             setLoading(false)
-            _effect.send(WithdrawEffect.NavigateToLogin)
+            _withdrawEvent.tryEmit(Unit)
         } catch (e: Exception) {
+
             val errorMessage = when {
                 e.message?.contains("unauthenticated") == true -> "인증이 필요합니다"
                 e.message?.contains("not-found") == true -> "사용자를 찾을 수 없습니다"
                 e.message?.contains("permission-denied") == true -> "권한이 없습니다"
                 else -> "탈퇴 처리 중 오류가 발생했습니다: ${e.message}"
             }
+
             setError(errorMessage)
         }
     }
-}
-
-sealed interface WithdrawEffect {
-    data object NavigateToLogin : WithdrawEffect
 }

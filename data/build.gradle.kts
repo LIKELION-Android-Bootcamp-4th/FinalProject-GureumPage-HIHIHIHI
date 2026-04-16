@@ -26,8 +26,8 @@ android {
         consumerProguardFiles("consumer-rules.pro")
         //local.properties API KEY 사용하기 위함
         buildConfigField("String", "ALADIN_API_KEY", "\"${localProperties["ALADIN_API_KEY"] ?: ""}\"")
-    }
 
+    }
     //local.properties API KEY 사용하기 위함
     buildFeatures {
         buildConfig = true
@@ -52,21 +52,40 @@ dependencies {
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.gson)
-
-    implementation(libs.bundles.network)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.hilt)
-    ksp(libs.hilt.android.compiler)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.bundles.firebase)
-
-    implementation(libs.bundles.social.auth)
-
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.firebase.functions)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Dagger - Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // Gson
+    implementation(libs.gson)
+
+    implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:21.4.0")
+
+    implementation("com.navercorp.nid:oauth:5.9.0")
+
+    implementation("com.kakao.sdk:v2-user:2.20.3")
+
+    implementation(libs.androidx.datastore.preferences)
 }
+

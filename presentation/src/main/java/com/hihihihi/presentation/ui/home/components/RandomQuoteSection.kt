@@ -36,20 +36,20 @@ import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.hihihihi.domain.model.Quote
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.components.Semi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.home.mock.dummyQuotes
-import com.hihihihi.presentation.ui.model.QuoteUiModel
 import com.hihihihi.presentation.utils.formatDateToSimpleString
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 @Composable
 fun RandomQuoteSection(
-    quotes: List<QuoteUiModel>,
+    quotes: List<Quote>,
 ) {
     // 현재 인덱스 저장해서 다음 랜덤때 제외하도록
     var currentIndex by remember { mutableStateOf(0) }
@@ -57,7 +57,7 @@ fun RandomQuoteSection(
     Column(
         modifier = Modifier
             .background(GureumTheme.colors.background)
-            .padding(16.dp),
+            .padding(16.dp)
     ) {
         Semi16Text("필사한 문장", isUnderline = true)
         Spacer(Modifier.height(12.dp))
@@ -72,7 +72,7 @@ fun RandomQuoteSection(
                     if (quotes.size > 1) {  // 1일때는 안바뀌도록
                         currentIndex = (quotes.indices - currentIndex).random()
                     }
-                },
+                }
             )
         } else {
             // 필사 목록 비어있을 때 처리
@@ -81,7 +81,7 @@ fun RandomQuoteSection(
                 title = "구름한장",
                 date = formatDateToSimpleString(LocalDateTime.now()),
                 onClick = {
-                },
+                }
             )
         }
     }
@@ -92,12 +92,12 @@ fun QuoteCard(
     quote: String,
     title: String,
     date: String,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .wrapContentHeight()
-            .padding(bottom = 30.dp), // 구름 하단 여유 공간 확보
+            .padding(bottom = 30.dp) // 구름 하단 여유 공간 확보
         //TODO 더 나은 방식이 있지 않을까
     ) {
         // 말풍선 본체
@@ -108,7 +108,7 @@ fun QuoteCard(
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // 책 제목
                     Text(
@@ -116,7 +116,7 @@ fun QuoteCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = GureumTypography.titleLarge.copy(color = GureumTheme.colors.gray900),
-                        modifier = Modifier.weight(1f), // 날짜 공간 보장용
+                        modifier = Modifier.weight(1f) // 날짜 공간 보장용
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     // 날짜
@@ -130,7 +130,7 @@ fun QuoteCard(
                     text = "\"${quote}\"",
                     style = GureumTypography.bodyMedium.copy(color = GureumTheme.colors.gray700),
                     maxLines = 4,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -140,7 +140,7 @@ fun QuoteCard(
             modifier = Modifier
                 .size(100.dp)
                 .align(Alignment.BottomEnd)
-                .offset(x = 16.dp, y = 60.dp),
+                .offset(x = 16.dp, y = 60.dp)
         ) {
             GuruemBulbLottie(onClick)
         }
@@ -150,7 +150,7 @@ fun QuoteCard(
 
 @Composable
 fun GuruemBulbLottie(
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("cloud_bulb.json"))
     val scope = rememberCoroutineScope()
@@ -161,7 +161,7 @@ fun GuruemBulbLottie(
         modifier = Modifier
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
+                indication = null
             ) {
                 onClick()
                 scope.launch {
@@ -172,17 +172,17 @@ fun GuruemBulbLottie(
                     animatable.animate(
                         composition = composition,
                         clipSpec = LottieClipSpec.Progress(0f, 0.9f),
-                        iterations = 1,
+                        iterations = 1
                     )
                     animatable.snapTo(progress = 0f) // 처음으로 되돌리기
                 }
-            },
+            }
     ) {
         if (composition != null) {
             LottieAnimation(
                 composition = composition,
                 progress = { animatable.progress },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             // TODO 로티가 로딩이 좀 느려서 자리가 비어있다가 생기길래 일단 인디케이터를 넣어놨는데 어떻게 하면 좋을지🥲

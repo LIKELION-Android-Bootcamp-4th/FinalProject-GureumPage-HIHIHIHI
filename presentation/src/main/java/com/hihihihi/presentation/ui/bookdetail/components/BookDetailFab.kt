@@ -44,30 +44,46 @@ import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
+import com.hihihihi.presentation.ui.bookdetail.BookDetailFabEvent
 
 @Composable
 fun BookDetailFab(
     readingStatus: ReadingStatus,
     modifier: Modifier = Modifier,
-    onAddQuoteClick: () -> Unit,
-    onAddManualHistoryClick: () -> Unit,
-    onNavigateToMindmap: () -> Unit,
-    onNavigateToTimer: () -> Unit,
+    onEvent: (BookDetailFabEvent) -> Unit
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
 
     val fabItems = when (readingStatus) {
         ReadingStatus.PLANNED -> emptyList()
         ReadingStatus.READING -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onAddQuoteClick() },
-            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onNavigateToMindmap() },
-            MiniFabItem(R.drawable.ic_alarm_filled, "독서 스톱워치 시작") { onNavigateToTimer() },
-            MiniFabItem(R.drawable.ic_edit_alt_filled, "독서 기록 추가") { onAddManualHistoryClick() },
+            MiniFabItem(
+                R.drawable.ic_lightbulb_filled,
+                "필사 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(
+                R.drawable.ic_graph,
+                "마인드맵 그리기"
+            ) { onEvent(BookDetailFabEvent.NavigateToMindmap) },
+            MiniFabItem(
+                R.drawable.ic_alarm_filled,
+                "독서 스톱워치 시작"
+            ) { onEvent(BookDetailFabEvent.NavigateToTimer) },
+            MiniFabItem(
+                R.drawable.ic_edit_alt_filled,
+                "독서 기록 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddManualHistoryDialog) },
         )
 
         ReadingStatus.FINISHED -> listOf(
-            MiniFabItem(R.drawable.ic_lightbulb_filled, "필사 추가") { onAddQuoteClick() },
-            MiniFabItem(R.drawable.ic_graph, "마인드맵 그리기") { onNavigateToMindmap() },
+            MiniFabItem(
+                R.drawable.ic_lightbulb_filled,
+                "필사 추가"
+            ) { onEvent(BookDetailFabEvent.ShowAddQuoteDialog) },
+            MiniFabItem(
+                R.drawable.ic_graph,
+                "마인드맵 그리기"
+            ) { onEvent(BookDetailFabEvent.NavigateToMindmap) },
         )
     }
 
@@ -182,12 +198,6 @@ data class MiniFabItem(
 @Composable
 private fun BookDetailFabPreview() {
     GureumPageTheme {
-        BookDetailFab(
-            readingStatus = ReadingStatus.READING,
-            onAddQuoteClick = {},
-            onAddManualHistoryClick = {},
-            onNavigateToMindmap = {},
-            onNavigateToTimer = {},
-        )
+        BookDetailFab(readingStatus = ReadingStatus.READING, onEvent = { })
     }
 }

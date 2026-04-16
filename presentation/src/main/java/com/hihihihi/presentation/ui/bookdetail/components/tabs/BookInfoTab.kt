@@ -9,16 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.designsystem.components.GureumGenreChip
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.bookdetail.mock.dummyUserBook
-import com.hihihihi.presentation.ui.model.UserBookUiModel
 
 @Composable
 fun BookInfoTab(
-    userBook: UserBookUiModel,
+    userBook: UserBook
 ) {
     Column(
         modifier = Modifier
