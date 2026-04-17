@@ -17,6 +17,10 @@ val localProperties = Properties().apply {
     }
 }
 
+fun getLocalProperty(key: String): String {
+    return localProperties[key]?.toString() ?: ""
+}
+
 android {
     namespace = "com.hihihihi.gureumpage"
     compileSdk = 36
@@ -30,21 +34,26 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "NAVER_CLIENT_ID", "\"${localProperties["NAVER_CLIENT_ID"] ?: ""}\"")
-        manifestPlaceholders["NAVER_CLIENT_ID"] = localProperties["NAVER_CLIENT_ID"] ?: ""
+        val naverId = getLocalProperty("NAVER_CLIENT_ID")
+        val naverSecret = getLocalProperty("NAVER_CLIENT_SECRET")
+        val kakaoKey = getLocalProperty("KAKAO_NATIVE_APP_KEY")
 
-        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"${localProperties["NAVER_CLIENT_SECRET"] ?: ""}\"")
-        manifestPlaceholders["NAVER_CLIENT_SECRET"] = localProperties["NAVER_CLIENT_SECRET"] ?: ""
+        buildConfigField("String", "NAVER_CLIENT_ID", "\"$naverId\"")
+        buildConfigField("String", "NAVER_CLIENT_SECRET", "\"$naverSecret\"")
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoKey\"")
+        buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
 
-        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"${localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""}\"")
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties["KAKAO_NATIVE_APP_KEY"] ?: ""
-
-        buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
+        manifestPlaceholders += mapOf(
+            "NAVER_CLIENT_ID" to naverId,
+            "NAVER_CLIENT_SECRET" to naverSecret,
+            "KAKAO_NATIVE_APP_KEY" to kakaoKey
+        )
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // 릴리즈 모드 난독화 활성화가 권장 사항
+            isShrinkResources = true // 미사용 리소스 제거
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
