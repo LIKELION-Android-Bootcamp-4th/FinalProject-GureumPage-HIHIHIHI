@@ -2,6 +2,7 @@
 # Android & Kotlin
 agp = "9.1.0"
 kotlin = "2.2.10"
+ksp = "2.2.10-2.0.2"
 coreKtx = "1.18.0"
 appcompat = "1.7.1"
 material = "1.13.0"
@@ -203,3 +204,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroidVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
