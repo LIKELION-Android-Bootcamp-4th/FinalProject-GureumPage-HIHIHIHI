@@ -7,7 +7,9 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableResult
 import com.hihihihi.data.remote.datasource.AuthDataSource
+import com.navercorp.nid.NidOAuth
 import com.navercorp.nid.oauth.util.NidOAuthCallback
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -45,7 +47,7 @@ class AuthDataSourceImpl @Inject constructor(
     }
 
     override suspend fun unlinkKakao() {
-        return kotlin.coroutines.suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             com.kakao.sdk.user.UserApiClient.instance.unlink { error ->
                 if (error != null) {
                     continuation.resumeWithException(error)
@@ -57,19 +59,25 @@ class AuthDataSourceImpl @Inject constructor(
     }
 
     override suspend fun unlinkNaver() {
-        return kotlin.coroutines.suspendCoroutine { continuation ->
-            com.navercorp.nid.oauth.NidOAuthLogin()
-                .callDeleteTokenApi(
+        return suspendCancellableCoroutine { cont ->
+            try {
+                NidOAuth.disconnect(
                     object : NidOAuthCallback {
                         override fun onSuccess() {
-                            continuation.resume(Unit)
+                            if (cont.isActive) cont.resume(Unit)
                         }
 
                         override fun onFailure(errorCode: String, errorDesc: String) {
-                            continuation.resumeWithException(Exception("Naver unlink failed: $errorCode, $errorDesc"))
+                            if (cont.isActive) {
+                                cont.resumeWithException(Exception("Naver unlink failed: $errorCode, $errorDesc"))
+                            }
                         }
                     },
                 )
+            } catch (e: Exception) {
+                if (cont.isActive) cont.resumeWithException(e)
+            }
+            cont.invokeOnCancellation { /* Naver SDK는 별도 취소 API 없음 */ }
         }
     }
 

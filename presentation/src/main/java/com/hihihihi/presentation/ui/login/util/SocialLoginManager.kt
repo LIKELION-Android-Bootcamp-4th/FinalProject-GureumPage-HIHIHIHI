@@ -1,8 +1,8 @@
 package com.hihihihi.presentation.ui.login.util
 
 import android.app.Activity
-import android.content.Context
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -16,8 +16,8 @@ import kotlin.coroutines.resumeWithException
 
 object SocialLoginManager {
 
-    suspend fun getGoogleIdToken(context: Context, webClientId: String): String {
-        val credentialManager = CredentialManager.create(context)
+    suspend fun getGoogleIdToken(activity: Activity, webClientId: String): String {
+        val credentialManager = CredentialManager.create(activity)
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(webClientId)
@@ -25,8 +25,16 @@ object SocialLoginManager {
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()
-        val result = credentialManager.getCredential(context, request)
-        return GoogleIdTokenCredential.createFrom(result.credential.data).idToken
+        val result = credentialManager.getCredential(activity, request)
+
+        // 타입 체크: CustomCredential 중 Google ID Token이 아닌 경우 명시적 예외
+        val credential = result.credential
+        if (credential is CustomCredential &&
+            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+        ) {
+            return GoogleIdTokenCredential.createFrom(credential.data).idToken
+        }
+        throw IllegalStateException("Unexpected credential type: ${credential.type}")
     }
 
     suspend fun loginWithKakao(activity: Activity): String =
@@ -47,6 +55,9 @@ object SocialLoginManager {
                         UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
                     } else if (token != null) {
                         cont.resume(token.accessToken)
+                    } else {
+                        // token/error 모두 null → 웹 로그인으로 fallback
+                        UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
                     }
                 }
             } else {

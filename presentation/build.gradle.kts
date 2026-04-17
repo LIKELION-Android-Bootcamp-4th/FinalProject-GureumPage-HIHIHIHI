@@ -22,7 +22,11 @@ android {
         minSdk = 26
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties["GOOGLE_WEB_CLIENT_ID"] ?: ""}\"")
+        val googleWebClientId = localProperties["GOOGLE_WEB_CLIENT_ID"]?.toString().orEmpty()
+        if (googleWebClientId.isBlank()) {
+            logger.warn("GOOGLE_WEB_CLIENT_ID가 비어 있습니다. local.properties를 확인해주세요.")
+        }
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
@@ -79,6 +83,9 @@ dependencies {
     implementation(libs.bundles.social.auth)
     implementation(libs.bundles.compose.extra)
     implementation(libs.kotlinx.serialization.json)
+
+    // Google Identity (googleid) SDK가 gson을 transitive 의존성으로 요구함
+    // kotlinx.serialization과 중복 사용 안 함 — 신규 JSON 코드는 kotlinx.serialization 사용할 것
     implementation(libs.gson)
 
     ksp(libs.hilt.android.compiler)

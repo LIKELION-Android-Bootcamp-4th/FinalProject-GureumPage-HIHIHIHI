@@ -12,7 +12,7 @@ plugins {
 val localProperties = Properties().apply {
     val localFile = rootProject.file("local.properties")
     if (localFile.exists()) {
-        load(localFile.inputStream())
+        localFile.inputStream().use { load(it) }
     }
 }
 

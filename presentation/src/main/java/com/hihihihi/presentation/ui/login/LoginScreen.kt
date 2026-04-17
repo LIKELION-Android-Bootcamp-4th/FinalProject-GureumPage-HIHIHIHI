@@ -3,6 +3,8 @@ package com.hihihihi.presentation.ui.login
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +22,6 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,12 +36,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.domain.usecase.auth.SocialProvider
+import com.hihihihi.presentation.BuildConfig
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -50,8 +53,6 @@ import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.login.components.SocialLoginButton
-import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.hihihihi.presentation.BuildConfig
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
 import com.navercorp.nid.NidOAuth
 import com.navercorp.nid.core.data.errorcode.NidOAuthErrorCode
@@ -73,7 +74,7 @@ fun LoginScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val naverLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult(),
     ) { _ ->
         val token = NidOAuth.getAccessToken()
         if (token != null) {
@@ -107,11 +108,13 @@ fun LoginScreen(
         loadingMessage = uiState.loadingMessage,
         snackbarHostState = snackbarHostState,
         onGoogleLogin = {
+            val act = activity ?: return@LoginContent
             coroutineScope.launch {
-                runCatching { SocialLoginManager.getGoogleIdToken(context, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
+                runCatching { SocialLoginManager.getGoogleIdToken(act, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
                     .onSuccess { viewModel.loginWithSocialToken(SocialProvider.GOOGLE, it) }
                     .onFailure {
                         if (it is GetCredentialCancellationException) return@onFailure
+                        if (it is NoCredentialException) return@onFailure
                         viewModel.setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
                     }
             }
