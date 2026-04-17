@@ -2,8 +2,10 @@ package com.hihihihi.presentation.ui.login.util
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
@@ -16,11 +18,17 @@ import kotlin.coroutines.resumeWithException
 
 object SocialLoginManager {
 
-    fun getGoogleIdToken(intent: Intent): String {
-        //
-        val task = GoogleSignIn.getSignedInAccountFromIntent(intent)
-        val account = task.result
-        return account.idToken ?: throw Exception("Google idToken is null")
+    suspend fun getGoogleIdToken(context: Context, webClientId: String): String {
+        val credentialManager = CredentialManager.create(context)
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId(webClientId)
+            .build()
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+        val result = credentialManager.getCredential(context, request)
+        return GoogleIdTokenCredential.createFrom(result.credential.data).idToken
     }
 
     suspend fun loginWithKakao(context: Context): String =

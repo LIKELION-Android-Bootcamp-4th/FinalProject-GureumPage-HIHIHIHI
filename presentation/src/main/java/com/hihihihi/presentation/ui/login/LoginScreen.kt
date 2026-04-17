@@ -2,8 +2,6 @@ package com.hihihihi.presentation.ui.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +47,8 @@ import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.login.components.SocialLoginButton
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import com.hihihihi.presentation.BuildConfig
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -66,12 +66,6 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-
-    val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        result.data?.let { intent -> viewModel.handleGoogleSignInResult(intent) }
-    }
 
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -96,7 +90,16 @@ fun LoginScreen(
         isLoading = uiState.isLoading,
         loadingMessage = uiState.loadingMessage,
         snackbarHostState = snackbarHostState,
-        onGoogleLogin = { viewModel.googleLogin(context, googleLauncher) },
+        onGoogleLogin = {
+            coroutineScope.launch {
+                runCatching { SocialLoginManager.getGoogleIdToken(context, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
+                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.GOOGLE, it) }
+                    .onFailure {
+                        if (it is GetCredentialCancellationException) return@onFailure
+                        viewModel.setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
+                    }
+            }
+        },
         onKakaoLogin = {
             coroutineScope.launch {
                 runCatching { SocialLoginManager.loginWithKakao(context) }
