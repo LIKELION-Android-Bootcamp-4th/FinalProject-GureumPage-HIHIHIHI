@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.bundles.social.auth)
     implementation(libs.bundles.compose.extra)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.gson)
 
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
