@@ -2,6 +2,7 @@ package com.hihihihi.presentation.ui.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,8 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +53,8 @@ import com.hihihihi.presentation.ui.login.components.SocialLoginButton
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.hihihihi.presentation.BuildConfig
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
+import com.navercorp.nid.NidOAuth
+import com.navercorp.nid.core.data.errorcode.NidOAuthErrorCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -66,6 +71,17 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val naverLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        val token = NidOAuth.getAccessToken()
+        if (token != null) {
+            viewModel.loginWithSocialToken(SocialProvider.NAVER, token)
+        } else if (NidOAuth.getLastErrorCode() != NidOAuthErrorCode.CLIENT_USER_CANCEL) {
+            viewModel.setError("네이버 로그인에 실패했습니다.")
+        }
+    }
 
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -101,25 +117,19 @@ fun LoginScreen(
             }
         },
         onKakaoLogin = {
+            val act = activity ?: return@LoginContent
             coroutineScope.launch {
-                runCatching { SocialLoginManager.loginWithKakao(context) }
+                runCatching { SocialLoginManager.loginWithKakao(act) }
                     .onSuccess { viewModel.loginWithSocialToken(SocialProvider.KAKAO, it) }
                     .onFailure {
                         if (it is CancellationException) throw it
+                        Log.e("KakaoLogin", "SDK error: ${it::class.simpleName} - ${it.message}", it)
                         viewModel.setError("카카오 로그인에 실패했습니다.")
                     }
             }
         },
         onNaverLogin = {
-            val act = activity ?: return@LoginContent
-            coroutineScope.launch {
-                runCatching { SocialLoginManager.loginWithNaver(act) }
-                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.NAVER, it) }
-                    .onFailure {
-                        if (it is CancellationException) throw it
-                        viewModel.setError("네이버 로그인에 실패했습니다.")
-                    }
-            }
+            NidOAuth.requestLogin(context, naverLauncher)
         },
     )
 }
