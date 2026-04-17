@@ -8,9 +8,10 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.NidOAuth
 import com.navercorp.nid.oauth.util.NidOAuthCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 object SocialLoginManager {
@@ -27,7 +28,7 @@ object SocialLoginManager {
             val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
                 when {
                     error != null -> cont.resumeWithException(error)
-                    token != null -> cont.resume(token.accessToken, null)
+                    token != null -> cont.resume(token.accessToken)
                     else -> cont.resumeWithException(Exception("Unknown kakao failure"))
                 }
             }
@@ -39,7 +40,7 @@ object SocialLoginManager {
                         }
                         UserApiClient.instance.loginWithKakaoAccount(context, callback = callback)
                     } else if (token != null) {
-                        cont.resume(token.accessToken, null)
+                        cont.resume(token.accessToken)
                     }
                 }
             } else {
@@ -49,16 +50,26 @@ object SocialLoginManager {
 
     suspend fun loginWithNaver(activity: Activity): String =
         suspendCancellableCoroutine { cont ->
-            NaverIdLoginSDK.authenticate(activity, object : NidOAuthCallback {
-                override fun onSuccess() {
-                    val token = NaverIdLoginSDK.getAccessToken()
-                    if (token != null) cont.resume(token, null)
-                    else cont.resumeWithException(Exception("Naver accessToken is null"))
-                }
+            NidOAuth.requestLogin(
+                activity,
+                object : NidOAuthCallback {
+                    override fun onSuccess() {
+                        val token = NidOAuth.getAccessToken()
+                        if (token != null) {
+                            cont.resume(token)
+                        } else {
+                            cont.resumeWithException(Exception("Naver accessToken is null"))
+                        }
+                    }
 
-                override fun onFailure(errorCode: String, errorDesc: String) {
-                    cont.resumeWithException(Exception("Naver login failed: $errorCode, $errorDesc"))
-                }
-            })
+                    override fun onFailure(errorCode: String, errorDesc: String) {
+                        if (errorCode == "user_cancel") {
+                            cont.cancel()
+                        } else {
+                            cont.resumeWithException(Exception("Naver login failed: $errorCode, $errorDesc"))
+                        }
+                    }
+                },
+            )
         }
 }
