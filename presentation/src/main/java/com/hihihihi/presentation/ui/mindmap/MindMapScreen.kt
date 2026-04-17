@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.gyso.treeview.layout.VerticalTreeLayoutManager
 import com.gyso.treeview.line.DashLine
 import com.gyso.treeview.model.NodeModel
