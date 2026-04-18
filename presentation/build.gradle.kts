@@ -40,8 +40,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -53,7 +53,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
@@ -76,8 +76,13 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.coroutines)
+    
     implementation(libs.bundles.hilt)
+    // hiltViewModel의 신 패키지 제공 아티팩트 (androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    // Navigation 기반 ViewModel 스코프 사용 시 필요
     implementation(libs.androidx.hilt.navigation.compose)
+
     implementation(libs.bundles.glance)
     implementation(libs.bundles.coil)
     implementation(libs.bundles.social.auth)
