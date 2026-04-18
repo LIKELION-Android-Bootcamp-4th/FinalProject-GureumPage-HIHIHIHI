@@ -11,6 +11,7 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.WaitForUserDocumentCreationUseCase
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -111,7 +112,8 @@ class LoginViewModel @Inject constructor(
                 signInWithSocialTokenUseCase(provider, accessToken)
                 setLastProviderUseCase(provider.name.lowercase())
                 navigateAfterLogin()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "소셜 로그인 실패", e)
                 setError("로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
