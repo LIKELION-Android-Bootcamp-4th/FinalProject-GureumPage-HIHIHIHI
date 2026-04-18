@@ -53,7 +53,7 @@ object SocialLoginManager {
                             cont.cancel(); return@loginWithKakaoTalk
                         }
                         UserApiClient.instance.loginWithKakaoAccount(activity, callback = callback)
-                    } else if (token != null) {
+                    } else if (token != null && cont.isActive) {
                         cont.resume(token.accessToken)
                     } else {
                         // token/error 모두 null → 웹 로그인으로 fallback
