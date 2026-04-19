@@ -41,10 +41,15 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN_CI }}
         run: |
+          if [ -f "app/build.gradle.kts" ]; then
+            TARGET="app/google-services.json"
+          else
+            TARGET="presentation/google-services.json"
+          fi
           doppler secrets get GOOGLE_SERVICES_JSON \
             --plain --token "$DOPPLER_TOKEN" \
             --project gureumpage --config ci \
-            > app/google-services.json
+            > "$TARGET"
 
       - uses: gradle/actions/setup-gradle@v4
         with:

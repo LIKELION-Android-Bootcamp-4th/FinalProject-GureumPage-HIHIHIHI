@@ -46,8 +46,13 @@ fi
 
 # 5. google-services.json 복원
 echo "[5/6] google-services.json 복원..."
-doppler secrets get GOOGLE_SERVICES_JSON --plain \
-    > "$PROJECT_ROOT/app/google-services.json"
+if [ -f "$PROJECT_ROOT/app/build.gradle.kts" ]; then
+    GOOGLE_SERVICES_TARGET="$PROJECT_ROOT/app/google-services.json"
+else
+    GOOGLE_SERVICES_TARGET="$PROJECT_ROOT/presentation/google-services.json"
+fi
+doppler secrets get GOOGLE_SERVICES_JSON --plain > "$GOOGLE_SERVICES_TARGET"
+echo "  → $GOOGLE_SERVICES_TARGET"
 
 # 6. 공용 debug keystore 복원
 echo "[6/6] debug.keystore 복원..."
