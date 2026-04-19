@@ -6,7 +6,7 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.openjsse.**
 
-# Retrofit2 (R8 full mode)
+# Retrofit2 (R8 compatibility)
 -if interface * { @retrofit2.http.* <methods>; }
 -keep,allowobfuscation interface <1>
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
@@ -45,9 +45,6 @@
     *** get*();
     void set*(***);
 }
-
-# Naver OAuth
--dontwarn com.navercorp.nid.**
 
 # 스택 트레이스 줄 번호 보존
 -keepattributes SourceFile,LineNumberTable
