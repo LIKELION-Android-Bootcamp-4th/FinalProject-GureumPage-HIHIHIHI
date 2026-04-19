@@ -6,7 +6,7 @@ echo "=== GureumPage 시크릿 셋업 ==="
 
 # 1. Doppler CLI 설치 확인
 if ! command -v doppler &> /dev/null; then
-    echo "[1/5] Doppler CLI 설치 중..."
+    echo "[1/6] Doppler CLI 설치 중..."
     if [[ "$OSTYPE" == "darwin"* ]]; then
         brew install dopplerhq/cli/doppler
     else
@@ -14,19 +14,19 @@ if ! command -v doppler &> /dev/null; then
         exit 1
     fi
 else
-    echo "[1/5] Doppler CLI: $(doppler --version)"
+    echo "[1/6] Doppler CLI: $(doppler --version)"
 fi
 
 # 2. 로그인 확인
-echo "[2/5] Doppler 인증 확인..."
+echo "[2/6] Doppler 인증 확인..."
 doppler me &> /dev/null || doppler login
 
 # 3. 프로젝트 연결
-echo "[3/5] 프로젝트 연결 (gureumpage / dev)..."
+echo "[3/6] 프로젝트 연결 (gureumpage / dev)..."
 doppler setup --project gureumpage --config dev --no-prompt
 
 # 4. local.properties 생성 (기존 sdk.dir 보존)
-echo "[4/5] local.properties 생성..."
+echo "[4/6] local.properties 생성..."
 SDK_LINE=""
 if [ -f "$PROJECT_ROOT/local.properties" ]; then
     SDK_LINE=$(grep "^sdk.dir=" "$PROJECT_ROOT/local.properties" || true)
@@ -45,10 +45,16 @@ fi
 } > "$PROJECT_ROOT/local.properties"
 
 # 5. google-services.json 복원
-echo "[5/5] google-services.json 복원..."
+echo "[5/6] google-services.json 복원..."
 doppler secrets get GOOGLE_SERVICES_JSON --plain \
     > "$PROJECT_ROOT/app/google-services.json"
 
+# 6. 공용 debug keystore 복원
+echo "[6/6] debug.keystore 복원..."
+mkdir -p "$HOME/.android"
+doppler secrets get DEBUG_KEYSTORE --plain \
+    | base64 -d > "$HOME/.android/debug.keystore"
+
 echo ""
-echo "완료! local.properties 및 app/google-services.json 생성됨."
+echo "완료! local.properties, app/google-services.json, ~/.android/debug.keystore 생성됨."
 echo "./gradlew assembleDebug 또는 Android Studio에서 Gradle sync를 실행하세요."
