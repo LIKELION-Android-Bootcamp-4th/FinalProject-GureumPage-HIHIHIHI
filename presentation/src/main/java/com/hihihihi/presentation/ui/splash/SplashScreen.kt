@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.components.Medi12Text
@@ -127,16 +128,20 @@ fun SplashView(
         }
     }
 
-    LaunchedEffect(uiState.permissionHandled, uiState.isLoading, uiState.navTarget) {
-        if (uiState.permissionHandled && !uiState.isLoading) {
-            when (val target = uiState.navTarget) {
-                SplashViewModel.NavTarget.Login -> onNavigateToLogin()
-                SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()
-                SplashViewModel.NavTarget.Home -> onNavigateToHome()
-                is SplashViewModel.NavTarget.Widget -> onNavigateToWidget(target.route)
-                else -> {
-                    // Loading, NoNetwork 상태는 별도 UI에서 처리
-                }
+    val navEvent by remember(uiState) {
+        derivedStateOf {
+            if (uiState.permissionHandled && !uiState.isLoading) uiState.navTarget else null
+        }
+    }
+
+    LaunchedEffect(navEvent) {
+        when (val target = navEvent ?: return@LaunchedEffect) {
+            SplashViewModel.NavTarget.Login -> onNavigateToLogin()
+            SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()
+            SplashViewModel.NavTarget.Home -> onNavigateToHome()
+            is SplashViewModel.NavTarget.Widget -> onNavigateToWidget(target.route)
+            else -> {
+                // Loading, NoNetwork 상태는 별도 UI에서 처리
             }
         }
     }
