@@ -33,8 +33,8 @@ jobs:
             --no-file --format env \
             --token "$DOPPLER_TOKEN" \
             --project gureumpage --config ci \
-            --exclude GOOGLE_SERVICES_JSON \
-          | grep -E "^(KAKAO_|NAVER_|ALADIN_|GOOGLE_WEB_CLIENT_ID)" >> local.properties
+          | grep -E "^(KAKAO_|NAVER_|ALADIN_|GOOGLE_WEB_CLIENT_ID)" \
+          | sed 's/="\(.*\)"$/=\1/' >> local.properties
           echo "sdk.dir=$ANDROID_SDK_ROOT" >> local.properties
 
       - name: Restore google-services.json

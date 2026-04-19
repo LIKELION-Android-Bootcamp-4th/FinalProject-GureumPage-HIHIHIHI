@@ -23,7 +23,7 @@ doppler me &> /dev/null || doppler login
 
 # 3. 프로젝트 연결
 echo "[3/6] 프로젝트 연결 (gureumpage / dev)..."
-doppler setup --project gureumpage --config dev --no-prompt
+doppler setup --project gureumpage --config dev --no-interactive
 
 # 4. local.properties 생성 (기존 sdk.dir 보존)
 echo "[4/6] local.properties 생성..."
@@ -40,8 +40,9 @@ fi
     else
         echo "sdk.dir=${ANDROID_HOME:-$HOME/Library/Android/sdk}"
     fi
-    doppler secrets download --no-file --format env --exclude GOOGLE_SERVICES_JSON \
-        | grep -E "^(KAKAO_|NAVER_|ALADIN_|GOOGLE_WEB_CLIENT_ID)"
+    doppler secrets download --no-file --format env \
+        | grep -E "^(KAKAO_|NAVER_|ALADIN_|GOOGLE_WEB_CLIENT_ID)" \
+        | sed 's/="\(.*\)"$/=\1/'
 } > "$PROJECT_ROOT/local.properties"
 
 # 5. google-services.json 복원
