@@ -1,7 +1,7 @@
 package com.hihihihi.data.remote.datasourceimpl
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.hihihihi.data.common.util.ISBNNormalizer
+import com.hihihihi.data.common.utils.ISBNNormalizer
 import com.hihihihi.data.remote.datasource.UserBookRemoteDataSource
 import com.hihihihi.data.remote.dto.UserBookDto
 import com.hihihihi.data.remote.mapper.toMap
