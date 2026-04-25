@@ -37,8 +37,7 @@ javaxInject = "1"
 # Social Auth
 kakaoSdk = "2.23.2"
 naverOauth = "5.11.2"
-credentials = "1.6.0"
-googleid = "1.2.0"
+playServicesAuth = "21.4.0"
 
 # Image Loading
 coil = "3.4.0"
@@ -110,9 +109,7 @@ androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", vers
 # Social Auth
 kakao-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakaoSdk" }
 naver-oauth = { group = "com.navercorp.nid", name = "oauth", version.ref = "naverOauth" }
-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
-googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 # Image Loading (Coil)
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
@@ -177,9 +174,7 @@ firebase = [
 social-auth = [
     "kakao-user",
     "naver-oauth",
-    "credentials",
-    "credentials-play-services-auth",
-    "googleid"
+    "play-services-auth"
 ]
 coil = [
     "coil-compose",
