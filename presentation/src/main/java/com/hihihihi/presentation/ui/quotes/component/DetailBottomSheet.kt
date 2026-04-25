@@ -20,20 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.hihihihi.domain.model.Quote
 import com.hihihihi.presentation.designsystem.components.BodySubText
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
+import com.hihihihi.presentation.ui.model.QuoteUiModel
 import com.hihihihi.presentation.utils.formatDateToSimpleString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailBottomSheet(
-    quote: Quote,
+    quote: QuoteUiModel,
     sheetState: SheetState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
@@ -44,7 +44,7 @@ fun DetailBottomSheet(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 // 책 표지
                 BookCoverImage(
@@ -57,7 +57,7 @@ fun DetailBottomSheet(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.Top,
                     ) {
                         Column {
                             // 책 제목
@@ -65,7 +65,7 @@ fun DetailBottomSheet(
                                 text = quote.title,
                                 maxLines = 1,
                                 style = GureumTypography.bodyLarge,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
                             )
                             Row {
                                 // 날짜
@@ -91,12 +91,12 @@ fun DetailBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GureumTheme.colors.bookBackground)
+                    .background(GureumTheme.colors.bookBackground),
             ) {
                 Medi16Text(
                     text = quote.content,
                     color = GureumTheme.colors.gray800,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
             }
         }

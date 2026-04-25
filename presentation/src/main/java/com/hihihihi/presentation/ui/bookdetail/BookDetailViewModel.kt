@@ -6,6 +6,7 @@ import com.hihihihi.domain.model.History
 import com.hihihihi.domain.model.Quote
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.RecordType
+import com.hihihihi.domain.model.UserBook
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.quote.AddQuoteUseCase
@@ -13,15 +14,20 @@ import com.hihihihi.domain.usecase.quote.DeleteQuoteUseCase
 import com.hihihihi.domain.usecase.quote.UpdateQuoteUseCase
 import com.hihihihi.domain.usecase.userbook.GetBookDetailDataUseCase
 import com.hihihihi.domain.usecase.userbook.PatchUserBookUseCase
+import com.hihihihi.presentation.ui.model.QuoteUiModel
+import com.hihihihi.presentation.ui.model.toUiModel
 import com.hihihihi.presentation.utils.formatSecondsToReadableTime
 import com.hihihihi.presentation.utils.getDailyAverageReadTimeInSeconds
 import com.hihihihi.presentation.utils.getDayCountLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -35,16 +41,21 @@ class BookDetailViewModel @Inject constructor(
     private val getBookDetailDataUseCase: GetBookDetailDataUseCase,
     private val deleteQuoteUseCase: DeleteQuoteUseCase,
     private val updateQuoteUseCase: UpdateQuoteUseCase,
-    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
 
-    // UI 상태를 관리하는 StateFlow
     private val _uiState = MutableStateFlow(BookDetailUiState())
     val uiState: StateFlow<BookDetailUiState> = _uiState
 
+    private val _effect = Channel<BookDetailEffect>(Channel.BUFFERED)
+    val effect: Flow<BookDetailEffect> = _effect.receiveAsFlow()
+
+    // domain 백킹 — mutation 연산(patchUserBook, addQuote, addManualHistory)에서 사용
+    private var _domainUserBook: UserBook? = null
+    private var _domainHistories: List<History> = emptyList()
+
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
-
 
     fun loadUserBookDetails(userBookId: String) {
         viewModelScope.launch {
@@ -52,17 +63,75 @@ class BookDetailViewModel @Inject constructor(
                 .onStart { _uiState.update { it.copy(isLoading = true) } }
                 .catch { e -> _uiState.update { it.copy(errorMessage = e.message, isLoading = false) } }
                 .collect { data ->
+                    val userBook = data.userBook
+                    _domainUserBook = userBook
+                    _domainHistories = data.history
+
+                    val shouldShowCompletion = userBook != null &&
+                            userBook.status == ReadingStatus.READING &&
+                            userBook.currentPage >= userBook.totalPage &&
+                            userBook.currentPage > 0 &&
+                            userBook.totalPage > 0
+
                     _uiState.update {
                         it.copy(
-                            userBook = data.userBook,
-                            quotes = data.quotes,
-                            histories = data.history,
-                            isLoading = false
+                            userBook = userBook?.toUiModel(),
+                            quotes = data.quotes.map { q -> q.toUiModel() },
+                            histories = data.history.map { h -> h.toUiModel() },
+                            isLoading = false,
+                            dialogState = if (shouldShowCompletion && it.dialogState == BookDetailDialogState.None) {
+                                BookDetailDialogState.Completion
+                            } else {
+                                it.dialogState
+                            },
                         )
                     }
                 }
         }
     }
+
+    // --- Dialog 상태 메서드 ---
+
+    fun onAddQuoteClick() {
+        _uiState.update { it.copy(dialogState = BookDetailDialogState.AddQuote(it.userBook?.totalPage)) }
+    }
+
+    fun onAddManualHistoryClick() {
+        val userBook = _domainUserBook
+        _uiState.update {
+            it.copy(
+                dialogState = BookDetailDialogState.AddManualHistory(
+                    currentPage = userBook?.currentPage ?: 0,
+                    lastPage = userBook?.totalPage ?: 0,
+                    startDate = userBook?.startDate,
+                ),
+            )
+        }
+    }
+
+    fun onReadingStatusClick() {
+        _uiState.update { it.copy(dialogState = BookDetailDialogState.ReadingStatus) }
+    }
+
+    fun onQuoteEditClick(quoteUiModel: QuoteUiModel) {
+        _uiState.update { it.copy(dialogState = BookDetailDialogState.EditQuote(quoteUiModel)) }
+    }
+
+    fun dismissDialog() {
+        _uiState.update { it.copy(dialogState = BookDetailDialogState.None) }
+    }
+
+    // --- Navigation Effect 메서드 ---
+
+    fun navigateToMindmap() {
+        viewModelScope.launch { _effect.send(BookDetailEffect.NavigateToMindmap) }
+    }
+
+    fun navigateToTimer() {
+        viewModelScope.launch { _effect.send(BookDetailEffect.NavigateToTimer) }
+    }
+
+    // --- 데이터 조작 메서드 ---
 
     fun addManualHistory(
         date: LocalDateTime,
@@ -70,10 +139,9 @@ class BookDetailViewModel @Inject constructor(
         endTime: LocalDateTime,
         readTime: Int,
         readPageCount: Int,
-        currentPage: Int
+        currentPage: Int,
     ) {
-        val userBook = uiState.value.userBook ?: return
-
+        val userBook = _domainUserBook ?: return
         val uid = currentUid ?: return
 
         val history = History(
@@ -85,24 +153,20 @@ class BookDetailViewModel @Inject constructor(
             endTime = endTime,
             readTime = readTime,
             readPageCount = readPageCount,
-            recordType = RecordType.MANUAL
+            recordType = RecordType.MANUAL,
         )
 
         viewModelScope.launch {
             try {
                 addHistoryUseCase(history, currentPage = currentPage)
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(errorMessage = e.message)
-                }
+                _uiState.update { it.copy(errorMessage = e.message) }
             }
         }
     }
 
-
     fun addQuote(userBookId: String, content: String, pageNumber: Int?) {
-        val userBook = uiState.value.userBook ?: return // 방어 코드
-
+        val userBook = _domainUserBook ?: return
         val uid = currentUid ?: return
 
         val newQuote = Quote(
@@ -116,86 +180,64 @@ class BookDetailViewModel @Inject constructor(
             title = userBook.title,
             author = userBook.author,
             publisher = userBook.publisher ?: "",
-            imageUrl = userBook.imageUrl
+            imageUrl = userBook.imageUrl,
         )
         viewModelScope.launch {
-            // 로딩 상태로 설정
             _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isLoading = true))
-
-            // 명언 추가 UseCase 실행
             val result = addQuoteUseCase(newQuote)
-
-            // 결과에 따라 상태 업데이트
             if (result.isSuccess) {
                 _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isSuccess = true))
-                delay(2000) // 잠깐 보여주기 위한 delay (필요에 따라 조절 가능)
+                delay(2000)
                 _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
             } else if (result.isFailure) {
                 _uiState.value = _uiState.value.copy(
-                    addQuoteState = AddQuoteState(
-                        error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"
-                    )
+                    addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"),
                 )
             }
-
         }
     }
 
-    // 필사 추가 상태 초기화 함수
     fun resetAddQuoteState() {
         _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
     }
 
-    // 통계 반환하는 함수
     fun getStatistic(): BookStatistic {
+        val userBook = _domainUserBook
         return BookStatistic(
-            readingPeriod = if (uiState.value.userBook?.startDate == null) "아직 읽지 않은 책" else getDayCountLabel(
-                uiState.value.userBook?.startDate!!,
-                uiState.value.userBook?.endDate,
-                uiState.value.userBook?.status!!
-            ),
-            totalReadingTime = uiState.value.histories
+            readingPeriod = userBook?.let { book ->
+                val startDate = book.startDate
+                if (startDate == null) "아직 읽지 않은 책"
+                else getDayCountLabel(startDate, book.endDate, book.status)
+            } ?: "아직 읽지 않은 책",
+            totalReadingTime = _domainHistories
                 .sumOf { it.readTime }
                 .let { if (it == 0) "0분" else formatSecondsToReadableTime(it) },
-            averageDailyTime = getDailyAverageReadTimeInSeconds(uiState.value.histories)
+            averageDailyTime = getDailyAverageReadTimeInSeconds(_domainHistories),
         )
     }
 
     fun patchUserBook(status: ReadingStatus?, page: Int?, startDate: LocalDateTime?, endDate: LocalDateTime?) {
-        val userBook = uiState.value.userBook ?: return
-
+        val userBook = _domainUserBook ?: return
         val patchUserBook = userBook.copy(
             status = status ?: userBook.status,
             currentPage = page ?: userBook.currentPage,
             startDate = startDate ?: userBook.startDate,
-            endDate = endDate ?: userBook.endDate
+            endDate = endDate ?: userBook.endDate,
         )
-
-        viewModelScope.launch {
-            patchUserBookUseCase(patchUserBook)
-        }
+        viewModelScope.launch { patchUserBookUseCase(patchUserBook) }
     }
 
     fun patchReview(rating: Double, review: String) {
-        val userBook = uiState.value.userBook ?: return
-
-        val patchUserBook = userBook.copy(
-            rating = rating,
-            review = review
-        )
-
-        viewModelScope.launch {
-            patchUserBookUseCase(patchUserBook)
-        }
+        val userBook = _domainUserBook ?: return
+        val patchUserBook = userBook.copy(rating = rating, review = review)
+        viewModelScope.launch { patchUserBookUseCase(patchUserBook) }
     }
 
     fun deleteQuote(quoteId: String) {
         viewModelScope.launch {
             val result = deleteQuoteUseCase(quoteId)
             if (result.isSuccess) {
-                _uiState.update { state ->
-                    state.copy(quotes = state.quotes.filterNot { it.id == quoteId })
-                }
+                _uiState.update { state -> state.copy(quotes = state.quotes.filterNot { it.id == quoteId }) }
             } else {
                 _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
             }
@@ -206,13 +248,9 @@ class BookDetailViewModel @Inject constructor(
         val currentQuotes = uiState.value.quotes.toMutableList()
         val index = currentQuotes.indexOfFirst { it.id == quoteId }
         if (index != -1) {
-            val updatedQuote = currentQuotes[index].copy(
-                content = newContent,
-                pageNumber = newPageNumber
-            )
+            val updatedQuote = currentQuotes[index].copy(content = newContent, pageNumber = newPageNumber)
             currentQuotes[index] = updatedQuote
             _uiState.update { it.copy(quotes = currentQuotes) }
-
             viewModelScope.launch {
                 val result = updateQuoteUseCase(quoteId, newContent, newPageNumber)
                 if (result.isFailure) {
@@ -226,6 +264,24 @@ class BookDetailViewModel @Inject constructor(
 data class BookStatistic(
     val readingPeriod: String,
     val totalReadingTime: String,
-    val averageDailyTime: String
+    val averageDailyTime: String,
 )
 
+sealed interface BookDetailDialogState {
+    data object None : BookDetailDialogState
+    data class AddQuote(val lastPage: Int?) : BookDetailDialogState
+    data class AddManualHistory(
+        val currentPage: Int,
+        val lastPage: Int,
+        val startDate: LocalDateTime?,
+    ) : BookDetailDialogState
+
+    data object ReadingStatus : BookDetailDialogState
+    data class EditQuote(val quoteUiModel: QuoteUiModel) : BookDetailDialogState
+    data object Completion : BookDetailDialogState
+}
+
+sealed interface BookDetailEffect {
+    data object NavigateToMindmap : BookDetailEffect
+    data object NavigateToTimer : BookDetailEffect
+}

@@ -7,26 +7,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
-import com.hihihihi.presentation.ui.mypage.MypageViewModel
 import com.hihihihi.presentation.utils.openAppOnPlayStore
 import com.hihihihi.presentation.utils.openSupportEmail
 
 @Composable
 fun MyPageMenuSection(
-    viewModel: MypageViewModel = hiltViewModel(),
+    theme: GureumThemeType,
+    onThemeToggle: (GureumThemeType) -> Unit,
     onLogoutClick: () -> Unit,
     onWithDrawClick: () -> Unit
 ) {
-    val theme by viewModel.theme.collectAsState()
     val colors = GureumTheme.colors
     val context = LocalContext.current
 
@@ -62,7 +58,7 @@ fun MyPageMenuSection(
             showSwitch = true,
             showArrow = false,
             switchChecked = (theme == GureumThemeType.DARK),
-            onSwitchToggle = { viewModel.toggleTheme(it) }
+            onSwitchToggle = { onThemeToggle(it) }
         ) { }
 
         MyPageMenuSettingItem(

@@ -36,13 +36,18 @@ class SearchViewModel @Inject constructor(
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
 
+    fun selectBook(book: SearchBook?) {
+        _uiState.update { it.copy(selectedBook = book) }
+    }
+
     fun search(query: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 query = query,
                 isSearching = true,
                 searchResults = emptyList(),
-                page = 1
+                page = 1,
+                hasSearched = true,
             )
             try {
                 val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE).getOrThrow()
@@ -52,14 +57,14 @@ class SearchViewModel @Inject constructor(
                     searchResults = dedup,
                     isSearching = false,
                     hasMore = canLoadMore(dedup.size, 1),
-                    page = 1
+                    page = 1,
                 )
             } catch (_: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
                     isSearching = false,
                     hasMore = false,
-                    page = 0
+                    page = 0,
                 )
             }
         }
@@ -70,29 +75,36 @@ class SearchViewModel @Inject constructor(
         if (state.isLoadingMore || state.isPaging || !state.hasMore) return
 
         viewModelScope.launch {
+            // 요청 시점의 쿼리를 캡처해 유효성 검증에 사용
+            val requestQuery = state.query
+            val snapshotPage = state.page
+            val snapshotResults = state.searchResults
             _uiState.update { it.copy(isLoadingMore = true) }
 
             try {
-                val nextPage = state.page + 1
+                val nextPage = snapshotPage + 1
                 val newResults =
-                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE).getOrThrow()
+                    searchBooksUseCase(requestQuery, page = nextPage, pageSize = PAGE_SIZE).getOrThrow()
 
-                val before = state.searchResults
-                val merged = (before + newResults).distinctBy { it.isbn }
+                val merged = (snapshotResults + newResults).distinctBy { it.isbn }
+                val actuallyGrew = merged.size > snapshotResults.size
 
-                val actuallyGrew = merged.size > before.size
-
-                _uiState.value = state.copy(
-                    searchResults = merged,
-                    page = nextPage,
-                    isLoadingMore = false,
-                    hasMore = canLoadMore(merged.size, nextPage) && actuallyGrew && newResults.isNotEmpty()
-                )
-            } catch (e: Exception) {
-                _uiState.value = state.copy(
-                    isLoadingMore = false,
-                    hasMore = false
-                )
+                _uiState.update { current ->
+                    // 응답을 기다리는 동안 새 검색이 시작됐으면 결과를 버리고 로딩 플래그만 해제
+                    if (current.query != requestQuery) {
+                        current.copy(isLoadingMore = false)
+                    } else {
+                        current.copy(
+                            searchResults = merged,
+                            page = nextPage,
+                            isLoadingMore = false,
+                            hasMore = canLoadMore(merged.size, nextPage) && actuallyGrew && newResults.isNotEmpty(),
+                        )
+                    }
+                }
+            } catch (_: Exception) {
+                // 일시적 오류(타임아웃 등)에서는 hasMore를 변경하지 않아 사용자가 재시도 가능하게 유지
+                _uiState.update { current -> current.copy(isLoadingMore = false) }
             }
         }
     }
@@ -167,7 +179,7 @@ class SearchViewModel @Inject constructor(
                     color = null,
                     icon = null,
                     deleted = false,
-                    bookImage = searchBook.coverImageUrl
+                    bookImage = searchBook.coverImageUrl,
                 )
 
                 val result = addUserBookUseCase(uid, userBook, mindmap, rootNode)
@@ -177,7 +189,8 @@ class SearchViewModel @Inject constructor(
                         _uiState.value.copy(
                             isAddingBook = false,
                             addBookMessage = "책이 추가되었습니다",
-                            isAddBookSuccess = true
+                            isAddBookSuccess = true,
+                            selectedBook = null,
                         )
                 } else {
                     val errorMessage = result.exceptionOrNull()?.message ?: "알 수 없는 오류가 발생했습니다."
@@ -185,7 +198,7 @@ class SearchViewModel @Inject constructor(
                         _uiState.value.copy(
                             isAddingBook = false,
                             addBookMessage = errorMessage,
-                            isAddBookSuccess = false
+                            isAddBookSuccess = false,
                         )
                 }
             } catch (e: Exception) {
@@ -193,7 +206,7 @@ class SearchViewModel @Inject constructor(
                     _uiState.value.copy(
                         isAddingBook = false,
                         addBookMessage = e.message ?: "알 수 없는 오류가 발생했습니다.",
-                        isAddBookSuccess = false
+                        isAddBookSuccess = false,
                     )
             }
         }
@@ -202,7 +215,7 @@ class SearchViewModel @Inject constructor(
     fun clearMessage() {
         _uiState.value = _uiState.value.copy(
             addBookMessage = "",
-            isAddBookSuccess = false
+            isAddBookSuccess = false,
         )
     }
 }
