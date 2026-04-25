@@ -6,6 +6,7 @@ import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.auth.WithdrawUserUseCase
 import com.hihihihi.domain.usecase.user.ClearUserDataUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -75,11 +76,12 @@ class WithdrawViewModel @Inject constructor(
             setLoading(false)
             _effect.send(WithdrawEffect.NavigateToLogin)
         } catch (e: Exception) {
+            Log.e("WithdrawViewModel", "계정 탈퇴 실패", e)
             val errorMessage = when {
                 e.message?.contains("unauthenticated") == true -> "인증이 필요합니다"
                 e.message?.contains("not-found") == true -> "사용자를 찾을 수 없습니다"
                 e.message?.contains("permission-denied") == true -> "권한이 없습니다"
-                else -> "탈퇴 처리 중 오류가 발생했습니다: ${e.message}"
+                else -> "탈퇴 처리 중 오류가 발생했습니다"
             }
             setError(errorMessage)
         }

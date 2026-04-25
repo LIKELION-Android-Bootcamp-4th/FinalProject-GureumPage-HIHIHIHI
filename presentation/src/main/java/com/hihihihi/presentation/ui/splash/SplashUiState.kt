@@ -1,5 +1,8 @@
 package com.hihihihi.presentation.ui.splash
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class SplashUiState(
     val navTarget: SplashViewModel.NavTarget = SplashViewModel.NavTarget.Loading,
     val loadingMessage: String = "구름이를 깨우는 중...",

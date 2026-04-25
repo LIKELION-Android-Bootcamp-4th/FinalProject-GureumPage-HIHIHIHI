@@ -2,6 +2,7 @@ package com.hihihihi.presentation.ui.login
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -35,12 +36,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.domain.usecase.auth.SocialProvider
+import com.hihihihi.presentation.BuildConfig
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -50,6 +54,8 @@ import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
 import com.hihihihi.presentation.ui.login.components.SocialLoginButton
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
+import com.navercorp.nid.NidOAuth
+import com.navercorp.nid.core.data.errorcode.NidOAuthErrorCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -67,10 +73,15 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val googleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        result.data?.let { intent -> viewModel.handleGoogleSignInResult(intent) }
+    val naverLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { _ ->
+        val token = NidOAuth.getAccessToken()
+        if (token != null) {
+            viewModel.loginWithSocialToken(SocialProvider.NAVER, token)
+        } else if (NidOAuth.getLastErrorCode() != NidOAuthErrorCode.CLIENT_USER_CANCEL) {
+            viewModel.setError("네이버 로그인에 실패했습니다.")
+        }
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -96,27 +107,32 @@ fun LoginScreen(
         isLoading = uiState.isLoading,
         loadingMessage = uiState.loadingMessage,
         snackbarHostState = snackbarHostState,
-        onGoogleLogin = { viewModel.googleLogin(context, googleLauncher) },
-        onKakaoLogin = {
+        onGoogleLogin = {
+            val act = activity ?: return@LoginContent
             coroutineScope.launch {
-                runCatching { SocialLoginManager.loginWithKakao(context) }
+                runCatching { SocialLoginManager.getGoogleIdToken(act, BuildConfig.GOOGLE_WEB_CLIENT_ID) }
+                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.GOOGLE, it) }
+                    .onFailure {
+                        if (it is GetCredentialCancellationException) return@onFailure
+                        if (it is NoCredentialException) return@onFailure
+                        viewModel.setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
+                    }
+            }
+        },
+        onKakaoLogin = {
+            val act = activity ?: return@LoginContent
+            coroutineScope.launch {
+                runCatching { SocialLoginManager.loginWithKakao(act) }
                     .onSuccess { viewModel.loginWithSocialToken(SocialProvider.KAKAO, it) }
                     .onFailure {
                         if (it is CancellationException) throw it
+                        Log.e("KakaoLogin", "SDK error: ${it::class.simpleName} - ${it.message}", it)
                         viewModel.setError("카카오 로그인에 실패했습니다.")
                     }
             }
         },
         onNaverLogin = {
-            val act = activity ?: return@LoginContent
-            coroutineScope.launch {
-                runCatching { SocialLoginManager.loginWithNaver(act) }
-                    .onSuccess { viewModel.loginWithSocialToken(SocialProvider.NAVER, it) }
-                    .onFailure {
-                        if (it is CancellationException) throw it
-                        viewModel.setError("네이버 로그인에 실패했습니다.")
-                    }
-            }
+            NidOAuth.requestLogin(context, naverLauncher)
         },
     )
 }
