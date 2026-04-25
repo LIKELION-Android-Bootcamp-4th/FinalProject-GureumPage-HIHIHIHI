@@ -1,9 +1,9 @@
 package com.hihihihi.data.mapper
 
+import com.hihihihi.data.common.utils.toLocalDateTime
+import com.hihihihi.data.common.utils.toTimestamp
 import com.hihihihi.data.remote.dto.HistoryDto
 import com.hihihihi.domain.model.History
-import com.hihihihi.data.common.util.toLocalDateTime
-import com.hihihihi.data.common.util.toTimestamp
 import com.hihihihi.domain.model.RecordType
 
 fun HistoryDto.toDomain(): History = History(
