@@ -24,11 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,37 +35,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.components.Medi12Text
+import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTypography
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.notification.reminder.ReminderScheduler
 import com.hihihihi.presentation.notification.summary.SummaryScheduler
 
 @Composable
 fun SplashView(
-    navController: NavHostController,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToOnBoarding: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToWidget: (Any) -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
-    pendingWidgetRoute: String? = null,
+    pendingWidgetRoute: Any? = null,
 ) {
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var askedOnce by rememberSaveable { mutableStateOf(false) }
-    var proceed by rememberSaveable { mutableStateOf(false) }
-    var kicked by rememberSaveable { mutableStateOf(false) }
     var showProgress by remember { mutableStateOf(false) }
     var startAnimation by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
-        proceed = true
+        viewModel.onPermissionResult()
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
         else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
     }
@@ -78,15 +78,14 @@ fun SplashView(
         finishedListener = {
             showProgress = true
             viewModel.checkNetworkAndProceed()
-        }
+        },
     )
 
     val offsetY by animateDpAsState(
         targetValue = if (startAnimation) 0.dp else 40.dp,
-        animationSpec = tween(durationMillis = 1200), label = ""
+        animationSpec = tween(durationMillis = 1200), label = "",
     )
 
-    // 위젯 라우트를 먼저 ViewModel에 설정
     LaunchedEffect(pendingWidgetRoute) {
         if (pendingWidgetRoute != null) {
             viewModel.setPendingWidgetRoute(pendingWidgetRoute)
@@ -99,74 +98,42 @@ fun SplashView(
 
     val animatedProgress by animateFloatAsState(
         targetValue = uiState.progress,
-        animationSpec = tween(durationMillis = 300), label = ""
+        animationSpec = tween(durationMillis = 300), label = "",
     )
 
-    LaunchedEffect(askedOnce) {
+    LaunchedEffect(uiState.permissionAsked) {
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
+                context, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
-            if (!granted && !askedOnce) {
-                askedOnce = true
+            if (!granted && !uiState.permissionAsked) {
+                viewModel.markPermissionAsked()
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return@LaunchedEffect
             }
         }
-        proceed = true
+        viewModel.onPermissionResult()
     }
 
-    // 권한 허용 후 네트워크 상태 확인
-    LaunchedEffect(proceed) {
-        if (proceed && !kicked) {
-            kicked = true
+    LaunchedEffect(uiState.permissionHandled) {
+        if (uiState.permissionHandled && !uiState.schedulersSetUp) {
+            viewModel.markSchedulersSetUp()
             showProgress = true
-        }
 
-        if (proceed) {
             ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
-
-            SummaryScheduler.scheduleWeekly(context)   // 월 09:00
-            SummaryScheduler.scheduleMonthly(context)  // 1일 09:00
-            SummaryScheduler.scheduleYearly(context)   // 1월 1일 09:00
-
-            // 주, 월, 년 알림 테스트
-//            SummaryScheduler.scheduleAllIn(context, 5)
+            SummaryScheduler.scheduleWeekly(context)
+            SummaryScheduler.scheduleMonthly(context)
+            SummaryScheduler.scheduleYearly(context)
         }
     }
 
-    LaunchedEffect(proceed, uiState.isLoading, uiState.navTarget) {
-
-        if (proceed && !uiState.isLoading) {
+    LaunchedEffect(uiState.permissionHandled, uiState.isLoading, uiState.navTarget) {
+        if (uiState.permissionHandled && !uiState.isLoading) {
             when (val target = uiState.navTarget) {
-                SplashViewModel.NavTarget.Login -> {
-                    navController.navigate(NavigationRoute.Login.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                SplashViewModel.NavTarget.Onboarding -> {
-                    navController.navigate(NavigationRoute.OnBoarding.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                SplashViewModel.NavTarget.Home -> {
-                    navController.navigate(NavigationRoute.Home.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
-                is SplashViewModel.NavTarget.Widget -> {
-                    navController.navigate(target.route) {
-                        popUpTo(NavigationRoute.Splash.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-
+                SplashViewModel.NavTarget.Login -> onNavigateToLogin()
+                SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()
+                SplashViewModel.NavTarget.Home -> onNavigateToHome()
+                is SplashViewModel.NavTarget.Widget -> onNavigateToWidget(target.route)
                 else -> {
                     // Loading, NoNetwork 상태는 별도 UI에서 처리
                 }
@@ -174,6 +141,29 @@ fun SplashView(
         }
     }
 
+    SplashContent(
+        isNoNetwork = uiState.navTarget == SplashViewModel.NavTarget.NoNetwork,
+        isLoading = uiState.isLoading,
+        loadingMessage = uiState.loadingMessage,
+        showProgress = showProgress,
+        alpha = alpha,
+        offsetY = offsetY,
+        animatedProgress = animatedProgress,
+        onExit = { (context as? Activity)?.finish() },
+    )
+}
+
+@Composable
+private fun SplashContent(
+    isNoNetwork: Boolean,
+    isLoading: Boolean,
+    loadingMessage: String,
+    showProgress: Boolean,
+    alpha: Float,
+    offsetY: Dp,
+    animatedProgress: Float,
+    onExit: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -181,60 +171,58 @@ fun SplashView(
                 brush = Brush.linearGradient(
                     colors = if (GureumTheme.isDarkTheme) listOf(
                         GureumTheme.colors.background,
-                        Color(0xFF00153F)
+                        Color(0xFF00153F),
                     ) else listOf(
                         Color(0xFF51C1F6),
                         Color(0xFFE1F5FE),
-                        Color(0xFFFFFDE7)
-                    )
-                )
-            )
+                        Color(0xFFFFFDE7),
+                    ),
+                ),
+            ),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.align(Alignment.Center),
         ) {
             Text(
                 "구름한장",
                 style = GureumTypography.displayMedium.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 ),
                 color = GureumTheme.colors.gray900,
                 modifier = Modifier
                     .offset(y = offsetY)
-                    .graphicsLayer { this.alpha = alpha }
+                    .graphicsLayer { this.alpha = alpha },
             )
         }
 
-        if (uiState.navTarget == SplashViewModel.NavTarget.NoNetwork) {
+        if (isNoNetwork) {
             AlertDialog(
                 onDismissRequest = { },
                 title = { Text("네트워크 오류") },
                 text = { Text("인터넷 연결이 필요합니다.\n연결 후 다시 시도해주세요.") },
                 containerColor = GureumTheme.colors.card,
                 confirmButton = {
-                    TextButton(onClick = {
-                        (navController.context as? Activity)?.finish()
-                    }) { Text("앱 종료") }
-                }
+                    TextButton(onClick = onExit) { Text("앱 종료") }
+                },
             )
         }
 
-        if (showProgress && uiState.isLoading && uiState.loadingMessage.isNotEmpty()) {
+        if (showProgress && isLoading && loadingMessage.isNotEmpty()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 100.dp)
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 Medi12Text(
-                    uiState.loadingMessage,
+                    loadingMessage,
                     style = GureumTypography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     ),
-                    color = GureumTheme.colors.gray900
+                    color = GureumTheme.colors.gray900,
                 )
                 Spacer(Modifier.height(8.dp))
                 GureumLinearProgressBar(
@@ -243,5 +231,23 @@ fun SplashView(
                 )
             }
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark")
+@Composable
+private fun SplashPreview() {
+    GureumPageTheme {
+        SplashContent(
+            isNoNetwork = false,
+            isLoading = true,
+            loadingMessage = "데이터를 불러오는 중...",
+            showProgress = true,
+            alpha = 1f,
+            offsetY = 0.dp,
+            animatedProgress = 0.6f,
+            onExit = {},
+        )
     }
 }

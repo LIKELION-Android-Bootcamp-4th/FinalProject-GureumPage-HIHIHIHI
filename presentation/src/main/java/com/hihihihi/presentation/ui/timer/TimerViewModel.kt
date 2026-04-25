@@ -12,11 +12,13 @@ import com.hihihihi.domain.usecase.history.AddHistoryUseCase
 import com.hihihihi.domain.usecase.userbook.GetUserBookByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -33,6 +35,9 @@ class TimerViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TimerUiState())
     val uiState: StateFlow<TimerUiState> = _uiState
+
+    private val _effect = Channel<TimerEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     val sharedTimerState = timerRepository.timerState
 
@@ -70,7 +75,7 @@ class TimerViewModel @Inject constructor(
             }
 
             is FloatingAction.OpenMemoDialog -> {
-                _uiState.update { it.copy(showMemoDialog = true) }
+                _uiState.update { it.copy(dialogState = TimerDialogState.Memo) }
             }
 
             is FloatingAction.ReturnToApp -> {
@@ -88,19 +93,35 @@ class TimerViewModel @Inject constructor(
     fun ensureFloatingWindowClosed(context: Context) {
         val intent = Intent().apply {
             component = android.content.ComponentName(
-                "com.hihihihi.gureumpage",
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
+                context.packageName,
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
             )
         }
         context.stopService(intent)
     }
 
-    fun showMemoDialog() {
-        _uiState.update { it.copy(showMemoDialog = true) }
+    fun showDialog(type: TimerDialogType) {
+        val wasRunning = _uiState.value.isRunning
+        if (type != TimerDialogType.Memo && wasRunning) pauseStopwatch()
+        _uiState.update {
+            it.copy(
+                dialogState = when (type) {
+                    TimerDialogType.Memo -> TimerDialogState.Memo
+                    TimerDialogType.StopConfirm -> TimerDialogState.StopConfirm(wasRunning)
+                    TimerDialogType.BackExit -> TimerDialogState.BackExit(wasRunning)
+                },
+            )
+        }
     }
 
-    fun dismissMemoDialog() {
-        _uiState.update { it.copy(showMemoDialog = false) }
+    fun dismissDialog(resumeTimer: Boolean = false) {
+        val wasRunning = when (val s = _uiState.value.dialogState) {
+            is TimerDialogState.StopConfirm -> s.wasRunning
+            is TimerDialogState.BackExit -> s.wasRunning
+            else -> false
+        }
+        _uiState.update { it.copy(dialogState = TimerDialogState.None) }
+        if (resumeTimer && wasRunning) start()
     }
 
     fun bind(userBookId: String) {
@@ -113,7 +134,7 @@ class TimerViewModel @Inject constructor(
                     author = userBook.author,
                     bookImageUrl = userBook.imageUrl,
                     startPage = userBook.currentPage,
-                    totalPage = userBook.totalPage
+                    totalPage = userBook.totalPage,
                 )
             }
 
@@ -122,11 +143,11 @@ class TimerViewModel @Inject constructor(
                     bookInfo = BookInfo(
                         title = userBook.title,
                         author = userBook.author,
-                        imageUrl = userBook.imageUrl
+                        imageUrl = userBook.imageUrl,
                     ),
                     userBookId = userBook.userBookId,
                     startPage = userBook.currentPage,
-                    totalPage = userBook.totalPage
+                    totalPage = userBook.totalPage,
                 )
             }
         }
@@ -198,12 +219,22 @@ class TimerViewModel @Inject constructor(
         timerRepository.updateTimerState { it.copy(isRunning = false, elapsedSec = 0) }
     }
 
+    fun openFloatingMode(canDrawOverlays: Boolean) {
+        viewModelScope.launch {
+            if (!canDrawOverlays) {
+                _effect.send(TimerEffect.RequestOverlayPermission)
+            } else {
+                _effect.send(TimerEffect.StartFloatingWindow)
+            }
+        }
+    }
+
     fun startFloatingWindowMode(context: Context) {
         val intent = Intent().setComponent(
             android.content.ComponentName(
                 context.packageName,
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
-            )
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
+            ),
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)
@@ -216,8 +247,8 @@ class TimerViewModel @Inject constructor(
         val intent = Intent().setComponent(
             android.content.ComponentName(
                 context.packageName,
-                "com.hihihihi.gureumpage.service.FloatingTimerService"
-            )
+                "com.hihihihi.gureumpage.service.FloatingTimerService",
+            ),
         )
         context.stopService(intent)
     }
@@ -237,7 +268,7 @@ class TimerViewModel @Inject constructor(
             endTime = now,
             readTime = seconds,
             readPageCount = delta,
-            recordType = RecordType.TIMER
+            recordType = RecordType.TIMER,
         )
 
         viewModelScope.launch {
@@ -264,8 +295,8 @@ class TimerViewModel @Inject constructor(
                 bookInfo = BookInfo(
                     title = currentState.bookTitle,
                     author = currentState.author,
-                    imageUrl = currentState.bookImageUrl
-                )
+                    imageUrl = currentState.bookImageUrl,
+                ),
             )
         }
     }

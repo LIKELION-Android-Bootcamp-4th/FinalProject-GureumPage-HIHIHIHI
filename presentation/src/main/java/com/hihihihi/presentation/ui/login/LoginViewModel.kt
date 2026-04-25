@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
@@ -17,13 +16,15 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.WaitForUserDocumentCreationUseCase
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.login.util.SocialLoginManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +42,9 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
 
+    private val _effect = Channel<LoginEffect>(Channel.BUFFERED)
+    val effect: Flow<LoginEffect> = _effect.receiveAsFlow()
+
     init {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -54,7 +58,7 @@ class LoginViewModel @Inject constructor(
         return getLastProviderUseCase().first()
     }
 
-    private suspend fun navigateAfterLogin(navController: NavHostController) {
+    private suspend fun navigateAfterLogin() {
         setLoading(true, "사용자 정보를 설정하는 중...")
 
         val currentUserUid = getCurrentUserIdUseCase()
@@ -78,15 +82,11 @@ class LoginViewModel @Inject constructor(
 
         val isOnboardingComplete = getOnboardingCompleteUseCase(currentUserUid).firstOrNull() ?: false
 
-        val destination = if (isOnboardingComplete && hasNickname) {
-            NavigationRoute.Home.route
+        setLoading(false)
+        if (isOnboardingComplete && hasNickname) {
+            _effect.send(LoginEffect.NavigateToHome)
         } else {
-            NavigationRoute.OnBoarding.route
-        }
-
-        setLoading(true, "사용자 정보를 확인하는 중...")
-        navController.navigate(destination) {
-            popUpTo(NavigationRoute.Login.route) { inclusive = true }
+            _effect.send(LoginEffect.NavigateToOnBoarding)
         }
     }
 
@@ -122,7 +122,6 @@ class LoginViewModel @Inject constructor(
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(defaultWebClientId)
-
             .requestEmail()
             .build()
 
@@ -130,34 +129,32 @@ class LoginViewModel @Inject constructor(
         launcher.launch(client.signInIntent)
     }
 
-    fun handleGoogleSignInResult(
-        data: Intent,
-        navController: NavHostController
-    ) {
+    fun handleGoogleSignInResult(data: Intent) {
         viewModelScope.launch {
             try {
                 val idToken = SocialLoginManager.getGoogleIdToken(data)
-                loginWithSocialToken(SocialProvider.GOOGLE, idToken, navController)
+                loginWithSocialToken(SocialProvider.GOOGLE, idToken)
             } catch (_: Exception) {
                 setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
     }
 
-    fun loginWithSocialToken(
-        provider: SocialProvider,
-        accessToken: String,
-        navController: NavHostController
-    ) {
+    fun loginWithSocialToken(provider: SocialProvider, accessToken: String) {
         viewModelScope.launch {
             try {
                 setLoading(true, "로그인 중...")
                 signInWithSocialTokenUseCase(provider, accessToken)
                 setLastProviderUseCase(provider.name.lowercase())
-                navigateAfterLogin(navController)
+                navigateAfterLogin()
             } catch (_: Exception) {
                 setError("로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }
     }
+}
+
+sealed interface LoginEffect {
+    data object NavigateToHome : LoginEffect
+    data object NavigateToOnBoarding : LoginEffect
 }

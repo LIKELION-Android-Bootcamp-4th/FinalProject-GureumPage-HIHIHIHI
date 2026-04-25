@@ -15,47 +15,44 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.hihihihi.domain.model.Quote
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
+import com.hihihihi.presentation.ui.model.QuoteUiModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuoteContent(
-    quotes: List<Quote>,
-    selectedQuote: Quote?,
+    quotes: List<QuoteUiModel>,
+    selectedQuote: QuoteUiModel?,
     scope: CoroutineScope,
-    onQuoteSelected: (Quote) -> Unit,
+    onQuoteSelected: (QuoteUiModel) -> Unit,
     onDismiss: () -> Unit,
-    sheetState: SheetState
+    sheetState: SheetState,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GureumTheme.colors.background)
+                .background(GureumTheme.colors.background),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(quotes) { item ->
                     QuoteItem(
                         item = item,
                         onItemClick = {
                             onQuoteSelected(item)
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        }
+                            scope.launch { sheetState.show() }
+                        },
                     )
                 }
             }
         }
 
-        //모달 시트
         if (selectedQuote != null) {
             DetailBottomSheet(
                 quote = selectedQuote,
@@ -65,8 +62,8 @@ fun QuoteContent(
                         sheetState.hide()
                         onDismiss()
                     }
-                }
+                },
             )
         }
     }
-} 
+}

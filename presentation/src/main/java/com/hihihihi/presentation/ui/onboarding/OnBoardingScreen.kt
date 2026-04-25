@@ -1,16 +1,17 @@
 package com.hihihihi.presentation.ui.onboarding
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hihihihi.domain.model.GureumThemeType
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingBottomContents
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingScaffold
 import com.hihihihi.presentation.ui.onboarding.components.OnboardingTopContents
@@ -25,33 +26,43 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnBoardingScreen(
-    navController: NavHostController,
+    onNavigateToHome: () -> Unit,
+    onNavigateBack: () -> Unit,
     viewModel: OnBoardingViewModel = hiltViewModel(),
 ) {
-    val steps by viewModel.steps.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     GureumPageTheme(darkTheme = true) {
-        OnboardingContents(
-            steps = steps,
-            viewModel = viewModel,
-            navController = navController,
+        OnBoardingContent(
+            steps = viewModel.steps,
+            nickname = uiState.nickname,
+            selectedPurposes = uiState.selectedPurposes,
+            theme = uiState.theme,
+            onNicknameChange = viewModel::updateNickname,
+            onTogglePurpose = viewModel::togglePurpose,
+            onFeaturePageChanged = viewModel::featurePageChanged,
+            onSelectTheme = viewModel::selectTheme,
+            isNextEnabled = viewModel::isNextEnabled,
+            onNavigateBack = onNavigateBack,
             onSave = { viewModel.saveOnboardingComplete() },
-            onFinish = {
-                navController.navigate(NavigationRoute.Home.route) {
-                    popUpTo(NavigationRoute.OnBoarding.route) { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
+            onFinish = onNavigateToHome,
         )
     }
 }
 
 @Composable
-private fun OnboardingContents(
+private fun OnBoardingContent(
     steps: List<OnboardingStep>,
-    viewModel: OnBoardingViewModel,
-    navController: NavHostController,
+    nickname: String,
+    selectedPurposes: List<String>,
+    theme: GureumThemeType?,
+    onNicknameChange: (String) -> Unit,
+    onTogglePurpose: (String) -> Unit,
+    onFeaturePageChanged: (Int, Int) -> Unit,
+    onSelectTheme: (GureumThemeType) -> Unit,
+    isNextEnabled: (OnboardingStep) -> Boolean,
+    onNavigateBack: () -> Unit,
     onSave: () -> Unit,
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
 ) {
     val pagerState = rememberPagerState { steps.size }
     val scope = rememberCoroutineScope()
@@ -62,13 +73,13 @@ private fun OnboardingContents(
         if (pagerState.currentPage > 0) {
             scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
         } else {
-            navController.popBackStack()
+            onNavigateBack()
         }
     }
 
     OnboardingScaffold(
         pagerState = pagerState,
-        topContent = { page, step ->
+        topContent = { _, step ->
             if (step !is OnboardingStep.Welcome && step !is OnboardingStep.Finish) {
                 OnboardingTopContents(
                     onBack = {
@@ -76,18 +87,33 @@ private fun OnboardingContents(
                             if (pagerState.currentPage > 0) pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
                     },
-                    progress = computeProgress(pagerState)
+                    progress = computeProgress(pagerState),
                 )
             }
         },
-        mainContent = { page, step ->
+        mainContent = { _, step ->
             when (step) {
                 OnboardingStep.Welcome -> WelcomePage()
-                OnboardingStep.Nickname -> NicknamePage(viewModel = viewModel)
-                OnboardingStep.Purpose -> PurposePage(viewModel = viewModel)
-                OnboardingStep.Feature -> FeaturePage(viewModel = viewModel)
-                OnboardingStep.Theme -> ThemePage(viewModel = viewModel)
-                OnboardingStep.Finish -> FinishPage(viewModel = viewModel)
+                OnboardingStep.Nickname -> NicknamePage(
+                    nickname = nickname,
+                    onNicknameChange = onNicknameChange,
+                )
+
+                OnboardingStep.Purpose -> PurposePage(
+                    selectedPurposes = selectedPurposes,
+                    onTogglePurpose = onTogglePurpose,
+                )
+
+                OnboardingStep.Feature -> FeaturePage(
+                    onFeaturePageChanged = onFeaturePageChanged,
+                )
+
+                OnboardingStep.Theme -> ThemePage(
+                    selectedTheme = theme,
+                    onSelectTheme = onSelectTheme,
+                )
+
+                OnboardingStep.Finish -> FinishPage()
             }
         },
         bottomContent = { page, step ->
@@ -99,7 +125,7 @@ private fun OnboardingContents(
                     OnboardingStep.Feature -> "옆으로 밀어 구름한장의 기능을 확인해보세요!"
                     else -> ""
                 },
-                isNextEnabled = viewModel.isNextEnabled(currentStep),
+                isNextEnabled = isNextEnabled(currentStep),
                 onNext = {
                     scope.launch {
                         if (step == OnboardingStep.Theme) onSave()
@@ -116,4 +142,26 @@ private fun OnboardingContents(
 private fun computeProgress(pagerState: PagerState): Float {
     val position = pagerState.currentPage + pagerState.currentPageOffsetFraction
     return (position / (pagerState.pageCount - 1)).coerceIn(0f, 1f)
+}
+
+@Preview(name = "Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OnBoardingPreview() {
+    GureumPageTheme(darkTheme = true) {
+        OnBoardingContent(
+            steps = listOf(OnboardingStep.Welcome, OnboardingStep.Nickname, OnboardingStep.Purpose, OnboardingStep.Feature, OnboardingStep.Theme, OnboardingStep.Finish),
+            nickname = "",
+            selectedPurposes = emptyList(),
+            theme = null,
+            onNicknameChange = {},
+            onTogglePurpose = {},
+            onFeaturePageChanged = { _, _ -> },
+            onSelectTheme = {},
+            isNextEnabled = { true },
+            onNavigateBack = {},
+            onSave = {},
+            onFinish = {},
+        )
+    }
 }

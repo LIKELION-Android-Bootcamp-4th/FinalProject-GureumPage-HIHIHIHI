@@ -18,30 +18,30 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hihihihi.domain.model.History
-import com.hihihihi.domain.model.Quote
-import com.hihihihi.domain.model.UserBook
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
 import com.hihihihi.presentation.ui.bookdetail.components.tabs.BookInfoTab
 import com.hihihihi.presentation.ui.bookdetail.components.tabs.QuotesTab
 import com.hihihihi.presentation.ui.bookdetail.components.tabs.ReadingRecordTab
+import com.hihihihi.presentation.ui.model.HistoryUiModel
+import com.hihihihi.presentation.ui.model.QuoteUiModel
+import com.hihihihi.presentation.ui.model.UserBookUiModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun BookDetailTabs(
-    userBook: UserBook,
-    quotes: List<Quote>,
-    histories: List<History>,
+    userBook: UserBookUiModel,
+    quotes: List<QuoteUiModel>,
+    histories: List<HistoryUiModel>,
     onQuoteEdit: (String) -> Unit,
-    onQuoteDelete: (String) -> Unit
+    onQuoteDelete: (String) -> Unit,
 ) {
     val tabTitles = listOf("독서 기록", "필사 목록", "책 정보")
     val pagerState = rememberPagerState(pageCount = { tabTitles.size })
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         HorizontalDivider(thickness = 4.dp, color = GureumTheme.colors.dividerShallow)
 
@@ -76,7 +76,7 @@ fun BookDetailTabs(
                 1 -> QuotesTab(
                     quotes = quotes,
                     onEdit = onQuoteEdit,
-                    onDelete = onQuoteDelete
+                    onDelete = onQuoteDelete,
                 )
 
                 2 -> BookInfoTab(userBook)

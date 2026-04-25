@@ -10,17 +10,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hihihihi.domain.model.Quote
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.Medi16Text
 import com.hihihihi.presentation.designsystem.components.Semi18Text
 import com.hihihihi.presentation.designsystem.theme.GureumTheme
@@ -30,13 +26,12 @@ import com.hihihihi.presentation.ui.quotes.component.QuoteContent
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesScreen(
-    viewModel: QuotesViewModel = hiltViewModel()
+    viewModel: QuotesViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     //모달 관련
     var sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var selectedQuote by remember { mutableStateOf<Quote?>(null) }
 
     when {
         uiState.isLoading -> {
@@ -53,16 +48,16 @@ fun QuotesScreen(
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Semi18Text(
                     "아직 필사가 없어요",
-                    color = GureumTheme.colors.gray500
+                    color = GureumTheme.colors.gray500,
                 )
                 Spacer(Modifier.height(16.dp))
                 Medi16Text(
                     "책에서 인상 깊은 한 줄을 남겨 보세요.",
-                    color = GureumTheme.colors.gray400
+                    color = GureumTheme.colors.gray400,
                 )
             }
         }
@@ -70,15 +65,11 @@ fun QuotesScreen(
         else -> {
             QuoteContent(
                 quotes = uiState.quotes,
-                selectedQuote = selectedQuote,
+                selectedQuote = uiState.selectedQuote,
                 sheetState = sheetState,
                 scope = scope,
-                onQuoteSelected = { quote ->
-                    selectedQuote = quote
-                },
-                onDismiss = {
-                    selectedQuote = null
-                }
+                onQuoteSelected = { quote -> viewModel.selectQuote(quote) },
+                onDismiss = { viewModel.selectQuote(null) },
             )
         }
     }

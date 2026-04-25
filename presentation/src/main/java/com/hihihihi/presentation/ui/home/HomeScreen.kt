@@ -6,67 +6,40 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import com.hihihihi.domain.model.Quote
-import com.hihihihi.domain.model.User
-import com.hihihihi.domain.model.UserBook
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
-import com.hihihihi.presentation.navigation.NavigationRoute
 import com.hihihihi.presentation.ui.home.components.CurrentReadingBookSection
 import com.hihihihi.presentation.ui.home.components.ErrorView
 import com.hihihihi.presentation.ui.home.components.LoadingView
 import com.hihihihi.presentation.ui.home.components.RandomQuoteSection
 import com.hihihihi.presentation.ui.home.components.ReadingGoalSection
 import com.hihihihi.presentation.ui.home.components.SearchBarWithBackground
-import com.hihihihi.presentation.ui.home.mock.dummyQuotes
-import com.hihihihi.presentation.ui.home.mock.mockUser
-import com.hihihihi.presentation.ui.home.mock.mockUserBooks
+import com.hihihihi.presentation.ui.home.mock.mockHomeUiModel
+import com.hihihihi.presentation.ui.model.HomeUiModel
 
 @Composable
 fun HomeScreen(
-    // Hilt로 ViewModel을 주입받음. DI를 통해 뷰모델의 생명주기를 컴포즈에 맞게 관리
-    navController: NavHostController,
+    onNavigateToBookDetail: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    // viewModel에서 선언한 uiState Flow를 Compose에서 관찰 (State로 변환).
-    // 상태가 변경되면 recomposition 발생
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // ui
     when {
-        uiState.value.isLoading -> {
-            LoadingView() // 데이터 로딩 중일 때 표시될 뷰. 분리된 Composable 사용
-        }
-
-        uiState.value.errorMessage != null -> {
-            ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요") // 에러 발생 시 표시될 뷰
-        }
-
-        uiState.value.homeData != null -> {
-            val homeData = uiState.value.homeData!! // null 아님 확정
-
+        uiState.isLoading -> LoadingView()
+        uiState.errorMessage != null -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
+        uiState.homeUiModel != null -> {
             Column {
                 HomeScreenContent(
-                    user = homeData.user,
-                    books = homeData.userBooks,
-                    quotes = homeData.quotes,
-                    todayReadTime = homeData.todayReadTime,
-                    dailyGoalTime = homeData.user.dailyGoalTime,
-                    onBookClick = {
-                        navController.navigate(NavigationRoute.BookDetail.createRoute(it))
-                    },
-                    onSearchBarClick = {
-                        navController.navigate(NavigationRoute.Search.route)
-                    },
-                    onChangeDailyGoalTime = {
-                        viewModel.changeDailyGoalTime(it)
-                    }
+                    homeUiModel = uiState.homeUiModel!!,
+                    onBookClick = onNavigateToBookDetail,
+                    onSearchBarClick = onNavigateToSearch,
+                    onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
                 )
             }
         }
@@ -75,52 +48,41 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    user: User,
-    books: List<UserBook>,
-    quotes: List<Quote>,
-    todayReadTime: Int,
-    dailyGoalTime: Int,
+    homeUiModel: HomeUiModel,
     onBookClick: (String) -> Unit,
     onChangeDailyGoalTime: (Int) -> Unit,
-    onSearchBarClick: () -> Unit
+    onSearchBarClick: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-
-    val goalSeconds by rememberUpdatedState(newValue = dailyGoalTime)
-    val totalReadSeconds by rememberUpdatedState(newValue = todayReadTime)
-
+    val goalSeconds by rememberUpdatedState(newValue = homeUiModel.dailyGoalTime)
+    val totalReadSeconds by rememberUpdatedState(newValue = homeUiModel.todayReadTime)
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         state = scrollState,
     ) {
         item {
             SearchBarWithBackground(
-                user = user,
-                onSearchBarClick,
+                nickname = homeUiModel.nickname,
+                appellation = homeUiModel.appellation,
+                onSearchBarClick = onSearchBarClick,
             )
         }
-
         item {
             CurrentReadingBookSection(
-                books = books,
+                books = homeUiModel.userBooks,
                 onBookClick = { onBookClick(it) },
-                onAddBookClick = onSearchBarClick
+                onAddBookClick = onSearchBarClick,
             )
         }
-
         item {
-            RandomQuoteSection(
-                quotes = quotes
-            )
+            RandomQuoteSection(quotes = homeUiModel.quotes)
         }
-
         item {
             ReadingGoalSection(
                 totalReadSeconds,
                 goalSeconds,
-                onGoalChange = onChangeDailyGoalTime
+                onGoalChange = onChangeDailyGoalTime,
             )
         }
     }
@@ -131,7 +93,6 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockUser, mockUserBooks, dummyQuotes, 200, 300, onBookClick = {}, {}, {})
+        HomeScreenContent(mockHomeUiModel, onBookClick = {}, {}, {})
     }
 }
-
