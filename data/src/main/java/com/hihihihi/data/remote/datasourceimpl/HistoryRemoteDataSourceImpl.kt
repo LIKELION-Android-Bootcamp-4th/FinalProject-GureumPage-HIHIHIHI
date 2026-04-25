@@ -103,7 +103,7 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
         historyDto: HistoryDto,
         uid: String,
         currentPage: Int
-    ): Result<Unit> = try {
+    ) {
         val historyRef = firestore.collection("histories").document()
         historyDto.historyId = historyRef.id
         historyRef.set(historyDto).await()
@@ -161,9 +161,5 @@ class HistoryRemoteDataSourceImpl @Inject constructor(
                 )
             ).await()
         }
-
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 }

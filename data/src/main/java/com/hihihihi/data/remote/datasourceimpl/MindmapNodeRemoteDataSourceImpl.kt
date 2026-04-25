@@ -48,7 +48,7 @@ class MindmapNodeRemoteDataSourceImpl @Inject constructor(
     override suspend fun applyNodeOperation(
         mindmapId: String,
         operations: List<NodeEditOperation>
-    ): Result<Unit> = runCatching {
+    ) {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
             ?: throw IllegalStateException("사용자가 로그인되지 않았습니다")
 

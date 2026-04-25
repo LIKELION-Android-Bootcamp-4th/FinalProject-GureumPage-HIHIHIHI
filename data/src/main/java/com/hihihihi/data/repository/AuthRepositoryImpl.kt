@@ -1,20 +1,15 @@
 package com.hihihihi.data.repository
 
-import android.content.Intent
-import kotlinx.coroutines.tasks.await
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.domain.repository.AuthRepository
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val authDataSource: AuthDataSource,
 ) : AuthRepository {
 
-    override suspend fun handleGoogleSignInResult(data: Intent?) {
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        val account = task.result
-        val idToken = account.idToken ?: throw Exception("idToken is null")
+    override suspend fun googleLogin(idToken: String) {
         authDataSource.signInWithGoogleCredential(idToken).await()
     }
 
