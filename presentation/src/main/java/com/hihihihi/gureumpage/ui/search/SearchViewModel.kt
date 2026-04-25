@@ -8,7 +8,7 @@ import com.hihihihi.domain.model.MindmapNode
 import com.hihihihi.domain.model.ReadingStatus
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.domain.model.UserBook
-import com.hihihihi.domain.repository.SearchRepository
+import com.hihihihi.domain.usecase.search.GetBookPageCountUseCase
 import com.hihihihi.domain.usecase.search.SearchBooksUseCase
 import com.hihihihi.domain.usecase.userbook.AddUserBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ private const val MAX_TOTAL_RESULTS = 200
 class SearchViewModel @Inject constructor(
     private val searchBooksUseCase: SearchBooksUseCase,
     private val addUserBookUseCase: AddUserBookUseCase,
-    private val searchRepository: SearchRepository,
+    private val getBookPageCountUseCase: GetBookPageCountUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
@@ -45,7 +45,7 @@ class SearchViewModel @Inject constructor(
                 page = 1
             )
             try {
-                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE)
+                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE).getOrThrow()
                 val dedup = results.distinctBy { it.isbn }
 
                 _uiState.value = _uiState.value.copy(
@@ -54,7 +54,7 @@ class SearchViewModel @Inject constructor(
                     hasMore = canLoadMore(dedup.size, 1),
                     page = 1
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _uiState.value = _uiState.value.copy(
                     searchResults = emptyList(),
                     isSearching = false,
@@ -75,7 +75,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val nextPage = state.page + 1
                 val newResults =
-                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE)
+                    searchBooksUseCase(state.query, page = nextPage, pageSize = PAGE_SIZE).getOrThrow()
 
                 val before = state.searchResults
                 val merged = (before + newResults).distinctBy { it.isbn }
@@ -107,15 +107,10 @@ class SearchViewModel @Inject constructor(
         return true
     }
 
-    // TODO: usecase로 일관성 맞추기
     fun getBookPageCount(isbn: String, onResult: (Int?) -> Unit) {
         viewModelScope.launch {
-            try {
-                val pageCount = searchRepository.getBookPageCount(isbn)
-                onResult(pageCount)
-            } catch (e: Exception) {
-                onResult(null)
-            }
+            val result = getBookPageCountUseCase(isbn)
+            onResult(result.getOrNull())
         }
     }
 
@@ -150,7 +145,7 @@ class SearchViewModel @Inject constructor(
                     status = status,
                     review = null,
                     rating = null,
-                    category = searchBook.categoryName.split(">")[1],
+                    category = searchBook.categoryName.split(">").getOrNull(1)?.trim() ?: "",
                 )
 
                 val mindmap = Mindmap(

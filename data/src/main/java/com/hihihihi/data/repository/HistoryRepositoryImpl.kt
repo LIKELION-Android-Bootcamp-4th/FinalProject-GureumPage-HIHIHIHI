@@ -27,8 +27,7 @@ class HistoryRepositoryImpl @Inject constructor(
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
 
-    override suspend fun addHistory(history: History, currentPage: Int): Result<Unit> {
-        val dto = history.toDto()
-        return historyRemoteDataSource.addHistory(dto, history.userId, currentPage)
+    override suspend fun addHistory(history: History, currentPage: Int) {
+        historyRemoteDataSource.addHistory(history.toDto(), history.userId, currentPage)
     }
 }

@@ -15,18 +15,12 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : QuoteRemoteDataSource {
     // 새로운 명언 데이터를 Firestore에 추가하는 suspend 함수
-    override suspend fun addQuote(quoteDto: QuoteDto): Result<Unit> = try {
+    override suspend fun addQuote(quoteDto: QuoteDto) {
         // quotes 컬렉션에 새 문서 생성 (자동 ID 생성)
         val documentReference = firestore.collection("quotes").document()
 
         // DTO를 Map 형태로 변환 후 Firestore에 저장, await()로 완료 대기
         documentReference.set(quoteDto.toMap()).await()
-
-        // 성공 결과 반환
-        Result.success(Unit)
-    } catch (e: Exception) {
-        // 에러 발생 시 실패 결과 반환
-        Result.failure(e)
     }
 
     override fun getQuotes(userId: String): Flow<List<QuoteDto>> = callbackFlow {
@@ -66,24 +60,22 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
                 } ?: emptyList()
                 trySend(quotes)
             }
+        FirestoreListenerManager.add(quotesCollection)
         awaitClose { quotesCollection.remove() }
     }
 
-    override suspend fun deleteQuote(quoteId: String): Result<Unit> = try{
+    override suspend fun deleteQuote(quoteId: String) {
         firestore.collection("quotes")
             .document(quoteId)
             .delete()
             .await()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
     override suspend fun updateQuote(
         quoteId: String,
         content: String,
         pageNumber: Int?
-    ): Result<Unit> = try {
+    ) {
         val updates = mutableMapOf<String, Any?>(
             "content" to content,
             "page_number" to pageNumber
@@ -93,9 +85,5 @@ class QuoteRemoteDataSourceImpl @Inject constructor(
             .document(quoteId)
             .update(updates)
             .await()
-
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 }

@@ -14,11 +14,11 @@ class QuoteRepositoryImpl @Inject constructor(
     private val quoteRemoteDataSource: QuoteRemoteDataSource // 원격 데이터 소스 주입 (Firestore)
 ) : QuoteRepository {
     // 명언 추가 함수 구현
-    override suspend fun addQuote(quote: Quote): Result<Unit> {
+    override suspend fun addQuote(quote: Quote) {
         // Domain 모델인 Quote를 DTO로 변환
         val quoteDto = quote.toDto()
         // RemoteDataSource에 DTO 전달하여 실제 데이터 저장 수행
-        return quoteRemoteDataSource.addQuote(quoteDto)
+        quoteRemoteDataSource.addQuote(quoteDto)
     }
 
     override fun getQuotes(userId: String): Flow<List<Quote>> {
@@ -31,15 +31,15 @@ class QuoteRepositoryImpl @Inject constructor(
             .map { dtoList -> dtoList.map { it.toDomain() } }
     }
 
-    override suspend fun deleteQuote(quoteId: String): Result<Unit> {
-        return quoteRemoteDataSource.deleteQuote(quoteId)
+    override suspend fun deleteQuote(quoteId: String) {
+        quoteRemoteDataSource.deleteQuote(quoteId)
     }
 
     override suspend fun updateQuote(
         quoteId: String,
         content: String,
         pageNumber: Int?
-    ): Result<Unit> {
-        return quoteRemoteDataSource.updateQuote(quoteId, content, pageNumber)
+    ) {
+        quoteRemoteDataSource.updateQuote(quoteId, content, pageNumber)
     }
 }
