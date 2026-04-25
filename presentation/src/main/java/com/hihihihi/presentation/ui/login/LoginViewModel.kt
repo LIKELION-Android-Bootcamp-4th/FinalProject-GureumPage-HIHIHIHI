@@ -1,12 +1,7 @@
 package com.hihihihi.presentation.ui.login
 
-import android.content.Context
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.auth.SignInWithSocialTokenUseCase
 import com.hihihihi.domain.usecase.auth.SocialProvider
@@ -16,7 +11,7 @@ import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetLastProviderUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import com.hihihihi.domain.usecase.user.WaitForUserDocumentCreationUseCase
-import com.hihihihi.presentation.ui.login.util.SocialLoginManager
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -110,36 +105,6 @@ class LoginViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
-    fun googleLogin(
-        context: Context,
-        launcher: ActivityResultLauncher<Intent>
-    ) {
-        setLoading(true, "구글 로그인 중...")
-
-        // TODO: Credential 방식으로 변경하기
-        val webClientIdResId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
-        val defaultWebClientId = if (webClientIdResId != 0) context.getString(webClientIdResId) else ""
-
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(defaultWebClientId)
-            .requestEmail()
-            .build()
-
-        val client = GoogleSignIn.getClient(context, gso)
-        launcher.launch(client.signInIntent)
-    }
-
-    fun handleGoogleSignInResult(data: Intent) {
-        viewModelScope.launch {
-            try {
-                val idToken = SocialLoginManager.getGoogleIdToken(data)
-                loginWithSocialToken(SocialProvider.GOOGLE, idToken)
-            } catch (_: Exception) {
-                setError("구글 로그인에 실패했습니다. 다시 시도해주세요.")
-            }
-        }
-    }
-
     fun loginWithSocialToken(provider: SocialProvider, accessToken: String) {
         viewModelScope.launch {
             try {
@@ -147,7 +112,8 @@ class LoginViewModel @Inject constructor(
                 signInWithSocialTokenUseCase(provider, accessToken)
                 setLastProviderUseCase(provider.name.lowercase())
                 navigateAfterLogin()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "소셜 로그인 실패", e)
                 setError("로그인에 실패했습니다. 다시 시도해주세요.")
             }
         }

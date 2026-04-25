@@ -185,3 +185,18 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,kotlin
+
+# Local dev tools (not shared with team)
+config/detekt/
+.coderabbit.yaml
+.github/workflows/code-quality.yml
+
+# Claude Code
+.claude/
+.agent/
+.context/
+.clinerules
+.claudeignore
+
+# macOS
+.DS_Store

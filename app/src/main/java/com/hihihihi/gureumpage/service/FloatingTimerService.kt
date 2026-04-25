@@ -15,8 +15,8 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
@@ -98,7 +98,7 @@ class FloatingTimerService : Service(), LifecycleOwner, SavedStateRegistryOwner 
             setViewTreeSavedStateRegistryOwner(this@FloatingTimerService)
 
             setContent {
-                val timerState by timerRepository.timerState.collectAsState()
+                val timerState by timerRepository.timerState.collectAsStateWithLifecycle()
 
                 FloatingTimer(
                     timerState = timerState,

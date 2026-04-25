@@ -5,9 +5,8 @@ import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.hihihihi.presentation.widgets.common.WigetAutoUpdater
-import com.hihihihi.gureumpage.BuildConfig
 import com.kakao.sdk.common.KakaoSdk
-import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.NidOAuth
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class GureumApp : Application() , Configuration.Provider {
+class GureumApp : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
     @Inject lateinit var widgetAutoUpdater: WigetAutoUpdater
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -32,11 +31,11 @@ class GureumApp : Application() , Configuration.Provider {
         super.onCreate()
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
 
-        NaverIdLoginSDK.initialize(
+        NidOAuth.initialize(
             this,
             BuildConfig.NAVER_CLIENT_ID,
             BuildConfig.NAVER_CLIENT_SECRET,
-            "구름한장"
+            "구름한장",
         )
 
         // 위젯 자동 업데이터
