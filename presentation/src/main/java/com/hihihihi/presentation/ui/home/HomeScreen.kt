@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hihihihi.domain.model.NotificationSettings
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.ui.home.components.CurrentReadingBookSection
 import com.hihihihi.presentation.ui.home.components.ErrorView
@@ -37,6 +38,7 @@ fun HomeScreen(
             Column {
                 HomeScreenContent(
                     homeUiModel = uiState.homeUiModel!!,
+                    notificationSettings = uiState.notificationSettings,
                     onBookClick = onNavigateToBookDetail,
                     onSearchBarClick = onNavigateToSearch,
                     onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
@@ -49,6 +51,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     homeUiModel: HomeUiModel,
+    notificationSettings: NotificationSettings = NotificationSettings(),
     onBookClick: (String) -> Unit,
     onChangeDailyGoalTime: (Int) -> Unit,
     onSearchBarClick: () -> Unit,
@@ -82,6 +85,7 @@ fun HomeScreenContent(
             ReadingGoalSection(
                 totalReadSeconds,
                 goalSeconds,
+                notificationSettings,
                 onGoalChange = onChangeDailyGoalTime,
             )
         }
@@ -93,6 +97,11 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockHomeUiModel, onBookClick = {}, {}, {})
+        HomeScreenContent(
+            homeUiModel = mockHomeUiModel,
+            onBookClick = {},
+            onChangeDailyGoalTime = {},
+            onSearchBarClick = {},
+        )
     }
 }

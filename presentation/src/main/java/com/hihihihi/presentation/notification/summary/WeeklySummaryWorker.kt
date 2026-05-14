@@ -9,19 +9,28 @@ import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.presentation.notification.common.NotificationFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 
 @HiltWorker
 class WeeklySummaryWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val factory: NotificationFactory,
-    private val summaryProvider: SummaryProvider
+    private val summaryProvider: SummaryProvider,
+    private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
+        val settings = getNotificationSettingsUseCase().first()
+        if (!settings.isWeeklySummaryEnabled) {
+            SummaryScheduler.cancelWeekly(appContext)
+            return Result.success()
+        }
+
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED

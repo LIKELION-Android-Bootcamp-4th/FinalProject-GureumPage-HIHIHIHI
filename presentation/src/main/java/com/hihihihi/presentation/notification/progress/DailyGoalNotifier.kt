@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import com.hihihihi.domain.model.NotificationSettings
 import com.hihihihi.presentation.notification.common.Quiet
 import com.hihihihi.presentation.notification.reminder.ReminderScheduler
 import java.time.LocalDate
@@ -14,7 +15,12 @@ object DailyGoalNotifier {
     private const val PREFERENCE = "goal_progress"
     private val day get() = LocalDate.now().toString()
 
-    fun onProgress(context: Context, totalSecond: Int, goalSecond: Int) {
+    fun onProgress(
+        context: Context,
+        totalSecond: Int,
+        goalSecond: Int,
+        notificationSettings: NotificationSettings,
+    ) {
         if (!Quiet.allow()) return
 
         if (Build.VERSION.SDK_INT >= 33 &&
@@ -49,7 +55,7 @@ object DailyGoalNotifier {
             }
             Goal80ReminderScheduler.cancelToday(context)
 
-            ReminderScheduler.scheduleDaily(context)
+            scheduleDailyIfEnabled(context, notificationSettings)
 
             return
         }
@@ -63,7 +69,7 @@ object DailyGoalNotifier {
         when {
             // 오늘 책 안 읽었으면 데일리만 예약
             totalSecond <= 0 -> {
-                ReminderScheduler.scheduleDaily(context)
+                scheduleDailyIfEnabled(context, notificationSettings)
                 Goal80ReminderScheduler.cancelToday(context)
                 sharedPref.edit {
                     putFloat("last_ratio", 0f)
@@ -85,9 +91,11 @@ object DailyGoalNotifier {
 
             // 목표 80% 이상 달성했으면 80% 알림,
             ratio >= 0.8f -> {
-                if (!sent80) {
+                if (notificationSettings.isGoalAlertEnabled && !sent80) {
                     Goal80ReminderScheduler.scheduleAt(context) // 예: 20:00
                     sent80 = true
+                } else if (!notificationSettings.isGoalAlertEnabled) {
+                    Goal80ReminderScheduler.cancelToday(context)
                 }
                 ReminderScheduler.cancel(context)
                 sharedPref.edit {
@@ -99,7 +107,7 @@ object DailyGoalNotifier {
 
             // 80% 미만 → 데일리만 예약
             else -> {
-                ReminderScheduler.scheduleDaily(context)
+                scheduleDailyIfEnabled(context, notificationSettings)
                 Goal80ReminderScheduler.cancelToday(context)
                 sent80 = false
                 sharedPref.edit {
@@ -108,6 +116,14 @@ object DailyGoalNotifier {
                 }
                 return
             }
+        }
+    }
+
+    private fun scheduleDailyIfEnabled(context: Context, settings: NotificationSettings) {
+        if (settings.isDailyReminderEnabled) {
+            ReminderScheduler.scheduleDaily(context, settings.reminderHour, settings.reminderMinute)
+        } else {
+            ReminderScheduler.cancel(context)
         }
     }
 }

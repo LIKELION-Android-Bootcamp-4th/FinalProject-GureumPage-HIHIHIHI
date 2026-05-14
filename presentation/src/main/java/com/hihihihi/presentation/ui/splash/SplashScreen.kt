@@ -121,8 +121,18 @@ fun SplashView(
             viewModel.markSchedulersSetUp()
             showProgress = true
 
-            ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
-            SummaryScheduler.scheduleWeekly(context)
+            val settings = viewModel.getNotificationSettings()
+            if (settings.isDailyReminderEnabled) {
+                ReminderScheduler.scheduleDaily(context, settings.reminderHour, settings.reminderMinute)
+            } else {
+                ReminderScheduler.cancel(context)
+            }
+
+            if (settings.isWeeklySummaryEnabled) {
+                SummaryScheduler.scheduleWeekly(context)
+            } else {
+                SummaryScheduler.cancelWeekly(context)
+            }
             SummaryScheduler.scheduleMonthly(context)
             SummaryScheduler.scheduleYearly(context)
         }

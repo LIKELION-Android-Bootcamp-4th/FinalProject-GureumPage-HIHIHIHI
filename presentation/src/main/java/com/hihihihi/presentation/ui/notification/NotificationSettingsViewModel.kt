@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.NotificationSettings
 import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.domain.usecase.notification.UpdateNotificationSettingsUseCase
+import com.hihihihi.presentation.notification.progress.Goal80ReminderScheduler
 import com.hihihihi.presentation.notification.reminder.ReminderScheduler
+import com.hihihihi.presentation.notification.summary.SummaryScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,7 @@ import javax.inject.Inject
 class NotificationSettingsViewModel @Inject constructor(
     private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
     private val updateNotificationSettingsUseCase: UpdateNotificationSettingsUseCase,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationSettingsUiState())
@@ -48,46 +50,58 @@ class NotificationSettingsViewModel @Inject constructor(
     fun setDailyReminderEnabled(enabled: Boolean) {
         val updated = _uiState.value.copy(isDailyReminderEnabled = enabled)
         _uiState.update { updated }
-        save(updated)
-        if (enabled) {
-            ReminderScheduler.scheduleDaily(context, updated.reminderHour, updated.reminderMinute)
-        } else {
-            ReminderScheduler.cancel(context)
+        viewModelScope.launch {
+            save(updated)
+            if (enabled) {
+                ReminderScheduler.scheduleDaily(context, updated.reminderHour, updated.reminderMinute)
+            } else {
+                ReminderScheduler.cancel(context)
+            }
         }
     }
 
     fun setReminderTime(hour: Int, minute: Int) {
         val updated = _uiState.value.copy(reminderHour = hour, reminderMinute = minute)
         _uiState.update { updated }
-        save(updated)
-        if (updated.isDailyReminderEnabled) {
-            ReminderScheduler.scheduleDaily(context, hour, minute)
+        viewModelScope.launch {
+            save(updated)
+            if (updated.isDailyReminderEnabled) {
+                ReminderScheduler.scheduleDaily(context, hour, minute)
+            }
         }
     }
 
     fun setGoalAlertEnabled(enabled: Boolean) {
         val updated = _uiState.value.copy(isGoalAlertEnabled = enabled)
         _uiState.update { updated }
-        save(updated)
+        viewModelScope.launch {
+            save(updated)
+            if (!enabled) Goal80ReminderScheduler.cancelToday(context)
+        }
     }
 
     fun setWeeklySummaryEnabled(enabled: Boolean) {
         val updated = _uiState.value.copy(isWeeklySummaryEnabled = enabled)
         _uiState.update { updated }
-        save(updated)
+        viewModelScope.launch {
+            save(updated)
+            if (enabled) {
+                SummaryScheduler.scheduleWeekly(context)
+            } else {
+                SummaryScheduler.cancelWeekly(context)
+            }
+        }
     }
 
-    private fun save(state: NotificationSettingsUiState) {
-        viewModelScope.launch {
-            updateNotificationSettingsUseCase(
-                NotificationSettings(
-                    isDailyReminderEnabled = state.isDailyReminderEnabled,
-                    reminderHour = state.reminderHour,
-                    reminderMinute = state.reminderMinute,
-                    isGoalAlertEnabled = state.isGoalAlertEnabled,
-                    isWeeklySummaryEnabled = state.isWeeklySummaryEnabled,
-                )
+    private suspend fun save(state: NotificationSettingsUiState) {
+        updateNotificationSettingsUseCase(
+            NotificationSettings(
+                isDailyReminderEnabled = state.isDailyReminderEnabled,
+                reminderHour = state.reminderHour,
+                reminderMinute = state.reminderMinute,
+                isGoalAlertEnabled = state.isGoalAlertEnabled,
+                isWeeklySummaryEnabled = state.isWeeklySummaryEnabled,
             )
-        }
+        )
     }
 }

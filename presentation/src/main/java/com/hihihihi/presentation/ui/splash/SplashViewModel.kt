@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.repository.NetworkMonitor
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.domain.usecase.user.GetUserUseCase
 import com.hihihihi.domain.usecase.user.SetOnboardingCompleteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +21,7 @@ class SplashViewModel @Inject constructor(
     private val setOnboardingCompleteUseCase: SetOnboardingCompleteUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
     private val networkManager: NetworkMonitor,
 ) : ViewModel() {
 
@@ -51,6 +54,8 @@ class SplashViewModel @Inject constructor(
     fun markSchedulersSetUp() {
         _uiState.update { it.copy(schedulersSetUp = true) }
     }
+
+    suspend fun getNotificationSettings() = getNotificationSettingsUseCase().first()
 
     fun checkNetworkAndProceed() {
         viewModelScope.launch {
