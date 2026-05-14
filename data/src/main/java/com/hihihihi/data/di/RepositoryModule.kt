@@ -5,6 +5,7 @@ import com.hihihihi.data.repository.DailyReadPageRepositoryImpl
 import com.hihihihi.data.repository.HistoryRepositoryImpl
 import com.hihihihi.data.repository.MindmapNodeRepositoryImpl
 import com.hihihihi.data.repository.MindmapRepositoryImpl
+import com.hihihihi.data.repository.NotificationPreferencesRepositoryImpl
 import com.hihihihi.data.repository.QuoteRepositoryImpl
 import com.hihihihi.data.repository.SearchRepositoryImpl
 import com.hihihihi.data.repository.UserBookRepositoryImpl
@@ -15,6 +16,7 @@ import com.hihihihi.domain.repository.DailyReadPageRepository
 import com.hihihihi.domain.repository.HistoryRepository
 import com.hihihihi.domain.repository.MindmapNodeRepository
 import com.hihihihi.domain.repository.MindmapRepository
+import com.hihihihi.domain.repository.NotificationPreferencesRepository
 import com.hihihihi.domain.repository.QuoteRepository
 import com.hihihihi.domain.repository.SearchRepository
 import com.hihihihi.domain.repository.UserBookRepository
@@ -69,4 +71,8 @@ abstract class RepositoryModule {
     @Singleton
     @Binds
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindNotificationPreferencesRepository(impl: NotificationPreferencesRepositoryImpl): NotificationPreferencesRepository
 }

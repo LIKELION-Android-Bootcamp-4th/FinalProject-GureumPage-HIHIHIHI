@@ -20,8 +20,9 @@ import com.hihihihi.presentation.utils.openSupportEmail
 fun MyPageMenuSection(
     theme: GureumThemeType,
     onThemeToggle: (GureumThemeType) -> Unit,
+    onNotificationSettingsClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onWithDrawClick: () -> Unit
+    onWithDrawClick: () -> Unit,
 ) {
     val colors = GureumTheme.colors
     val context = LocalContext.current
@@ -53,12 +54,16 @@ fun MyPageMenuSection(
             }
         }
 
+        MyPageMenuSettingItem("알림 설정") {
+            onNotificationSettingsClick()
+        }
+
         MyPageMenuSettingItem(
             title = "다크모드",
             showSwitch = true,
             showArrow = false,
             switchChecked = (theme == GureumThemeType.DARK),
-            onSwitchToggle = { onThemeToggle(it) }
+            onSwitchToggle = { onThemeToggle(it) },
         ) { }
 
         MyPageMenuSettingItem(
