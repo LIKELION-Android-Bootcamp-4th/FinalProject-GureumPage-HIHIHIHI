@@ -78,6 +78,10 @@ object SummaryScheduler {
         WorkManager.getInstance(ctx).cancelUniqueWork("summary-yearly")
     }
 
+    fun cancelMonthly(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("summary-monthly")
+    }
+
     fun cancelWeekly(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork("summary-weekly")
     }

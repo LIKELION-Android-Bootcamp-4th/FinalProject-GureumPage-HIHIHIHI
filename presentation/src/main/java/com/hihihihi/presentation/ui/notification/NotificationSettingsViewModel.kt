@@ -40,6 +40,7 @@ class NotificationSettingsViewModel @Inject constructor(
                             reminderMinute = settings.reminderMinute,
                             isGoalAlertEnabled = settings.isGoalAlertEnabled,
                             isWeeklySummaryEnabled = settings.isWeeklySummaryEnabled,
+                            isMonthlySummaryEnabled = settings.isMonthlySummaryEnabled,
                             isLoading = false,
                         )
                     }
@@ -93,6 +94,16 @@ class NotificationSettingsViewModel @Inject constructor(
         }
     }
 
+    fun setMonthlySummaryEnabled(enabled: Boolean) {
+        val updated = _uiState.value.copy(isMonthlySummaryEnabled = enabled)
+        _uiState.update { updated }
+        viewModelScope.launch {
+            save(updated)
+            if (enabled) SummaryScheduler.scheduleMonthly(context)
+            else SummaryScheduler.cancelMonthly(context)
+        }
+    }
+
     private suspend fun save(state: NotificationSettingsUiState) {
         updateNotificationSettingsUseCase(
             NotificationSettings(
@@ -101,6 +112,7 @@ class NotificationSettingsViewModel @Inject constructor(
                 reminderMinute = state.reminderMinute,
                 isGoalAlertEnabled = state.isGoalAlertEnabled,
                 isWeeklySummaryEnabled = state.isWeeklySummaryEnabled,
+                isMonthlySummaryEnabled = state.isMonthlySummaryEnabled,
             )
         )
     }

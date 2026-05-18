@@ -21,6 +21,7 @@ private object NotifPrefKeys {
     val REMINDER_MINUTE = intPreferencesKey("reminder_minute")
     val GOAL_ALERT_ENABLED = booleanPreferencesKey("goal_alert_enabled")
     val WEEKLY_SUMMARY_ENABLED = booleanPreferencesKey("weekly_summary_enabled")
+    val MONTHLY_SUMMARY_ENABLED = booleanPreferencesKey("monthly_summary_enabled")
 }
 
 class NotificationPreferencesLocalDataSourceImpl @Inject constructor(
@@ -35,6 +36,7 @@ class NotificationPreferencesLocalDataSourceImpl @Inject constructor(
                 reminderMinute = it[NotifPrefKeys.REMINDER_MINUTE] ?: 0,
                 isGoalAlertEnabled = it[NotifPrefKeys.GOAL_ALERT_ENABLED] ?: true,
                 isWeeklySummaryEnabled = it[NotifPrefKeys.WEEKLY_SUMMARY_ENABLED] ?: true,
+                isMonthlySummaryEnabled = it[NotifPrefKeys.MONTHLY_SUMMARY_ENABLED] ?: false,
             )
         }
 
@@ -45,6 +47,7 @@ class NotificationPreferencesLocalDataSourceImpl @Inject constructor(
             it[NotifPrefKeys.REMINDER_MINUTE] = settings.reminderMinute
             it[NotifPrefKeys.GOAL_ALERT_ENABLED] = settings.isGoalAlertEnabled
             it[NotifPrefKeys.WEEKLY_SUMMARY_ENABLED] = settings.isWeeklySummaryEnabled
+            it[NotifPrefKeys.MONTHLY_SUMMARY_ENABLED] = settings.isMonthlySummaryEnabled
         }
     }
 }

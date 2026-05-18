@@ -9,5 +9,6 @@ data class NotificationSettingsUiState(
     val reminderMinute: Int = 0,
     val isGoalAlertEnabled: Boolean = true,
     val isWeeklySummaryEnabled: Boolean = true,
+    val isMonthlySummaryEnabled: Boolean = false,
     val isLoading: Boolean = true,
 )

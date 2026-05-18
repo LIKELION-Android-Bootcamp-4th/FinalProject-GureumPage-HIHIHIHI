@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.annotation.SuppressLint
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
@@ -24,6 +25,7 @@ class WeeklySummaryWorker @AssistedInject constructor(
     private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
 ) : CoroutineWorker(appContext, workerParams) {
 
+    @SuppressLint("MissingPermission")
     override suspend fun doWork(): Result {
         val settings = getNotificationSettingsUseCase().first()
         if (!settings.isWeeklySummaryEnabled) {

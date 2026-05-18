@@ -9,6 +9,8 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumAppBar
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -57,13 +59,16 @@ fun NotificationSettingsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    var hasNotificationPermission by remember {
-        mutableStateOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
-                        android.content.pm.PackageManager.PERMISSION_GRANTED
-            } else true,
-        )
+    fun checkPermission(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+        else true
+
+    var hasNotificationPermission by remember { mutableStateOf(checkPermission()) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        hasNotificationPermission = checkPermission()
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -95,6 +100,7 @@ fun NotificationSettingsScreen(
         onDailyReminderChange = viewModel::setDailyReminderEnabled,
         onGoalAlertChange = viewModel::setGoalAlertEnabled,
         onWeeklySummaryChange = viewModel::setWeeklySummaryEnabled,
+        onMonthlySummaryChange = viewModel::setMonthlySummaryEnabled,
         onNavigateBack = onNavigateBack,
     )
 }
@@ -111,6 +117,7 @@ private fun NotificationSettingsContent(
     onDailyReminderChange: (Boolean) -> Unit,
     onGoalAlertChange: (Boolean) -> Unit,
     onWeeklySummaryChange: (Boolean) -> Unit,
+    onMonthlySummaryChange: (Boolean) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     Scaffold(
@@ -192,6 +199,14 @@ private fun NotificationSettingsContent(
                 checked = state.isWeeklySummaryEnabled,
                 enabled = hasNotificationPermission,
                 onCheckedChange = onWeeklySummaryChange,
+            )
+
+            NotificationToggleRow(
+                title = "월간 요약",
+                description = "매월 독서 기록 요약을 전달해드려요",
+                checked = state.isMonthlySummaryEnabled,
+                enabled = hasNotificationPermission,
+                onCheckedChange = onMonthlySummaryChange,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -356,6 +371,7 @@ private fun NotificationSettingsPreview() {
             onDailyReminderChange = {},
             onGoalAlertChange = {},
             onWeeklySummaryChange = {},
+            onMonthlySummaryChange = {},
             onNavigateBack = {},
         )
     }
