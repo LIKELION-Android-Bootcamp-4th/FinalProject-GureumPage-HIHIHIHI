@@ -21,3 +21,4 @@ import kotlinx.serialization.Serializable
     val showAddManualRecord: Boolean = false
 )
 @Serializable data class Withdraw(val userName: String)
+@Serializable data object NotificationSettings

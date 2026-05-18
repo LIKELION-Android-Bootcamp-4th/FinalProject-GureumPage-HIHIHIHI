@@ -4,7 +4,9 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.hihihihi.data.local.datasource.NotificationPreferencesLocalDataSource
 import com.hihihihi.data.local.datasource.UserPreferencesLocalDataSource
+import com.hihihihi.data.local.datasourceimpl.NotificationPreferencesLocalDataSourceImpl
 import com.hihihihi.data.local.datasourceimpl.UserPreferencesLocalDataSourceImpl
 import com.hihihihi.data.remote.datasource.AuthDataSource
 import com.hihihihi.data.remote.datasource.DailyReadPageRemoteDataSource
@@ -39,7 +41,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideUserBookRemoteDataSource(
-        firestore: FirebaseFirestore // Firestore 인스턴스 주입
+        firestore: FirebaseFirestore, // Firestore 인스턴스 주입
     ): UserBookRemoteDataSource {
         return UserBookRemoteDataSourceImpl(firestore) // 구현체 반환
     }
@@ -47,7 +49,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideQuoteRemoteDataSource(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): QuoteRemoteDataSource {
         return QuoteRemoteDataSourceImpl(firestore)
     }
@@ -56,7 +58,7 @@ object DataSourceModule {
     @Singleton
     fun provideAuthDataSource(
         auth: FirebaseAuth,
-        functions: FirebaseFunctions
+        functions: FirebaseFunctions,
     ): AuthDataSource {
         return AuthDataSourceImpl(auth, functions)
     }
@@ -64,7 +66,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideHistoryRemotedDataSource(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): HistoryRemoteDataSource {
         return HistoryRemoteDataSourceImpl(firestore)
     }
@@ -72,7 +74,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideUserRemoteDataSource(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): UserRemoteDataSource {
         return UserRemoteDataSourceImpl(firestore)
     }
@@ -80,7 +82,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideDailyReadPageRemoteDataSource(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
     ): DailyReadPageRemoteDataSource {
         return DailyReadPageRemoteDataSourceImpl(firestore)
     }
@@ -89,7 +91,7 @@ object DataSourceModule {
     @Singleton
     fun provideSearchRemoteDataSource(
         searchApiService: SearchApiService,
-        apiKey: String
+        apiKey: String,
     ): SearchRemoteDataSource {
         return SearchRemoteDataSourceImpl(searchApiService, apiKey)
     }
@@ -97,7 +99,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideMindmapRemoteDataSource(
-        fireStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
     ): MindmapRemoteDataSource {
         return MindmapRemoteDataSourceImpl(fireStore)
     }
@@ -105,7 +107,7 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideMindmapNodeRemoteDataSource(
-        fireStore: FirebaseFirestore
+        fireStore: FirebaseFirestore,
     ): MindmapNodeRemoteDataSource {
         return MindmapNodeRemoteDataSourceImpl(fireStore)
     }
@@ -113,8 +115,16 @@ object DataSourceModule {
     @Provides
     @Singleton
     fun provideUserPreferencesLocalDataSource(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): UserPreferencesLocalDataSource {
         return UserPreferencesLocalDataSourceImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationPreferencesLocalDataSource(
+        @ApplicationContext context: Context,
+    ): NotificationPreferencesLocalDataSource {
+        return NotificationPreferencesLocalDataSourceImpl(context)
     }
 }

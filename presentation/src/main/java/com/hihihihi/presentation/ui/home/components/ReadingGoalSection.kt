@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.hihihihi.domain.model.NotificationSettings
 import com.hihihihi.presentation.R
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.components.GureumCircleProgressBar
@@ -44,6 +45,7 @@ import com.hihihihi.presentation.utils.formatSecondsToReadableTimeWithoutSecond
 fun ReadingGoalSection(
     totalReadSeconds: Int,
     goalSeconds: Int,
+    notificationSettings: NotificationSettings,
     onGoalChange: (Int) -> Unit
 ) {
     val isGoalSet = goalSeconds > 0
@@ -56,8 +58,8 @@ fun ReadingGoalSection(
     var isPickerOpen by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    LaunchedEffect(totalReadSeconds, goalSeconds) {
-        DailyGoalNotifier.onProgress(context, totalReadSeconds, goalSeconds)
+    LaunchedEffect(totalReadSeconds, goalSeconds, notificationSettings) {
+        DailyGoalNotifier.onProgress(context, totalReadSeconds, goalSeconds, notificationSettings)
     }
 
     Column(
@@ -198,4 +200,3 @@ fun ReadingGoalSection(
         )
     }
 }
-

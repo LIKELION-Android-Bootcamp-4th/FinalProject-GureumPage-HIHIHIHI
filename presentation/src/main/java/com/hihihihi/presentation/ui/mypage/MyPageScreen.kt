@@ -14,8 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +48,7 @@ import java.time.LocalDate
 fun MyPageScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWithdraw: (String) -> Unit,
+    onNavigateToNotificationSettings: () -> Unit,
     viewModel: MypageViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,6 +73,7 @@ fun MyPageScreen(
         dialogState = state.dialogState,
         theme = theme,
         onThemeToggle = viewModel::toggleTheme,
+        onNavigateToNotificationSettings = onNavigateToNotificationSettings,
         onNicknameChangeClick = viewModel::onNicknameChangeClick,
         onLogoutClick = viewModel::onLogoutClick,
         onWithdrawClick = viewModel::onWithdrawClick,
@@ -93,6 +95,7 @@ private fun MyPageContent(
     dialogState: MyPageDialogState,
     theme: GureumThemeType,
     onThemeToggle: (GureumThemeType) -> Unit,
+    onNavigateToNotificationSettings: () -> Unit,
     onNicknameChangeClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onWithdrawClick: () -> Unit,
@@ -166,8 +169,9 @@ private fun MyPageContent(
         MyPageMenuSection(
             theme = theme,
             onThemeToggle = onThemeToggle,
+            onNotificationSettingsClick = onNavigateToNotificationSettings,
             onLogoutClick = onLogoutClick,
-            onWithDrawClick = onWithdrawClick
+            onWithDrawClick = onWithdrawClick,
         )
     }
 
@@ -236,6 +240,7 @@ private fun MyPageWithDataPreview() {
             dialogState = MyPageDialogState.None,
             theme = GureumThemeType.DARK,
             onThemeToggle = {},
+            onNavigateToNotificationSettings = {},
             onNicknameChangeClick = {},
             onLogoutClick = {},
             onWithdrawClick = {},
