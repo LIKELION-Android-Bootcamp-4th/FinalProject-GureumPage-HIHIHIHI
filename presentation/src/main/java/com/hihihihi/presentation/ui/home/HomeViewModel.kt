@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
@@ -48,7 +49,9 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             getNotificationSettingsUseCase()
-                .catch { }
+                .catch { exception ->
+                    Log.e(TAG, "알림 설정 조회 실패", exception)
+                }
                 .collect { settings ->
                     _uiState.update { it.copy(notificationSettings = settings) }
                 }
@@ -61,5 +64,9 @@ class HomeViewModel @Inject constructor(
                 changeDailyGoalTimeUseCase(uid, dailyGoalTime)
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "HomeViewModel"
     }
 }
