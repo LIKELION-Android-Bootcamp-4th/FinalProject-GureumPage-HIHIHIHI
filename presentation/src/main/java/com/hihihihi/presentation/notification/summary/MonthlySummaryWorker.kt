@@ -37,6 +37,7 @@ class MonthlySummaryWorker @AssistedInject constructor(
             ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
+            SummaryScheduler.scheduleMonthly(appContext)
             return Result.success()
         }
 

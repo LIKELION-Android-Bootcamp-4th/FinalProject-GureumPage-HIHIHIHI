@@ -133,7 +133,11 @@ fun SplashView(
             } else {
                 SummaryScheduler.cancelWeekly(context)
             }
-            SummaryScheduler.scheduleMonthly(context)
+            if (settings.isMonthlySummaryEnabled) {
+                SummaryScheduler.scheduleMonthly(context)
+            } else {
+                SummaryScheduler.cancelMonthly(context)
+            }
             SummaryScheduler.scheduleYearly(context)
         }
     }
