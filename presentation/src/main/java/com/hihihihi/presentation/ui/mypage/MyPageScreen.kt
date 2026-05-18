@@ -48,7 +48,7 @@ import java.time.LocalDate
 fun MyPageScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWithdraw: (String) -> Unit,
-    onNavigateToNotificationSettings: () -> Unit = {},
+    onNavigateToNotificationSettings: () -> Unit,
     viewModel: MypageViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

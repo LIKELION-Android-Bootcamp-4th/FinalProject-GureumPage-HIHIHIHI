@@ -9,11 +9,10 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,12 +22,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.core.app.NotificationManagerCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumAppBar
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -60,10 +63,7 @@ fun NotificationSettingsScreen(
     val context = LocalContext.current
 
     fun checkPermission(): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED
-        else true
+        NotificationManagerCompat.from(context).areNotificationsEnabled()
 
     var hasNotificationPermission by remember { mutableStateOf(checkPermission()) }
 
@@ -73,9 +73,14 @@ fun NotificationSettingsScreen(
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
-    ) { granted -> hasNotificationPermission = granted }
+    ) { hasNotificationPermission = checkPermission() }
 
     var showTimePicker by remember { mutableStateOf(false) }
+
+    if (state.isLoading) {
+        NotificationSettingsLoadingContent(onNavigateBack = onNavigateBack)
+        return
+    }
 
     NotificationSettingsContent(
         state = state,
@@ -103,6 +108,31 @@ fun NotificationSettingsScreen(
         onMonthlySummaryChange = viewModel::setMonthlySummaryEnabled,
         onNavigateBack = onNavigateBack,
     )
+}
+
+@Composable
+private fun NotificationSettingsLoadingContent(
+    onNavigateBack: () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            GureumAppBar(
+                title = "알림 설정",
+                showUpButton = true,
+                onUpClick = onNavigateBack,
+            )
+        },
+        containerColor = GureumTheme.colors.background,
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = GureumTheme.colors.primary)
+        }
+    }
 }
 
 @Composable
