@@ -10,6 +10,8 @@ import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.hihihihi.domain.usecase.history.GetTodayReadTimeUseCase
 import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.domain.usecase.user.CheckRecentVisitUseCase
 import com.hihihihi.presentation.notification.common.Channels
@@ -27,6 +29,8 @@ class DailyReminderWorker @AssistedInject constructor(
     private val factory: NotificationFactory,
     private val checkRecentVisitUseCase: CheckRecentVisitUseCase,
     private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val getTodayReadTimeUseCase: GetTodayReadTimeUseCase,
 ) : CoroutineWorker(appContext, params) {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -57,7 +61,18 @@ class DailyReminderWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        val notReadToday = true
+        val currentUserId = getCurrentUserIdUseCase()
+        if (currentUserId.isNullOrBlank()) {
+            ReminderScheduler.scheduleDaily(appContext, settings.reminderHour, settings.reminderMinute)
+            return Result.success()
+        }
+
+        val todayReadTime = getTodayReadTimeUseCase(currentUserId).getOrElse {
+            ReminderScheduler.scheduleDaily(appContext, settings.reminderHour, settings.reminderMinute)
+            return Result.success()
+        }
+        val notReadToday = todayReadTime <= 0
+
         if (notReadToday) {
             val pendingIntent = factory.pendingIntentTo("gureum://read/start".toUri())
             val notification = factory.simpleAlarm(
