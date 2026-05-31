@@ -13,7 +13,7 @@ fun MindmapNode.toLibraryModel(): MindMapNodeWithPayload<GureumMindMapPayload> =
         title = nodeTitle,
         subtitle = nodeEx,
         parentId = parentNodeId,
-        color = color?.toLongOrNull()?.let { Color(it) },
+        color = color?.toULongOrNull()?.let { Color(it) },
         icon = icon,
     ).withPayload(GureumMindMapPayload(bookImage = bookImage))
 

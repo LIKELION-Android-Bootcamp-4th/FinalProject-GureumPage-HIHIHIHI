@@ -56,7 +56,7 @@ ossLicensesPlugin = "0.11.0"
 playServicesOssLicenses = "17.5.0"
 
 # Compose MindMap
-composeMindmap = "0.1.0"
+composeMindmap = "0.1.1"
 
 # Test
 junit = "4.13.2"

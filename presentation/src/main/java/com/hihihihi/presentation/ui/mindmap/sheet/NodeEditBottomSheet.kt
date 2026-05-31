@@ -3,11 +3,15 @@ package com.hihihihi.presentation.ui.mindmap.sheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -42,9 +46,22 @@ private val ICON_OPTIONS = listOf(
 )
 
 private val COLOR_OPTIONS = listOf(
-    Color(0xFFFFCDD2), Color(0xFFFFE0B2), Color(0xFFFFF9C4),
-    Color(0xFFC8E6C9), Color(0xFFB3E5FC), Color(0xFFE1BEE7),
-    Color(0xFFF8BBD0), Color(0xFFD7CCC8), Color(0xFFCFD8DC), Color(0xFFEEEEEE),
+    Color(0xFFFFCDD2), // 연핑크
+    Color(0xFFFFE0B2), // 연주황
+    Color(0xFFFFF9C4), // 연노랑
+    Color(0xFFC8E6C9), // 연초록
+    Color(0xFFB3E5FC), // 연하늘
+    Color(0xFFE1BEE7), // 연보라
+    Color(0xFFF8BBD0), // 핑크
+    Color(0xFFD7CCC8), // 연베이지
+    Color(0xFFCFD8DC), // 연회색
+    Color(0xFFEEEEEE), // 밝은 회색
+    Color(0xFFB2EBF2), // 민트
+    Color(0xFFDCEDC8), // 연두
+    Color(0xFFF0F4C3), // 라임
+    Color(0xFFFFECB3), // 크림옐로우
+    Color(0xFFD1C4E9), // 라벤더
+    Color(0xFFFFCCBC), // 살구
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,17 +77,19 @@ fun NodeEditBottomSheet(
     var selectedIcon by remember { mutableStateOf(node?.icon) }
     var selectedColor by remember { mutableStateOf(node?.color) }
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.background,
+        containerColor = colors.gray150,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -81,22 +100,7 @@ fun NodeEditBottomSheet(
                 color = colors.gray900,
             )
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("제목") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            OutlinedTextField(
-                value = subtitle,
-                onValueChange = { subtitle = it },
-                label = { Text("내용") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
+            // 아이콘 선택
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("아이콘", fontSize = 14.sp, color = colors.gray500)
                 LazyRow(
@@ -110,7 +114,7 @@ fun NodeEditBottomSheet(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelected) colors.primary10 else colors.gray150)
+                                .background(if (isSelected) colors.primary10 else colors.gray200)
                                 .border(
                                     width = if (isSelected) 2.dp else 0.dp,
                                     color = if (isSelected) colors.primary else Color.Transparent,
@@ -126,6 +130,7 @@ fun NodeEditBottomSheet(
                 }
             }
 
+            // 색상 선택
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("색상", fontSize = 14.sp, color = colors.gray500)
                 LazyRow(
@@ -152,19 +157,66 @@ fun NodeEditBottomSheet(
                 }
             }
 
+            // 제목 입력
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "제목",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.gray600,
+                )
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = {
+                        Text("제목을 입력해주세요.", color = colors.gray400)
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            // 내용 입력
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "내용",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.gray600,
+                )
+                OutlinedTextField(
+                    value = subtitle,
+                    onValueChange = { if (it.length <= 500) subtitle = it },
+                    placeholder = {
+                        Text("책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요", color = colors.gray400)
+                    },
+                    minLines = 3,
+                    maxLines = 4,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    text = "최대 500자",
+                    modifier = Modifier.align(Alignment.End),
+                    fontSize = 12.sp,
+                    color = colors.gray400,
+                )
+            }
+
             Button(
                 onClick = { onSave(title.trim(), subtitle.trim(), selectedIcon, selectedColor) },
                 enabled = title.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colors.primary,
                     contentColor = colors.white,
-                    disabledContainerColor = colors.gray150,
+                    disabledContainerColor = colors.gray200,
                     disabledContentColor = colors.gray400,
                 ),
             ) {
-                Text("저장", fontWeight = FontWeight.SemiBold)
+                Text("저장하기", fontWeight = FontWeight.SemiBold)
             }
         }
     }

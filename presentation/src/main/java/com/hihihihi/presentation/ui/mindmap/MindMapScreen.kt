@@ -2,42 +2,37 @@ package com.hihihihi.presentation.ui.mindmap
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,10 +43,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -71,6 +72,7 @@ import io.github.hanhyo.composemindmap.model.MindMapStyle
 import com.hihihihi.presentation.designsystem.components.BookCoverImage
 import com.hihihihi.presentation.ui.mindmap.sheet.NodeDetailBottomSheet
 import com.hihihihi.presentation.ui.mindmap.sheet.NodeEditBottomSheet
+import kotlin.math.roundToInt
 
 @Composable
 fun MindMapScreen(
@@ -87,6 +89,20 @@ fun MindMapScreen(
     var showEditSheet by remember { mutableStateOf(false) }
     var deleteTargetId by remember { mutableStateOf<String?>(null) }
     var detailNode by remember { mutableStateOf<MindMapNode?>(null) }
+    var showExitEditDialog by remember { mutableStateOf(false) }
+    val content = uiState as? MindMapUiState.Content
+
+    val requestNavigateBack = {
+        if (content?.editMode == true) {
+            showExitEditDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    BackHandler(enabled = content?.editMode == true) {
+        showExitEditDialog = true
+    }
 
     LaunchedEffect(mindmapId) {
         viewModel.load(mindmapId)
@@ -108,6 +124,10 @@ fun MindMapScreen(
                 is MindMapEffect.ShowNodeDetail -> {
                     detailNode = effect.node
                 }
+                MindMapEffect.NavigateBack -> {
+                    showExitEditDialog = false
+                    onNavigateBack()
+                }
             }
         }
     }
@@ -116,30 +136,14 @@ fun MindMapScreen(
         uiState = uiState,
         canvasState = canvasState,
         onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack,
+        onNavigateBack = requestNavigateBack,
+        onRequestEditNode = { node ->
+            pendingEditNode = node
+            pendingParentId = null
+            showEditSheet = true
+        },
+        onRequestDeleteNode = { deleteTargetId = it },
     )
-
-    // 선택된 노드 위 오버레이 툴바 (편집 모드일 때만)
-    val content = uiState as? MindMapUiState.Content
-    val selectedId = content?.selectedNodeId
-    if (content != null && content.editMode && selectedId != null) {
-        val selectedNode = content.nodes.firstOrNull { it.node.id == selectedId }?.node
-        if (selectedNode != null) {
-            NodeOverlayToolbar(
-                onEdit = {
-                    viewModel.onEvent(MindMapEvent.NodeTapped(selectedId))
-                    pendingEditNode = selectedNode
-                    pendingParentId = null
-                    showEditSheet = true
-                },
-                onDelete = if (canDeleteMindMapNode(selectedNode)) {
-                    { deleteTargetId = selectedId }
-                } else {
-                    null
-                },
-            )
-        }
-    }
 
     // 노드 편집/추가 BottomSheet
     if (showEditSheet) {
@@ -183,10 +187,10 @@ fun MindMapScreen(
         )
     }
 
-    // 노드 삭제 확인 BottomSheet
+    // 노드 삭제 확인 Dialog
     val targetId = deleteTargetId
     if (targetId != null) {
-        DeleteConfirmBottomSheet(
+        DeleteConfirmDialog(
             onConfirm = {
                 viewModel.onEvent(MindMapEvent.DeleteNode(targetId))
                 deleteTargetId = null
@@ -194,90 +198,129 @@ fun MindMapScreen(
             onDismiss = { deleteTargetId = null },
         )
     }
+
+    if (showExitEditDialog) {
+        ExitEditConfirmDialog(
+            onConfirm = {
+                showExitEditDialog = false
+                viewModel.onEvent(MindMapEvent.SaveAndNavigateBack)
+            },
+            onDismiss = { showExitEditDialog = false },
+        )
+    }
 }
 
 @Composable
 private fun NodeOverlayToolbar(
+    touchOffset: Offset,
+    containerSize: IntSize,
     onEdit: () -> Unit,
     onDelete: (() -> Unit)?,
 ) {
     val colors = GureumTheme.colors
-    Box(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 72.dp),
-            shape = RoundedCornerShape(24.dp),
-            shadowElevation = 4.dp,
-            color = colors.card,
-        ) {
-            Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
-                TextButton(onClick = onEdit) {
-                    Text("수정", color = colors.primary, fontWeight = FontWeight.Medium)
-                }
-                if (onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text("삭제", color = colors.systemRed, fontWeight = FontWeight.Medium)
-                    }
+    var toolbarSize by remember { mutableStateOf(IntSize.Zero) }
+    Surface(
+        modifier = Modifier
+            .onSizeChanged { toolbarSize = it }
+            .absoluteOffset {
+                val margin = 12.dp.roundToPx()
+                val maxX = (containerSize.width - toolbarSize.width).coerceAtLeast(0)
+                val maxY = (containerSize.height - toolbarSize.height).coerceAtLeast(0)
+                val x = (touchOffset.x - toolbarSize.width / 2f).roundToInt().coerceIn(0, maxX)
+                val above = (touchOffset.y - toolbarSize.height - margin).roundToInt()
+                val below = (touchOffset.y + margin).roundToInt()
+                val y = (if (above < 0) below else above).coerceIn(0, maxY)
+                IntOffset(x, y)
+            },
+        shape = RoundedCornerShape(24.dp),
+        shadowElevation = 4.dp,
+        color = colors.card,
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
+            TextButton(onClick = onEdit) {
+                Text("수정", color = colors.primary, fontWeight = FontWeight.Medium)
+            }
+            if (onDelete != null) {
+                TextButton(onClick = onDelete) {
+                    Text("삭제", color = colors.systemRed, fontWeight = FontWeight.Medium)
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DeleteConfirmBottomSheet(
+private fun DeleteConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = GureumTheme.colors
-    val sheetState = rememberModalBottomSheetState()
-    ModalBottomSheet(
+    AlertDialog(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = colors.background,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        title = {
             Text(
                 text = "노드 삭제",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = colors.gray900,
             )
-            HorizontalDivider(color = colors.dividerShallow)
+        },
+        text = {
             Text(
                 text = "이 노드와 하위 노드를 모두 삭제할까요?",
                 fontSize = 14.sp,
                 color = colors.gray600,
             )
-            Button(
-                onClick = onConfirm,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.systemRed,
-                    contentColor = colors.white,
-                ),
-                shape = RoundedCornerShape(12.dp),
-            ) {
-                Text("삭제", fontWeight = FontWeight.SemiBold)
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("삭제", color = colors.systemRed, fontWeight = FontWeight.Medium)
             }
-            OutlinedButton(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.gray700),
-            ) {
-                Text("취소")
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("취소", color = colors.gray500, fontWeight = FontWeight.Medium)
             }
-        }
-    }
+        },
+        containerColor = colors.card,
+    )
+}
+
+@Composable
+private fun ExitEditConfirmDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = GureumTheme.colors
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "편집 종료",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.gray900,
+            )
+        },
+        text = {
+            Text(
+                text = "변경사항을 저장하고 나갈까요?",
+                fontSize = 14.sp,
+                color = colors.gray600,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("저장 후 나가기", color = colors.primary, fontWeight = FontWeight.Medium)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("취소", color = colors.gray500, fontWeight = FontWeight.Medium)
+            }
+        },
+        containerColor = colors.card,
+    )
 }
 
 @Composable
@@ -286,13 +329,22 @@ private fun MindMapContent(
     canvasState: MindMapCanvasState,
     onEvent: (MindMapEvent) -> Unit,
     onNavigateBack: () -> Unit = {},
+    onRequestEditNode: (MindMapNode) -> Unit = {},
+    onRequestDeleteNode: (String) -> Unit = {},
 ) {
     when (uiState) {
         MindMapUiState.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) { CircularProgressIndicator(color = GureumTheme.colors.primary) }
-        is MindMapUiState.Content -> MindMapSuccessContent(uiState, canvasState, onEvent, onNavigateBack)
+        is MindMapUiState.Content -> MindMapSuccessContent(
+            content = uiState,
+            canvasState = canvasState,
+            onEvent = onEvent,
+            onNavigateBack = onNavigateBack,
+            onRequestEditNode = onRequestEditNode,
+            onRequestDeleteNode = onRequestDeleteNode,
+        )
         is MindMapUiState.Error -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
@@ -306,7 +358,11 @@ private fun MindMapSuccessContent(
     canvasState: MindMapCanvasState,
     onEvent: (MindMapEvent) -> Unit,
     onNavigateBack: () -> Unit = {},
+    onRequestEditNode: (MindMapNode) -> Unit = {},
+    onRequestDeleteNode: (String) -> Unit = {},
 ) {
+    var touchOffset by remember { mutableStateOf(Offset.Zero) }
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
     val style = MindMapStyle(
         defaultNodeColor = GureumTheme.colors.card,
         selectedStrokeColor = GureumTheme.colors.primary,
@@ -316,11 +372,13 @@ private fun MindMapSuccessContent(
     Scaffold(
         containerColor = GureumTheme.colors.background,
         topBar = {
-            MindMapTopBar(
+            MindMapTopBar(onNavigateBack = onNavigateBack)
+        },
+        bottomBar = {
+            MindMapBottomBar(
                 editMode = content.editMode,
                 canUndo = content.canUndo,
                 canRedo = content.canRedo,
-                onNavigateBack = onNavigateBack,
                 onToggleEdit = { checked ->
                     onEvent(if (checked) MindMapEvent.StartEdit else MindMapEvent.EndEdit)
                 },
@@ -329,45 +387,59 @@ private fun MindMapSuccessContent(
                 onRedo = { onEvent(MindMapEvent.Redo) },
             )
         },
-        floatingActionButton = {
-            if (content.editMode) {
-                FloatingActionButton(
-                    onClick = { onEvent(MindMapEvent.ShowAddSheet) },
-                    containerColor = GureumTheme.colors.primary,
-                    contentColor = GureumTheme.colors.white,
-                    elevation = FloatingActionButtonDefaults.elevation(4.dp),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "노드 추가")
-                }
-            }
-        },
     ) { paddingValues ->
-        PayloadMindMapCanvas(
-            nodes = content.nodes,
-            state = canvasState,
-            style = style,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .navigationBarsPadding(),
-            selectedNodeId = content.selectedNodeId,
-            editMode = content.editMode,
-            nodeSize = { item ->
-                if (item.node.parentId == null && !item.payload.bookImage.isNullOrBlank()) {
-                    DpSize(width = 112.dp, height = 148.dp)
-                } else {
-                    DpSize(width = style.nodeWidth, height = style.nodeHeight)
-                }
-            },
-            nodeContent = { item, visualState ->
-                GureumMindMapNode(node = item.node, payload = item.payload, visualState = visualState)
-            },
-            onNodeClick = { onEvent(MindMapEvent.NodeTapped(it)) },
-            onNodeLongClick = { onEvent(MindMapEvent.NodeLongPressed(it)) },
-            onCanvasClick = { onEvent(MindMapEvent.CanvasTapped) },
-            onAddChildClick = { onEvent(MindMapEvent.ShowAddChildSheet(it)) },
-            onNodeMove = { nodeId, newParentId -> onEvent(MindMapEvent.MoveNode(nodeId, newParentId)) },
-        )
+                .onSizeChanged { containerSize = it },
+        ) {
+            PayloadMindMapCanvas(
+                nodes = content.nodes,
+                state = canvasState,
+                style = style,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            touchOffset = awaitFirstDown(requireUnconsumed = false).position
+                        }
+                    },
+                selectedNodeId = content.selectedNodeId,
+                editMode = content.editMode,
+                nodeSize = { item ->
+                    if (item.node.parentId == null && !item.payload.bookImage.isNullOrBlank()) {
+                        DpSize(width = 112.dp, height = 148.dp)
+                    } else {
+                        DpSize(width = style.nodeWidth, height = style.nodeHeight)
+                    }
+                },
+                nodeContent = { item, visualState ->
+                    GureumMindMapNode(node = item.node, payload = item.payload, visualState = visualState)
+                },
+                onNodeClick = { onEvent(MindMapEvent.NodeTapped(it)) },
+                onNodeLongClick = { onEvent(MindMapEvent.NodeLongPressed(it)) },
+                onCanvasClick = { onEvent(MindMapEvent.CanvasTapped) },
+                onAddChildClick = { onEvent(MindMapEvent.ShowAddChildSheet(it)) },
+                onNodeMove = { nodeId, newParentId -> onEvent(MindMapEvent.MoveNode(nodeId, newParentId)) },
+            )
+
+            val selectedNode = content.selectedNodeId?.let { id ->
+                content.nodes.firstOrNull { it.node.id == id }?.node
+            }
+            if (content.editMode && selectedNode != null) {
+                NodeOverlayToolbar(
+                    touchOffset = touchOffset,
+                    containerSize = containerSize,
+                    onEdit = { onRequestEditNode(selectedNode) },
+                    onDelete = if (canDeleteMindMapNode(selectedNode)) {
+                        { onRequestDeleteNode(selectedNode.id) }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -417,12 +489,16 @@ private fun GureumMindMapNode(
             )
         }
     } else {
+        val nodeColor = node.color ?: colors.card
+        val isLightNode = nodeColor.luminance() > 0.5f
+        val titleColor = if (isLightNode) Color(0xFF1F1E18) else colors.white
+        val subtitleColor = if (isLightNode) Color(0xFF4F4F41) else Color(0xFFE0E0D8)
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(alpha)
                 .clip(shape)
-                .background(node.color ?: colors.card)
+                .background(nodeColor)
                 .border(2.dp, borderColor, shape)
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -432,13 +508,13 @@ private fun GureumMindMapNode(
             Column {
                 Text(
                     text = node.title,
-                    color = colors.gray900,
+                    color = titleColor,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = if (node.subtitle.isBlank()) 2 else 1,
                 )
                 if (node.subtitle.isNotBlank()) {
-                    Text(text = node.subtitle, color = colors.gray500, fontSize = 11.sp, maxLines = 1)
+                    Text(text = node.subtitle, color = subtitleColor, fontSize = 11.sp, maxLines = 1)
                 }
             }
         }
@@ -448,14 +524,7 @@ private fun GureumMindMapNode(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MindMapTopBar(
-    editMode: Boolean,
-    canUndo: Boolean,
-    canRedo: Boolean,
     onNavigateBack: () -> Unit,
-    onToggleEdit: (Boolean) -> Unit,
-    onCenter: () -> Unit,
-    onUndo: () -> Unit,
-    onRedo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = GureumTheme.colors
@@ -477,45 +546,75 @@ private fun MindMapTopBar(
                 )
             }
         },
-        actions = {
-            if (editMode) {
-                IconButton(onClick = onUndo, enabled = canUndo) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_undo),
-                        contentDescription = "실행 취소",
-                        tint = if (canUndo) colors.gray700 else colors.gray300,
-                    )
-                }
-                IconButton(onClick = onRedo, enabled = canRedo) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_redo),
-                        contentDescription = "다시 실행",
-                        tint = if (canRedo) colors.gray700 else colors.gray300,
-                    )
-                }
-            }
-            TextButton(onClick = onCenter) {
-                Text("중앙", color = colors.primary, fontWeight = FontWeight.Medium)
-            }
-            Spacer(Modifier.width(4.dp))
-            Switch(
-                checked = editMode,
-                onCheckedChange = onToggleEdit,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = colors.white,
-                    checkedTrackColor = colors.primary,
-                    uncheckedThumbColor = colors.white,
-                    uncheckedTrackColor = colors.gray200,
-                ),
-            )
-            Spacer(Modifier.width(8.dp))
-        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = colors.card,
             titleContentColor = colors.gray900,
         ),
         modifier = modifier,
     )
+}
+
+@Composable
+private fun MindMapBottomBar(
+    editMode: Boolean,
+    canUndo: Boolean,
+    canRedo: Boolean,
+    onToggleEdit: (Boolean) -> Unit,
+    onCenter: () -> Unit,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
+) {
+    val colors = GureumTheme.colors
+    Surface(
+        color = colors.gray150,
+        shadowElevation = 8.dp,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
+        ) {
+            if (editMode) {
+                Row(modifier = Modifier.align(Alignment.CenterStart)) {
+                    IconButton(onClick = onUndo, enabled = canUndo) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_undo),
+                            contentDescription = "실행 취소",
+                            tint = if (canUndo) colors.gray700 else colors.gray400,
+                        )
+                    }
+                    IconButton(onClick = onRedo, enabled = canRedo) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_redo),
+                            contentDescription = "다시 실행",
+                            tint = if (canRedo) colors.gray700 else colors.gray400,
+                        )
+                    }
+                }
+            }
+            IconButton(
+                onClick = onCenter,
+                modifier = Modifier.align(Alignment.Center),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CenterFocusStrong,
+                    contentDescription = "중앙으로 이동",
+                    tint = colors.gray700,
+                )
+            }
+            IconToggleButton(
+                checked = editMode,
+                onCheckedChange = onToggleEdit,
+                modifier = Modifier.align(Alignment.CenterEnd),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = if (editMode) "편집 모드 종료" else "편집 모드 시작",
+                    tint = if (editMode) colors.primary else colors.gray700,
+                )
+            }
+        }
+    }
 }
 
 @Preview(name = "Loading", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)

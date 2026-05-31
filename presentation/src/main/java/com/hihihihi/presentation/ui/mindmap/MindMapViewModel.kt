@@ -52,6 +52,7 @@ sealed interface MindMapEvent {
     data object CanvasTapped : MindMapEvent
     data object StartEdit : MindMapEvent
     data object EndEdit : MindMapEvent
+    data object SaveAndNavigateBack : MindMapEvent
     data class AddNode(
         val parentId: String?,
         val title: String,
@@ -70,7 +71,6 @@ sealed interface MindMapEvent {
     data class MoveNode(val nodeId: String, val newParentId: String) : MindMapEvent
     data object Undo : MindMapEvent
     data object Redo : MindMapEvent
-    data object ShowAddSheet : MindMapEvent
     data class ShowAddChildSheet(val parentId: String) : MindMapEvent
 }
 
@@ -79,6 +79,7 @@ sealed interface MindMapEffect {
     data class ShowNodeEditSheet(val node: MindMapNode?, val parentId: String? = null) : MindMapEffect
     data class ShowDeleteConfirm(val nodeId: String) : MindMapEffect
     data class ShowNodeDetail(val node: MindMapNode) : MindMapEffect
+    data object NavigateBack : MindMapEffect
 }
 
 @HiltViewModel
@@ -107,10 +108,10 @@ class MindMapViewModel @Inject constructor(
         viewModelScope.launch {
             observeMindmapNodeUseCase(mindmapId).collect { nodes ->
                 if (userId.isEmpty() && nodes.isNotEmpty()) userId = nodes.first().userId
-                currentDomainNodes = nodes
                 payloadByNodeId = nodes.associate { it.mindmapNodeId to GureumMindMapPayload(it.bookImage) }
                 val editMode = (_uiState.value as? MindMapUiState.Content)?.editMode ?: false
                 if (!editMode && !saving) {
+                    currentDomainNodes = nodes
                     updateContent { it.copy(nodes = nodes.map { n -> n.toLibraryModel() }) }
                 }
             }
@@ -124,10 +125,9 @@ class MindMapViewModel @Inject constructor(
                 controller.reset()
                 updateContent { it.copy(editMode = true, canUndo = false, canRedo = false) }
             }
-            MindMapEvent.EndEdit -> viewModelScope.launch {
-                flushDiff(currentDomainNodes)
-                controller.reset()
-                updateContent { it.copy(editMode = false, selectedNodeId = null, canUndo = false, canRedo = false) }
+            MindMapEvent.EndEdit -> finishEditing()
+            MindMapEvent.SaveAndNavigateBack -> finishEditing {
+                _effect.send(MindMapEffect.NavigateBack)
             }
             is MindMapEvent.NodeTapped -> {
                 val content = _uiState.value as? MindMapUiState.Content ?: return
@@ -207,12 +207,6 @@ class MindMapViewModel @Inject constructor(
                 }
                 commitNodes(moved)
             }
-            MindMapEvent.ShowAddSheet -> {
-                val content = _uiState.value as? MindMapUiState.Content ?: return
-                val parentId = content.selectedNodeId
-                    ?: content.nodes.firstOrNull { it.node.parentId == null }?.node?.id
-                viewModelScope.launch { _effect.send(MindMapEffect.ShowNodeEditSheet(null, parentId)) }
-            }
             is MindMapEvent.ShowAddChildSheet -> {
                 viewModelScope.launch { _effect.send(MindMapEffect.ShowNodeEditSheet(null, event.parentId)) }
             }
@@ -241,13 +235,24 @@ class MindMapViewModel @Inject constructor(
         }
     }
 
-    private suspend fun flushDiff(current: List<MindmapNode>) {
+    private fun finishEditing(onSaved: suspend () -> Unit = {}) {
+        if (saving) return
+        viewModelScope.launch {
+            if (!flushDiff(currentDomainNodes)) return@launch
+            controller.reset()
+            updateContent { it.copy(editMode = false, selectedNodeId = null, canUndo = false, canRedo = false) }
+            onSaved()
+        }
+    }
+
+    private suspend fun flushDiff(current: List<MindmapNode>): Boolean {
         val operations = diff(baselineDomain, current)
-        if (operations.isEmpty()) return
+        if (operations.isEmpty()) return true
         saving = true
         try {
-            applyNodeOperation(mindmapId, operations)
+            return applyNodeOperation(mindmapId, operations)
                 .onFailure { _effect.send(MindMapEffect.ShowToast("저장에 실패했습니다")) }
+                .isSuccess
         } finally {
             saving = false
         }
