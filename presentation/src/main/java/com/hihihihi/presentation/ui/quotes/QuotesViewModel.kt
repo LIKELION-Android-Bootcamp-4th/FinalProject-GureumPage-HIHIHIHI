@@ -19,7 +19,7 @@ class QuotesViewModel @Inject constructor(
     private val getQuoteUseCase: GetQuoteUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(QuotesUiState(isLoading = true))
+    private val _uiState = MutableStateFlow<QuotesUiState>(QuotesUiState.Loading)
     val uiState: StateFlow<QuotesUiState> = _uiState.asStateFlow()
 
     private val currentUid: String?
@@ -30,19 +30,30 @@ class QuotesViewModel @Inject constructor(
     }
 
     fun selectQuote(quote: QuoteUiModel?) {
-        _uiState.update { it.copy(selectedQuote = quote) }
+        updateContent { it.copy(selectedQuote = quote) }
     }
 
     fun getQuotes(userId: String) {
         viewModelScope.launch {
             try {
-                _uiState.update { it.copy(isLoading = true) }
+                _uiState.update { QuotesUiState.Loading }
                 getQuoteUseCase(userId).collect { quotes ->
-                    _uiState.update { it.copy(quotes = quotes.map { quote -> quote.toUiModel() }, isLoading = false) }
+                    _uiState.update { QuotesUiState.Content(quotes = quotes.map { quote -> quote.toUiModel() }) }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "알 수 없는 오류 발생", isLoading = false) }
+                _uiState.update { current ->
+                    QuotesUiState.Error(
+                        message = e.message ?: "알 수 없는 오류 발생",
+                        previous = current as? QuotesUiState.Content,
+                    )
+                }
             }
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (QuotesUiState.Content) -> QuotesUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }

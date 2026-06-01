@@ -33,7 +33,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.domain.model.SearchBook
 import com.hihihihi.presentation.designsystem.components.GureumCard
 import com.hihihihi.presentation.designsystem.components.Medi14Text
@@ -55,25 +58,28 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val content = uiState.contentOrDefault()
 
-    LaunchedEffect(uiState.addBookMessage) {
-        uiState.addBookMessage?.let { message ->
-            if (message.isNotEmpty()) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                viewModel.clearMessage()
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    is SearchEffect.ShowMessage ->
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
     SearchContent(
-        hasSearched = uiState.hasSearched,
-        isSearching = uiState.isSearching,
-        searchResults = uiState.searchResults,
-        isLoadingMore = uiState.isLoadingMore,
-        hasMore = uiState.hasMore,
-        selectedBook = uiState.selectedBook,
-        isAddingBook = uiState.isAddingBook,
-        isAddBookSuccess = uiState.isAddBookSuccess,
+        hasSearched = content.hasSearched,
+        isSearching = content.isSearching,
+        searchResults = content.searchResults,
+        isLoadingMore = content.isLoadingMore,
+        hasMore = content.hasMore,
+        selectedBook = content.selectedBook,
+        isAddingBook = content.isAddingBook,
         onSearch = viewModel::search,
         onBack = onNavigateBack,
         onSelectBook = viewModel::selectBook,
@@ -96,7 +102,6 @@ private fun SearchContent(
     hasMore: Boolean,
     selectedBook: SearchBook?,
     isAddingBook: Boolean,
-    isAddBookSuccess: Boolean,
     onSearch: (String) -> Unit,
     onBack: () -> Unit,
     onSelectBook: (SearchBook?) -> Unit,
@@ -117,12 +122,6 @@ private fun SearchContent(
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
-    }
-
-    LaunchedEffect(isAddBookSuccess) {
-        if (isAddBookSuccess && !isAddingBook) {
-            scope.launch { sheetState.hide() }
-        }
     }
 
     LaunchedEffect(searchResults.size) {
@@ -272,7 +271,6 @@ private fun SearchPreview() {
             hasMore = false,
             selectedBook = null,
             isAddingBook = false,
-            isAddBookSuccess = false,
             onSearch = {},
             onBack = {},
             onSelectBook = {},

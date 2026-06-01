@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
@@ -59,17 +60,35 @@ fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LibraryContent(
-        books = uiState.books,
-        errorMessage = uiState.errorMessage,
-        onNavigateToBookDetail = onNavigateToBookDetail,
-    )
+    when (val state = uiState) {
+        LibraryUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = GureumTheme.colors.primary)
+            }
+        }
+
+        is LibraryUiState.Error -> {
+            LibraryContent(
+                books = state.previous?.books.orEmpty(),
+                loadErrorMessage = state.message,
+                onNavigateToBookDetail = onNavigateToBookDetail,
+            )
+        }
+
+        is LibraryUiState.Content -> {
+            LibraryContent(
+                books = state.books,
+                loadErrorMessage = null,
+                onNavigateToBookDetail = onNavigateToBookDetail,
+            )
+        }
+    }
 }
 
 @Composable
 private fun LibraryContent(
     books: List<UserBookUiModel>,
-    errorMessage: String?,
+    loadErrorMessage: String?,
     onNavigateToBookDetail: (String) -> Unit,
 ) {
     val tabTitles = listOf("읽기 전", "읽는 중", "읽은 후")
@@ -150,7 +169,7 @@ private fun LibraryContent(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    if (errorMessage != null) {
+                    if (loadErrorMessage != null) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -345,7 +364,7 @@ private fun SlidingPillIndicator(
 @Composable
 private fun LibraryEmptyPreview() {
     GureumPageTheme {
-        LibraryContent(books = emptyList(), errorMessage = null, onNavigateToBookDetail = {})
+        LibraryContent(books = emptyList(), loadErrorMessage = null, onNavigateToBookDetail = {})
     }
 }
 
@@ -410,6 +429,6 @@ private fun LibraryWithBooksPreview() {
         )
     )
     GureumPageTheme {
-        LibraryContent(books = sampleBooks, errorMessage = null, onNavigateToBookDetail = {})
+        LibraryContent(books = sampleBooks, loadErrorMessage = null, onNavigateToBookDetail = {})
     }
 }

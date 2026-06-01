@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,29 +26,23 @@ class WithdrawViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(WithdrawUiState())
+    private val _uiState = MutableStateFlow<WithdrawUiState>(WithdrawUiState.Content())
     val uiState: StateFlow<WithdrawUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<WithdrawEffect>(Channel.BUFFERED)
     val effect: Flow<WithdrawEffect> = _effect.receiveAsFlow()
 
     private fun setLoading(isLoading: Boolean, message: String = "") {
-        _uiState.value = _uiState.value.copy(
-            isLoading = isLoading,
-            loadingMessage = message,
-            errorMessage = null
-        )
+        updateContent { it.copy(isLoading = isLoading, loadingMessage = message) }
     }
 
     private fun setError(message: String) {
-        _uiState.value = _uiState.value.copy(
-            isLoading = false,
-            errorMessage = message
-        )
+        updateContent { it.copy(isLoading = false, loadingMessage = "") }
+        viewModelScope.launch { _effect.send(WithdrawEffect.ShowMessage(message)) }
     }
 
     fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
+        // Errors are delivered through WithdrawEffect.
     }
 
     fun withdrawUser() = viewModelScope.launch {
@@ -77,17 +72,24 @@ class WithdrawViewModel @Inject constructor(
             _effect.send(WithdrawEffect.NavigateToLogin)
         } catch (e: Exception) {
             Log.e("WithdrawViewModel", "계정 탈퇴 실패", e)
-            val errorMessage = when {
+            val failureMessage = when {
                 e.message?.contains("unauthenticated") == true -> "인증이 필요합니다"
                 e.message?.contains("not-found") == true -> "사용자를 찾을 수 없습니다"
                 e.message?.contains("permission-denied") == true -> "권한이 없습니다"
                 else -> "탈퇴 처리 중 오류가 발생했습니다"
             }
-            setError(errorMessage)
+            setError(failureMessage)
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (WithdrawUiState.Content) -> WithdrawUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }
 
 sealed interface WithdrawEffect {
     data object NavigateToLogin : WithdrawEffect
+    data class ShowMessage(val message: String) : WithdrawEffect
 }

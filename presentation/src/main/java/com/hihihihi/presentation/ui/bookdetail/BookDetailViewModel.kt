@@ -44,7 +44,7 @@ class BookDetailViewModel @Inject constructor(
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(BookDetailUiState())
+    private val _uiState = MutableStateFlow<BookDetailUiState>(BookDetailUiState.Loading)
     val uiState: StateFlow<BookDetailUiState> = _uiState
 
     private val _effect = Channel<BookDetailEffect>(Channel.BUFFERED)
@@ -60,29 +60,44 @@ class BookDetailViewModel @Inject constructor(
     fun loadUserBookDetails(userBookId: String) {
         viewModelScope.launch {
             getBookDetailDataUseCase(userBookId)
-                .onStart { _uiState.update { it.copy(isLoading = true) } }
-                .catch { e -> _uiState.update { it.copy(errorMessage = e.message, isLoading = false) } }
+                .onStart {
+                    _uiState.update { current ->
+                        val content = current.contentOrDefault()
+                        if (content.dialogState == BookDetailDialogState.None) {
+                            BookDetailUiState.Loading
+                        } else {
+                            content
+                        }
+                    }
+                }
+                .catch { e ->
+                    _uiState.update { current ->
+                        BookDetailUiState.Error(
+                            message = e.message ?: "책 정보를 가져오는데 실패했어요",
+                            previous = current as? BookDetailUiState.Content,
+                        )
+                    }
+                }
                 .collect { data ->
                     val userBook = data.userBook
                     _domainUserBook = userBook
                     _domainHistories = data.history
 
-                    val shouldShowCompletion = userBook != null &&
-                            userBook.status == ReadingStatus.READING &&
+                    val shouldShowCompletion = userBook.status == ReadingStatus.READING &&
                             userBook.currentPage >= userBook.totalPage &&
                             userBook.currentPage > 0 &&
                             userBook.totalPage > 0
 
                     _uiState.update {
-                        it.copy(
-                            userBook = userBook?.toUiModel(),
+                        val current = it.contentOrDefault()
+                        BookDetailUiState.Content(
+                            userBook = userBook.toUiModel(),
                             quotes = data.quotes.map { q -> q.toUiModel() },
                             histories = data.history.map { h -> h.toUiModel() },
-                            isLoading = false,
-                            dialogState = if (shouldShowCompletion && it.dialogState == BookDetailDialogState.None) {
+                            dialogState = if (shouldShowCompletion && current.dialogState == BookDetailDialogState.None) {
                                 BookDetailDialogState.Completion
                             } else {
-                                it.dialogState
+                                current.dialogState
                             },
                         )
                     }
@@ -93,12 +108,12 @@ class BookDetailViewModel @Inject constructor(
     // --- Dialog 상태 메서드 ---
 
     fun onAddQuoteClick() {
-        _uiState.update { it.copy(dialogState = BookDetailDialogState.AddQuote(it.userBook?.totalPage)) }
+        updateContent { it.copy(dialogState = BookDetailDialogState.AddQuote(it.userBook?.totalPage)) }
     }
 
     fun onAddManualHistoryClick() {
         val userBook = _domainUserBook
-        _uiState.update {
+        updateContent {
             it.copy(
                 dialogState = BookDetailDialogState.AddManualHistory(
                     currentPage = userBook?.currentPage ?: 0,
@@ -110,15 +125,15 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun onReadingStatusClick() {
-        _uiState.update { it.copy(dialogState = BookDetailDialogState.ReadingStatus) }
+        updateContent { it.copy(dialogState = BookDetailDialogState.ReadingStatus) }
     }
 
     fun onQuoteEditClick(quoteUiModel: QuoteUiModel) {
-        _uiState.update { it.copy(dialogState = BookDetailDialogState.EditQuote(quoteUiModel)) }
+        updateContent { it.copy(dialogState = BookDetailDialogState.EditQuote(quoteUiModel)) }
     }
 
     fun dismissDialog() {
-        _uiState.update { it.copy(dialogState = BookDetailDialogState.None) }
+        updateContent { it.copy(dialogState = BookDetailDialogState.None) }
     }
 
     // --- Navigation Effect 메서드 ---
@@ -160,7 +175,7 @@ class BookDetailViewModel @Inject constructor(
             try {
                 addHistoryUseCase(history, currentPage = currentPage)
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message) }
+                _effect.send(BookDetailEffect.ShowMessage(e.message ?: "독서 기록을 저장하지 못했습니다."))
             }
         }
     }
@@ -183,22 +198,17 @@ class BookDetailViewModel @Inject constructor(
             imageUrl = userBook.imageUrl,
         )
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isLoading = true))
             val result = addQuoteUseCase(newQuote)
             if (result.isSuccess) {
-                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState(isSuccess = true))
-                delay(2000)
-                _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
+                _effect.send(BookDetailEffect.ShowMessage("필사가 추가되었습니다!"))
             } else if (result.isFailure) {
-                _uiState.value = _uiState.value.copy(
-                    addQuoteState = AddQuoteState(error = result.exceptionOrNull()?.message ?: "알 수 없는 오류"),
-                )
+                _effect.send(BookDetailEffect.ShowMessage("에러: ${result.exceptionOrNull()?.message ?: "알 수 없는 오류"}"))
             }
         }
     }
 
     fun resetAddQuoteState() {
-        _uiState.value = _uiState.value.copy(addQuoteState = AddQuoteState())
+        // Add quote result is delivered through BookDetailEffect.
     }
 
     fun getStatistic(): BookStatistic {
@@ -237,27 +247,33 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val result = deleteQuoteUseCase(quoteId)
             if (result.isSuccess) {
-                _uiState.update { state -> state.copy(quotes = state.quotes.filterNot { it.id == quoteId }) }
+                updateContent { state -> state.copy(quotes = state.quotes.filterNot { it.id == quoteId }) }
             } else {
-                _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
+                _effect.send(BookDetailEffect.ShowMessage(result.exceptionOrNull()?.message ?: "필사를 삭제하지 못했습니다."))
             }
         }
     }
 
     fun updateQuote(quoteId: String, newContent: String, newPageNumber: Int?) {
-        val currentQuotes = uiState.value.quotes.toMutableList()
+        val currentQuotes = uiState.value.contentOrDefault().quotes.toMutableList()
         val index = currentQuotes.indexOfFirst { it.id == quoteId }
         if (index != -1) {
             val updatedQuote = currentQuotes[index].copy(content = newContent, pageNumber = newPageNumber)
             currentQuotes[index] = updatedQuote
-            _uiState.update { it.copy(quotes = currentQuotes) }
+            updateContent { it.copy(quotes = currentQuotes) }
             viewModelScope.launch {
                 val result = updateQuoteUseCase(quoteId, newContent, newPageNumber)
                 if (result.isFailure) {
-                    _uiState.update { it.copy(errorMessage = result.exceptionOrNull()?.message) }
+                    _effect.send(BookDetailEffect.ShowMessage(result.exceptionOrNull()?.message ?: "필사를 수정하지 못했습니다."))
                 }
             }
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (BookDetailUiState.Content) -> BookDetailUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }
 
@@ -284,4 +300,5 @@ sealed interface BookDetailDialogState {
 sealed interface BookDetailEffect {
     data object NavigateToMindmap : BookDetailEffect
     data object NavigateToTimer : BookDetailEffect
+    data class ShowMessage(val message: String) : BookDetailEffect
 }

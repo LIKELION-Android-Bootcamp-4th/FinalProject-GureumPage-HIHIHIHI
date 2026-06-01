@@ -68,6 +68,8 @@ fun TimerScreen(
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val memoState by memoViewModel.ui.collectAsStateWithLifecycle()
+    val timerContent = state.contentOrDefault()
+    val memoContent = memoState.contentOrDefault()
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -98,8 +100,8 @@ fun TimerScreen(
         }
     }
 
-    LaunchedEffect(state.showMemoDialog) {
-        if (state.showMemoDialog) {
+    LaunchedEffect(timerContent.showMemoDialog) {
+        if (timerContent.showMemoDialog) {
             kotlinx.coroutines.delay(500)
         }
     }
@@ -113,8 +115,8 @@ fun TimerScreen(
     val appBarUp = LocalAppBarUpClick.current
     var lastHandledUpTs by remember { mutableStateOf(0L) }
 
-    LaunchedEffect(appBarUp, state.countdown) {
-        if (state.countdown != null) return@LaunchedEffect
+    LaunchedEffect(appBarUp, timerContent.countdown) {
+        if (timerContent.countdown != null) return@LaunchedEffect
         if (appBarUp != 0L && appBarUp != lastHandledUpTs) {
             lastHandledUpTs = appBarUp
             viewModel.showDialog(TimerDialogType.BackExit)
@@ -122,29 +124,32 @@ fun TimerScreen(
     }
 
     BackHandler(
-        enabled = state.countdown == null && !state.showStopDialog && !state.showMemoDialog && !state.showBackExitScreen,
+        enabled = timerContent.countdown == null &&
+                !timerContent.showStopDialog &&
+                !timerContent.showMemoDialog &&
+                !timerContent.showBackExitScreen,
     ) {
         viewModel.showDialog(TimerDialogType.BackExit)
     }
 
-    val memoLines = remember(memoState.items, userBookId) {
-        memoState.items
+    val memoLines = remember(memoContent.items, userBookId) {
+        memoContent.items
             .filter { it.userBookId == userBookId }
             .mapIndexed { idx, q -> "#${idx + 1} - ${q.content}" }
     }
 
     TimerContent(
-        bookTitle = state.bookTitle,
-        author = state.author,
-        bookImageUrl = state.bookImageUrl,
-        isRunning = state.isRunning,
-        countdown = state.countdown,
-        displayTimeMMSS = state.displayTimeMMSS,
-        startPage = state.startPage,
-        totalPage = state.totalPage,
-        showMemoDialog = state.showMemoDialog,
-        showStopDialog = state.showStopDialog,
-        showBackExitScreen = state.showBackExitScreen,
+        bookTitle = timerContent.bookTitle,
+        author = timerContent.author,
+        bookImageUrl = timerContent.bookImageUrl,
+        isRunning = timerContent.isRunning,
+        countdown = timerContent.countdown,
+        displayTimeMMSS = timerContent.displayTimeMMSS,
+        startPage = timerContent.startPage,
+        totalPage = timerContent.totalPage,
+        showMemoDialog = timerContent.showMemoDialog,
+        showStopDialog = timerContent.showStopDialog,
+        showBackExitScreen = timerContent.showBackExitScreen,
         memoLines = memoLines,
         onToggle = viewModel::toggleRun,
         onRequestStopDialog = { viewModel.showDialog(TimerDialogType.StopConfirm) },
@@ -165,9 +170,9 @@ fun TimerScreen(
                 userBookId = userBookId,
                 pageNumber = page?.toIntOrNull(),
                 content = content,
-                title = state.bookTitle,
-                author = state.author,
-                imageUrl = state.bookImageUrl,
+                title = timerContent.bookTitle,
+                author = timerContent.author,
+                imageUrl = timerContent.bookImageUrl,
             ) { viewModel.dismissDialog() }
         },
         onOpenFloatingMode = {

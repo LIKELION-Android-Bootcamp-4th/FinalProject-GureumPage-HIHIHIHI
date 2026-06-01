@@ -69,6 +69,8 @@ fun BookDetailScreen(
                 when (effect) {
                     BookDetailEffect.NavigateToMindmap -> onNavigateToMindmap(bookId, bookId)
                     BookDetailEffect.NavigateToTimer -> onNavigateToTimer(bookId)
+                    is BookDetailEffect.ShowMessage ->
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -80,56 +82,42 @@ fun BookDetailScreen(
         if (initialShowAddManualRecord) viewModel.onAddManualHistoryClick()
     }
 
-    LaunchedEffect(uiState.addQuoteState) {
-        val state = uiState.addQuoteState
-        when {
-            state.isSuccess -> {
-                Toast.makeText(context, "필사가 추가되었습니다!", Toast.LENGTH_SHORT).show()
-                viewModel.resetAddQuoteState()
-            }
+    val content = uiState.contentOrDefault()
 
-            state.error != null -> {
-                Toast.makeText(context, "에러: ${state.error}", Toast.LENGTH_SHORT).show()
-                viewModel.resetAddQuoteState()
-            }
-        }
-    }
-
-    when {
-        uiState.isLoading -> {
+    when (val state = uiState) {
+        BookDetailUiState.Loading -> {
             LoadingView()
         }
 
-        uiState.errorMessage != null -> {
+        is BookDetailUiState.Error -> {
             ErrorView(message = "책 정보를 가져오는데 실패했어요")
         }
 
-        uiState.userBook != null -> {
-            BookDetailContent(
-                userBook = uiState.userBook!!,
-                quotes = uiState.quotes,
-                histories = uiState.histories,
-                bookStatistic = viewModel.getStatistic(),
-                onReadingStatusClick = viewModel::onReadingStatusClick,
-                onReviewSave = { rating, review -> viewModel.patchReview(rating, review) },
-                onQuoteEdit = { quoteId ->
-                    val quoteUiModel = uiState.quotes.find { it.id == quoteId }
-                    if (quoteUiModel != null) viewModel.onQuoteEditClick(quoteUiModel)
-                },
-                onQuoteDelete = { id -> viewModel.deleteQuote(id) },
-                onAddQuoteClick = viewModel::onAddQuoteClick,
-                onAddManualHistoryClick = viewModel::onAddManualHistoryClick,
-                onNavigateToMindmap = viewModel::navigateToMindmap,
-                onNavigateToTimer = viewModel::navigateToTimer,
-            )
-        }
-
-        else -> {
-            // TODO 빈 화면 또는 초기 화면
+        is BookDetailUiState.Content -> {
+            val userBook = state.userBook
+            if (userBook != null) {
+                BookDetailContent(
+                    userBook = userBook,
+                    quotes = state.quotes,
+                    histories = state.histories,
+                    bookStatistic = viewModel.getStatistic(),
+                    onReadingStatusClick = viewModel::onReadingStatusClick,
+                    onReviewSave = { rating, review -> viewModel.patchReview(rating, review) },
+                    onQuoteEdit = { quoteId ->
+                        val quoteUiModel = state.quotes.find { it.id == quoteId }
+                        if (quoteUiModel != null) viewModel.onQuoteEditClick(quoteUiModel)
+                    },
+                    onQuoteDelete = { id -> viewModel.deleteQuote(id) },
+                    onAddQuoteClick = viewModel::onAddQuoteClick,
+                    onAddManualHistoryClick = viewModel::onAddManualHistoryClick,
+                    onNavigateToMindmap = viewModel::navigateToMindmap,
+                    onNavigateToTimer = viewModel::navigateToTimer,
+                )
+            }
         }
     }
 
-    when (val dialogState = uiState.dialogState) {
+    when (val dialogState = content.dialogState) {
         BookDetailDialogState.None -> Unit
 
         is BookDetailDialogState.AddQuote -> {
@@ -156,9 +144,9 @@ fun BookDetailScreen(
         }
 
         BookDetailDialogState.ReadingStatus -> {
-            if (uiState.userBook != null) {
+            if (content.userBook != null) {
                 SetReadingStatusBottomSheet(
-                    userBook = uiState.userBook!!,
+                    userBook = content.userBook,
                     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                     onDismiss = viewModel::dismissDialog,
                     onConfirm = { status, page, startDate, endDate ->
@@ -186,12 +174,12 @@ fun BookDetailScreen(
         }
 
         BookDetailDialogState.Completion -> {
-            if (uiState.userBook != null) {
+            if (content.userBook != null) {
                 BookCompletionDialog(
-                    userBook = uiState.userBook!!,
+                    userBook = content.userBook,
                     onConfirm = {
-                        val userBook = uiState.userBook!!
-                        val endDate: LocalDateTime = uiState.histories
+                        val userBook = content.userBook
+                        val endDate: LocalDateTime = content.histories
                             .mapNotNull { it.endTime }
                             .maxOrNull()
                             ?: LocalDateTime.now()

@@ -25,7 +25,7 @@ class OnBoardingViewModel @Inject constructor(
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(OnBoardingUiState())
+    private val _uiState = MutableStateFlow<OnBoardingUiState>(OnBoardingUiState.Content())
     val uiState: StateFlow<OnBoardingUiState> = _uiState.asStateFlow()
 
     val steps: List<OnboardingStep> = listOf(
@@ -38,16 +38,16 @@ class OnBoardingViewModel @Inject constructor(
     )
 
     fun updateNickname(nickname: String) {
-        _uiState.update { it.copy(nickname = nickname) }
+        updateContent { it.copy(nickname = nickname) }
     }
 
     fun saveNickname() {
         val userId = getCurrentUserIdUseCase() ?: return
-        viewModelScope.launch { setNicknameUseCase(userId, _uiState.value.nickname.trim()) }
+        viewModelScope.launch { setNicknameUseCase(userId, _uiState.value.contentOrDefault().nickname.trim()) }
     }
 
     fun togglePurpose(purpose: String) {
-        _uiState.update { state ->
+        updateContent { state ->
             val current = state.selectedPurposes.toMutableList()
             if (current.contains(purpose)) current.remove(purpose) else current.add(purpose)
             state.copy(selectedPurposes = current)
@@ -55,11 +55,11 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun featurePageChanged(page: Int, count: Int) {
-        _uiState.update { it.copy(currentInnerPage = page, featurePageCount = count - 1) }
+        updateContent { it.copy(currentInnerPage = page, featurePageCount = count - 1) }
     }
 
     fun isNextEnabled(step: OnboardingStep): Boolean {
-        val state = _uiState.value
+        val state = _uiState.value.contentOrDefault()
         return when (step) {
             OnboardingStep.Nickname -> state.nickname.validateNickname()
             OnboardingStep.Purpose -> state.selectedPurposes.isNotEmpty()
@@ -70,15 +70,22 @@ class OnBoardingViewModel @Inject constructor(
     }
 
     fun selectTheme(theme: GureumThemeType) {
-        _uiState.update { it.copy(theme = theme) }
+        updateContent { it.copy(theme = theme) }
     }
 
     fun saveOnboardingComplete() {
         viewModelScope.launch {
             val uid = getCurrentUserIdUseCase() ?: return@launch
-            _uiState.value.theme?.let { setThemeUseCase(it) }
-            setNicknameUseCase(uid, _uiState.value.nickname.trim())
+            val state = _uiState.value.contentOrDefault()
+            state.theme?.let { setThemeUseCase(it) }
+            setNicknameUseCase(uid, state.nickname.trim())
             setOnboardingCompleteUseCase(uid, true)
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (OnBoardingUiState.Content) -> OnBoardingUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }
