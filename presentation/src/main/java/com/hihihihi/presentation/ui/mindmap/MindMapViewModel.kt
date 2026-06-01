@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.mindmap
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.MindmapNode
@@ -14,10 +15,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class MindMapUiState(
-    val nodes: List<MindmapNode> = emptyList(),
-    val editing: Boolean = false,
-)
+@Immutable
+sealed interface MindMapUiState {
+    @Immutable
+    data object Loading : MindMapUiState
+
+    @Immutable
+    data class Content(
+        val nodes: List<MindmapNode> = emptyList(),
+        val editing: Boolean = false,
+    ) : MindMapUiState
+
+    @Immutable
+    data class Error(
+        val message: String,
+        val previous: Content? = null,
+    ) : MindMapUiState
+}
+
+internal fun MindMapUiState.contentOrDefault(): MindMapUiState.Content = when (this) {
+    is MindMapUiState.Content -> this
+    is MindMapUiState.Error -> previous ?: MindMapUiState.Content()
+    MindMapUiState.Loading -> MindMapUiState.Content()
+}
 
 @HiltViewModel
 class MindMapViewModel @Inject constructor(
@@ -25,7 +45,7 @@ class MindMapViewModel @Inject constructor(
     private val applyNodeOperation: ApplyNodeOperation,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MindMapUiState())
+    private val _uiState = MutableStateFlow<MindMapUiState>(MindMapUiState.Content())
     val uiState: StateFlow<MindMapUiState> = _uiState.asStateFlow()
 
     // 편집 시작 시점 스냅샷
@@ -41,26 +61,26 @@ class MindMapViewModel @Inject constructor(
         this.mindmapId = mindmapId
         viewModelScope.launch {
             observeMindmapNodeUseCase(mindmapId).collect { nodes ->
-                if (!_uiState.value.editing && !saving) {
-                    _uiState.update { it.copy(nodes = nodes) }
+                if (!_uiState.value.contentOrDefault().editing && !saving) {
+                    updateContent { it.copy(nodes = nodes) }
                 }
             }
         }
     }
 
     fun startEdit() {
-        baseline = _uiState.value.nodes
-        _uiState.update { it.copy(editing = true) }
+        baseline = _uiState.value.contentOrDefault().nodes
+        updateContent { it.copy(editing = true) }
     }
 
     fun endEdit(currentTree: List<MindmapNode>, autoSave: Boolean = true) {
-        if (!_uiState.value.editing) return
+        if (!_uiState.value.contentOrDefault().editing) return
         viewModelScope.launch {
             if (autoSave) {
                 flushDiff(currentTree)
-                _uiState.update { it.copy(nodes = currentTree) }
+                updateContent { it.copy(nodes = currentTree) }
             }
-            _uiState.update { it.copy(editing = false) }
+            updateContent { it.copy(editing = false) }
         }
     }
 
@@ -98,5 +118,11 @@ class MindMapViewModel @Inject constructor(
             }
         }
         return operations
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (MindMapUiState.Content) -> MindMapUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }

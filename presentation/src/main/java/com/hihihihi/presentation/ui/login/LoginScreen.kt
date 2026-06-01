@@ -63,6 +63,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val activity = LocalContext.current as? Activity
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -79,22 +80,16 @@ fun LoginScreen(
                 when (effect) {
                     LoginEffect.NavigateToHome -> onNavigateToHome()
                     LoginEffect.NavigateToOnBoarding -> onNavigateToOnBoarding()
+                    is LoginEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
     }
 
-    LaunchedEffect(uiState.errorMessage) {
-        uiState.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            viewModel.clearError()
-        }
-    }
-
     LoginContent(
-        lastProvider = uiState.lastProvider,
-        isLoading = uiState.isLoading,
-        loadingMessage = uiState.loadingMessage,
+        lastProvider = content.lastProvider,
+        isLoading = content.isLoading,
+        loadingMessage = content.loadingMessage,
         snackbarHostState = snackbarHostState,
         onGoogleLogin = { viewModel.googleLogin(context, googleLauncher) },
         onKakaoLogin = {

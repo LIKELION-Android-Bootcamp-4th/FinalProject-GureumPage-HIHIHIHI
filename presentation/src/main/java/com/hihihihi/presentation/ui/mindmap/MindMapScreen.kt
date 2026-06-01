@@ -37,6 +37,7 @@ fun MindMapScreen(
     viewModel: MindMapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
 
     LaunchedEffect(mindmapId) {
         viewModel.load(mindmapId)
@@ -44,8 +45,8 @@ fun MindMapScreen(
 
     MindMapContent(
         mindmapId = mindmapId,
-        nodes = uiState.nodes,
-        isEditing = uiState.editing,
+        nodes = content.nodes,
+        isEditing = content.editing,
         onEndEdit = { list, autoSave -> viewModel.endEdit(list, autoSave) },
         onStartEdit = viewModel::startEdit,
     )

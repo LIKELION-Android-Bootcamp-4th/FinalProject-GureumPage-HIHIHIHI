@@ -20,7 +20,7 @@ class LibraryViewModel @Inject constructor(
 ) : ViewModel() {
 
     // ui 상태 :
-    private val _uiState = MutableStateFlow(LibraryUiState(isLoading = true))
+    private val _uiState = MutableStateFlow<LibraryUiState>(LibraryUiState.Loading)
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
 
     val userId: String? = getCurrentUserIdUseCase()
@@ -34,14 +34,19 @@ class LibraryViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // 로딩 상태
-                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                _uiState.update { LibraryUiState.Loading }
                 // 책 목록 Flow 수집해서 ui 상태 갱신
                 getUserBooksUseCase(userId).collect { books ->
-                    _uiState.update { it.copy(isLoading = false, books = books.map { book -> book.toUiModel() }) }
+                    _uiState.update { LibraryUiState.Content(books = books.map { book -> book.toUiModel() }) }
                 }
             } catch (e: Exception) {
                 // 에러 발생 시 ui 상태에 에러 메시지 전달
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "알 수 없는 오류 발생") }
+                _uiState.update { current ->
+                    LibraryUiState.Error(
+                        message = e.message ?: "알 수 없는 오류 발생",
+                        previous = current as? LibraryUiState.Content,
+                    )
+                }
             }
         }
     }

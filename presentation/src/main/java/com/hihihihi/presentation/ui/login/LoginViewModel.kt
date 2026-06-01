@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,7 +40,7 @@ class LoginViewModel @Inject constructor(
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
     private val waitForUserDocumentCreationUseCase: WaitForUserDocumentCreationUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Loading)
     val uiState: StateFlow<LoginUiState> = _uiState
 
     private val _effect = Channel<LoginEffect>(Channel.BUFFERED)
@@ -47,10 +48,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                lastProvider = getLastProvider(),
-                errorMessage = null,
-            )
+            _uiState.value = LoginUiState.Content(lastProvider = getLastProvider())
         }
     }
 
@@ -92,22 +90,16 @@ class LoginViewModel @Inject constructor(
 
 
     private fun setLoading(isLoading: Boolean, message: String = "") {
-        _uiState.value = _uiState.value.copy(
-            isLoading = isLoading,
-            loadingMessage = message,
-            errorMessage = null,
-        )
+        updateContent { it.copy(isLoading = isLoading, loadingMessage = message) }
     }
 
     internal fun setError(message: String) {
-        _uiState.value = _uiState.value.copy(
-            isLoading = false,
-            errorMessage = message,
-        )
+        updateContent { it.copy(isLoading = false, loadingMessage = null) }
+        viewModelScope.launch { _effect.send(LoginEffect.ShowMessage(message)) }
     }
 
     fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
+        // Errors are delivered through LoginEffect.
     }
 
     fun googleLogin(
@@ -151,9 +143,16 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
+    private inline fun updateContent(
+        crossinline transform: (LoginUiState.Content) -> LoginUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
+    }
 }
 
 sealed interface LoginEffect {
     data object NavigateToHome : LoginEffect
     data object NavigateToOnBoarding : LoginEffect
+    data class ShowMessage(val message: String) : LoginEffect
 }
