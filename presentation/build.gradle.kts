@@ -47,6 +47,7 @@ kotlin {
 dependencies {
     // CA
     implementation(project(":domain"))
+    implementation(libs.compose.mindmap)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -54,10 +55,6 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     implementation(libs.play.services.oss.licenses)
-
-    // MindMap
-    implementation(libs.gyso.treeview)
-    implementation(libs.androidx.dynamicanimation)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)

@@ -1,28 +1,31 @@
 package com.hihihihi.presentation.ui.mindmap.mapper
 
+import androidx.compose.ui.graphics.Color
 import com.hihihihi.domain.model.MindmapNode
-import com.hihihihi.presentation.ui.mindmap.model.MindMapNodeData
+import io.github.hanhyo.composemindmap.model.MindMapNode
+import io.github.hanhyo.composemindmap.model.MindMapNodeWithPayload
+import io.github.hanhyo.composemindmap.model.withPayload
+import com.hihihihi.presentation.ui.mindmap.GureumMindMapPayload
 
-fun MindmapNode.toUi(): MindMapNodeData =
-    MindMapNodeData(
-        userId = userId,
+fun MindmapNode.toLibraryModel(): MindMapNodeWithPayload<GureumMindMapPayload> =
+    MindMapNode(
         id = mindmapNodeId,
         title = nodeTitle,
-        content = nodeEx,
+        subtitle = nodeEx,
+        parentId = parentNodeId,
+        color = color?.toLongOrNull()?.let { Color(it) },
         icon = icon,
-        color = color?.toLong(),
-        bookImage = bookImage,
-    )
+    ).withPayload(GureumMindMapPayload(bookImage = bookImage))
 
-fun MindMapNodeData.toDomain(mindmapId: String, parentId: String?): MindmapNode =
+fun MindMapNode.toDomain(mindmapId: String, userId: String, bookImage: String?): MindmapNode =
     MindmapNode(
         userId = userId,
         mindmapNodeId = id,
         mindmapId = mindmapId,
         nodeTitle = title,
-        nodeEx = content.orEmpty(),
+        nodeEx = subtitle,
         parentNodeId = parentId,
-        color = color?.toString(),
+        color = color?.value?.toString(),
         icon = icon,
         deleted = false,
         bookImage = bookImage,

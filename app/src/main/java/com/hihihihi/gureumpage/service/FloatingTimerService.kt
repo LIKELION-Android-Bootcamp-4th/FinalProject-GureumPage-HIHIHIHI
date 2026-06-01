@@ -32,7 +32,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.hihihihi.gureumpage.MainActivity
 import com.hihihihi.presentation.R
-import com.hihihihi.presentation.ui.mindmap.dpToPx
+import com.hihihihi.presentation.utils.dpToPx
 import com.hihihihi.presentation.ui.timer.FloatingAction
 import com.hihihihi.presentation.ui.timer.FloatingTimer
 import com.hihihihi.presentation.ui.timer.FloatingTouchListener
@@ -169,7 +169,7 @@ class FloatingTimerService : Service(), LifecycleOwner, SavedStateRegistryOwner 
 
         layoutParams.apply {
             gravity = Gravity.TOP or Gravity.START
-            x = (screenWidth - dpToPx(280)) / 2
+            x = (screenWidth - dpToPx(this@FloatingTimerService, 280)) / 2
             y = 200
         }
         windowManager.updateViewLayout(floatingView, layoutParams)
