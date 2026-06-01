@@ -258,12 +258,16 @@ class BookDetailViewModel @Inject constructor(
         val currentQuotes = uiState.value.contentOrDefault().quotes.toMutableList()
         val index = currentQuotes.indexOfFirst { it.id == quoteId }
         if (index != -1) {
-            val updatedQuote = currentQuotes[index].copy(content = newContent, pageNumber = newPageNumber)
+            val previousQuote = currentQuotes[index]
+            val updatedQuote = previousQuote.copy(content = newContent, pageNumber = newPageNumber)
             currentQuotes[index] = updatedQuote
             updateContent { it.copy(quotes = currentQuotes) }
             viewModelScope.launch {
                 val result = updateQuoteUseCase(quoteId, newContent, newPageNumber)
                 if (result.isFailure) {
+                    updateContent { state ->
+                        state.copy(quotes = state.quotes.map { if (it.id == quoteId) previousQuote else it })
+                    }
                     _effect.send(BookDetailEffect.ShowMessage(result.exceptionOrNull()?.message ?: "필사를 수정하지 못했습니다."))
                 }
             }

@@ -63,7 +63,7 @@ class MypageViewModel @Inject constructor(
                         }
                     }
                     .collect { myPageData ->
-                        _uiState.update { MyPageUiState.Content(myPageUiModel = myPageData.toUiModel()) }
+                        updateContent { it.copy(myPageUiModel = myPageData.toUiModel()) }
                     }
             } catch (e: Exception) {
                 _uiState.update { current ->

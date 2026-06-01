@@ -35,15 +35,19 @@ fun HomeScreen(
         HomeUiState.Loading -> LoadingView()
         is HomeUiState.Error -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
         is HomeUiState.Content -> {
-            val homeUiModel = state.homeUiModel ?: return
-            Column {
-                HomeScreenContent(
-                    homeUiModel = homeUiModel,
-                    notificationSettings = state.notificationSettings,
-                    onBookClick = onNavigateToBookDetail,
-                    onSearchBarClick = onNavigateToSearch,
-                    onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
-                )
+            val homeUiModel = state.homeUiModel
+            if (homeUiModel == null) {
+                LoadingView()
+            } else {
+                Column {
+                    HomeScreenContent(
+                        homeUiModel = homeUiModel,
+                        notificationSettings = state.notificationSettings,
+                        onBookClick = onNavigateToBookDetail,
+                        onSearchBarClick = onNavigateToSearch,
+                        onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
+                    )
+                }
             }
         }
     }

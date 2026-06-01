@@ -100,12 +100,6 @@ fun TimerScreen(
         }
     }
 
-    LaunchedEffect(timerContent.showMemoDialog) {
-        if (timerContent.showMemoDialog) {
-            kotlinx.coroutines.delay(500)
-        }
-    }
-
     LaunchedEffect(userBookId) {
         viewModel.bind(userBookId)
         memoViewModel.clear()

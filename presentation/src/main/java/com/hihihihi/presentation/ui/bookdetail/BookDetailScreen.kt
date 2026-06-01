@@ -113,6 +113,8 @@ fun BookDetailScreen(
                     onNavigateToMindmap = viewModel::navigateToMindmap,
                     onNavigateToTimer = viewModel::navigateToTimer,
                 )
+            } else {
+                LoadingView()
             }
         }
     }
