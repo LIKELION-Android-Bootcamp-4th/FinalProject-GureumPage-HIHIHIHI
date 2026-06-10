@@ -80,7 +80,9 @@ fun LoginScreen(
                 when (effect) {
                     LoginEffect.NavigateToHome -> onNavigateToHome()
                     LoginEffect.NavigateToOnBoarding -> onNavigateToOnBoarding()
-                    is LoginEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+                    is LoginEffect.ShowMessage -> coroutineScope.launch {
+                        snackbarHostState.showSnackbar(effect.message)
+                    }
                 }
             }
         }

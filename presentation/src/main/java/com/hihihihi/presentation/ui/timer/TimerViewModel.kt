@@ -195,9 +195,12 @@ class TimerViewModel @Inject constructor(
         stopwatchJob = viewModelScope.launch {
             while (isActive) {
                 delay(1_000L)
-                val newSec = _uiState.value.contentOrDefault().elapsedSec + 1
+                var newSec = 0
 
-                updateContent { it.copy(elapsedSec = newSec) }
+                updateContent {
+                    newSec = it.elapsedSec + 1
+                    it.copy(elapsedSec = newSec)
+                }
                 timerRepository.updateTimerState { it.copy(elapsedSec = newSec) }
             }
         }

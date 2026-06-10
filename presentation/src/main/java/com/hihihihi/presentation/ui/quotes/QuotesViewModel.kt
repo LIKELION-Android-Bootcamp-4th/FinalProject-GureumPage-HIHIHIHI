@@ -38,7 +38,7 @@ class QuotesViewModel @Inject constructor(
             try {
                 _uiState.update { QuotesUiState.Loading }
                 getQuoteUseCase(userId).collect { quotes ->
-                    _uiState.update { QuotesUiState.Content(quotes = quotes.map { quote -> quote.toUiModel() }) }
+                    updateContent { it.copy(quotes = quotes.map { quote -> quote.toUiModel() }) }
                 }
             } catch (e: Exception) {
                 _uiState.update { current ->

@@ -26,7 +26,11 @@ class LibraryViewModel @Inject constructor(
     val userId: String? = getCurrentUserIdUseCase()
 
     init {
-        userId?.let { loadUserBooks(it) }
+        if (userId == null) {
+            _uiState.value = LibraryUiState.Content()
+        } else {
+            loadUserBooks(userId)
+        }
     }
 
     // 유저 ID에 해당하는 책 목록을 비동기로 가져와 ui 상태에 반영

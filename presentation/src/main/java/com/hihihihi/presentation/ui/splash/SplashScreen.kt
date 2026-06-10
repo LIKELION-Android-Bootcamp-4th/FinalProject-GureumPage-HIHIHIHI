@@ -72,6 +72,7 @@ fun SplashView(
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
+        viewModel.markPermissionAsked()
         viewModel.onPermissionResult()
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
         else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
@@ -125,10 +126,10 @@ fun SplashView(
                 context, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
             if (!granted && !content.permissionAsked) {
-                viewModel.markPermissionAsked()
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return@LaunchedEffect
             }
+            if (!granted) return@LaunchedEffect
         }
         viewModel.onPermissionResult()
     }

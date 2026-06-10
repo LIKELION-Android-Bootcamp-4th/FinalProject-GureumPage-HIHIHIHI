@@ -9,7 +9,9 @@ import com.hihihihi.domain.model.DateRangePreset
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
 import com.hihihihi.domain.usecase.statistics.GetStatisticsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,6 +27,7 @@ class StatisticsViewModel @Inject constructor(
     val uiState: StateFlow<StatisticsUiState> = _uiState
 
     val userId: String? = getCurrentUserIdUseCase()
+    private var loadJob: Job? = null
 
     init {
         if (userId != null) {
@@ -47,7 +50,8 @@ class StatisticsViewModel @Inject constructor(
 
     fun loadStatistics(preset: DateRangePreset) {
         if (userId == null) return
-        viewModelScope.launch(Dispatchers.IO) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch(Dispatchers.IO) {
             try {
                 getStatisticsUseCase(userId, preset).collect { statistics ->
                     updateContent { current ->
@@ -60,6 +64,8 @@ class StatisticsViewModel @Inject constructor(
                         )
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update { current ->
                     StatisticsUiState.Error(

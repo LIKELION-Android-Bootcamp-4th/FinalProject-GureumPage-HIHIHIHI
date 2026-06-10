@@ -48,7 +48,8 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _uiState.value = LoginUiState.Content(lastProvider = getLastProvider())
+            val lastProvider = getLastProvider()
+            updateContent { it.copy(lastProvider = lastProvider) }
         }
     }
 

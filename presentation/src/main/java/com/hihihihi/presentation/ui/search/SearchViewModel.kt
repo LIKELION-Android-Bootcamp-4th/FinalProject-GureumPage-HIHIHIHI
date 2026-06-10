@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -42,15 +43,19 @@ class SearchViewModel @Inject constructor(
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
 
+    private var searchJob: Job? = null
+
     fun selectBook(book: SearchBook?) {
         updateContent { it.copy(selectedBook = book) }
     }
 
     fun search(query: String) {
-        viewModelScope.launch {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            val requestQuery = query
             updateContent {
                 it.copy(
-                    query = query,
+                    query = requestQuery,
                     isSearching = true,
                     searchResults = emptyList(),
                     page = 1,
@@ -58,11 +63,12 @@ class SearchViewModel @Inject constructor(
                 )
             }
             try {
-                val results = searchBooksUseCase(query, page = 1, pageSize = PAGE_SIZE).getOrThrow()
+                val results = searchBooksUseCase(requestQuery, page = 1, pageSize = PAGE_SIZE).getOrThrow()
                 val dedup = results.distinctBy { it.isbn }
 
-                updateContent {
-                    it.copy(
+                updateContent { current ->
+                    if (current.query != requestQuery) return@updateContent current
+                    current.copy(
                         searchResults = dedup,
                         isSearching = false,
                         hasMore = canLoadMore(dedup.size, 1),
@@ -70,8 +76,9 @@ class SearchViewModel @Inject constructor(
                     )
                 }
             } catch (_: Exception) {
-                updateContent {
-                    it.copy(
+                updateContent { current ->
+                    if (current.query != requestQuery) return@updateContent current
+                    current.copy(
                         searchResults = emptyList(),
                         isSearching = false,
                         hasMore = false,
