@@ -31,12 +31,13 @@ fun OnBoardingScreen(
     viewModel: OnBoardingViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
     GureumPageTheme(darkTheme = true) {
         OnBoardingContent(
             steps = viewModel.steps,
-            nickname = uiState.nickname,
-            selectedPurposes = uiState.selectedPurposes,
-            theme = uiState.theme,
+            nickname = content.nickname,
+            selectedPurposes = content.selectedPurposes,
+            theme = content.theme,
             onNicknameChange = viewModel::updateNickname,
             onTogglePurpose = viewModel::togglePurpose,
             onFeaturePageChanged = viewModel::featurePageChanged,

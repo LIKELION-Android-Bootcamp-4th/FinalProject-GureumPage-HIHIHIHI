@@ -33,18 +33,18 @@ fun QuotesScreen(
     var sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    when {
-        uiState.isLoading -> {
+    when (val state = uiState) {
+        QuotesUiState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = GureumTheme.colors.primary)
             }
         }
 
-        uiState.errorMessage != null -> {
+        is QuotesUiState.Error -> {
             ErrorView(message = "필사 데이터를 가져오는데 실패했어요") // 에러 발생 시 표시될 뷰
         }
 
-        !uiState.isLoading && uiState.quotes.isEmpty() -> {
+        is QuotesUiState.Content -> if (state.quotes.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,12 +60,10 @@ fun QuotesScreen(
                     color = GureumTheme.colors.gray400,
                 )
             }
-        }
-
-        else -> {
+        } else {
             QuoteContent(
-                quotes = uiState.quotes,
-                selectedQuote = uiState.selectedQuote,
+                quotes = state.quotes,
+                selectedQuote = state.selectedQuote,
                 sheetState = sheetState,
                 scope = scope,
                 onQuoteSelected = { quote -> viewModel.selectQuote(quote) },

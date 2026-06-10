@@ -78,6 +78,14 @@ object SummaryScheduler {
         WorkManager.getInstance(ctx).cancelUniqueWork("summary-yearly")
     }
 
+    fun cancelMonthly(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("summary-monthly")
+    }
+
+    fun cancelWeekly(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("summary-weekly")
+    }
+
     // 테스트 알림
     fun scheduleWeeklyIn(ctx: Context, seconds: Long = 10) {
         val req = OneTimeWorkRequestBuilder<WeeklySummaryWorker>()

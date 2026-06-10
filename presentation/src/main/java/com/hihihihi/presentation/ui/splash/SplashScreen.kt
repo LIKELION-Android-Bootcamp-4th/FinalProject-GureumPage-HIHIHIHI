@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +40,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumLinearProgressBar
 import com.hihihihi.presentation.designsystem.components.Medi12Text
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
@@ -61,6 +63,8 @@ fun SplashView(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var showProgress by remember { mutableStateOf(false) }
     var startAnimation by remember { mutableStateOf(false) }
@@ -68,6 +72,7 @@ fun SplashView(
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
+        viewModel.markPermissionAsked()
         viewModel.onPermissionResult()
         if (isGranted) Toast.makeText(context, "권한이 허용되었습니다.", Toast.LENGTH_SHORT).show()
         else Toast.makeText(context, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
@@ -97,59 +102,68 @@ fun SplashView(
         startAnimation = true
     }
 
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    SplashEffect.NavigateToLogin -> onNavigateToLogin()
+                    SplashEffect.NavigateToOnBoarding -> onNavigateToOnBoarding()
+                    SplashEffect.NavigateToHome -> onNavigateToHome()
+                    is SplashEffect.NavigateToWidget -> onNavigateToWidget(effect.route)
+                }
+            }
+        }
+    }
+
     val animatedProgress by animateFloatAsState(
-        targetValue = uiState.progress,
+        targetValue = content.progress,
         animationSpec = tween(durationMillis = 300), label = "",
     )
 
-    LaunchedEffect(uiState.permissionAsked) {
+    LaunchedEffect(content.permissionAsked) {
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
-            if (!granted && !uiState.permissionAsked) {
-                viewModel.markPermissionAsked()
+            if (!granted && !content.permissionAsked) {
                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return@LaunchedEffect
             }
+            if (!granted) return@LaunchedEffect
         }
         viewModel.onPermissionResult()
     }
 
-    LaunchedEffect(uiState.permissionHandled) {
-        if (uiState.permissionHandled && !uiState.schedulersSetUp) {
+    LaunchedEffect(content.permissionHandled) {
+        if (content.permissionHandled && !content.schedulersSetUp) {
             viewModel.markSchedulersSetUp()
             showProgress = true
 
-            ReminderScheduler.scheduleDaily(context, hour = 22, minute = 0)
-            SummaryScheduler.scheduleWeekly(context)
-            SummaryScheduler.scheduleMonthly(context)
+            val settings = viewModel.getNotificationSettings()
+            if (settings.isDailyReminderEnabled) {
+                ReminderScheduler.scheduleDaily(context, settings.reminderHour, settings.reminderMinute)
+            } else {
+                ReminderScheduler.cancel(context)
+            }
+
+            if (settings.isWeeklySummaryEnabled) {
+                SummaryScheduler.scheduleWeekly(context)
+            } else {
+                SummaryScheduler.cancelWeekly(context)
+            }
+            if (settings.isMonthlySummaryEnabled) {
+                SummaryScheduler.scheduleMonthly(context)
+            } else {
+                SummaryScheduler.cancelMonthly(context)
+            }
             SummaryScheduler.scheduleYearly(context)
         }
     }
 
-    val navEvent by remember(uiState) {
-        derivedStateOf {
-            if (uiState.permissionHandled && !uiState.isLoading) uiState.navTarget else null
-        }
-    }
-
-    LaunchedEffect(navEvent) {
-        when (val target = navEvent ?: return@LaunchedEffect) {
-            SplashViewModel.NavTarget.Login -> onNavigateToLogin()
-            SplashViewModel.NavTarget.Onboarding -> onNavigateToOnBoarding()
-            SplashViewModel.NavTarget.Home -> onNavigateToHome()
-            is SplashViewModel.NavTarget.Widget -> onNavigateToWidget(target.route)
-            else -> {
-                // Loading, NoNetwork 상태는 별도 UI에서 처리
-            }
-        }
-    }
-
     SplashContent(
-        isNoNetwork = uiState.navTarget == SplashViewModel.NavTarget.NoNetwork,
-        isLoading = uiState.isLoading,
-        loadingMessage = uiState.loadingMessage,
+        isNoNetwork = content.navTarget == SplashViewModel.NavTarget.NoNetwork,
+        isLoading = content.isLoading,
+        loadingMessage = content.loadingMessage,
         showProgress = showProgress,
         alpha = alpha,
         offsetY = offsetY,

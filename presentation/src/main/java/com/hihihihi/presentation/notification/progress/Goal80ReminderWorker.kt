@@ -9,21 +9,30 @@ import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.presentation.notification.common.Channels
 import com.hihihihi.presentation.notification.common.NotificationFactory
 import com.hihihihi.presentation.notification.common.Quiet
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
 @HiltWorker
 class Goal80ReminderWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted params: WorkerParameters,
-    private val factory: NotificationFactory
+    private val factory: NotificationFactory,
+    private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
+        val settings = getNotificationSettingsUseCase().first()
+        if (!settings.isGoalAlertEnabled) {
+            Goal80ReminderScheduler.cancelToday(appContext)
+            return Result.success()
+        }
+
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED

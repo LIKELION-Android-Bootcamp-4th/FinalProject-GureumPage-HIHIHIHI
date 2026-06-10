@@ -50,19 +50,20 @@ fun StatisticsScreen(
     initialPreset: DateRangePreset = DateRangePreset.WEEK,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
 
     LaunchedEffect(initialPreset) {
         viewModel.loadStatistics(initialPreset)
     }
 
     StatisticsContent(
-        category = uiState.category,
-        time = uiState.time,
-        pages = uiState.pages,
-        xLabels = uiState.xLabels,
-        hasError = uiState.hasError,
-        showPicker = uiState.showPicker,
-        selectedPreset = uiState.selectedPreset,
+        category = content.category,
+        time = content.time,
+        pages = content.pages,
+        xLabels = content.xLabels,
+        hasError = uiState is StatisticsUiState.Error,
+        showPicker = content.showPicker,
+        selectedPreset = content.selectedPreset,
         onShowPicker = viewModel::showPicker,
         onHidePicker = viewModel::hidePicker,
         onSetPreset = viewModel::setPreset,

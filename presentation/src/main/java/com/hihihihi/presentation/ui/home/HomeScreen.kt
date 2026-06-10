@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.hihihihi.domain.model.NotificationSettings
 import com.hihihihi.presentation.designsystem.theme.GureumPageTheme
 import com.hihihihi.presentation.ui.home.components.CurrentReadingBookSection
 import com.hihihihi.presentation.ui.home.components.ErrorView
@@ -30,17 +31,23 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when {
-        uiState.isLoading -> LoadingView()
-        uiState.errorMessage != null -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
-        uiState.homeUiModel != null -> {
-            Column {
-                HomeScreenContent(
-                    homeUiModel = uiState.homeUiModel!!,
-                    onBookClick = onNavigateToBookDetail,
-                    onSearchBarClick = onNavigateToSearch,
-                    onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
-                )
+    when (val state = uiState) {
+        HomeUiState.Loading -> LoadingView()
+        is HomeUiState.Error -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
+        is HomeUiState.Content -> {
+            val homeUiModel = state.homeUiModel
+            if (homeUiModel == null) {
+                LoadingView()
+            } else {
+                Column {
+                    HomeScreenContent(
+                        homeUiModel = homeUiModel,
+                        notificationSettings = state.notificationSettings,
+                        onBookClick = onNavigateToBookDetail,
+                        onSearchBarClick = onNavigateToSearch,
+                        onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
+                    )
+                }
             }
         }
     }
@@ -49,6 +56,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     homeUiModel: HomeUiModel,
+    notificationSettings: NotificationSettings = NotificationSettings(),
     onBookClick: (String) -> Unit,
     onChangeDailyGoalTime: (Int) -> Unit,
     onSearchBarClick: () -> Unit,
@@ -82,6 +90,7 @@ fun HomeScreenContent(
             ReadingGoalSection(
                 totalReadSeconds,
                 goalSeconds,
+                notificationSettings,
                 onGoalChange = onChangeDailyGoalTime,
             )
         }
@@ -93,6 +102,11 @@ fun HomeScreenContent(
 @Composable
 private fun HomePreview() {
     GureumPageTheme {
-        HomeScreenContent(mockHomeUiModel, onBookClick = {}, {}, {})
+        HomeScreenContent(
+            homeUiModel = mockHomeUiModel,
+            onBookClick = {},
+            onChangeDailyGoalTime = {},
+            onSearchBarClick = {},
+        )
     }
 }

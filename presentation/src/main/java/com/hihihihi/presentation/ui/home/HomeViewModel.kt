@@ -1,8 +1,10 @@
 package com.hihihihi.presentation.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.hihihihi.domain.usecase.notification.GetNotificationSettingsUseCase
 import com.hihihihi.domain.usecase.user.GetHomeDataUseCase
 import com.hihihihi.domain.usecase.user.UpdateDailyGoalTimeUseCase
 import com.hihihihi.presentation.ui.model.toUiModel
@@ -19,12 +21,13 @@ class HomeViewModel @Inject constructor(
     private val getHomeDataUseCase: GetHomeDataUseCase,
     private val changeDailyGoalTimeUseCase: UpdateDailyGoalTimeUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val getNotificationSettingsUseCase: GetNotificationSettingsUseCase,
 ) : ViewModel() {
 
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
 
     init {
@@ -32,16 +35,27 @@ class HomeViewModel @Inject constructor(
             currentUid?.let { uid ->
                 getHomeDataUseCase(uid)
                     .catch { e ->
-                        _uiState.update {
-                            it.copy(errorMessage = e.message, isLoading = false)
+                        _uiState.update { current ->
+                            HomeUiState.Error(
+                                message = e.message ?: "홈 화면 데이터를 가져오는데 실패했어요",
+                                previous = current as? HomeUiState.Content,
+                            )
                         }
                     }
                     .collect { homeData ->
-                        _uiState.update {
-                            it.copy(homeUiModel = homeData.toUiModel(), isLoading = false)
-                        }
+                        updateContent { it.copy(homeUiModel = homeData.toUiModel()) }
                     }
             }
+        }
+
+        viewModelScope.launch {
+            getNotificationSettingsUseCase()
+                .catch { exception ->
+                    Log.e(TAG, "알림 설정 조회 실패", exception)
+                }
+                .collect { settings ->
+                    updateContent { it.copy(notificationSettings = settings) }
+                }
         }
     }
 
@@ -51,5 +65,15 @@ class HomeViewModel @Inject constructor(
                 changeDailyGoalTimeUseCase(uid, dailyGoalTime)
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "HomeViewModel"
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (HomeUiState.Content) -> HomeUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }

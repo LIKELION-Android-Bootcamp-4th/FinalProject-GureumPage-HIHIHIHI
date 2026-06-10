@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.mypage
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,14 +15,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,10 +50,13 @@ import java.time.LocalDate
 fun MyPageScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWithdraw: (String) -> Unit,
+    onNavigateToNotificationSettings: () -> Unit,
     viewModel: MypageViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = state.contentOrDefault()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(lifecycleOwner) {
@@ -60,18 +65,21 @@ fun MyPageScreen(
                 when (effect) {
                     MypageEffect.NavigateToLogin -> onNavigateToLogin()
                     is MypageEffect.NavigateToWithdraw -> onNavigateToWithdraw(effect.userName)
+                    is MypageEffect.ShowMessage ->
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     MyPageContent(
-        isLoading = state.isLoading,
-        errorMessage = state.errorMessage,
-        myPageUiModel = state.myPageUiModel,
-        dialogState = state.dialogState,
+        isLoading = state is MyPageUiState.Loading,
+        loadErrorMessage = (state as? MyPageUiState.Error)?.message,
+        myPageUiModel = content.myPageUiModel,
+        dialogState = content.dialogState,
         theme = theme,
         onThemeToggle = viewModel::toggleTheme,
+        onNavigateToNotificationSettings = onNavigateToNotificationSettings,
         onNicknameChangeClick = viewModel::onNicknameChangeClick,
         onLogoutClick = viewModel::onLogoutClick,
         onWithdrawClick = viewModel::onWithdrawClick,
@@ -88,11 +96,12 @@ fun MyPageScreen(
 @Composable
 private fun MyPageContent(
     isLoading: Boolean,
-    errorMessage: String?,
+    loadErrorMessage: String?,
     myPageUiModel: MyPageUiModel?,
     dialogState: MyPageDialogState,
     theme: GureumThemeType,
     onThemeToggle: (GureumThemeType) -> Unit,
+    onNavigateToNotificationSettings: () -> Unit,
     onNicknameChangeClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onWithdrawClick: () -> Unit,
@@ -120,7 +129,7 @@ private fun MyPageContent(
                 CircularProgressIndicator()
             }
 
-            errorMessage != null -> {
+            loadErrorMessage != null -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -166,8 +175,9 @@ private fun MyPageContent(
         MyPageMenuSection(
             theme = theme,
             onThemeToggle = onThemeToggle,
+            onNotificationSettingsClick = onNavigateToNotificationSettings,
             onLogoutClick = onLogoutClick,
-            onWithDrawClick = onWithdrawClick
+            onWithDrawClick = onWithdrawClick,
         )
     }
 
@@ -231,11 +241,12 @@ private fun MyPageWithDataPreview() {
     GureumPageTheme {
         MyPageContent(
             isLoading = false,
-            errorMessage = null,
+            loadErrorMessage = null,
             myPageUiModel = sampleData,
             dialogState = MyPageDialogState.None,
             theme = GureumThemeType.DARK,
             onThemeToggle = {},
+            onNavigateToNotificationSettings = {},
             onNicknameChangeClick = {},
             onLogoutClick = {},
             onWithdrawClick = {},

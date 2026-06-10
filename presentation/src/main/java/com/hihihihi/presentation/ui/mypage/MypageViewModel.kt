@@ -44,7 +44,7 @@ class MypageViewModel @Inject constructor(
         }
     }
 
-    private val _uiState = MutableStateFlow(MyPageUiState())
+    private val _uiState = MutableStateFlow<MyPageUiState>(MyPageUiState.Loading)
     val uiState: StateFlow<MyPageUiState> = _uiState
 
     private val _effect = Channel<MypageEffect>(Channel.BUFFERED)
@@ -55,18 +55,22 @@ class MypageViewModel @Inject constructor(
             try {
                 getMyPageDataUseCase(currentUid ?: return@launch)
                     .catch { e ->
-                        _uiState.update {
-                            it.copy(errorMessage = e.message, isLoading = false)
+                        _uiState.update { current ->
+                            MyPageUiState.Error(
+                                message = e.message ?: "사용자 정보를 불러오는데 실패했어요",
+                                previous = current as? MyPageUiState.Content,
+                            )
                         }
                     }
                     .collect { myPageData ->
-                        _uiState.update {
-                            it.copy(myPageUiModel = myPageData.toUiModel(), isLoading = false)
-                        }
+                        updateContent { it.copy(myPageUiModel = myPageData.toUiModel()) }
                     }
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(errorMessage = e.message, isLoading = false)
+                _uiState.update { current ->
+                    MyPageUiState.Error(
+                        message = e.message ?: "사용자 정보를 불러오는데 실패했어요",
+                        previous = current as? MyPageUiState.Content,
+                    )
                 }
             }
         }
@@ -76,39 +80,47 @@ class MypageViewModel @Inject constructor(
         val uid = currentUid ?: return@launch
         runCatching { updateNicknameUseCase(uid, newNickname) }
             .onSuccess {}
-            .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
+            .onFailure { e -> _effect.send(MypageEffect.ShowMessage(e.message ?: "닉네임 변경에 실패했습니다.")) }
     }
 
     fun logout() = viewModelScope.launch {
         runCatching {
             logoutUseCase()
-        }
+            }
             .onSuccess {
-                _uiState.value = MyPageUiState(isLoading = false, myPageUiModel = null)
+                _uiState.value = MyPageUiState.Content(myPageUiModel = null)
                 _effect.send(MypageEffect.NavigateToLogin)
             }
-            .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
+            .onFailure { e -> _effect.send(MypageEffect.ShowMessage(e.message ?: "로그아웃에 실패했습니다.")) }
     }
 
     fun onLogoutClick() {
-        _uiState.update { it.copy(dialogState = MyPageDialogState.Logout) }
+        updateContent { it.copy(dialogState = MyPageDialogState.Logout) }
     }
 
     fun onNicknameChangeClick() {
-        _uiState.update { it.copy(dialogState = MyPageDialogState.NicknameChange) }
+        updateContent { it.copy(dialogState = MyPageDialogState.NicknameChange) }
     }
 
     fun dismissDialog() {
-        _uiState.update { it.copy(dialogState = MyPageDialogState.None) }
+        updateContent { it.copy(dialogState = MyPageDialogState.None) }
     }
 
     fun onWithdrawClick() {
-        val userName = _uiState.value.myPageUiModel?.nickname
+        val userName = _uiState.value.contentOrDefault().myPageUiModel?.nickname
         if (userName.isNullOrBlank()) {
-            _uiState.update { it.copy(errorMessage = "사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.") }
+            viewModelScope.launch {
+                _effect.send(MypageEffect.ShowMessage("사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요."))
+            }
             return
         }
         viewModelScope.launch { _effect.send(MypageEffect.NavigateToWithdraw(userName)) }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (MyPageUiState.Content) -> MyPageUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }
 
@@ -121,4 +133,5 @@ sealed interface MyPageDialogState {
 sealed interface MypageEffect {
     data object NavigateToLogin : MypageEffect
     data class NavigateToWithdraw(val userName: String) : MypageEffect
+    data class ShowMessage(val message: String) : MypageEffect
 }

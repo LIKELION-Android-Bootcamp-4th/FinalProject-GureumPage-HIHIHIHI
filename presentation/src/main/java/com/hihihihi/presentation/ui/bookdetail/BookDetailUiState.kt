@@ -6,20 +6,27 @@ import com.hihihihi.presentation.ui.model.QuoteUiModel
 import com.hihihihi.presentation.ui.model.UserBookUiModel
 
 @Immutable
-data class BookDetailUiState(
-    val userBook: UserBookUiModel? = null,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val quotes: List<QuoteUiModel> = emptyList(),
-    val histories: List<HistoryUiModel> = emptyList(),
-    val addQuoteState: AddQuoteState = AddQuoteState(),
-    val dialogState: BookDetailDialogState = BookDetailDialogState.None,
-)
+sealed interface BookDetailUiState {
+    @Immutable
+    data object Loading : BookDetailUiState
 
-@Immutable
-data class AddQuoteState(
-    val isLoading: Boolean = false,
-    val isSuccess: Boolean = false,
-    val error: String? = null,
-    val message: String? = null,
-)
+    @Immutable
+    data class Content(
+        val userBook: UserBookUiModel? = null,
+        val quotes: List<QuoteUiModel> = emptyList(),
+        val histories: List<HistoryUiModel> = emptyList(),
+        val dialogState: BookDetailDialogState = BookDetailDialogState.None,
+    ) : BookDetailUiState
+
+    @Immutable
+    data class Error(
+        val message: String,
+        val previous: Content? = null,
+    ) : BookDetailUiState
+}
+
+internal fun BookDetailUiState.contentOrDefault(): BookDetailUiState.Content = when (this) {
+    is BookDetailUiState.Content -> this
+    is BookDetailUiState.Error -> previous ?: BookDetailUiState.Content()
+    BookDetailUiState.Loading -> BookDetailUiState.Content()
+}

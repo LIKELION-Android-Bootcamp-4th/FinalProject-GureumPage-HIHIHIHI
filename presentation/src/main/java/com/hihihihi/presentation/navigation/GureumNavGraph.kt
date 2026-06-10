@@ -15,6 +15,7 @@ import com.hihihihi.presentation.ui.library.LibraryScreen
 import com.hihihihi.presentation.ui.login.LoginScreen
 import com.hihihihi.presentation.ui.mindmap.MindMapScreen
 import com.hihihihi.presentation.ui.mypage.MyPageScreen
+import com.hihihihi.presentation.ui.notification.NotificationSettingsScreen
 import com.hihihihi.presentation.ui.onboarding.OnBoardingScreen
 import com.hihihihi.presentation.ui.quotes.QuotesScreen
 import com.hihihihi.presentation.ui.search.SearchScreen
@@ -112,7 +113,10 @@ fun GureumNavGraph(
 
         composable<MindMap> { backStackEntry ->
             val route = backStackEntry.toRoute<MindMap>()
-            MindMapScreen(mindmapId = route.mindmapId ?: "")
+            MindMapScreen(
+                mindmapId = route.mindmapId ?: "",
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         composable<Quotes> { QuotesScreen() }
@@ -181,6 +185,15 @@ fun GureumNavGraph(
                 onNavigateToWithdraw = { userName ->
                     navController.navigate(Withdraw(userName = userName))
                 },
+                onNavigateToNotificationSettings = {
+                    navController.navigate(NotificationSettings)
+                },
+            )
+        }
+
+        composable<NotificationSettings> {
+            NotificationSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 

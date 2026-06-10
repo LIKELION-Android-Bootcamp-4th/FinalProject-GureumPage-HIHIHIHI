@@ -470,9 +470,6 @@ fun GureumPageApp(
                 currentDestination?.hasRoute(MyPage::class) == true ->
                     GureumAppBar(title = "마이페이지")
 
-                currentDestination?.hasRoute(MindMap::class) == true ->
-                    GureumAppBar(navController, "마인드맵", true)
-
                 currentDestination?.hasRoute(Timer::class) == true ->
                     GureumAppBar(
                         navController = navController,
