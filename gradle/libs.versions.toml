@@ -44,8 +44,6 @@ coil = "3.4.0"
 
 # UI & Utilities
 datastore = "1.2.1"
-dynamicanimation = "1.1.0"
-gysoTreeview = "1.0.1"
 glance = "1.1.1"
 workVersion = "2.11.2"
 mpAndroidChart = "3.1.0"
@@ -56,6 +54,9 @@ coreSplashscreen = "1.2.0"
 # Google Play & Open Source
 ossLicensesPlugin = "0.11.0"
 playServicesOssLicenses = "17.5.0"
+
+# Compose MindMap
+composeMindmap = "0.1.1"
 
 # Test
 junit = "4.13.2"
@@ -71,6 +72,9 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+
+# Compose MindMap
+compose-mindmap = { group = "com.github.UiHyeon-Kim", name = "compose-mindmap", version.ref = "composeMindmap" }
 
 # Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -117,8 +121,6 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 
 # UI & Utilities
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-androidx-dynamicanimation = { group = "androidx.dynamicanimation", name = "dynamicanimation", version.ref = "dynamicanimation" }
-gyso-treeview = { group = "io.github.guaishoun", name = "gyso-treeview", version.ref = "gysoTreeview" }
 androidx-glance = { group = "androidx.glance", name = "glance", version.ref = "glance" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workVersion" }

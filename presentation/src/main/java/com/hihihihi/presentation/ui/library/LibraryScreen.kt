@@ -69,7 +69,7 @@ fun LibraryScreen(
 
         is LibraryUiState.Error -> {
             LibraryContent(
-                books = state.previous?.books.orEmpty(),
+                books = emptyList(),
                 loadErrorMessage = state.message,
                 onNavigateToBookDetail = onNavigateToBookDetail,
             )

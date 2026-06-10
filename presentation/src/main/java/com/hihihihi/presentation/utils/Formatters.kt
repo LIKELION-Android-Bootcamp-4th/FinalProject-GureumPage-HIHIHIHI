@@ -113,6 +113,9 @@ fun pxToDp(px: Int): Dp {
     return with(density) { px.toDp() }
 }
 
+fun dpToPx(context: android.content.Context, dp: Int): Int =
+    (dp * context.resources.displayMetrics.density).toInt()
+
 /**
  * LocalDateTime 을 HH:mm 형식으로 변환, 범위 있음
  */

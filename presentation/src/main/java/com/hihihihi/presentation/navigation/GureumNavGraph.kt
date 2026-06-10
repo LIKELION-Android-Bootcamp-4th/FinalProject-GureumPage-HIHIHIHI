@@ -113,7 +113,10 @@ fun GureumNavGraph(
 
         composable<MindMap> { backStackEntry ->
             val route = backStackEntry.toRoute<MindMap>()
-            MindMapScreen(mindmapId = route.mindmapId ?: "")
+            MindMapScreen(
+                mindmapId = route.mindmapId ?: "",
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         composable<Quotes> { QuotesScreen() }

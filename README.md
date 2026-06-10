@@ -28,7 +28,7 @@
     - **통계 화면 구현**: MPAndroidChart
     - **이미지 및 애니메이션**: Coil, Lottie
     - **잔디 캘린더**: kizitonwose/Calendar
-    - **마인드맵**: android-thinkmap-treeview
+    - **마인드맵**: Compose 라이브러리(`compose-mindmap`)
 
 <br>
 

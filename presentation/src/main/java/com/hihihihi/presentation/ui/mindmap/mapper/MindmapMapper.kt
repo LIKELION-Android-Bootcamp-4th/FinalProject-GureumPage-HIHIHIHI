@@ -1,33 +1,31 @@
 package com.hihihihi.presentation.ui.mindmap.mapper
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import com.hihihihi.domain.model.MindmapNode
-import com.hihihihi.presentation.ui.mindmap.model.MindMapNodeData
+import io.github.hanhyo.composemindmap.model.MindMapNode
+import io.github.hanhyo.composemindmap.model.MindMapNodeWithPayload
+import io.github.hanhyo.composemindmap.model.withPayload
+import com.hihihihi.presentation.ui.mindmap.GureumMindMapPayload
 
-fun MindmapNode.toUi(): MindMapNodeData =
-    MindMapNodeData(
-        userId = userId,
+fun MindmapNode.toLibraryModel(): MindMapNodeWithPayload<GureumMindMapPayload> =
+    MindMapNode(
         id = mindmapNodeId,
         title = nodeTitle,
-        content = nodeEx,
+        subtitle = nodeEx,
+        parentId = parentNodeId,
+        color = color?.toULongOrNull()?.let { Color(it) },
         icon = icon,
-        color = color?.toStoredColorLongOrNull(),
-        bookImage = bookImage,
-    )
+    ).withPayload(GureumMindMapPayload(bookImage = bookImage))
 
-private fun String.toStoredColorLongOrNull(): Long? =
-    toLongOrNull() ?: toULongOrNull()?.let { Color(it).toArgb().toLong() }
-
-fun MindMapNodeData.toDomain(mindmapId: String, parentId: String?): MindmapNode =
+fun MindMapNode.toDomain(mindmapId: String, userId: String, bookImage: String?): MindmapNode =
     MindmapNode(
         userId = userId,
         mindmapNodeId = id,
         mindmapId = mindmapId,
         nodeTitle = title,
-        nodeEx = content.orEmpty(),
+        nodeEx = subtitle,
         parentNodeId = parentId,
-        color = color?.toString(),
+        color = color?.value?.toString(),
         icon = icon,
         deleted = false,
         bookImage = bookImage,
