@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.mindmap
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hihihihi.domain.model.MindmapNode
@@ -7,6 +8,7 @@ import com.hihihihi.domain.operation.NodeEditOperation
 import com.hihihihi.domain.usecase.mindmapnode.ApplyNodeOperation
 import com.hihihihi.domain.usecase.mindmapnode.ObserveMindmapNodeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +16,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class MindMapUiState(
-    val nodes: List<MindmapNode> = emptyList(),
-    val editing: Boolean = false,
-)
+@Immutable
+sealed interface MindMapUiState {
+    @Immutable
+    data object Loading : MindMapUiState
+
+    @Immutable
+    data class Content(
+        val nodes: List<MindmapNode> = emptyList(),
+        val editing: Boolean = false,
+    ) : MindMapUiState
+
+    @Immutable
+    data class Error(
+        val message: String,
+        val previous: Content? = null,
+    ) : MindMapUiState
+}
+
+internal fun MindMapUiState.contentOrDefault(): MindMapUiState.Content = when (this) {
+    is MindMapUiState.Content -> this
+    is MindMapUiState.Error -> previous ?: MindMapUiState.Content()
+    MindMapUiState.Loading -> MindMapUiState.Content()
+}
 
 @HiltViewModel
 class MindMapViewModel @Inject constructor(
@@ -25,7 +46,7 @@ class MindMapViewModel @Inject constructor(
     private val applyNodeOperation: ApplyNodeOperation,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MindMapUiState())
+    private val _uiState = MutableStateFlow<MindMapUiState>(MindMapUiState.Content())
     val uiState: StateFlow<MindMapUiState> = _uiState.asStateFlow()
 
     // 편집 시작 시점 스냅샷
@@ -40,27 +61,51 @@ class MindMapViewModel @Inject constructor(
     fun load(mindmapId: String) {
         this.mindmapId = mindmapId
         viewModelScope.launch {
-            observeMindmapNodeUseCase(mindmapId).collect { nodes ->
-                if (!_uiState.value.editing && !saving) {
-                    _uiState.update { it.copy(nodes = nodes) }
+            _uiState.value = MindMapUiState.Loading
+            try {
+                observeMindmapNodeUseCase(mindmapId).collect { nodes ->
+                    if (!_uiState.value.contentOrDefault().editing && !saving) {
+                        updateContent { it.copy(nodes = nodes) }
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { current ->
+                    MindMapUiState.Error(
+                        message = e.message ?: "마인드맵을 불러오지 못했습니다.",
+                        previous = current as? MindMapUiState.Content,
+                    )
                 }
             }
         }
     }
 
     fun startEdit() {
-        baseline = _uiState.value.nodes
-        _uiState.update { it.copy(editing = true) }
+        baseline = _uiState.value.contentOrDefault().nodes
+        updateContent { it.copy(editing = true) }
     }
 
     fun endEdit(currentTree: List<MindmapNode>, autoSave: Boolean = true) {
-        if (!_uiState.value.editing) return
+        if (!_uiState.value.contentOrDefault().editing) return
         viewModelScope.launch {
-            if (autoSave) {
-                flushDiff(currentTree)
-                _uiState.update { it.copy(nodes = currentTree) }
+            try {
+                if (autoSave) {
+                    flushDiff(currentTree)
+                    updateContent { it.copy(nodes = currentTree) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { current ->
+                    MindMapUiState.Error(
+                        message = e.message ?: "마인드맵을 저장하지 못했습니다.",
+                        previous = current.contentOrDefault().copy(editing = false),
+                    )
+                }
+            } finally {
+                updateContent { it.copy(editing = false) }
             }
-            _uiState.update { it.copy(editing = false) }
         }
     }
 
@@ -98,5 +143,11 @@ class MindMapViewModel @Inject constructor(
             }
         }
         return operations
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (MindMapUiState.Content) -> MindMapUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }

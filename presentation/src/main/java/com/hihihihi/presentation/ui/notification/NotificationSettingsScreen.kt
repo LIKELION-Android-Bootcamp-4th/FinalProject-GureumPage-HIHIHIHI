@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.core.app.NotificationManagerCompat
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.hihihihi.presentation.designsystem.components.GureumAppBar
 import com.hihihihi.presentation.designsystem.components.Medi14Text
 import com.hihihihi.presentation.designsystem.components.Semi16Text
@@ -61,6 +65,7 @@ fun NotificationSettingsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     fun checkPermission(): Boolean =
         NotificationManagerCompat.from(context).areNotificationsEnabled()
@@ -77,37 +82,58 @@ fun NotificationSettingsScreen(
 
     var showTimePicker by remember { mutableStateOf(false) }
 
-    if (state.isLoading) {
-        NotificationSettingsLoadingContent(onNavigateBack = onNavigateBack)
-        return
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    is NotificationSettingsEffect.ShowMessage ->
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
-    NotificationSettingsContent(
-        state = state,
-        hasNotificationPermission = hasNotificationPermission,
-        showTimePicker = showTimePicker,
-        onRequestPermission = {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", context.packageName, null)
-                }
-                context.startActivity(intent)
-            }
-        },
-        onShowTimePicker = { showTimePicker = true },
-        onTimePickerDismiss = { showTimePicker = false },
-        onTimeConfirm = { hour, minute ->
-            viewModel.setReminderTime(hour, minute)
-            showTimePicker = false
-        },
-        onDailyReminderChange = viewModel::setDailyReminderEnabled,
-        onGoalAlertChange = viewModel::setGoalAlertEnabled,
-        onWeeklySummaryChange = viewModel::setWeeklySummaryEnabled,
-        onMonthlySummaryChange = viewModel::setMonthlySummaryEnabled,
-        onNavigateBack = onNavigateBack,
-    )
+    when (val currentState = state) {
+        NotificationSettingsUiState.Loading -> {
+            NotificationSettingsLoadingContent(onNavigateBack = onNavigateBack)
+        }
+
+        is NotificationSettingsUiState.Error -> {
+            NotificationSettingsErrorContent(
+                message = currentState.message,
+                onNavigateBack = onNavigateBack,
+            )
+        }
+
+        is NotificationSettingsUiState.Content -> {
+            NotificationSettingsContent(
+                state = currentState,
+                hasNotificationPermission = hasNotificationPermission,
+                showTimePicker = showTimePicker,
+                onRequestPermission = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                },
+                onShowTimePicker = { showTimePicker = true },
+                onTimePickerDismiss = { showTimePicker = false },
+                onTimeConfirm = { hour, minute ->
+                    viewModel.setReminderTime(hour, minute)
+                    showTimePicker = false
+                },
+                onDailyReminderChange = viewModel::setDailyReminderEnabled,
+                onGoalAlertChange = viewModel::setGoalAlertEnabled,
+                onWeeklySummaryChange = viewModel::setWeeklySummaryEnabled,
+                onMonthlySummaryChange = viewModel::setMonthlySummaryEnabled,
+                onNavigateBack = onNavigateBack,
+            )
+        }
+    }
 }
 
 @Composable
@@ -136,8 +162,44 @@ private fun NotificationSettingsLoadingContent(
 }
 
 @Composable
+private fun NotificationSettingsErrorContent(
+    message: String,
+    onNavigateBack: () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            GureumAppBar(
+                title = "알림 설정",
+                showUpButton = true,
+                onUpClick = onNavigateBack,
+            )
+        },
+        containerColor = GureumTheme.colors.background,
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Semi16Text(
+                    text = "알림 설정을 불러오지 못했어요",
+                    color = GureumTheme.colors.gray700,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Medi14Text(
+                    text = message,
+                    color = GureumTheme.colors.gray500,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun NotificationSettingsContent(
-    state: NotificationSettingsUiState,
+    state: NotificationSettingsUiState.Content,
     hasNotificationPermission: Boolean,
     showTimePicker: Boolean,
     onRequestPermission: () -> Unit,
@@ -385,7 +447,7 @@ private fun TimePickerDialog(
 private fun NotificationSettingsPreview() {
     GureumPageTheme {
         NotificationSettingsContent(
-            state = NotificationSettingsUiState(
+            state = NotificationSettingsUiState.Content(
                 isDailyReminderEnabled = true,
                 reminderHour = 21,
                 reminderMinute = 0,

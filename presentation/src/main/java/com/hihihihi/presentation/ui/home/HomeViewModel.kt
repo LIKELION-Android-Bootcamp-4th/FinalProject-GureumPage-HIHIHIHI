@@ -27,7 +27,7 @@ class HomeViewModel @Inject constructor(
     private val currentUid: String?
         get() = getCurrentUserIdUseCase()
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
 
     init {
@@ -35,14 +35,15 @@ class HomeViewModel @Inject constructor(
             currentUid?.let { uid ->
                 getHomeDataUseCase(uid)
                     .catch { e ->
-                        _uiState.update {
-                            it.copy(errorMessage = e.message, isLoading = false)
+                        _uiState.update { current ->
+                            HomeUiState.Error(
+                                message = e.message ?: "홈 화면 데이터를 가져오는데 실패했어요",
+                                previous = current as? HomeUiState.Content,
+                            )
                         }
                     }
                     .collect { homeData ->
-                        _uiState.update {
-                            it.copy(homeUiModel = homeData.toUiModel(), isLoading = false)
-                        }
+                        updateContent { it.copy(homeUiModel = homeData.toUiModel()) }
                     }
             }
         }
@@ -53,7 +54,7 @@ class HomeViewModel @Inject constructor(
                     Log.e(TAG, "알림 설정 조회 실패", exception)
                 }
                 .collect { settings ->
-                    _uiState.update { it.copy(notificationSettings = settings) }
+                    updateContent { it.copy(notificationSettings = settings) }
                 }
         }
     }
@@ -68,5 +69,11 @@ class HomeViewModel @Inject constructor(
 
     private companion object {
         const val TAG = "HomeViewModel"
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (HomeUiState.Content) -> HomeUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }

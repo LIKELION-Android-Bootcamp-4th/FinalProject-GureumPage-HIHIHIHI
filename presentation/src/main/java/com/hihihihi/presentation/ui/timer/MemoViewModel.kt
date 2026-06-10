@@ -19,11 +19,11 @@ class MemoViewModel @Inject constructor(
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
 ) : ViewModel() {
 
-    private val _ui = MutableStateFlow(MemoUiState())
+    private val _ui = MutableStateFlow<MemoUiState>(MemoUiState.Content())
     val ui: StateFlow<MemoUiState> = _ui
 
     fun clear() {
-        _ui.value = MemoUiState()
+        _ui.value = MemoUiState.Content()
     }
 
     fun add(
@@ -38,7 +38,10 @@ class MemoViewModel @Inject constructor(
     ) {
         val uid = getCurrentUserIdUseCase()
         if (uid.isNullOrBlank()) {
-            _ui.update { it.copy(error = "AUTH_REQUIRED") }
+            _ui.value = MemoUiState.Error(
+                message = "AUTH_REQUIRED",
+                previous = _ui.value as? MemoUiState.Content,
+            )
             onDone()
             return
         }
@@ -58,11 +61,20 @@ class MemoViewModel @Inject constructor(
             )
             val r = addQuote(q)
             if (r.isSuccess) {
-                _ui.update { it.copy(items = it.items + q) }
+                updateContent { it.copy(items = it.items + q) }
                 onDone()
-            } else _ui.update {
-                it.copy(error = r.exceptionOrNull()?.message)
+            } else {
+                _ui.value = MemoUiState.Error(
+                    message = r.exceptionOrNull()?.message ?: "메모 저장에 실패했습니다.",
+                    previous = _ui.value as? MemoUiState.Content,
+                )
             }
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (MemoUiState.Content) -> MemoUiState.Content,
+    ) {
+        _ui.update { current -> transform(current.contentOrDefault()) }
     }
 }

@@ -31,18 +31,23 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when {
-        uiState.isLoading -> LoadingView()
-        uiState.errorMessage != null -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
-        uiState.homeUiModel != null -> {
-            Column {
-                HomeScreenContent(
-                    homeUiModel = uiState.homeUiModel!!,
-                    notificationSettings = uiState.notificationSettings,
-                    onBookClick = onNavigateToBookDetail,
-                    onSearchBarClick = onNavigateToSearch,
-                    onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
-                )
+    when (val state = uiState) {
+        HomeUiState.Loading -> LoadingView()
+        is HomeUiState.Error -> ErrorView(message = "홈 화면 데이터를 가져오는데 실패했어요")
+        is HomeUiState.Content -> {
+            val homeUiModel = state.homeUiModel
+            if (homeUiModel == null) {
+                LoadingView()
+            } else {
+                Column {
+                    HomeScreenContent(
+                        homeUiModel = homeUiModel,
+                        notificationSettings = state.notificationSettings,
+                        onBookClick = onNavigateToBookDetail,
+                        onSearchBarClick = onNavigateToSearch,
+                        onChangeDailyGoalTime = { viewModel.changeDailyGoalTime(it) },
+                    )
+                }
             }
         }
     }

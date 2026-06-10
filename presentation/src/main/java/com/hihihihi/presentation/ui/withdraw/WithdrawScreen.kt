@@ -79,21 +79,16 @@ fun WithdrawScreen(
     viewModel: WithdrawViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState.contentOrDefault()
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
-
-    LaunchedEffect(uiState.errorMessage) {
-        uiState.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            viewModel.clearError()
-        }
-    }
 
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effect.collect { effect ->
                 when (effect) {
                     WithdrawEffect.NavigateToLogin -> onNavigateToLogin()
+                    is WithdrawEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
@@ -101,8 +96,8 @@ fun WithdrawScreen(
 
     WithdrawContent(
         userName = userName,
-        isLoading = uiState.isLoading,
-        loadingMessage = uiState.loadingMessage,
+        isLoading = content.isLoading,
+        loadingMessage = content.loadingMessage,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
         onWithdraw = viewModel::withdrawUser,

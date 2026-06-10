@@ -33,7 +33,7 @@ class TimerViewModel @Inject constructor(
     private val timerRepository: TimerRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TimerUiState())
+    private val _uiState = MutableStateFlow<TimerUiState>(TimerUiState.Content())
     val uiState: StateFlow<TimerUiState> = _uiState
 
     private val _effect = Channel<TimerEffect>(Channel.BUFFERED)
@@ -49,7 +49,7 @@ class TimerViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             timerRepository.timerState.collectLatest { shared ->
-                _uiState.update {
+                updateContent {
                     it.copy(
                         elapsedSec = shared.elapsedSec,
                         isRunning = shared.isRunning,
@@ -75,7 +75,7 @@ class TimerViewModel @Inject constructor(
             }
 
             is FloatingAction.OpenMemoDialog -> {
-                _uiState.update { it.copy(dialogState = TimerDialogState.Memo) }
+                updateContent { it.copy(dialogState = TimerDialogState.Memo) }
             }
 
             is FloatingAction.ReturnToApp -> {
@@ -84,7 +84,7 @@ class TimerViewModel @Inject constructor(
     }
 
     fun resumeIfNeeded() {
-        val state = _uiState.value
+        val state = _uiState.value.contentOrDefault()
         if (state.isRunning && (stopwatchJob?.isActive != true)) {
             startStopwatch()
         }
@@ -101,9 +101,9 @@ class TimerViewModel @Inject constructor(
     }
 
     fun showDialog(type: TimerDialogType) {
-        val wasRunning = _uiState.value.isRunning
+        val wasRunning = _uiState.value.contentOrDefault().isRunning
         if (type != TimerDialogType.Memo && wasRunning) pauseStopwatch()
-        _uiState.update {
+        updateContent {
             it.copy(
                 dialogState = when (type) {
                     TimerDialogType.Memo -> TimerDialogState.Memo
@@ -115,12 +115,12 @@ class TimerViewModel @Inject constructor(
     }
 
     fun dismissDialog(resumeTimer: Boolean = false) {
-        val wasRunning = when (val s = _uiState.value.dialogState) {
+        val wasRunning = when (val s = _uiState.value.contentOrDefault().dialogState) {
             is TimerDialogState.StopConfirm -> s.wasRunning
             is TimerDialogState.BackExit -> s.wasRunning
             else -> false
         }
-        _uiState.update { it.copy(dialogState = TimerDialogState.None) }
+        updateContent { it.copy(dialogState = TimerDialogState.None) }
         if (resumeTimer && wasRunning) start()
     }
 
@@ -128,7 +128,7 @@ class TimerViewModel @Inject constructor(
         booksJob = viewModelScope.launch {
             val userBook = getUserBook(userBookId).first()
 
-            _uiState.update {
+            updateContent {
                 it.copy(
                     bookTitle = userBook.title,
                     author = userBook.author,
@@ -154,7 +154,7 @@ class TimerViewModel @Inject constructor(
     }
 
     fun toggleRun() {
-        val state = _uiState.value
+        val state = _uiState.value.contentOrDefault()
 
         if (state.countdown != null) return
 
@@ -175,10 +175,10 @@ class TimerViewModel @Inject constructor(
 
         viewModelScope.launch {
             for (i in 3 downTo 1) {
-                _uiState.update { it.copy(countdown = i, isRunning = false) }
+                updateContent { it.copy(countdown = i, isRunning = false) }
                 delay(1000)
             }
-            _uiState.update { it.copy(countdown = null) }
+            updateContent { it.copy(countdown = null) }
             startStopwatch()
         }
     }
@@ -189,22 +189,25 @@ class TimerViewModel @Inject constructor(
     private fun startStopwatch() {
         if (stopwatchJob?.isActive == true) return
 
-        _uiState.update { it.copy(isRunning = true) }
+        updateContent { it.copy(isRunning = true) }
         timerRepository.updateTimerState { it.copy(isRunning = true) }
 
         stopwatchJob = viewModelScope.launch {
             while (isActive) {
                 delay(1_000L)
-                val newSec = _uiState.value.elapsedSec + 1
+                var newSec = 0
 
-                _uiState.update { it.copy(elapsedSec = newSec) }
+                updateContent {
+                    newSec = it.elapsedSec + 1
+                    it.copy(elapsedSec = newSec)
+                }
                 timerRepository.updateTimerState { it.copy(elapsedSec = newSec) }
             }
         }
     }
 
     private fun pauseStopwatch() {
-        _uiState.update { it.copy(isRunning = false) }
+        updateContent { it.copy(isRunning = false) }
         timerRepository.updateTimerState { it.copy(isRunning = false) }
 
         stopwatchJob?.cancel()
@@ -215,7 +218,7 @@ class TimerViewModel @Inject constructor(
         stopwatchJob?.cancel()
         stopwatchJob = null
 
-        _uiState.update { it.copy(isRunning = false, elapsedSec = 0) }
+        updateContent { it.copy(isRunning = false, elapsedSec = 0) }
         timerRepository.updateTimerState { it.copy(isRunning = false, elapsedSec = 0) }
     }
 
@@ -255,7 +258,7 @@ class TimerViewModel @Inject constructor(
 
     fun finishAndSave(userBookId: String?, startPage: Int, endPage: Int) {
         val uid = getCurrentUserIdUseCase() ?: return
-        val seconds = _uiState.value.elapsedSec
+        val seconds = _uiState.value.contentOrDefault().elapsedSec
         val delta = (endPage - startPage).coerceAtLeast(0)
 
         val now = LocalDateTime.now()
@@ -274,7 +277,7 @@ class TimerViewModel @Inject constructor(
         viewModelScope.launch {
             addHistory(history, endPage)
                 .onSuccess {
-                    _uiState.update { it.copy(elapsedSec = 0, isRunning = false) }
+                    updateContent { it.copy(elapsedSec = 0, isRunning = false) }
                     timerRepository.updateTimerState { it.copy(elapsedSec = 0, isRunning = false) }
                 }
         }
@@ -287,7 +290,7 @@ class TimerViewModel @Inject constructor(
     }
 
     fun syncWithFloatingWindow() {
-        val currentState = _uiState.value
+        val currentState = _uiState.value.contentOrDefault()
         timerRepository.updateTimerState { shared ->
             shared.copy(
                 isRunning = currentState.isRunning,
@@ -299,6 +302,12 @@ class TimerViewModel @Inject constructor(
                 ),
             )
         }
+    }
+
+    private inline fun updateContent(
+        crossinline transform: (TimerUiState.Content) -> TimerUiState.Content,
+    ) {
+        _uiState.update { current -> transform(current.contentOrDefault()) }
     }
 }
 

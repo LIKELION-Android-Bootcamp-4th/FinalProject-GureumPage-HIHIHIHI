@@ -12,9 +12,12 @@ import com.hihihihi.presentation.notification.reminder.ReminderScheduler
 import com.hihihihi.presentation.notification.summary.SummaryScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -28,8 +31,12 @@ class NotificationSettingsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(NotificationSettingsUiState())
+    private val _uiState = MutableStateFlow<NotificationSettingsUiState>(NotificationSettingsUiState.Loading)
     val uiState: StateFlow<NotificationSettingsUiState> = _uiState
+
+    private val _effect = Channel<NotificationSettingsEffect>(Channel.BUFFERED)
+    val effect: Flow<NotificationSettingsEffect> = _effect.receiveAsFlow()
+
     private val settingsUpdateMutex = Mutex()
 
     init {
@@ -37,18 +44,23 @@ class NotificationSettingsViewModel @Inject constructor(
             getNotificationSettingsUseCase()
                 .catch { exception ->
                     Log.e(TAG, "알림 설정 조회 실패", exception)
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { current ->
+                        NotificationSettingsUiState.Error(
+                            message = "알림 설정을 불러오지 못했습니다.",
+                            previous = current as? NotificationSettingsUiState.Content,
+                        )
+                    }
+                    _effect.send(NotificationSettingsEffect.ShowMessage("알림 설정을 불러오지 못했습니다."))
                 }
                 .collect { settings ->
                     _uiState.update {
-                        it.copy(
+                        NotificationSettingsUiState.Content(
                             isDailyReminderEnabled = settings.isDailyReminderEnabled,
                             reminderHour = settings.reminderHour,
                             reminderMinute = settings.reminderMinute,
                             isGoalAlertEnabled = settings.isGoalAlertEnabled,
                             isWeeklySummaryEnabled = settings.isWeeklySummaryEnabled,
                             isMonthlySummaryEnabled = settings.isMonthlySummaryEnabled,
-                            isLoading = false,
                         )
                     }
                 }
@@ -110,12 +122,12 @@ class NotificationSettingsViewModel @Inject constructor(
         )
 
     private fun updateAndPersist(
-        transform: (NotificationSettingsUiState) -> NotificationSettingsUiState,
-        afterSaved: suspend (NotificationSettingsUiState) -> Unit = {},
+        transform: (NotificationSettingsUiState.Content) -> NotificationSettingsUiState.Content,
+        afterSaved: suspend (NotificationSettingsUiState.Content) -> Unit = {},
     ) {
         viewModelScope.launch {
             settingsUpdateMutex.withLock {
-                val previous = _uiState.value
+                val previous = _uiState.value.contentOrDefault()
                 val updated = transform(previous)
                 _uiState.update { updated }
 
@@ -123,12 +135,13 @@ class NotificationSettingsViewModel @Inject constructor(
                     afterSaved(updated)
                 } else {
                     _uiState.update { previous }
+                    _effect.send(NotificationSettingsEffect.ShowMessage("알림 설정을 저장하지 못했습니다."))
                 }
             }
         }
     }
 
-    private suspend fun save(state: NotificationSettingsUiState): Result<Unit> {
+    private suspend fun save(state: NotificationSettingsUiState.Content): Result<Unit> {
         val settings = runCatching {
             NotificationSettings(
                 isDailyReminderEnabled = state.isDailyReminderEnabled,
@@ -151,4 +164,8 @@ class NotificationSettingsViewModel @Inject constructor(
     private companion object {
         const val TAG = "NotificationSettingsVM"
     }
+}
+
+sealed interface NotificationSettingsEffect {
+    data class ShowMessage(val message: String) : NotificationSettingsEffect
 }

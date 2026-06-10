@@ -1,5 +1,6 @@
 package com.hihihihi.presentation.ui.mypage
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,7 +54,9 @@ fun MyPageScreen(
     viewModel: MypageViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = state.contentOrDefault()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(lifecycleOwner) {
@@ -61,16 +65,18 @@ fun MyPageScreen(
                 when (effect) {
                     MypageEffect.NavigateToLogin -> onNavigateToLogin()
                     is MypageEffect.NavigateToWithdraw -> onNavigateToWithdraw(effect.userName)
+                    is MypageEffect.ShowMessage ->
+                        Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     MyPageContent(
-        isLoading = state.isLoading,
-        errorMessage = state.errorMessage,
-        myPageUiModel = state.myPageUiModel,
-        dialogState = state.dialogState,
+        isLoading = state is MyPageUiState.Loading,
+        loadErrorMessage = (state as? MyPageUiState.Error)?.message,
+        myPageUiModel = content.myPageUiModel,
+        dialogState = content.dialogState,
         theme = theme,
         onThemeToggle = viewModel::toggleTheme,
         onNavigateToNotificationSettings = onNavigateToNotificationSettings,
@@ -90,7 +96,7 @@ fun MyPageScreen(
 @Composable
 private fun MyPageContent(
     isLoading: Boolean,
-    errorMessage: String?,
+    loadErrorMessage: String?,
     myPageUiModel: MyPageUiModel?,
     dialogState: MyPageDialogState,
     theme: GureumThemeType,
@@ -123,7 +129,7 @@ private fun MyPageContent(
                 CircularProgressIndicator()
             }
 
-            errorMessage != null -> {
+            loadErrorMessage != null -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -235,7 +241,7 @@ private fun MyPageWithDataPreview() {
     GureumPageTheme {
         MyPageContent(
             isLoading = false,
-            errorMessage = null,
+            loadErrorMessage = null,
             myPageUiModel = sampleData,
             dialogState = MyPageDialogState.None,
             theme = GureumThemeType.DARK,
