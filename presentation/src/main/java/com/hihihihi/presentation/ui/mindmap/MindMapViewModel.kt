@@ -280,7 +280,8 @@ class MindMapViewModel @Inject constructor(
 
     private fun updateContent(transform: (MindMapUiState.Content) -> MindMapUiState.Content) {
         _uiState.update { current ->
-            transform(current as? MindMapUiState.Content ?: MindMapUiState.Content())
+            val content = current as? MindMapUiState.Content ?: return@update current
+            transform(content)
         }
     }
 }

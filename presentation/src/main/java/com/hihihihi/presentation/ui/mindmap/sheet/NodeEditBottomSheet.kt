@@ -82,7 +82,7 @@ fun NodeEditBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.gray150,
+        containerColor = colors.background,
     ) {
         Column(
             modifier = Modifier
