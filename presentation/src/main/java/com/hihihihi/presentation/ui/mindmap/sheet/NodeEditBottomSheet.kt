@@ -186,7 +186,7 @@ fun NodeEditBottomSheet(
                 )
                 OutlinedTextField(
                     value = subtitle,
-                    onValueChange = { if (it.length <= 500) subtitle = it },
+                    onValueChange = { subtitle = it.take(500) },
                     placeholder = {
                         Text("책에서 마음에 드는 문장이나 생각을 자유롭게 적어보세요", color = colors.gray400)
                     },
