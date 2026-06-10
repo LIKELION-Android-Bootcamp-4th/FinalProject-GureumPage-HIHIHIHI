@@ -83,7 +83,8 @@ class BookDetailViewModel @Inject constructor(
                     _domainUserBook = userBook
                     _domainHistories = data.history
 
-                    val shouldShowCompletion = userBook.status == ReadingStatus.READING &&
+                    val shouldShowCompletion = userBook != null &&
+                            userBook.status == ReadingStatus.READING &&
                             userBook.currentPage >= userBook.totalPage &&
                             userBook.currentPage > 0 &&
                             userBook.totalPage > 0
@@ -91,7 +92,7 @@ class BookDetailViewModel @Inject constructor(
                     _uiState.update {
                         val current = it.contentOrDefault()
                         BookDetailUiState.Content(
-                            userBook = userBook.toUiModel(),
+                            userBook = userBook?.toUiModel(),
                             quotes = data.quotes.map { q -> q.toUiModel() },
                             histories = data.history.map { h -> h.toUiModel() },
                             dialogState = if (shouldShowCompletion && current.dialogState == BookDetailDialogState.None) {
